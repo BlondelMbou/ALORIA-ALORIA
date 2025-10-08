@@ -24,10 +24,19 @@ export default function LandingPage() {
     phone: '',
     country: '',
     visa_type: '',
-    message: ''
+    message: '',
+    assigned_employee_id: ''
   });
   const [loading, setLoading] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showAuthForm, setShowAuthForm] = useState(false);
+  const [authData, setAuthData] = useState({
+    email: '',
+    password: ''
+  });
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [employees, setEmployees] = useState([]);
   const [animatedNumbers, setAnimatedNumbers] = useState({
     clients: 0,
     success: 0,
