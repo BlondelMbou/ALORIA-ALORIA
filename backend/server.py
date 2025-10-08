@@ -53,6 +53,112 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# WebSocket connection management
+connected_users = {}  # {user_id: sid}
+
+# WebSocket Events
+@sio.event
+async def connect(sid, environ):
+    logger.info(f"Client {sid} connected")
+    
+@sio.event
+async def disconnect(sid):
+    logger.info(f"Client {sid} disconnected")
+    # Remove from connected users
+    for user_id, user_sid in list(connected_users.items()):
+        if user_sid == sid:
+            del connected_users[user_id]
+            break
+
+@sio.event
+async def authenticate(sid, data):
+    try:
+        token = data.get('token')
+        if not token:
+            await sio.emit('error', {'message': 'Token required'}, room=sid)
+            return
+            
+        # Verify token
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        user_id = payload.get("sub")
+        
+        if user_id:
+            connected_users[user_id] = sid
+            await sio.emit('authenticated', {'user_id': user_id}, room=sid)
+            logger.info(f"User {user_id} authenticated with session {sid}")
+        else:
+            await sio.emit('error', {'message': 'Invalid token'}, room=sid)
+    except jwt.InvalidTokenError:
+        await sio.emit('error', {'message': 'Invalid token'}, room=sid)
+
+@sio.event 
+async def send_message(sid, data):
+    try:
+        sender_id = None
+        for user_id, user_sid in connected_users.items():
+            if user_sid == sid:
+                sender_id = user_id
+                break
+                
+        if not sender_id:
+            await sio.emit('error', {'message': 'Not authenticated'}, room=sid)
+            return
+            
+        receiver_id = data.get('receiver_id')
+        message_text = data.get('message')
+        
+        if not receiver_id or not message_text:
+            await sio.emit('error', {'message': 'Missing receiver_id or message'}, room=sid)
+            return
+            
+        # Save message to database
+        message_id = str(uuid.uuid4())
+        sender = await db.users.find_one({"id": sender_id})
+        receiver = await db.users.find_one({"id": receiver_id})
+        
+        if not sender or not receiver:
+            await sio.emit('error', {'message': 'Invalid sender or receiver'}, room=sid)
+            return
+            
+        message_dict = {
+            "id": message_id,
+            "sender_id": sender_id,
+            "sender_name": sender["full_name"],
+            "sender_role": sender["role"],
+            "receiver_id": receiver_id,
+            "receiver_name": receiver["full_name"], 
+            "receiver_role": receiver["role"],
+            "message": message_text,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "read_status": False
+        }
+        
+        await db.chat_messages.insert_one(message_dict)
+        
+        # Send to receiver if online
+        receiver_sid = connected_users.get(receiver_id)
+        if receiver_sid:
+            await sio.emit('new_message', {
+                'id': message_id,
+                'sender_id': sender_id,
+                'sender_name': sender["full_name"],
+                'sender_role': sender["role"],
+                'message': message_text,
+                'timestamp': message_dict["timestamp"]
+            }, room=receiver_sid)
+            
+        # Confirm to sender
+        await sio.emit('message_sent', {
+            'id': message_id,
+            'receiver_name': receiver["full_name"],
+            'message': message_text,
+            'timestamp': message_dict["timestamp"]
+        }, room=sid)
+        
+    except Exception as e:
+        logger.error(f"Error sending message: {e}")
+        await sio.emit('error', {'message': 'Failed to send message'}, room=sid)
+
 # Helper functions
 def hash_password(password: str) -> str:
     return pwd_context.hash(password)
