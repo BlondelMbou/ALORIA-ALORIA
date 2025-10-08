@@ -128,6 +128,33 @@ export default function EmployeeDashboard() {
       toast.error(error.response?.data?.detail || 'Failed to create client');
     }
   };
+  
+  const handleCreateVisitor = async () => {
+    try {
+      await api.post('/visitors', newVisitor);
+      toast.success('Visiteur enregistré avec succès');
+      setNewVisitor({
+        name: '',
+        company: '',
+        purpose: 'Consultation initiale',
+        details: ''
+      });
+      setShowVisitorForm(false);
+    } catch (error) {
+      toast.error('Erreur lors de l\'enregistrement du visiteur');
+    }
+  };
+
+  const visitorPurposeOptions = [
+    'Consultation initiale',
+    'Remise de documents', 
+    'Mise à jour du dossier',
+    'Rendez-vous planifié',
+    'Affaire urgente',
+    'Demande d\'informations',
+    'Paiement',
+    'Autre'
+  ];
 
   const getStatusColor = (status) => {
     switch (status.toLowerCase()) {
