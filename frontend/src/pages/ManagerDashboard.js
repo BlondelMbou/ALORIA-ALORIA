@@ -289,15 +289,15 @@ export default function ManagerDashboard() {
               <CardContent>
                 <div className="overflow-x-auto">
                   <table className="w-full">
-                    <thead className="border-b border-slate-200">
+                    <thead className="border-b border-slate-700">
                       <tr>
-                        <th className="text-left py-3 px-4 font-semibold text-slate-700">Client Name</th>
-                        <th className="text-left py-3 px-4 font-semibold text-slate-700">Country</th>
-                        <th className="text-left py-3 px-4 font-semibold text-slate-700">Visa Type</th>
-                        <th className="text-left py-3 px-4 font-semibold text-slate-700">Status</th>
-                        <th className="text-left py-3 px-4 font-semibold text-slate-700">Progress</th>
-                        <th className="text-left py-3 px-4 font-semibold text-slate-700">Counselor</th>
-                        <th className="text-left py-3 px-4 font-semibold text-slate-700">Actions</th>
+                        <th className="text-left py-3 px-4 font-semibold text-slate-300">Nom Client</th>
+                        <th className="text-left py-3 px-4 font-semibold text-slate-300">Pays</th>
+                        <th className="text-left py-3 px-4 font-semibold text-slate-300">Type de Visa</th>
+                        <th className="text-left py-3 px-4 font-semibold text-slate-300">Statut</th>
+                        <th className="text-left py-3 px-4 font-semibold text-slate-300">Progrès</th>
+                        <th className="text-left py-3 px-4 font-semibold text-slate-300">Conseiller</th>
+                        <th className="text-left py-3 px-4 font-semibold text-slate-300">Actions</th>
                       </tr>
                     </thead>
                     <tbody>
