@@ -454,10 +454,8 @@ export default function LandingPage() {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             {[
-              { name: 'Canada', flag: '🇨🇦', desc: 'Travail, Études & Résidence Permanente', color: 'hover:border-red-500/50', bg: 'from-red-500/10 to-red-600/10' },
-              { name: 'France', flag: '🇫🇷', desc: 'Passeport Talent & Études Supérieures', color: 'hover:border-blue-500/50', bg: 'from-blue-500/10 to-blue-600/10' },
-              { name: 'Belgique', flag: '🇧🇪', desc: 'Travail Qualifié & Regroupement Familial', color: 'hover:border-yellow-500/50', bg: 'from-yellow-500/10 to-yellow-600/10' },
-              { name: 'Allemagne', flag: '🇩🇪', desc: 'Carte Bleue EU & Migration Qualifiée', color: 'hover:border-green-500/50', bg: 'from-green-500/10 to-green-600/10' }
+              { name: 'Canada', flag: '🇨🇦', desc: 'Travail, Études & Résidence Permanente - Immigration Express Entry, Permis de travail fermé/ouvert, Études supérieures', color: 'hover:border-red-500/50', bg: 'from-red-500/10 to-red-600/10' },
+              { name: 'France', flag: '🇫🇷', desc: 'Passeport Talent & Études Supérieures - Visa étudiant, Regroupement familial, Carte de résident long séjour', color: 'hover:border-blue-500/50', bg: 'from-blue-500/10 to-blue-600/10' }
             ].map((country, idx) => (
               <Card key={country.name} className={`bg-gradient-to-br ${country.bg} border-slate-700/50 ${country.color} transition-all duration-500 hover:scale-105 text-center group`}>
                 <CardContent className="p-8">
