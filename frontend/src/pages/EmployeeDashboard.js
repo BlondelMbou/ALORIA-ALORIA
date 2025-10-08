@@ -218,10 +218,10 @@ export default function EmployeeDashboard() {
 
         {/* Tabs */}
         <Tabs defaultValue="cases" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-6">
-            <TabsTrigger value="cases" data-testid="tab-my-cases">My Cases</TabsTrigger>
-            <TabsTrigger value="clients" data-testid="tab-my-clients">My Clients</TabsTrigger>
-            <TabsTrigger value="create" data-testid="tab-create-client">Create Client</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-3 mb-6 bg-[#1E293B] border border-slate-700">
+            <TabsTrigger value="cases" data-testid="tab-my-cases" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white text-slate-300">Mes Dossiers</TabsTrigger>
+            <TabsTrigger value="clients" data-testid="tab-my-clients" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white text-slate-300">Mes Clients</TabsTrigger>
+            <TabsTrigger value="create" data-testid="tab-create-client" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white text-slate-300">Créer un Client</TabsTrigger>
           </TabsList>
 
           {/* My Cases */}
