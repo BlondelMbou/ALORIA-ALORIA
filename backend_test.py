@@ -867,8 +867,10 @@ class APITester:
         try:
             # 1. Create a client as manager
             headers = {"Authorization": f"Bearer {self.manager_token}"}
+            import time
+            timestamp = int(time.time())
             client_data = {
-                "email": "scenario.client@example.com",
+                "email": f"scenario.client.{timestamp}@example.com",
                 "full_name": "Client Scénario Complet",
                 "phone": "+33987654321",
                 "country": "Canada",
