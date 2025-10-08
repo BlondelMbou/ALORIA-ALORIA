@@ -554,6 +554,7 @@ export default function ManagerDashboard() {
                                   </div>
                                 </DialogContent>
                               </Dialog>
+                              </div>
                             </td>
                           </tr>
                         );
