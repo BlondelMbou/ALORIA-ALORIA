@@ -230,7 +230,7 @@ export default function EmployeeDashboard() {
               {cases.map((caseItem) => {
                 const client = clients.find(c => c.id === caseItem.client_id);
                 return (
-                  <Card key={caseItem.id} className="hover:shadow-lg transition-all">
+                  <Card key={caseItem.id} className="hover:shadow-lg transition-all bg-gradient-to-br from-[#1E293B] to-[#334155] border-slate-700">
                     <CardContent className="p-6">
                       <div className="flex justify-between items-start mb-4">
                         <div>
