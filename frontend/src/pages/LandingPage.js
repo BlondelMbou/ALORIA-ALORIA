@@ -1,13 +1,20 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
+import { Button } from '../components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
+import { Input } from '../components/ui/input';
+import { Label } from '../components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
+import { Textarea } from '../components/ui/textarea';
+import { Badge } from '../components/ui/badge';
 import { toast } from 'sonner';
-import { clientsAPI } from '@/utils/api';
-import { Globe, FileText, MessageCircle, CheckCircle, ArrowRight, MapPin, Shield, Clock, Users } from 'lucide-react';
+import api from '../utils/api';
+import { 
+  Globe, ArrowRight, CheckCircle, Users, FileText, Clock, Star, MapPin, 
+  Briefcase, GraduationCap, Heart, Shield, Award, TrendingUp, Phone, 
+  Mail, MessageCircle, ChevronRight, Zap, Target, Eye, Lightbulb,
+  BarChart3, Headphones, BookOpen, Calendar, MousePointer2
+} from 'lucide-react';
 
 export default function LandingPage() {
   const navigate = useNavigate();
