@@ -234,8 +234,8 @@ export default function EmployeeDashboard() {
                     <CardContent className="p-6">
                       <div className="flex justify-between items-start mb-4">
                         <div>
-                          <h3 className="font-bold text-xl text-slate-900 mb-1">{caseItem.client_name}</h3>
-                          <p className="text-slate-600">{caseItem.country} - {caseItem.visa_type}</p>
+                          <h3 className="font-bold text-xl text-white mb-1">{caseItem.client_name}</h3>
+                          <p className="text-slate-400">{caseItem.country} - {caseItem.visa_type}</p>
                         </div>
                         <div className="flex items-center space-x-2">
                           <Badge className={getStatusColor(caseItem.status)}>{caseItem.status}</Badge>
@@ -329,7 +329,7 @@ export default function EmployeeDashboard() {
                                           className={`max-w-[70%] rounded-lg p-3 ${
                                             msg.sender_id === user.id
                                               ? 'bg-orange-500 text-white'
-                                              : 'bg-slate-100 text-slate-900'
+                                              : 'bg-slate-100 text-white'
                                           }`}
                                         >
                                           <p className="text-sm mb-1">{msg.message}</p>
@@ -368,7 +368,7 @@ export default function EmployeeDashboard() {
 
                       {/* Progress Bar */}
                       <div className="mb-4">
-                        <div className="flex justify-between text-sm text-slate-600 mb-2">
+                        <div className="flex justify-between text-sm text-slate-400 mb-2">
                           <span>Step {caseItem.current_step_index + 1} of {caseItem.workflow_steps.length}</span>
                           <span>{Math.round(((caseItem.current_step_index + 1) / caseItem.workflow_steps.length) * 100)}%</span>
                         </div>
@@ -382,17 +382,17 @@ export default function EmployeeDashboard() {
 
                       {/* Current Step Details */}
                       <div className="bg-slate-50 rounded-lg p-4">
-                        <h4 className="font-semibold text-slate-900 mb-2">
+                        <h4 className="font-semibold text-white mb-2">
                           Current Step: {caseItem.workflow_steps[caseItem.current_step_index]?.title}
                         </h4>
-                        <p className="text-sm text-slate-600 mb-3">
+                        <p className="text-sm text-slate-400 mb-3">
                           {caseItem.workflow_steps[caseItem.current_step_index]?.description}
                         </p>
                         <div>
-                          <p className="text-sm font-semibold text-slate-700 mb-2">Required Documents:</p>
+                          <p className="text-sm font-semibold text-slate-300 mb-2">Required Documents:</p>
                           <ul className="space-y-1">
                             {caseItem.workflow_steps[caseItem.current_step_index]?.documents?.map((doc, idx) => (
-                              <li key={idx} className="text-sm text-slate-600 flex items-center">
+                              <li key={idx} className="text-sm text-slate-400 flex items-center">
                                 <CheckCircle className="w-4 h-4 mr-2 text-green-500" />
                                 {doc}
                               </li>
@@ -421,22 +421,22 @@ export default function EmployeeDashboard() {
                     return (
                       <Card key={client.id} className="border-2 hover:border-orange-500 transition-all">
                         <CardContent className="p-4">
-                          <h3 className="font-bold text-lg text-slate-900 mb-2">{clientCase?.client_name || 'N/A'}</h3>
+                          <h3 className="font-bold text-lg text-white mb-2">{clientCase?.client_name || 'N/A'}</h3>
                           <div className="space-y-2">
                             <div className="flex justify-between text-sm">
-                              <span className="text-slate-600">Country:</span>
+                              <span className="text-slate-400">Country:</span>
                               <Badge variant="outline">{client.country}</Badge>
                             </div>
                             <div className="flex justify-between text-sm">
-                              <span className="text-slate-600">Visa Type:</span>
-                              <span className="text-slate-900 font-medium text-xs">{client.visa_type}</span>
+                              <span className="text-slate-400">Visa Type:</span>
+                              <span className="text-white font-medium text-xs">{client.visa_type}</span>
                             </div>
                             <div className="flex justify-between text-sm">
-                              <span className="text-slate-600">Status:</span>
+                              <span className="text-slate-400">Status:</span>
                               <Badge className={getStatusColor(client.current_status)}>{client.current_status}</Badge>
                             </div>
                             <div>
-                              <div className="flex justify-between text-sm text-slate-600 mb-1">
+                              <div className="flex justify-between text-sm text-slate-400 mb-1">
                                 <span>Progress:</span>
                                 <span>{Math.round(client.progress_percentage)}%</span>
                               </div>
