@@ -661,8 +661,68 @@ export default function LandingPage() {
             </p>
           </div>
 
-          <Card className="bg-gradient-to-br from-[#1E293B] to-[#334155] border-slate-700/50 shadow-2xl">
+          {/* Authentication Modal */}
+        {showAuthForm && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <Card className="bg-[#1E293B] border-slate-700 max-w-md w-full">
+              <CardHeader>
+                <CardTitle className="text-white">Authentification Requise</CardTitle>
+                <CardDescription className="text-slate-400">
+                  Seuls les gestionnaires et employés peuvent créer des clients
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleAuth} className="space-y-4">
+                  <div>
+                    <Label className="text-slate-300">Email</Label>
+                    <Input
+                      type="email"
+                      value={authData.email}
+                      onChange={(e) => setAuthData({...authData, email: e.target.value})}
+                      className="bg-[#0F172A] border-slate-600 text-white"
+                      placeholder="votre.email@aloria.com"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-slate-300">Mot de passe</Label>
+                    <Input
+                      type="password"
+                      value={authData.password}
+                      onChange={(e) => setAuthData({...authData, password: e.target.value})}
+                      className="bg-[#0F172A] border-slate-600 text-white"
+                      required
+                    />
+                  </div>
+                  <div className="flex space-x-2">
+                    <Button type="submit" className="flex-1 bg-orange-500 hover:bg-orange-600">
+                      Se connecter
+                    </Button>
+                    <Button 
+                      type="button"
+                      variant="outline" 
+                      onClick={() => setShowAuthForm(false)}
+                      className="border-slate-600 text-slate-300"
+                    >
+                      Annuler
+                    </Button>
+                  </div>
+                </form>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        <Card className="bg-gradient-to-br from-[#1E293B] to-[#334155] border-slate-700/50 shadow-2xl">
             <CardContent className="p-8">
+              {isAuthenticated && (
+                <div className="mb-6 p-4 bg-green-500/10 border border-green-500/30 rounded-lg">
+                  <p className="text-green-400 font-medium">
+                    ✅ Connecté en tant que {currentUser.full_name} ({currentUser.role === 'MANAGER' ? 'Gestionnaire' : 'Employé'})
+                  </p>
+                </div>
+              )}
+              
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
