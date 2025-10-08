@@ -32,9 +32,19 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'your-secret-key-change-in-production'
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 7 days
 
+# WebSocket/SocketIO Setup
+sio = socketio.AsyncServer(
+    cors_allowed_origins="*",
+    logger=True,
+    engineio_logger=True
+)
+
 # Create the main app
 app = FastAPI()
 api_router = APIRouter(prefix="/api")
+
+# Mount Socket.IO
+socket_app = socketio.ASGIApp(sio)
 
 # Configure logging
 logging.basicConfig(
