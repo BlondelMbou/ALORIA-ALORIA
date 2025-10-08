@@ -113,12 +113,12 @@ export default function ClientDashboard() {
 
   if (!client || !caseData) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-orange-50">
-        <Card className="max-w-md">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#0F172A] via-[#1E293B] to-[#0F172A]">
+        <Card className="max-w-md bg-[#1E293B] border-slate-700">
           <CardContent className="p-8 text-center">
-            <h2 className="text-2xl font-bold text-white mb-4">No Active Case</h2>
-            <p className="text-slate-400 mb-6">You don't have an active immigration case yet.</p>
-            <Button onClick={logout}>Logout</Button>
+            <h2 className="text-2xl font-bold text-white mb-4">Aucun Dossier Actif</h2>
+            <p className="text-slate-400 mb-6">Vous n'avez pas encore de dossier d'immigration actif.</p>
+            <Button onClick={logout} className="bg-orange-500 hover:bg-orange-600">Déconnexion</Button>
           </CardContent>
         </Card>
       </div>
@@ -127,6 +127,7 @@ export default function ClientDashboard() {
 
   const currentStep = caseData.workflow_steps[caseData.current_step_index];
   const progressPercentage = ((caseData.current_step_index + 1) / caseData.workflow_steps.length) * 100;
+  const nextSteps = caseData.workflow_steps.slice(caseData.current_step_index + 1, caseData.current_step_index + 4);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0F172A] via-[#1E293B] to-[#0F172A]">
