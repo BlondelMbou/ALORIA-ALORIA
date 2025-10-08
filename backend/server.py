@@ -1227,6 +1227,63 @@ async def get_available_contacts(current_user: dict = Depends(get_current_user))
     
     return unique_contacts
 
+# Notifications API
+async def create_notification(user_id: str, title: str, message: str, type: str, related_id: str = None):
+    """Helper function to create notifications"""
+    notification_id = str(uuid.uuid4())
+    notification_dict = {
+        "id": notification_id,
+        "user_id": user_id,
+        "title": title,
+        "message": message,
+        "type": type,
+        "related_id": related_id,
+        "read": False,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.notifications.insert_one(notification_dict)
+    
+    # Send real-time notification via WebSocket
+    user_sid = connected_users.get(user_id)
+    if user_sid:
+        await sio.emit('new_notification', {
+            'id': notification_id,
+            'title': title,
+            'message': message,
+            'type': type,
+            'created_at': notification_dict["created_at"]
+        }, room=user_sid)
+    
+    return notification_id
+
+@api_router.get("/notifications", response_model=List[NotificationResponse])
+async def get_notifications(current_user: dict = Depends(get_current_user)):
+    notifications = await db.notifications.find(
+        {"user_id": current_user["id"]}, {"_id": 0}
+    ).sort("created_at", -1).limit(50).to_list(50)
+    
+    return [NotificationResponse(**notif) for notif in notifications]
+
+@api_router.patch("/notifications/{notification_id}/read")
+async def mark_notification_read(notification_id: str, current_user: dict = Depends(get_current_user)):
+    result = await db.notifications.update_one(
+        {"id": notification_id, "user_id": current_user["id"]},
+        {"$set": {"read": True}}
+    )
+    
+    if result.modified_count == 0:
+        raise HTTPException(status_code=404, detail="Notification non trouvée")
+    
+    return {"message": "Notification marquée comme lue"}
+
+@api_router.get("/notifications/unread-count")
+async def get_unread_notifications_count(current_user: dict = Depends(get_current_user)):
+    count = await db.notifications.count_documents({
+        "user_id": current_user["id"],
+        "read": False
+    })
+    return {"unread_count": count}
+
 # Include router
 app.include_router(api_router)
 
