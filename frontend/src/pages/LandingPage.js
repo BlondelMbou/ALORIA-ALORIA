@@ -808,6 +808,37 @@ export default function LandingPage() {
                   </Select>
                 </div>
 
+                {/* Champ employé assigné (seulement pour les managers) */}
+                {isAuthenticated && currentUser?.role === 'MANAGER' && (
+                  <div>
+                    <Label htmlFor="assigned_employee" className="text-slate-300 font-medium">Employé Assigné *</Label>
+                    <Select
+                      value={formData.assigned_employee_id}
+                      onValueChange={(value) => setFormData({ ...formData, assigned_employee_id: value })}
+                    >
+                      <SelectTrigger className="mt-2 bg-[#0F172A] border-slate-600 text-white focus:border-orange-500">
+                        <SelectValue placeholder="Sélectionner un employé" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-[#1E293B] border-slate-600">
+                        {employees.map((employee) => (
+                          <SelectItem key={employee.id} value={employee.id} className="text-white hover:bg-slate-700">
+                            {employee.full_name} ({employee.email})
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+
+                {/* Info pour les employés */}
+                {isAuthenticated && currentUser?.role === 'EMPLOYEE' && (
+                  <div className="p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+                    <p className="text-blue-400 text-sm">
+                      ℹ️ Ce client vous sera automatiquement assigné
+                    </p>
+                  </div>
+                )}
+
                 <div>
                   <Label htmlFor="message" className="text-slate-300 font-medium">Message Personnalisé (Optionnel)</Label>
                   <Textarea
