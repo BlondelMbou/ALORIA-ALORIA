@@ -540,8 +540,11 @@ class APITester:
         if self.manager_token:
             try:
                 headers = {"Authorization": f"Bearer {self.manager_token}"}
+                # Use timestamp to ensure unique email
+                import time
+                timestamp = int(time.time())
                 client_data = {
-                    "email": "nouveau.client@example.com",
+                    "email": f"nouveau.client.{timestamp}@example.com",
                     "full_name": "Nouveau Client Test",
                     "phone": "+33123456789",
                     "country": "France",
