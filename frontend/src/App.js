@@ -7,6 +7,7 @@ import ManagerDashboard from '@/pages/ManagerDashboard';
 import EmployeeDashboard from '@/pages/EmployeeDashboard';
 import ClientDashboard from '@/pages/ClientDashboard';
 import { AuthProvider, useAuth } from '@/context/AuthContext';
+import { Toaster } from 'sonner';
 
 function PrivateRoute({ children, allowedRoles }) {
   const { user, loading } = useAuth();
