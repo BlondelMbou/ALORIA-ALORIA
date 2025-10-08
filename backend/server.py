@@ -497,6 +497,46 @@ async def login(credentials: UserLogin):
 async def get_me(current_user: dict = Depends(get_current_user)):
     return UserResponse(**current_user)
 
+@api_router.patch("/auth/change-password")
+async def change_password(password_data: PasswordChange, current_user: dict = Depends(get_current_user)):
+    # Verify old password
+    user = await db.users.find_one({"id": current_user["id"]})
+    if not user or not verify_password(password_data.old_password, user["password"]):
+        raise HTTPException(status_code=400, detail="Mot de passe actuel incorrect")
+    
+    # Update password
+    new_hashed_password = hash_password(password_data.new_password)
+    await db.users.update_one(
+        {"id": current_user["id"]},
+        {"$set": {"password": new_hashed_password}}
+    )
+    
+    return {"message": "Mot de passe mis à jour avec succès"}
+
+@api_router.get("/clients/{client_id}/credentials")
+async def get_client_credentials(client_id: str, current_user: dict = Depends(get_current_user)):
+    if current_user["role"] not in ["MANAGER", "EMPLOYEE"]:
+        raise HTTPException(status_code=403, detail="Accès refusé")
+    
+    # Get client
+    client = await db.clients.find_one({"id": client_id})
+    if not client:
+        raise HTTPException(status_code=404, detail="Client non trouvé")
+    
+    # Check permissions for employee
+    if current_user["role"] == "EMPLOYEE" and client["assigned_employee_id"] != current_user["id"]:
+        raise HTTPException(status_code=403, detail="Accès refusé - client non assigné")
+    
+    # Get user credentials
+    user = await db.users.find_one({"id": client["user_id"]})
+    if not user:
+        raise HTTPException(status_code=404, detail="Utilisateur client non trouvé")
+    
+    return ClientCredentials(
+        email=user["email"],
+        password="Aloria2024!"  # Default password
+    )
+
 # Client Management
 @api_router.post("/clients", response_model=ClientResponse) 
 async def create_client(client_data: ClientCreate, current_user: dict = Depends(get_current_user)):
