@@ -23,6 +23,11 @@ export default function ClientDashboard() {
   const [messageText, setMessageText] = useState('');
   const [loading, setLoading] = useState(true);
   const [counselor, setCounselor] = useState(null);
+  const [chatUnreadCount, setChatUnreadCount] = useState(0);
+  const [documentChecklist, setDocumentChecklist] = useState([]);
+  
+  // WebSocket hook
+  const { connected } = useSocket(localStorage.getItem('token'));
 
   useEffect(() => {
     fetchData();
