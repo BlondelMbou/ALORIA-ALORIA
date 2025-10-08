@@ -485,12 +485,21 @@ export default function ManagerDashboard() {
                             </td>
                             <td className="py-3 px-4 text-sm text-slate-300">{client.assigned_employee_name || 'Non assigné'}</td>
                             <td className="py-3 px-4">
-                              <Dialog>
-                                <DialogTrigger asChild>
-                                  <Button variant="outline" size="sm" onClick={() => setSelectedClient(client)} className="border-slate-600 text-slate-300 hover:bg-slate-800 hover:text-white">
-                                    Réassigner
-                                  </Button>
-                                </DialogTrigger>
+                              <div className="flex space-x-2">
+                                <Button 
+                                  variant="outline" 
+                                  size="sm" 
+                                  onClick={() => handleShowClientCredentials(client.id)}
+                                  className="border-slate-600 text-slate-300 hover:bg-slate-800 hover:text-white"
+                                >
+                                  Login Info
+                                </Button>
+                                <Dialog>
+                                  <DialogTrigger asChild>
+                                    <Button variant="outline" size="sm" onClick={() => setSelectedClient(client)} className="border-slate-600 text-slate-300 hover:bg-slate-800 hover:text-white">
+                                      Réassigner
+                                    </Button>
+                                  </DialogTrigger>
                                 <DialogContent className="bg-[#1E293B] border-slate-700">
                                   <DialogHeader>
                                     <DialogTitle className="text-white">Réassigner le Client</DialogTitle>
