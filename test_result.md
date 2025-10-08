@@ -165,6 +165,54 @@
         -agent: "testing"
         -comment: "✅ TESTED: Country-specific workflow system fully functional. GET /api/workflows returns comprehensive workflows for Canada (Work Permit, Study Permit, Permanent Residence) and France (Work Permit, Student Visa, Family Reunification). POST /api/workflows/{country}/{visa_type}/steps allows managers to add custom workflow steps (403 for employees). Successfully added custom step 'Étape personnalisée de vérification' to Canada Work Permit workflow. Custom workflow storage in MongoDB working correctly."
 
+  - task: "Manager-only case update permissions"
+    implemented: true
+    working: true
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: true
+        -agent: "testing"
+        -comment: "✅ TESTED: Manager-only case update permissions fully functional. PATCH /api/cases/{id} correctly restricted to MANAGER role only. Employee attempts return 403 'Seuls les gestionnaires peuvent modifier les dossiers'. WebSocket notifications sent to both client and assigned employee when case is updated by manager. Tested case status update with current_step_index=1, status='En cours', and notes successfully."
+
+  - task: "Password change API"
+    implemented: true
+    working: true
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: true
+        -agent: "testing"
+        -comment: "✅ TESTED: Password change API fully functional. PATCH /api/auth/change-password works correctly with valid old password, returns 400 'Mot de passe actuel incorrect' for invalid old password. Password successfully updated in database and verified by subsequent login attempts. Both manager and client password changes tested successfully."
+
+  - task: "Client credentials API with permissions"
+    implemented: true
+    working: true
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: true
+        -agent: "testing"
+        -comment: "✅ TESTED: Client credentials API with proper permissions. GET /api/clients/{id}/credentials works for MANAGER (can access all clients) and EMPLOYEE (can access assigned clients only). Non-assigned employees correctly receive 403 'Accès refusé - client non assigné'. Response includes email and default password 'Aloria2024!' for client login."
+
+  - task: "Client creation with default password"
+    implemented: true
+    working: true
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: true
+        -agent: "testing"
+        -comment: "✅ TESTED: Client creation with default password fully functional. New clients created with default password 'Aloria2024!' and automatic user account creation. Response includes login_email and default_password fields for new accounts. Client can successfully login with default credentials and change password. Employee load balancing for client assignment working correctly."
+
 ## frontend:
   - task: "Manager client creation interface"
     implemented: false
