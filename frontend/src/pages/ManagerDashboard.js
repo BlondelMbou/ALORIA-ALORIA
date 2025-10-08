@@ -267,20 +267,20 @@ export default function ManagerDashboard() {
                   </div>
                   <div className="flex space-x-2">
                     <Input
-                      placeholder="Search clients..."
+                      placeholder="Rechercher des clients..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="w-64"
+                      className="w-64 bg-[#0F172A] border-slate-600 text-white placeholder:text-slate-500"
                       data-testid="search-clients-input"
                     />
                     <Select value={filterCountry} onValueChange={setFilterCountry}>
-                      <SelectTrigger className="w-32">
+                      <SelectTrigger className="w-32 bg-[#0F172A] border-slate-600 text-white">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All Countries</SelectItem>
-                        <SelectItem value="Canada">Canada</SelectItem>
-                        <SelectItem value="France">France</SelectItem>
+                      <SelectContent className="bg-[#1E293B] border-slate-600">
+                        <SelectItem value="all" className="text-white hover:bg-slate-700">Tous les Pays</SelectItem>
+                        <SelectItem value="Canada" className="text-white hover:bg-slate-700">Canada</SelectItem>
+                        <SelectItem value="France" className="text-white hover:bg-slate-700">France</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
