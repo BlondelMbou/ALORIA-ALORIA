@@ -387,30 +387,30 @@ export default function ManagerDashboard() {
                     const activeCases = employeeCases.filter(c => c.status === 'In Progress' || c.status === 'Under Review').length;
 
                     return (
-                      <Card key={employee.id} className="border-2 hover:border-orange-500 transition-all">
+                      <Card key={employee.id} className="bg-gradient-to-br from-[#0F172A] to-[#1E293B] border-2 border-slate-700 hover:border-orange-500 transition-all">
                         <CardContent className="p-6">
                           <div className="flex items-start justify-between mb-4">
-                            <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
-                              <UserCheck className="w-6 h-6 text-orange-600" />
+                            <div className="w-12 h-12 bg-orange-500/10 rounded-full flex items-center justify-center border border-orange-500/20">
+                              <UserCheck className="w-6 h-6 text-orange-400" />
                             </div>
-                            <Badge variant={employee.is_active ? "success" : "secondary"}>
-                              {employee.is_active ? 'Active' : 'Inactive'}
+                            <Badge variant={employee.is_active ? "success" : "secondary"} className={employee.is_active ? "bg-green-500/10 text-green-400 border-green-500/20" : "bg-slate-700 text-slate-400"}>
+                              {employee.is_active ? 'Actif' : 'Inactif'}
                             </Badge>
                           </div>
-                          <h3 className="font-bold text-lg text-slate-900 mb-1">{employee.full_name}</h3>
-                          <p className="text-sm text-slate-600 mb-4">{employee.email}</p>
+                          <h3 className="font-bold text-lg text-white mb-1">{employee.full_name}</h3>
+                          <p className="text-sm text-slate-400 mb-4">{employee.email}</p>
                           <div className="space-y-2 mb-4">
                             <div className="flex justify-between text-sm">
-                              <span className="text-slate-600">Active Cases:</span>
-                              <span className="font-semibold text-slate-900">{activeCases}</span>
+                              <span className="text-slate-400">Dossiers Actifs:</span>
+                              <span className="font-semibold text-white">{activeCases}</span>
                             </div>
                             <div className="flex justify-between text-sm">
-                              <span className="text-slate-600">Completed:</span>
-                              <span className="font-semibold text-green-600">{completedCases}</span>
+                              <span className="text-slate-400">Terminés:</span>
+                              <span className="font-semibold text-green-400">{completedCases}</span>
                             </div>
                             <div className="flex justify-between text-sm">
-                              <span className="text-slate-600">Total Cases:</span>
-                              <span className="font-semibold text-slate-900">{employeeCases.length}</span>
+                              <span className="text-slate-400">Total Dossiers:</span>
+                              <span className="font-semibold text-white">{employeeCases.length}</span>
                             </div>
                           </div>
                         </CardContent>
