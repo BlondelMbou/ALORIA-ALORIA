@@ -115,6 +115,25 @@ export default function ManagerDashboard() {
     }
   };
 
+  const handleShowClientCredentials = async (clientId) => {
+    try {
+      const response = await api.get(`/clients/${clientId}/credentials`);
+      const credentials = response.data;
+      
+      toast.info(
+        <div>
+          <p className="font-bold">Informations de connexion client:</p>
+          <p>Email: {credentials.email}</p>
+          <p>Mot de passe par défaut: {credentials.password}</p>
+          <p className="text-xs text-slate-400 mt-1">Le client peut changer son mot de passe dans son profil</p>
+        </div>,
+        { duration: 10000 }
+      );
+    } catch (error) {
+      toast.error('Erreur lors de la récupération des informations de connexion');
+    }
+  };
+
   const handleAddVisitor = async () => {
     try {
       await visitorsAPI.create(newVisitor);
