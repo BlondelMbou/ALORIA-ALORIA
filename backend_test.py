@@ -565,6 +565,291 @@ class APITester:
             except Exception as e:
                 self.log_result("Client Creation with Default Password", False, "Exception occurred", str(e))
 
+    def test_notification_system(self):
+        """Test notification system APIs"""
+        print("=== Testing Notification System ===")
+        
+        # Test get notifications
+        if self.manager_token:
+            try:
+                headers = {"Authorization": f"Bearer {self.manager_token}"}
+                response = self.session.get(f"{API_BASE}/notifications", headers=headers)
+                if response.status_code == 200:
+                    notifications = response.json()
+                    self.log_result("Get Notifications", True, f"Retrieved {len(notifications)} notifications")
+                else:
+                    self.log_result("Get Notifications", False, f"Status: {response.status_code}", response.text)
+            except Exception as e:
+                self.log_result("Get Notifications", False, "Exception occurred", str(e))
+
+        # Test get unread notifications count
+        if self.manager_token:
+            try:
+                headers = {"Authorization": f"Bearer {self.manager_token}"}
+                response = self.session.get(f"{API_BASE}/notifications/unread-count", headers=headers)
+                if response.status_code == 200:
+                    data = response.json()
+                    unread_count = data.get('unread_count', 0)
+                    self.log_result("Get Unread Notifications Count", True, f"Unread notifications: {unread_count}")
+                else:
+                    self.log_result("Get Unread Notifications Count", False, f"Status: {response.status_code}", response.text)
+            except Exception as e:
+                self.log_result("Get Unread Notifications Count", False, "Exception occurred", str(e))
+
+        # Test mark notification as read (need to get a notification ID first)
+        if self.manager_token:
+            try:
+                headers = {"Authorization": f"Bearer {self.manager_token}"}
+                # Get notifications first
+                response = self.session.get(f"{API_BASE}/notifications", headers=headers)
+                if response.status_code == 200:
+                    notifications = response.json()
+                    if notifications:
+                        notification_id = notifications[0]['id']
+                        # Mark as read
+                        read_response = self.session.patch(f"{API_BASE}/notifications/{notification_id}/read", headers=headers)
+                        if read_response.status_code == 200:
+                            self.log_result("Mark Notification Read", True, f"Notification {notification_id} marked as read")
+                        else:
+                            self.log_result("Mark Notification Read", False, f"Status: {read_response.status_code}", read_response.text)
+                    else:
+                        self.log_result("Mark Notification Read", False, "No notifications available to mark as read")
+                else:
+                    self.log_result("Mark Notification Read", False, "Could not retrieve notifications")
+            except Exception as e:
+                self.log_result("Mark Notification Read", False, "Exception occurred", str(e))
+
+    def test_automatic_notifications(self):
+        """Test automatic notifications creation"""
+        print("=== Testing Automatic Notifications ===")
+        
+        # Test notifications created when sending messages
+        if self.manager_token and self.employee_user:
+            try:
+                headers = {"Authorization": f"Bearer {self.manager_token}"}
+                
+                # Get initial unread count for employee
+                employee_headers = {"Authorization": f"Bearer {self.employee_token}"}
+                initial_response = self.session.get(f"{API_BASE}/notifications/unread-count", headers=employee_headers)
+                initial_count = 0
+                if initial_response.status_code == 200:
+                    initial_count = initial_response.json().get('unread_count', 0)
+                
+                # Send message from manager to employee
+                message_data = {
+                    "receiver_id": self.employee_user['id'],
+                    "message": "Test message pour vérifier les notifications automatiques"
+                }
+                response = self.session.post(f"{API_BASE}/chat/send", json=message_data, headers=headers)
+                if response.status_code == 200 or response.status_code == 201:
+                    # Check if notification was created for employee
+                    final_response = self.session.get(f"{API_BASE}/notifications/unread-count", headers=employee_headers)
+                    if final_response.status_code == 200:
+                        final_count = final_response.json().get('unread_count', 0)
+                        if final_count > initial_count:
+                            self.log_result("Message Notification Creation", True, f"Notification created for message (count: {initial_count} → {final_count})")
+                        else:
+                            self.log_result("Message Notification Creation", False, f"No notification created for message (count stayed at {initial_count})")
+                    else:
+                        self.log_result("Message Notification Creation", False, "Could not check final notification count")
+                else:
+                    self.log_result("Message Notification Creation", False, f"Failed to send message. Status: {response.status_code}")
+            except Exception as e:
+                self.log_result("Message Notification Creation", False, "Exception occurred", str(e))
+
+        # Test notifications created during case updates
+        if self.manager_token and self.test_client_id:
+            try:
+                headers = {"Authorization": f"Bearer {self.manager_token}"}
+                
+                # Get the case for the test client
+                cases_response = self.session.get(f"{API_BASE}/cases", headers=headers)
+                if cases_response.status_code == 200:
+                    cases = cases_response.json()
+                    test_case = None
+                    for case in cases:
+                        if case['client_id'] == self.test_client_id:
+                            test_case = case
+                            break
+                    
+                    if test_case:
+                        case_id = test_case['id']
+                        
+                        # Get client info to check notifications
+                        client_response = self.session.get(f"{API_BASE}/clients/{self.test_client_id}", headers=headers)
+                        if client_response.status_code == 200:
+                            client_data = client_response.json()
+                            client_user_id = client_data['user_id']
+                            
+                            # Try to login as client to check notifications
+                            client_login_data = {
+                                "email": "client.test@example.com",
+                                "password": "Aloria2024!"
+                            }
+                            client_login_response = self.session.post(f"{API_BASE}/auth/login", json=client_login_data)
+                            if client_login_response.status_code == 200:
+                                client_token = client_login_response.json()['access_token']
+                                client_headers = {"Authorization": f"Bearer {client_token}"}
+                                
+                                # Get initial notification count for client
+                                initial_response = self.session.get(f"{API_BASE}/notifications/unread-count", headers=client_headers)
+                                initial_count = 0
+                                if initial_response.status_code == 200:
+                                    initial_count = initial_response.json().get('unread_count', 0)
+                                
+                                # Update case as manager
+                                update_data = {
+                                    "current_step_index": 3,
+                                    "status": "En cours de traitement",
+                                    "notes": "Mise à jour pour test des notifications automatiques"
+                                }
+                                update_response = self.session.patch(f"{API_BASE}/cases/{case_id}", json=update_data, headers=headers)
+                                if update_response.status_code == 200:
+                                    # Check if notification was created for client
+                                    final_response = self.session.get(f"{API_BASE}/notifications/unread-count", headers=client_headers)
+                                    if final_response.status_code == 200:
+                                        final_count = final_response.json().get('unread_count', 0)
+                                        if final_count > initial_count:
+                                            self.log_result("Case Update Notification Creation", True, f"Notification created for case update (count: {initial_count} → {final_count})")
+                                        else:
+                                            self.log_result("Case Update Notification Creation", False, f"No notification created for case update (count stayed at {initial_count})")
+                                    else:
+                                        self.log_result("Case Update Notification Creation", False, "Could not check final notification count")
+                                else:
+                                    self.log_result("Case Update Notification Creation", False, f"Failed to update case. Status: {update_response.status_code}")
+                            else:
+                                self.log_result("Case Update Notification Creation", False, "Could not login as client to check notifications")
+                        else:
+                            self.log_result("Case Update Notification Creation", False, "Could not get client data")
+                    else:
+                        self.log_result("Case Update Notification Creation", False, "Could not find case for test client")
+                else:
+                    self.log_result("Case Update Notification Creation", False, "Could not retrieve cases")
+            except Exception as e:
+                self.log_result("Case Update Notification Creation", False, "Exception occurred", str(e))
+
+    def test_complete_integration(self):
+        """Test complete integration scenario with notifications"""
+        print("=== Testing Complete Integration with Notifications ===")
+        
+        if not self.manager_token:
+            self.log_result("Complete Integration", False, "No manager token available")
+            return
+
+        integration_client_id = None
+        integration_case_id = None
+        
+        try:
+            # 1. Employee creates a new client
+            if self.employee_token:
+                headers = {"Authorization": f"Bearer {self.employee_token}"}
+                client_data = {
+                    "email": "integration.client@example.com",
+                    "full_name": "Client Intégration Complète",
+                    "phone": "+33111222333",
+                    "country": "Canada",
+                    "visa_type": "Permanent Residence (Express Entry)",
+                    "message": "Test intégration complète avec notifications"
+                }
+                response = self.session.post(f"{API_BASE}/clients", json=client_data, headers=headers)
+                if response.status_code == 200 or response.status_code == 201:
+                    client_response = response.json()
+                    integration_client_id = client_response['id']
+                    self.log_result("Integration Step 1: Employee Creates Client", True, f"Employee created client with ID: {integration_client_id}")
+                    
+                    # 2. Manager updates the client's case
+                    if self.manager_token:
+                        manager_headers = {"Authorization": f"Bearer {self.manager_token}"}
+                        
+                        # Get the case for this client
+                        cases_response = self.session.get(f"{API_BASE}/cases", headers=manager_headers)
+                        if cases_response.status_code == 200:
+                            cases = cases_response.json()
+                            integration_case = None
+                            for case in cases:
+                                if case['client_id'] == integration_client_id:
+                                    integration_case = case
+                                    integration_case_id = case['id']
+                                    break
+                            
+                            if integration_case:
+                                # Update case as manager
+                                update_data = {
+                                    "current_step_index": 2,
+                                    "status": "Documents en cours de vérification",
+                                    "notes": "Intégration complète - mise à jour par manager avec notifications"
+                                }
+                                update_response = self.session.patch(f"{API_BASE}/cases/{integration_case_id}", json=update_data, headers=manager_headers)
+                                if update_response.status_code == 200:
+                                    self.log_result("Integration Step 2: Manager Updates Case", True, "Manager successfully updated client case")
+                                    
+                                    # 3. Test messaging with notifications
+                                    # Manager sends message to employee
+                                    message_data = {
+                                        "receiver_id": self.employee_user['id'],
+                                        "message": "Bonjour, j'ai mis à jour le dossier du client. Pouvez-vous vérifier les documents?"
+                                    }
+                                    message_response = self.session.post(f"{API_BASE}/chat/send", json=message_data, headers=manager_headers)
+                                    if message_response.status_code == 200 or message_response.status_code == 201:
+                                        self.log_result("Integration Step 3: Manager-Employee Messaging", True, "Manager sent message to employee")
+                                        
+                                        # 4. Verify all notifications were created
+                                        # Check employee notifications
+                                        employee_headers = {"Authorization": f"Bearer {self.employee_token}"}
+                                        employee_notif_response = self.session.get(f"{API_BASE}/notifications", headers=employee_headers)
+                                        if employee_notif_response.status_code == 200:
+                                            employee_notifications = employee_notif_response.json()
+                                            case_update_notif = any(notif['type'] == 'case_update' for notif in employee_notifications)
+                                            message_notif = any(notif['type'] == 'message' for notif in employee_notifications)
+                                            
+                                            if case_update_notif and message_notif:
+                                                self.log_result("Integration Step 4: Employee Notifications", True, "Employee received both case update and message notifications")
+                                            else:
+                                                self.log_result("Integration Step 4: Employee Notifications", False, f"Missing notifications - case_update: {case_update_notif}, message: {message_notif}")
+                                        else:
+                                            self.log_result("Integration Step 4: Employee Notifications", False, "Could not retrieve employee notifications")
+                                        
+                                        # Check client notifications (login as client)
+                                        client_login_data = {
+                                            "email": client_data["email"],
+                                            "password": "Aloria2024!"
+                                        }
+                                        client_login_response = self.session.post(f"{API_BASE}/auth/login", json=client_login_data)
+                                        if client_login_response.status_code == 200:
+                                            client_token = client_login_response.json()['access_token']
+                                            client_headers = {"Authorization": f"Bearer {client_token}"}
+                                            
+                                            client_notif_response = self.session.get(f"{API_BASE}/notifications", headers=client_headers)
+                                            if client_notif_response.status_code == 200:
+                                                client_notifications = client_notif_response.json()
+                                                case_update_notif = any(notif['type'] == 'case_update' for notif in client_notifications)
+                                                
+                                                if case_update_notif:
+                                                    self.log_result("Integration Step 5: Client Notifications", True, "Client received case update notification")
+                                                else:
+                                                    self.log_result("Integration Step 5: Client Notifications", False, "Client did not receive case update notification")
+                                            else:
+                                                self.log_result("Integration Step 5: Client Notifications", False, "Could not retrieve client notifications")
+                                        else:
+                                            self.log_result("Integration Step 5: Client Notifications", False, "Could not login as client")
+                                    else:
+                                        self.log_result("Integration Step 3: Manager-Employee Messaging", False, f"Failed to send message. Status: {message_response.status_code}")
+                                else:
+                                    self.log_result("Integration Step 2: Manager Updates Case", False, f"Status: {update_response.status_code}", update_response.text)
+                            else:
+                                self.log_result("Integration Step 2: Find Case", False, "Could not find case for created client")
+                        else:
+                            self.log_result("Integration Step 2: Get Cases", False, f"Status: {cases_response.status_code}", cases_response.text)
+                    else:
+                        self.log_result("Integration Step 2: Manager Updates Case", False, "No manager token available")
+                else:
+                    self.log_result("Integration Step 1: Employee Creates Client", False, f"Status: {response.status_code}", response.text)
+            else:
+                self.log_result("Integration Step 1: Employee Creates Client", False, "No employee token available")
+                
+        except Exception as e:
+            self.log_result("Complete Integration", False, "Exception occurred", str(e))
+
     def test_complete_scenario(self):
         """Test complete workflow scenario"""
         print("=== Testing Complete Scenario ===")
