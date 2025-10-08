@@ -109,8 +109,8 @@ export default function ClientDashboard() {
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-orange-50">
         <Card className="max-w-md">
           <CardContent className="p-8 text-center">
-            <h2 className="text-2xl font-bold text-slate-900 mb-4">No Active Case</h2>
-            <p className="text-slate-600 mb-6">You don't have an active immigration case yet.</p>
+            <h2 className="text-2xl font-bold text-white mb-4">No Active Case</h2>
+            <p className="text-slate-400 mb-6">You don't have an active immigration case yet.</p>
             <Button onClick={logout}>Logout</Button>
           </CardContent>
         </Card>
@@ -170,17 +170,17 @@ export default function ClientDashboard() {
               <CardContent>
                 {/* Progress Bar */}
                 <div className="mb-8">
-                  <div className="flex justify-between text-sm text-slate-600 mb-3">
+                  <div className="flex justify-between text-sm text-slate-400 mb-3">
                     <span className="font-semibold">Overall Progress</span>
                     <span className="font-bold text-orange-600">{Math.round(progressPercentage)}%</span>
                   </div>
-                  <div className="w-full bg-slate-200 rounded-full h-4 mb-4">
+                  <div className="w-full bg-slate-700 rounded-full h-4 mb-4">
                     <div
                       className="bg-gradient-to-r from-orange-500 to-orange-600 h-4 rounded-full transition-all progress-bar"
                       style={{ width: `${progressPercentage}%` }}
                     ></div>
                   </div>
-                  <p className="text-center text-sm text-slate-600">
+                  <p className="text-center text-sm text-slate-400">
                     Step {caseData.current_step_index + 1} of {caseData.workflow_steps.length}
                   </p>
                 </div>
@@ -192,14 +192,14 @@ export default function ClientDashboard() {
                       {caseData.current_step_index + 1}
                     </div>
                     <div>
-                      <h3 className="font-bold text-lg text-slate-900 mb-1">{currentStep.title}</h3>
-                      <p className="text-slate-600">{currentStep.description}</p>
+                      <h3 className="font-bold text-lg text-white mb-1">{currentStep.title}</h3>
+                      <p className="text-slate-400">{currentStep.description}</p>
                     </div>
                   </div>
 
                   {/* Required Documents Checklist */}
-                  <div className="bg-white rounded-lg p-4">
-                    <h4 className="font-semibold text-slate-900 mb-3 flex items-center">
+                  <div className="bg-gradient-to-br from-[#1E293B] to-[#334155] rounded-lg p-4">
+                    <h4 className="font-semibold text-white mb-3 flex items-center">
                       <FileText className="w-5 h-5 mr-2 text-orange-500" />
                       Required Documents
                     </h4>
@@ -207,14 +207,14 @@ export default function ClientDashboard() {
                       {currentStep.documents?.map((doc, idx) => (
                         <li key={idx} className="flex items-start space-x-2 text-sm">
                           <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
-                          <span className="text-slate-700">{doc}</span>
+                          <span className="text-slate-300">{doc}</span>
                         </li>
                       ))}
                     </ul>
                   </div>
 
                   {currentStep.duration && (
-                    <div className="mt-4 flex items-center text-sm text-slate-600">
+                    <div className="mt-4 flex items-center text-sm text-slate-400">
                       <Clock className="w-4 h-4 mr-2" />
                       Estimated duration: {currentStep.duration}
                     </div>
@@ -223,7 +223,7 @@ export default function ClientDashboard() {
 
                 {/* Timeline */}
                 <div>
-                  <h3 className="font-bold text-lg text-slate-900 mb-4">Complete Journey</h3>
+                  <h3 className="font-bold text-lg text-white mb-4">Complete Journey</h3>
                   <div className="space-y-3">
                     {caseData.workflow_steps.map((step, idx) => {
                       const isCompleted = idx < caseData.current_step_index;
@@ -239,7 +239,7 @@ export default function ClientDashboard() {
                                   ? 'bg-green-500 text-white'
                                   : isCurrent
                                   ? 'bg-orange-500 text-white'
-                                  : 'bg-slate-200 text-slate-600'
+                                  : 'bg-slate-700 text-slate-400'
                               }`}
                             >
                               {isCompleted ? <CheckCircle className="w-5 h-5" /> : idx + 1}
@@ -247,14 +247,14 @@ export default function ClientDashboard() {
                             {idx < caseData.workflow_steps.length - 1 && (
                               <div
                                 className={`w-0.5 h-8 ${
-                                  isCompleted ? 'bg-green-500' : 'bg-slate-200'
+                                  isCompleted ? 'bg-green-500' : 'bg-slate-700'
                                 }`}
                               ></div>
                             )}
                           </div>
                           <div className={`flex-1 pb-4 ${isPending ? 'opacity-50' : ''}`}>
-                            <h4 className="font-semibold text-slate-900">{step.title}</h4>
-                            <p className="text-sm text-slate-600">{step.description}</p>
+                            <h4 className="font-semibold text-white">{step.title}</h4>
+                            <p className="text-sm text-slate-400">{step.description}</p>
                           </div>
                         </div>
                       );
@@ -280,11 +280,11 @@ export default function ClientDashboard() {
                         {counselor.name.charAt(0)}
                       </AvatarFallback>
                     </Avatar>
-                    <h3 className="font-bold text-lg text-slate-900">{counselor.name}</h3>
-                    <p className="text-sm text-slate-600">Immigration Counselor</p>
+                    <h3 className="font-bold text-lg text-white">{counselor.name}</h3>
+                    <p className="text-sm text-slate-400">Immigration Counselor</p>
                   </div>
                   <div className="space-y-2">
-                    <div className="flex items-center text-sm text-slate-600">
+                    <div className="flex items-center text-sm text-slate-400">
                       <User className="w-4 h-4 mr-2" />
                       <span>Assigned to your case</span>
                     </div>
@@ -303,7 +303,7 @@ export default function ClientDashboard() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  <div className="h-96 overflow-y-auto border border-slate-200 rounded-lg p-3 space-y-3 bg-slate-50">
+                  <div className="h-96 overflow-y-auto border border-slate-200 rounded-lg p-3 space-y-3 bg-[#0F172A]">
                     {messages.length === 0 ? (
                       <p className="text-center text-slate-500 py-8">No messages yet. Start a conversation!</p>
                     ) : (
@@ -316,7 +316,7 @@ export default function ClientDashboard() {
                             className={`max-w-[80%] rounded-lg p-3 ${
                               msg.sender_id === user.id
                                 ? 'bg-orange-500 text-white'
-                                : 'bg-white text-slate-900 border border-slate-200'
+                                : 'bg-gradient-to-br from-[#1E293B] to-[#334155] text-white border border-slate-200'
                             }`}
                           >
                             <p className="text-sm mb-1">{msg.message}</p>
