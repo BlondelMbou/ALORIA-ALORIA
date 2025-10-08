@@ -100,16 +100,7 @@ export default function EmployeeDashboard() {
     }
   };
 
-  const handleUpdateCase = async (caseId, updateData) => {
-    try {
-      await casesAPI.update(caseId, updateData);
-      toast.success('Case updated successfully');
-      fetchData();
-      setSelectedCase(null);
-    } catch (error) {
-      toast.error('Failed to update case');
-    }
-  };
+  // Fonction handleUpdateCase supprimée - plus de mise à jour par les employés
 
   const handleCreateClient = async (e) => {
     e.preventDefault();
