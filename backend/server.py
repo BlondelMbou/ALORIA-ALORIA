@@ -490,8 +490,12 @@ async def get_me(current_user: dict = Depends(get_current_user)):
     return UserResponse(**current_user)
 
 # Client Management
-@api_router.post("/clients", response_model=ClientResponse)
+@api_router.post("/clients", response_model=ClientResponse) 
 async def create_client(client_data: ClientCreate, current_user: dict = Depends(get_current_user)):
+    # Only MANAGER can create clients now
+    if current_user["role"] != "MANAGER":
+        raise HTTPException(status_code=403, detail="Only managers can create clients")
+        
     # Check if user exists with this email
     existing_user = await db.users.find_one({"email": client_data.email})
     
@@ -513,20 +517,16 @@ async def create_client(client_data: ClientCreate, current_user: dict = Depends(
         }
         await db.users.insert_one(user_dict)
     
-    # Auto-assign to current user if EMPLOYEE, or find available employee
+    # Find employee with least clients for load balancing
     assigned_employee_id = None
-    if current_user["role"] == "EMPLOYEE":
-        assigned_employee_id = current_user["id"]
-    else:
-        # Find employee with least clients for load balancing
-        employees = await db.users.find({"role": "EMPLOYEE", "is_active": True}).to_list(100)
-        if employees:
-            # Count clients per employee
-            employee_loads = []
-            for emp in employees:
-                count = await db.clients.count_documents({"assigned_employee_id": emp["id"]})
-                employee_loads.append((emp["id"], count))
-            assigned_employee_id = min(employee_loads, key=lambda x: x[1])[0]
+    employees = await db.users.find({"role": "EMPLOYEE", "is_active": True}).to_list(100)
+    if employees:
+        # Count clients per employee
+        employee_loads = []
+        for emp in employees:
+            count = await db.clients.count_documents({"assigned_employee_id": emp["id"]})
+            employee_loads.append((emp["id"], count))
+        assigned_employee_id = min(employee_loads, key=lambda x: x[1])[0]
     
     # Create client record
     client_id = str(uuid.uuid4())
@@ -536,7 +536,7 @@ async def create_client(client_data: ClientCreate, current_user: dict = Depends(
         "assigned_employee_id": assigned_employee_id,
         "country": client_data.country,
         "visa_type": client_data.visa_type,
-        "current_status": "New",
+        "current_status": "Nouveau",
         "current_step": 0,
         "progress_percentage": 0.0,
         "created_at": datetime.now(timezone.utc).isoformat(),
@@ -554,7 +554,7 @@ async def create_client(client_data: ClientCreate, current_user: dict = Depends(
         "visa_type": client_data.visa_type,
         "workflow_steps": workflow_steps,
         "current_step_index": 0,
-        "status": "New",
+        "status": "Nouveau",
         "notes": client_data.message or "",
         "created_at": datetime.now(timezone.utc).isoformat(),
         "updated_at": datetime.now(timezone.utc).isoformat()
@@ -575,7 +575,7 @@ async def create_client(client_data: ClientCreate, current_user: dict = Depends(
         assigned_employee_name=assigned_employee_name,
         country=client_data.country,
         visa_type=client_data.visa_type,
-        current_status="New",
+        current_status="Nouveau",
         current_step=0,
         progress_percentage=0.0,
         created_at=client_dict["created_at"],
