@@ -304,8 +304,8 @@ export default function ManagerDashboard() {
                       {filteredClients.map((client) => {
                         const clientCase = cases.find(c => c.client_id === client.id);
                         return (
-                          <tr key={client.id} className="border-b border-slate-100 hover:bg-slate-50">
-                            <td className="py-3 px-4">{clientCase?.client_name || 'N/A'}</td>
+                          <tr key={client.id} className="border-b border-slate-700/50 hover:bg-slate-800/30">
+                            <td className="py-3 px-4 text-white">{clientCase?.client_name || 'N/A'}</td>
                             <td className="py-3 px-4">
                               <Badge variant="outline">{client.country}</Badge>
                             </td>
