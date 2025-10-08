@@ -135,6 +135,16 @@ export default function ManagerDashboard() {
     }
   };
 
+  const handleUpdateCase = async (caseId, updateData) => {
+    try {
+      await casesAPI.update(caseId, updateData);
+      toast.success('Dossier mis à jour avec succès');
+      fetchData(); // Refresh data
+    } catch (error) {
+      toast.error('Erreur lors de la mise à jour du dossier');
+    }
+  };
+
   const handleAddVisitor = async () => {
     try {
       await visitorsAPI.create(newVisitor);
