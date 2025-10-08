@@ -147,14 +147,6 @@ export default function ClientDashboard() {
                 <p className="text-sm font-medium text-white">{user.full_name}</p>
                 <p className="text-xs text-slate-400">{user.role}</p>
               </div>
-                <p className="text-sm text-slate-400">Portail Client</p>
-              </div>
-            </div>
-            <div className="flex items-center space-x-4">
-              <div className="text-right">
-                <p className="text-sm font-medium text-white">{user.full_name}</p>
-                <p className="text-xs text-slate-400">{user.role}</p>
-              </div>
               <Button variant="outline" onClick={logout} data-testid="logout-btn" className="border-slate-600 text-slate-300 hover:bg-slate-800 hover:text-white">
                 <LogOut className="w-4 h-4 mr-2" />
                 Déconnexion
