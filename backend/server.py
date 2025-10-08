@@ -235,6 +235,8 @@ class ClientResponse(BaseModel):
     progress_percentage: float
     created_at: str
     updated_at: str
+    login_email: Optional[str] = None
+    default_password: Optional[str] = None
 
 class CaseResponse(BaseModel):
     model_config = ConfigDict(extra="ignore")
