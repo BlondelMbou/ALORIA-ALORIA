@@ -330,7 +330,7 @@
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
-  last_test_session: "Nouvelles fonctionnalités ALORIA AGENCY - permissions mise à jour, changement mot de passe, informations connexion client, création client avec mot de passe, scénario complet"
+  last_test_session: "NOUVELLES FONCTIONNALITÉS ALORIA AGENCY - Test des corrections et nouvelles fonctionnalités: 1) Employé peut créer clients (corrigé), 2) Système de notifications complet, 3) Notifications automatiques, 4) Intégration complète avec WebSocket"
 
 ## agent_communication:
     -agent: "main"
