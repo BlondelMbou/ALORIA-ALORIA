@@ -14,6 +14,7 @@ import { clientsAPI, casesAPI, messagesAPI } from '../utils/api';
 import api from '../utils/api';
 import { Globe, LogOut, Users, FileText, MessageCircle, CheckCircle, Clock, Send, UserPlus, Building2 } from 'lucide-react';
 import ChatWidget from '../components/ChatWidget';
+import NotificationBell from '../components/NotificationBell';
 import useSocket from '../hooks/useSocket';
 
 export default function EmployeeDashboard() {
