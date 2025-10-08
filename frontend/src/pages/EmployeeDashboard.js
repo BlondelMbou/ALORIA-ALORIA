@@ -11,7 +11,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import { clientsAPI, casesAPI, messagesAPI } from '@/utils/api';
-import { Globe, LogOut, Users, FileText, MessageCircle, CheckCircle, Clock, Send } from 'lucide-react';
+import api from '../utils/api';
+import { Globe, LogOut, Users, FileText, MessageCircle, CheckCircle, Clock, Send, UserPlus, Building2 } from 'lucide-react';
+import ChatWidget from '../components/ChatWidget';
+import useSocket from '../hooks/useSocket';
 
 export default function EmployeeDashboard() {
   const { user, logout } = useAuth();
