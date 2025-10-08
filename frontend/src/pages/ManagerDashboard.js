@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '../components/ui/dialog';
 import { toast } from 'sonner';
 import { dashboardAPI, clientsAPI, casesAPI, employeesAPI, visitorsAPI } from '../utils/api';
+import api from '../utils/api';
 import { Globe, LogOut, Users, FileText, TrendingUp, CheckCircle, Clock, AlertCircle, UserCheck, Building2, Search, Filter, Plus, UserPlus, MessageCircle } from 'lucide-react';
 import ChatWidget from '../components/ChatWidget';
 import useSocket from '../hooks/useSocket';
