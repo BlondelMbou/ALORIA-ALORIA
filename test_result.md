@@ -279,6 +279,7 @@
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
+  last_test_session: "Nouvelles fonctionnalités ALORIA AGENCY - permissions mise à jour, changement mot de passe, informations connexion client, création client avec mot de passe, scénario complet"
 
 ## agent_communication:
     -agent: "main"
