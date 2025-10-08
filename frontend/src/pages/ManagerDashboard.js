@@ -680,6 +680,12 @@ export default function ManagerDashboard() {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Chat Widget */}
+      <ChatWidget 
+        currentUser={user} 
+        onUnreadCountChange={setChatUnreadCount}
+      />
     </div>
   );
 }
