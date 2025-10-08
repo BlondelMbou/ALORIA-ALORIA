@@ -32,6 +32,20 @@ export default function EmployeeDashboard() {
     visa_type: '',
     message: ''
   });
+  
+  // Visitor registration state
+  const [showVisitorForm, setShowVisitorForm] = useState(false);
+  const [newVisitor, setNewVisitor] = useState({
+    name: '',
+    company: '',
+    purpose: 'Consultation initiale',
+    details: ''
+  });
+  
+  const [chatUnreadCount, setChatUnreadCount] = useState(0);
+  
+  // WebSocket hook
+  const { connected } = useSocket(localStorage.getItem('token'));
 
   const visaTypes = {
     Canada: ['Work Permit', 'Study Permit', 'Permanent Residence (Express Entry)'],
