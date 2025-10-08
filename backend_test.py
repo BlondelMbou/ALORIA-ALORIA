@@ -414,6 +414,206 @@ class APITester:
             except Exception as e:
                 self.log_result("Employee Get Cases", False, "Exception occurred", str(e))
 
+    def test_password_change_api(self):
+        """Test password change functionality"""
+        print("=== Testing Password Change API ===")
+        
+        # Test password change with correct old password
+        if self.manager_token:
+            try:
+                headers = {"Authorization": f"Bearer {self.manager_token}"}
+                password_data = {
+                    "old_password": "admin123",
+                    "new_password": "newadmin123"
+                }
+                response = self.session.patch(f"{API_BASE}/auth/change-password", json=password_data, headers=headers)
+                if response.status_code == 200:
+                    self.log_result("Manager Password Change (correct old password)", True, "Password changed successfully")
+                    
+                    # Change it back for other tests
+                    password_data_back = {
+                        "old_password": "newadmin123",
+                        "new_password": "admin123"
+                    }
+                    self.session.patch(f"{API_BASE}/auth/change-password", json=password_data_back, headers=headers)
+                else:
+                    self.log_result("Manager Password Change (correct old password)", False, f"Status: {response.status_code}", response.text)
+            except Exception as e:
+                self.log_result("Manager Password Change (correct old password)", False, "Exception occurred", str(e))
+
+        # Test password change with incorrect old password
+        if self.manager_token:
+            try:
+                headers = {"Authorization": f"Bearer {self.manager_token}"}
+                password_data = {
+                    "old_password": "wrongpassword",
+                    "new_password": "newadmin123"
+                }
+                response = self.session.patch(f"{API_BASE}/auth/change-password", json=password_data, headers=headers)
+                if response.status_code == 400:
+                    self.log_result("Manager Password Change (incorrect old password)", True, "Incorrect old password correctly rejected")
+                else:
+                    self.log_result("Manager Password Change (incorrect old password)", False, f"Expected 400, got {response.status_code}")
+            except Exception as e:
+                self.log_result("Manager Password Change (incorrect old password)", False, "Exception occurred", str(e))
+
+    def test_client_credentials_api(self):
+        """Test client credentials API with different permissions"""
+        print("=== Testing Client Credentials API ===")
+        
+        if not self.test_client_id:
+            self.log_result("Client Credentials Test", False, "No test client available")
+            return
+
+        # Test manager can get client credentials
+        if self.manager_token:
+            try:
+                headers = {"Authorization": f"Bearer {self.manager_token}"}
+                response = self.session.get(f"{API_BASE}/clients/{self.test_client_id}/credentials", headers=headers)
+                if response.status_code == 200:
+                    data = response.json()
+                    if "email" in data and "password" in data:
+                        self.log_result("Manager Get Client Credentials", True, f"Retrieved credentials for client: {data['email']}")
+                    else:
+                        self.log_result("Manager Get Client Credentials", False, "Response missing email or password fields")
+                else:
+                    self.log_result("Manager Get Client Credentials", False, f"Status: {response.status_code}", response.text)
+            except Exception as e:
+                self.log_result("Manager Get Client Credentials", False, "Exception occurred", str(e))
+
+        # Test assigned employee can get client credentials
+        if self.employee_token:
+            try:
+                headers = {"Authorization": f"Bearer {self.employee_token}"}
+                response = self.session.get(f"{API_BASE}/clients/{self.test_client_id}/credentials", headers=headers)
+                if response.status_code == 200:
+                    data = response.json()
+                    self.log_result("Assigned Employee Get Client Credentials", True, "Assigned employee can access client credentials")
+                elif response.status_code == 403:
+                    self.log_result("Non-assigned Employee Get Client Credentials", True, "Non-assigned employee correctly denied access")
+                else:
+                    self.log_result("Employee Get Client Credentials", False, f"Status: {response.status_code}", response.text)
+            except Exception as e:
+                self.log_result("Employee Get Client Credentials", False, "Exception occurred", str(e))
+
+    def test_client_creation_with_password(self):
+        """Test client creation includes default password and login info"""
+        print("=== Testing Client Creation with Password ===")
+        
+        if self.manager_token:
+            try:
+                headers = {"Authorization": f"Bearer {self.manager_token}"}
+                client_data = {
+                    "email": "nouveau.client@example.com",
+                    "full_name": "Nouveau Client Test",
+                    "phone": "+33123456789",
+                    "country": "France",
+                    "visa_type": "Work Permit (Talent Permit)",
+                    "message": "Test création avec mot de passe par défaut"
+                }
+                response = self.session.post(f"{API_BASE}/clients", json=client_data, headers=headers)
+                if response.status_code == 200 or response.status_code == 201:
+                    data = response.json()
+                    
+                    # Check if response includes login_email and default_password for new accounts
+                    if "login_email" in data and "default_password" in data:
+                        if data["default_password"] == "Aloria2024!":
+                            self.log_result("Client Creation with Default Password", True, f"New client created with default password 'Aloria2024!' and login email: {data['login_email']}")
+                        else:
+                            self.log_result("Client Creation with Default Password", False, f"Default password is '{data['default_password']}', expected 'Aloria2024!'")
+                    else:
+                        self.log_result("Client Creation with Default Password", False, "Response missing login_email or default_password fields")
+                else:
+                    self.log_result("Client Creation with Default Password", False, f"Status: {response.status_code}", response.text)
+            except Exception as e:
+                self.log_result("Client Creation with Default Password", False, "Exception occurred", str(e))
+
+    def test_complete_scenario(self):
+        """Test complete workflow scenario"""
+        print("=== Testing Complete Scenario ===")
+        
+        if not self.manager_token:
+            self.log_result("Complete Scenario", False, "No manager token available")
+            return
+
+        scenario_client_id = None
+        scenario_case_id = None
+        
+        try:
+            # 1. Create a client as manager
+            headers = {"Authorization": f"Bearer {self.manager_token}"}
+            client_data = {
+                "email": "scenario.client@example.com",
+                "full_name": "Client Scénario Complet",
+                "phone": "+33987654321",
+                "country": "Canada",
+                "visa_type": "Study Permit",
+                "message": "Test scénario complet"
+            }
+            response = self.session.post(f"{API_BASE}/clients", json=client_data, headers=headers)
+            if response.status_code == 200 or response.status_code == 201:
+                client_response = response.json()
+                scenario_client_id = client_response['id']
+                self.log_result("Scenario Step 1: Create Client", True, f"Client created with ID: {scenario_client_id}")
+                
+                # 2. Get the case for this client
+                cases_response = self.session.get(f"{API_BASE}/cases", headers=headers)
+                if cases_response.status_code == 200:
+                    cases = cases_response.json()
+                    scenario_case = None
+                    for case in cases:
+                        if case['client_id'] == scenario_client_id:
+                            scenario_case = case
+                            scenario_case_id = case['id']
+                            break
+                    
+                    if scenario_case:
+                        # 3. Update case as manager
+                        update_data = {
+                            "current_step_index": 2,
+                            "status": "En cours",
+                            "notes": "Scénario complet - mise à jour par manager"
+                        }
+                        update_response = self.session.patch(f"{API_BASE}/cases/{scenario_case_id}", json=update_data, headers=headers)
+                        if update_response.status_code == 200:
+                            self.log_result("Scenario Step 2: Update Case", True, "Case updated successfully by manager")
+                            
+                            # 4. Test client login with new credentials
+                            login_data = {
+                                "email": client_data["email"],
+                                "password": "Aloria2024!"
+                            }
+                            login_response = self.session.post(f"{API_BASE}/auth/login", json=login_data)
+                            if login_response.status_code == 200:
+                                client_token_data = login_response.json()
+                                client_token = client_token_data['access_token']
+                                self.log_result("Scenario Step 3: Client Login", True, "Client successfully logged in with default password")
+                                
+                                # 5. Client changes password
+                                client_headers = {"Authorization": f"Bearer {client_token}"}
+                                password_change_data = {
+                                    "old_password": "Aloria2024!",
+                                    "new_password": "MonNouveauMotDePasse123!"
+                                }
+                                password_response = self.session.patch(f"{API_BASE}/auth/change-password", json=password_change_data, headers=client_headers)
+                                if password_response.status_code == 200:
+                                    self.log_result("Scenario Step 4: Client Password Change", True, "Client successfully changed password")
+                                else:
+                                    self.log_result("Scenario Step 4: Client Password Change", False, f"Status: {password_response.status_code}", password_response.text)
+                            else:
+                                self.log_result("Scenario Step 3: Client Login", False, f"Status: {login_response.status_code}", login_response.text)
+                        else:
+                            self.log_result("Scenario Step 2: Update Case", False, f"Status: {update_response.status_code}", update_response.text)
+                    else:
+                        self.log_result("Scenario Step 2: Find Case", False, "Could not find case for created client")
+                else:
+                    self.log_result("Scenario Step 2: Get Cases", False, f"Status: {cases_response.status_code}", cases_response.text)
+            else:
+                self.log_result("Scenario Step 1: Create Client", False, f"Status: {response.status_code}", response.text)
+                
+        except Exception as e:
+            self.log_result("Complete Scenario", False, "Exception occurred", str(e))
+
     def test_error_cases_and_validation(self):
         """Test error handling and validation"""
         print("=== Testing Error Cases and Validation ===")
