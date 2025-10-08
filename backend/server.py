@@ -1034,6 +1034,122 @@ async def reassign_client(client_id: str, new_employee_id: str, current_user: di
 async def get_workflows():
     return WORKFLOWS
 
+@api_router.post("/workflows/{country}/{visa_type}/steps")
+async def add_custom_workflow_step(
+    country: str, 
+    visa_type: str, 
+    step_data: CustomWorkflowStep, 
+    current_user: dict = Depends(get_current_user)
+):
+    if current_user["role"] != "MANAGER":
+        raise HTTPException(status_code=403, detail="Only managers can modify workflows")
+    
+    # Get or create custom workflow
+    custom_workflow = await db.custom_workflows.find_one({
+        "country": country,
+        "visa_type": visa_type
+    })
+    
+    if not custom_workflow:
+        # Create from base workflow
+        base_steps = WORKFLOWS.get(country, {}).get(visa_type, [])
+        custom_workflow = {
+            "id": str(uuid.uuid4()),
+            "country": country,
+            "visa_type": visa_type,
+            "steps": base_steps.copy(),
+            "created_by": current_user["id"],
+            "created_at": datetime.now(timezone.utc).isoformat(),
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }
+    
+    # Add new step
+    new_step = {
+        "title": step_data.title,
+        "description": step_data.description,
+        "documents": step_data.documents,
+        "duration": step_data.duration,
+        "custom": True,
+        "added_by": current_user["full_name"],
+        "added_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    custom_workflow["steps"].append(new_step)
+    custom_workflow["updated_at"] = datetime.now(timezone.utc).isoformat()
+    
+    # Save or update
+    await db.custom_workflows.replace_one(
+        {"country": country, "visa_type": visa_type},
+        custom_workflow,
+        upsert=True
+    )
+    
+    return {"message": "Étape ajoutée avec succès", "step": new_step}
+
+@api_router.get("/workflows/{country}/{visa_type}/custom")
+async def get_custom_workflow(country: str, visa_type: str, current_user: dict = Depends(get_current_user)):
+    # Check for custom workflow
+    custom_workflow = await db.custom_workflows.find_one({
+        "country": country,
+        "visa_type": visa_type
+    }, {"_id": 0})
+    
+    if custom_workflow:
+        return custom_workflow["steps"]
+    else:
+        # Return base workflow
+        return WORKFLOWS.get(country, {}).get(visa_type, [])
+
+@api_router.get("/users/available-contacts")
+async def get_available_contacts(current_user: dict = Depends(get_current_user)):
+    """Get list of users the current user can chat with"""
+    contacts = []
+    
+    if current_user["role"] == "MANAGER":
+        # Manager can chat with all employees and clients
+        employees = await db.users.find({"role": "EMPLOYEE", "is_active": True}, {"_id": 0}).to_list(100)
+        clients = await db.users.find({"role": "CLIENT", "is_active": True}, {"_id": 0}).to_list(1000)
+        contacts.extend(employees)
+        contacts.extend(clients)
+        
+    elif current_user["role"] == "EMPLOYEE":
+        # Employee can chat with manager and assigned clients
+        managers = await db.users.find({"role": "MANAGER", "is_active": True}, {"_id": 0}).to_list(10)
+        contacts.extend(managers)
+        
+        # Get assigned clients
+        assigned_clients = await db.clients.find({"assigned_employee_id": current_user["id"]}, {"_id": 0}).to_list(1000)
+        for client in assigned_clients:
+            user = await db.users.find_one({"id": client["user_id"], "is_active": True}, {"_id": 0})
+            if user:
+                contacts.append(user)
+                
+    elif current_user["role"] == "CLIENT":
+        # Client can chat with assigned employee and managers
+        client_record = await db.clients.find_one({"user_id": current_user["id"]})
+        if client_record and client_record.get("assigned_employee_id"):
+            employee = await db.users.find_one({"id": client_record["assigned_employee_id"], "is_active": True}, {"_id": 0})
+            if employee:
+                contacts.append(employee)
+        
+        managers = await db.users.find({"role": "MANAGER", "is_active": True}, {"_id": 0}).to_list(10)
+        contacts.extend(managers)
+    
+    # Remove duplicates and current user
+    unique_contacts = []
+    seen_ids = set()
+    for contact in contacts:
+        if contact["id"] not in seen_ids and contact["id"] != current_user["id"]:
+            unique_contacts.append({
+                "id": contact["id"],
+                "full_name": contact["full_name"],
+                "role": contact["role"],
+                "email": contact["email"]
+            })
+            seen_ids.add(contact["id"])
+    
+    return unique_contacts
+
 # Include router
 app.include_router(api_router)
 
