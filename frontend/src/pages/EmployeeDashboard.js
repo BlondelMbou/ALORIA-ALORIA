@@ -274,6 +274,7 @@ export default function EmployeeDashboard() {
                 </DialogContent>
               </Dialog>
               
+              <NotificationBell currentUser={user} />
               <div className="text-right">
                 <p className="text-sm font-medium text-white">{user.full_name}</p>
                 <p className="text-xs text-slate-400">{user.role}</p>
