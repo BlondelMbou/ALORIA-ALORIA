@@ -746,8 +746,10 @@ class APITester:
             # 1. Employee creates a new client
             if self.employee_token:
                 headers = {"Authorization": f"Bearer {self.employee_token}"}
+                import time
+                timestamp = int(time.time())
                 client_data = {
-                    "email": "integration.client@example.com",
+                    "email": f"integration.client.{timestamp}@example.com",
                     "full_name": "Client Intégration Complète",
                     "phone": "+33111222333",
                     "country": "Canada",
