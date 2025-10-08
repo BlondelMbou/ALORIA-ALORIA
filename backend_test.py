@@ -382,6 +382,20 @@ class APITester:
                             self.log_result("Manager Case Status Update", True, "Manager successfully updated case status")
                         else:
                             self.log_result("Manager Case Status Update", False, f"Status: {update_response.status_code}", update_response.text)
+                        
+                        # Test employee CANNOT update cases (should get 403)
+                        if self.employee_token:
+                            employee_headers = {"Authorization": f"Bearer {self.employee_token}"}
+                            employee_update_data = {
+                                "current_step_index": 2,
+                                "status": "Terminé",
+                                "notes": "Tentative de mise à jour par employé"
+                            }
+                            employee_response = self.session.patch(f"{API_BASE}/cases/{case_id}", json=employee_update_data, headers=employee_headers)
+                            if employee_response.status_code == 403:
+                                self.log_result("Employee Case Update (should fail)", True, "Employee correctly denied case update permission")
+                            else:
+                                self.log_result("Employee Case Update (should fail)", False, f"Employee should not be able to update cases. Status: {employee_response.status_code}")
                 else:
                     self.log_result("Get Cases", False, f"Status: {response.status_code}", response.text)
             except Exception as e:
