@@ -177,32 +177,100 @@ export default function LandingPage() {
     }
   ];
 
+  // Authentification pour accéder au formulaire
+  const handleAuth = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await api.post('/auth/login', authData);
+      const { access_token, user } = response.data;
+      
+      // Vérifier que c'est un manager ou employé
+      if (user.role !== 'MANAGER' && user.role !== 'EMPLOYEE') {
+        toast.error('Seuls les gestionnaires et employés peuvent créer des clients');
+        return;
+      }
+      
+      localStorage.setItem('token', access_token);
+      api.defaults.headers.Authorization = `Bearer ${access_token}`;
+      
+      setCurrentUser(user);
+      setIsAuthenticated(true);
+      setShowAuthForm(false);
+      
+      // Charger la liste des employés si c'est un manager
+      if (user.role === 'MANAGER') {
+        await loadEmployees();
+      }
+      
+      toast.success(`Bienvenue ${user.full_name} !`);
+    } catch (error) {
+      toast.error('Email ou mot de passe incorrect');
+    }
+  };
+
+  const loadEmployees = async () => {
+    try {
+      const response = await api.get('/employees');
+      setEmployees(response.data);
+    } catch (error) {
+      console.error('Erreur lors du chargement des employés:', error);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    if (!isAuthenticated) {
+      setShowAuthForm(true);
+      return;
+    }
     
     if (!formData.full_name || !formData.email || !formData.phone || !formData.country || !formData.visa_type) {
       toast.error('Veuillez remplir tous les champs obligatoires');
       return;
     }
 
+    // Si c'est un manager et qu'aucun employé n'est sélectionné, demander la sélection
+    if (currentUser.role === 'MANAGER' && !formData.assigned_employee_id) {
+      toast.error('Veuillez sélectionner un employé pour suivre ce dossier');
+      return;
+    }
+
     setLoading(true);
     try {
-      await api.post('/clients', formData);
-      toast.success('🎉 Votre demande a été soumise avec succès ! Vérifiez votre email pour les informations de connexion.');
+      const clientData = { ...formData };
+      
+      // Si c'est un employé, l'auto-assigner
+      if (currentUser.role === 'EMPLOYEE') {
+        clientData.assigned_employee_id = currentUser.id;
+      }
+      
+      const response = await api.post('/clients', clientData);
+      const createdClient = response.data;
+      
+      // Afficher les informations de connexion
+      toast.success(
+        <div>
+          <p className="font-bold">🎉 Client créé avec succès !</p>
+          <p>Email: {createdClient.login_email || formData.email}</p>
+          <p>Mot de passe: Aloria2024!</p>
+          <p className="text-xs text-slate-400 mt-1">Le client peut se connecter et changer son mot de passe</p>
+        </div>,
+        { duration: 8000 }
+      );
+      
       setFormData({
         full_name: '',
         email: '',
         phone: '',
         country: '',
         visa_type: '',
-        message: ''
+        message: '',
+        assigned_employee_id: ''
       });
       
-      setTimeout(() => {
-        navigate('/login');
-      }, 3000);
     } catch (error) {
-      toast.error(error.response?.data?.detail || 'Erreur lors de la soumission. Veuillez réessayer.');
+      toast.error(error.response?.data?.detail || 'Erreur lors de la création du client. Veuillez réessayer.');
     } finally {
       setLoading(false);
     }
