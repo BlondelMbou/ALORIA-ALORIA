@@ -26,6 +26,12 @@ export default function ClientDashboard() {
   const [chatUnreadCount, setChatUnreadCount] = useState(0);
   const [documentChecklist, setDocumentChecklist] = useState({});
   const [activeTab, setActiveTab] = useState('progress');
+  const [showPasswordChange, setShowPasswordChange] = useState(false);
+  const [passwordForm, setPasswordForm] = useState({
+    old_password: '',
+    new_password: '',
+    confirm_password: ''
+  });
   
   // WebSocket hook  
   const { connected } = useSocket(localStorage.getItem('token'));
