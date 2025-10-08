@@ -764,10 +764,25 @@ async def update_case(case_id: str, update_data: CaseUpdate, current_user: dict 
         if client_sid:
             await sio.emit('case_updated', {
                 'case_id': case_id,
+                'client_name': user["full_name"] if user else "Unknown",
                 'current_step': update_data.current_step_index,
                 'progress': progress,
-                'status': update_data.status or case["status"]
+                'status': update_data.status or case["status"],
+                'updated_by': current_user["full_name"]
             }, room=client_sid)
+        
+        # Notify assigned employee via WebSocket
+        if client.get("assigned_employee_id"):
+            employee_sid = connected_users.get(client["assigned_employee_id"])
+            if employee_sid:
+                await sio.emit('case_updated', {
+                    'case_id': case_id,
+                    'client_name': user["full_name"] if user else "Unknown", 
+                    'current_step': update_data.current_step_index,
+                    'progress': progress,
+                    'status': update_data.status or case["status"],
+                    'updated_by': current_user["full_name"]
+                }, room=employee_sid)
     
     # Get updated case
     updated_case = await db.cases.find_one({"id": case_id}, {"_id": 0})
