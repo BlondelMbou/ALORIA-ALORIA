@@ -165,207 +165,319 @@ export default function ClientDashboard() {
       </header>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid lg:grid-cols-3 gap-6">
-          {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Progress Card */}
-            <Card className="border-t-4 border-t-orange-500" data-testid="case-progress-card">
-              <CardHeader>
-                <div className="flex justify-between items-start">
-                  <div>
-                    <CardTitle className="text-2xl mb-2">Your Immigration Case</CardTitle>
-                    <CardDescription className="text-base">
-                      {caseData.country} - {caseData.visa_type}
-                    </CardDescription>
-                  </div>
-                  <Badge className={getStatusColor(caseData.status)} data-testid="case-status-badge">
-                    {caseData.status}
-                  </Badge>
-                </div>
-              </CardHeader>
-              <CardContent>
-                {/* Progress Bar */}
-                <div className="mb-8">
-                  <div className="flex justify-between text-sm text-slate-400 mb-3">
-                    <span className="font-semibold">Overall Progress</span>
-                    <span className="font-bold text-orange-600">{Math.round(progressPercentage)}%</span>
-                  </div>
-                  <div className="w-full bg-slate-700 rounded-full h-4 mb-4">
-                    <div
-                      className="bg-gradient-to-r from-orange-500 to-orange-600 h-4 rounded-full transition-all progress-bar"
-                      style={{ width: `${progressPercentage}%` }}
-                    ></div>
-                  </div>
-                  <p className="text-center text-sm text-slate-400">
-                    Step {caseData.current_step_index + 1} of {caseData.workflow_steps.length}
-                  </p>
-                </div>
-
-                {/* Current Step */}
-                <div className="bg-gradient-to-br from-orange-50 to-white border border-orange-200 rounded-lg p-6 mb-6">
-                  <div className="flex items-start space-x-3 mb-4">
-                    <div className="w-10 h-10 bg-orange-500 text-white rounded-full flex items-center justify-center font-bold flex-shrink-0">
-                      {caseData.current_step_index + 1}
-                    </div>
-                    <div>
-                      <h3 className="font-bold text-lg text-white mb-1">{currentStep.title}</h3>
-                      <p className="text-slate-400">{currentStep.description}</p>
-                    </div>
-                  </div>
-
-                  {/* Required Documents Checklist */}
-                  <div className="bg-gradient-to-br from-[#1E293B] to-[#334155] rounded-lg p-4">
-                    <h4 className="font-semibold text-white mb-3 flex items-center">
-                      <FileText className="w-5 h-5 mr-2 text-orange-500" />
-                      Required Documents
-                    </h4>
-                    <ul className="space-y-2">
-                      {currentStep.documents?.map((doc, idx) => (
-                        <li key={idx} className="flex items-start space-x-2 text-sm">
-                          <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
-                          <span className="text-slate-300">{doc}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  {currentStep.duration && (
-                    <div className="mt-4 flex items-center text-sm text-slate-400">
-                      <Clock className="w-4 h-4 mr-2" />
-                      Estimated duration: {currentStep.duration}
-                    </div>
-                  )}
-                </div>
-
-                {/* Timeline */}
+        {/* Profile Overview */}
+        <Card className="bg-gradient-to-br from-[#1E293B] to-[#334155] border-slate-700 mb-8">
+          <CardContent className="p-8">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-6">
+                <Avatar className="w-20 h-20">
+                  <AvatarFallback className="bg-orange-500 text-white text-2xl font-bold">
+                    {user.full_name.charAt(0)}
+                  </AvatarFallback>
+                </Avatar>
                 <div>
-                  <h3 className="font-bold text-lg text-white mb-4">Complete Journey</h3>
-                  <div className="space-y-3">
-                    {caseData.workflow_steps.map((step, idx) => {
-                      const isCompleted = idx < caseData.current_step_index;
-                      const isCurrent = idx === caseData.current_step_index;
-                      const isPending = idx > caseData.current_step_index;
-
-                      return (
-                        <div key={idx} className="flex items-start space-x-3">
-                          <div className="flex flex-col items-center">
-                            <div
-                              className={`w-8 h-8 rounded-full flex items-center justify-center font-semibold text-sm ${
-                                isCompleted
-                                  ? 'bg-green-500 text-white'
-                                  : isCurrent
-                                  ? 'bg-orange-500 text-white'
-                                  : 'bg-slate-700 text-slate-400'
-                              }`}
-                            >
-                              {isCompleted ? <CheckCircle className="w-5 h-5" /> : idx + 1}
-                            </div>
-                            {idx < caseData.workflow_steps.length - 1 && (
-                              <div
-                                className={`w-0.5 h-8 ${
-                                  isCompleted ? 'bg-green-500' : 'bg-slate-700'
-                                }`}
-                              ></div>
-                            )}
-                          </div>
-                          <div className={`flex-1 pb-4 ${isPending ? 'opacity-50' : ''}`}>
-                            <h4 className="font-semibold text-white">{step.title}</h4>
-                            <p className="text-sm text-slate-400">{step.description}</p>
-                          </div>
-                        </div>
-                      );
-                    })}
+                  <h1 className="text-3xl font-bold text-white mb-2">Bonjour, {user.full_name}</h1>
+                  <p className="text-slate-300 text-lg mb-1">{caseData.country} - {caseData.visa_type}</p>
+                  <div className="flex items-center space-x-4">
+                    <Badge className={getStatusColor(caseData.status)} data-testid="case-status-badge">
+                      {caseData.status}
+                    </Badge>
+                    {counselor && (
+                      <div className="flex items-center text-slate-300">
+                        <User className="w-4 h-4 mr-1" />
+                        Conseiller: {counselor.name}
+                      </div>
+                    )}
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-          </div>
+              </div>
+              <div className="text-right">
+                <div className="text-4xl font-bold text-orange-500 mb-1">
+                  {Math.round(progressPercentage)}%
+                </div>
+                <p className="text-slate-400">Progression</p>
+              </div>
+            </div>
+            
+            {/* Progress Bar */}
+            <div className="mt-6">
+              <div className="flex justify-between text-sm text-slate-400 mb-2">
+                <span>Étape {caseData.current_step_index + 1} sur {caseData.workflow_steps.length}</span>
+                <span className="text-orange-500">{Math.round(progressPercentage)}% terminé</span>
+              </div>
+              <Progress value={progressPercentage} className="h-3" />
+            </div>
+          </CardContent>
+        </Card>
 
-          {/* Sidebar */}
-          <div className="space-y-6">
-            {/* Counselor Card */}
-            {counselor && (
-              <Card data-testid="counselor-card">
+        {/* Main Content Tabs */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-4 mb-6 bg-[#1E293B] border border-slate-700">
+            <TabsTrigger value="progress" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white text-slate-300">
+              Progression
+            </TabsTrigger>
+            <TabsTrigger value="documents" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white text-slate-300">
+              Documents
+            </TabsTrigger>
+            <TabsTrigger value="timeline" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white text-slate-300">
+              Étapes À Venir
+            </TabsTrigger>
+            <TabsTrigger value="profile" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white text-slate-300">
+              Mon Profil
+            </TabsTrigger>
+          </TabsList>
+
+          {/* Progress Tab */}
+          <TabsContent value="progress">
+            <div className="grid lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <Card className="bg-gradient-to-br from-[#1E293B] to-[#334155] border-slate-700">
+                  <CardHeader>
+                    <CardTitle className="text-white text-xl">Étape Actuelle</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="bg-gradient-to-br from-orange-500/10 to-orange-600/10 border border-orange-500/20 rounded-lg p-6">
+                      <div className="flex items-start space-x-4 mb-4">
+                        <div className="w-12 h-12 bg-orange-500 text-white rounded-full flex items-center justify-center font-bold text-lg">
+                          {caseData.current_step_index + 1}
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="font-bold text-xl text-white mb-2">{currentStep.title}</h3>
+                          <p className="text-slate-300 mb-4">{currentStep.description}</p>
+                          {currentStep.duration && (
+                            <div className="flex items-center text-sm text-slate-400">
+                              <Clock className="w-4 h-4 mr-2" />
+                              Durée estimée: {currentStep.duration}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+              
+              <Card className="bg-gradient-to-br from-[#1E293B] to-[#334155] border-slate-700">
                 <CardHeader>
-                  <CardTitle className="text-lg">Your Immigration Counselor</CardTitle>
+                  <CardTitle className="text-white">Statistiques</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-center mb-4">
-                    <Avatar className="w-20 h-20 mx-auto mb-3">
-                      <AvatarFallback className="bg-orange-100 text-orange-600 text-2xl font-bold">
-                        {counselor.name.charAt(0)}
-                      </AvatarFallback>
-                    </Avatar>
-                    <h3 className="font-bold text-lg text-white">{counselor.name}</h3>
-                    <p className="text-sm text-slate-400">Immigration Counselor</p>
-                  </div>
-                  <div className="space-y-2">
-                    <div className="flex items-center text-sm text-slate-400">
-                      <User className="w-4 h-4 mr-2" />
-                      <span>Assigned to your case</span>
+                  <div className="space-y-4">
+                    <div className="flex justify-between">
+                      <span className="text-slate-400">Étapes terminées:</span>
+                      <span className="text-green-500 font-semibold">{caseData.current_step_index}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-400">Étapes restantes:</span>
+                      <span className="text-orange-500 font-semibold">{caseData.workflow_steps.length - caseData.current_step_index}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-400">Temps écoulé:</span>
+                      <span className="text-slate-300">{formatDistanceToNow(new Date(caseData.created_at), { addSuffix: true, locale: fr })}</span>
                     </div>
                   </div>
                 </CardContent>
               </Card>
-            )}
+            </div>
+          </TabsContent>
 
-            {/* Messaging Card */}
-            <Card data-testid="messaging-card">
+          {/* Documents Tab */}
+          <TabsContent value="documents">
+            <Card className="bg-gradient-to-br from-[#1E293B] to-[#334155] border-slate-700">
               <CardHeader>
-                <CardTitle className="text-lg flex items-center">
-                  <MessageCircle className="w-5 h-5 mr-2 text-orange-500" />
-                  Messages
+                <CardTitle className="text-white flex items-center">
+                  <FileText className="w-6 h-6 mr-2 text-orange-500" />
+                  Documents Requis - Étape Actuelle
                 </CardTitle>
+                <CardDescription className="text-slate-400">
+                  Cochez les documents que vous avez préparés
+                </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  <div className="h-96 overflow-y-auto border border-slate-200 rounded-lg p-3 space-y-3 bg-[#0F172A]">
-                    {messages.length === 0 ? (
-                      <p className="text-center text-slate-500 py-8">No messages yet. Start a conversation!</p>
-                    ) : (
-                      messages.map((msg) => (
-                        <div
-                          key={msg.id}
-                          className={`flex ${msg.sender_id === user.id ? 'justify-end' : 'justify-start'}`}
-                        >
-                          <div
-                            className={`max-w-[80%] rounded-lg p-3 ${
-                              msg.sender_id === user.id
-                                ? 'bg-orange-500 text-white'
-                                : 'bg-gradient-to-br from-[#1E293B] to-[#334155] text-white border border-slate-200'
-                            }`}
-                          >
-                            <p className="text-sm mb-1">{msg.message}</p>
-                            <p className="text-xs opacity-70">
-                              {new Date(msg.created_at).toLocaleString()}
-                            </p>
-                          </div>
+                <div className="space-y-3">
+                  {currentStep.documents?.map((doc, idx) => (
+                    <div key={idx} className="flex items-center space-x-3 p-3 bg-[#0F172A] border border-slate-700 rounded-lg">
+                      <button
+                        onClick={() => toggleDocumentComplete(doc)}
+                        className="flex-shrink-0"
+                      >
+                        {documentChecklist[doc] ? (
+                          <CheckSquare className="w-6 h-6 text-green-500" />
+                        ) : (
+                          <Square className="w-6 h-6 text-slate-400 hover:text-slate-300" />
+                        )}
+                      </button>
+                      <span className={`flex-1 ${documentChecklist[doc] ? 'text-green-400 line-through' : 'text-white'}`}>
+                        {doc}
+                      </span>
+                    </div>
+                  )) || (
+                    <p className="text-slate-400 text-center py-8">Aucun document requis pour cette étape</p>
+                  )}
+                </div>
+                
+                {/* All Documents Overview */}
+                <div className="mt-8">
+                  <h4 className="text-white font-semibold mb-4">Tous les Documents du Processus</h4>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    {caseData.workflow_steps.map((step, stepIdx) => (
+                      step.documents && step.documents.length > 0 && (
+                        <div key={stepIdx} className="bg-[#0F172A] border border-slate-700 rounded-lg p-4">
+                          <h5 className="font-medium text-slate-200 mb-2">
+                            Étape {stepIdx + 1}: {step.title}
+                          </h5>
+                          <ul className="space-y-1 text-sm">
+                            {step.documents.map((doc, docIdx) => (
+                              <li key={docIdx} className="flex items-center text-slate-400">
+                                {stepIdx < caseData.current_step_index ? (
+                                  <CheckCircle className="w-4 h-4 mr-2 text-green-500" />
+                                ) : stepIdx === caseData.current_step_index ? (
+                                  <Clock className="w-4 h-4 mr-2 text-orange-500" />
+                                ) : (
+                                  <div className="w-4 h-4 mr-2 rounded-full border border-slate-600"></div>
+                                )}
+                                {doc}
+                              </li>
+                            ))}
+                          </ul>
                         </div>
-                      ))
-                    )}
-                  </div>
-                  <div className="flex space-x-2">
-                    <Input
-                      placeholder="Type your message..."
-                      value={messageText}
-                      onChange={(e) => setMessageText(e.target.value)}
-                      onKeyPress={(e) => {
-                        if (e.key === 'Enter') {
-                          handleSendMessage();
-                        }
-                      }}
-                      data-testid="client-message-input"
-                    />
-                    <Button onClick={handleSendMessage} className="bg-orange-500 hover:bg-orange-600" data-testid="client-send-message-btn">
-                      <Send className="w-4 h-4" />
-                    </Button>
+                      )
+                    ))}
                   </div>
                 </div>
               </CardContent>
             </Card>
-          </div>
-        </div>
+          </TabsContent>
+
+          {/* Timeline Tab */}
+          <TabsContent value="timeline">
+            <Card className="bg-gradient-to-br from-[#1E293B] to-[#334155] border-slate-700">
+              <CardHeader>
+                <CardTitle className="text-white flex items-center">
+                  <Calendar className="w-6 h-6 mr-2 text-orange-500" />
+                  Prochaines Étapes
+                </CardTitle>
+                <CardDescription className="text-slate-400">
+                  Voici ce qui vous attend dans votre parcours d'immigration
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  {nextSteps.map((step, idx) => (
+                    <div key={idx} className="flex items-start space-x-4 p-4 bg-[#0F172A] border border-slate-700 rounded-lg">
+                      <div className="w-10 h-10 bg-slate-700 text-slate-400 rounded-full flex items-center justify-center font-semibold">
+                        {caseData.current_step_index + idx + 2}
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-white mb-2">{step.title}</h4>
+                        <p className="text-slate-300 mb-3">{step.description}</p>
+                        {step.duration && (
+                          <div className="flex items-center text-sm text-slate-400 mb-2">
+                            <Clock className="w-4 h-4 mr-2" />
+                            Durée: {step.duration}
+                          </div>
+                        )}
+                        {step.documents && step.documents.length > 0 && (
+                          <div className="text-sm">
+                            <p className="text-slate-400 mb-1">Documents requis:</p>
+                            <ul className="list-disc list-inside text-slate-500 space-y-1">
+                              {step.documents.slice(0, 3).map((doc, docIdx) => (
+                                <li key={docIdx}>{doc}</li>
+                              ))}
+                              {step.documents.length > 3 && (
+                                <li>... et {step.documents.length - 3} autres</li>
+                              )}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                      <ArrowRight className="w-5 h-5 text-slate-500 mt-2" />
+                    </div>
+                  ))}
+                  
+                  {nextSteps.length === 0 && (
+                    <div className="text-center py-12">
+                      <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
+                      <h3 className="text-xl font-semibold text-white mb-2">Félicitations!</h3>
+                      <p className="text-slate-400">Vous êtes à la dernière étape de votre processus d'immigration.</p>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Profile Tab */}
+          <TabsContent value="profile">
+            <div className="grid lg:grid-cols-2 gap-6">
+              <Card className="bg-gradient-to-br from-[#1E293B] to-[#334155] border-slate-700">
+                <CardHeader>
+                  <CardTitle className="text-white">Informations Personnelles</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex items-center space-x-3">
+                      <User className="w-5 h-5 text-orange-500" />
+                      <div>
+                        <p className="text-slate-400 text-sm">Nom complet</p>
+                        <p className="text-white font-medium">{user.full_name}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-3">
+                      <Mail className="w-5 h-5 text-orange-500" />
+                      <div>
+                        <p className="text-slate-400 text-sm">Email</p>
+                        <p className="text-white font-medium">{user.email}</p>
+                      </div>
+                    </div>
+                    {user.phone && (
+                      <div className="flex items-center space-x-3">
+                        <Phone className="w-5 h-5 text-orange-500" />
+                        <div>
+                          <p className="text-slate-400 text-sm">Téléphone</p>
+                          <p className="text-white font-medium">{user.phone}</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card className="bg-gradient-to-br from-[#1E293B] to-[#334155] border-slate-700">
+                <CardHeader>
+                  <CardTitle className="text-white">Détails du Dossier</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div>
+                      <p className="text-slate-400 text-sm">Pays de destination</p>
+                      <p className="text-white font-medium">{caseData.country}</p>
+                    </div>
+                    <div>
+                      <p className="text-slate-400 text-sm">Type de visa</p>
+                      <p className="text-white font-medium">{caseData.visa_type}</p>
+                    </div>
+                    <div>
+                      <p className="text-slate-400 text-sm">Date de création</p>
+                      <p className="text-white font-medium">{new Date(caseData.created_at).toLocaleDateString('fr-FR')}</p>
+                    </div>
+                    <div>
+                      <p className="text-slate-400 text-sm">Dernière mise à jour</p>
+                      <p className="text-white font-medium">{formatDistanceToNow(new Date(caseData.updated_at), { addSuffix: true, locale: fr })}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
+
+      {/* Chat Widget */}
+      <ChatWidget 
+        currentUser={user} 
+        onUnreadCountChange={setChatUnreadCount}
+      />
     </div>
   );
 }
