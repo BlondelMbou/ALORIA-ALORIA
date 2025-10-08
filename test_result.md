@@ -106,49 +106,64 @@
 
 ## backend:
   - task: "Manager client creation API"
-    implemented: false
-    working: "NA"
+    implemented: true
+    working: true
     file: "server.py"
     stuck_count: 0
     priority: "high"
     needs_retesting: false
-    status_history: []
+    status_history:
+        -working: true
+        -agent: "testing"
+        -comment: "✅ TESTED: Manager client creation API fully functional. POST /api/clients endpoint working correctly with proper authentication and authorization. Only managers can create clients (403 for employees). Client creation includes automatic user account creation, employee assignment via load balancing, and case workflow initialization. Created test client with ID d03fd337-3e67-47b3-9595-f16349f3e77a successfully."
     
   - task: "Manager status update API"
-    implemented: false
-    working: "NA"
+    implemented: true
+    working: true
     file: "server.py"
     stuck_count: 0
     priority: "high" 
     needs_retesting: false
-    status_history: []
+    status_history:
+        -working: true
+        -agent: "testing"
+        -comment: "✅ TESTED: Manager case status update API fully functional. PATCH /api/cases/{case_id} endpoint working correctly. Only managers can update case status and step progression (employees can only update notes). Successfully tested case status update with current_step_index=1, status='En cours', and notes. WebSocket notifications to clients working when case is updated."
     
   - task: "Employee visitor registration API"
-    implemented: false
-    working: "NA"
+    implemented: true
+    working: true
     file: "server.py"
     stuck_count: 0
     priority: "high"
     needs_retesting: false
-    status_history: []
+    status_history:
+        -working: true
+        -agent: "testing"
+        -comment: "✅ TESTED: Employee visitor registration API fully functional. POST /api/visitors endpoint working correctly for both MANAGER and EMPLOYEE roles. Visitor purpose enum validation working (Consultation initiale, Remise de documents, etc.). GET /api/visitors and PATCH /api/visitors/{id}/checkout endpoints working. Successfully registered visitor 'Jean Dupont' and performed checkout. Fixed initial data validation issues by cleaning invalid visitor records."
     
   - task: "WebSocket chat system"
-    implemented: false
-    working: "NA"
+    implemented: true
+    working: true
     file: "server.py"
     stuck_count: 0
     priority: "high"
     needs_retesting: false
-    status_history: []
+    status_history:
+        -working: true
+        -agent: "testing"
+        -comment: "✅ TESTED: WebSocket chat system fully functional. Socket.IO integration working with authentication, message sending, and real-time delivery. Chat APIs working: GET /api/chat/conversations, GET /api/users/available-contacts, POST /api/chat/send, GET /api/chat/unread-count. Role-based contact access working correctly (Manager can contact all users, Employee can contact managers and assigned clients, Client can contact assigned employee and managers). Successfully sent test message from manager to employee with unread count updating."
     
   - task: "Country-specific workflow steps"
-    implemented: false
-    working: "NA"
+    implemented: true
+    working: true
     file: "server.py"
     stuck_count: 0
     priority: "medium"
     needs_retesting: false
-    status_history: []
+    status_history:
+        -working: true
+        -agent: "testing"
+        -comment: "✅ TESTED: Country-specific workflow system fully functional. GET /api/workflows returns comprehensive workflows for Canada (Work Permit, Study Permit, Permanent Residence) and France (Work Permit, Student Visa, Family Reunification). POST /api/workflows/{country}/{visa_type}/steps allows managers to add custom workflow steps (403 for employees). Successfully added custom step 'Étape personnalisée de vérification' to Canada Work Permit workflow. Custom workflow storage in MongoDB working correctly."
 
 ## frontend:
   - task: "Manager client creation interface"
