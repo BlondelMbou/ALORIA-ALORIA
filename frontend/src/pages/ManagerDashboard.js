@@ -147,57 +147,57 @@ export default function ManagerDashboard() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* KPI Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card className="border-l-4 border-l-blue-500" data-testid="kpi-total-cases">
+          <Card className="bg-gradient-to-br from-[#1E293B] to-[#334155] border-l-4 border-l-blue-500 border-slate-700" data-testid="kpi-total-cases">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-slate-600 mb-1">Total Cases</p>
-                  <p className="text-3xl font-bold text-slate-900">{stats?.total_cases || 0}</p>
+                  <p className="text-sm text-slate-400 mb-1">Total Dossiers</p>
+                  <p className="text-3xl font-bold text-white">{stats?.total_cases || 0}</p>
                 </div>
-                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <FileText className="w-6 h-6 text-blue-600" />
+                <div className="w-12 h-12 bg-blue-500/10 rounded-lg flex items-center justify-center border border-blue-500/20">
+                  <FileText className="w-6 h-6 text-blue-400" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="border-l-4 border-l-yellow-500" data-testid="kpi-active-cases">
+          <Card className="bg-gradient-to-br from-[#1E293B] to-[#334155] border-l-4 border-l-yellow-500 border-slate-700" data-testid="kpi-active-cases">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-slate-600 mb-1">Active Cases</p>
-                  <p className="text-3xl font-bold text-slate-900">{stats?.active_cases || 0}</p>
+                  <p className="text-sm text-slate-400 mb-1">Dossiers Actifs</p>
+                  <p className="text-3xl font-bold text-white">{stats?.active_cases || 0}</p>
                 </div>
-                <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
-                  <Clock className="w-6 h-6 text-yellow-600" />
+                <div className="w-12 h-12 bg-yellow-500/10 rounded-lg flex items-center justify-center border border-yellow-500/20">
+                  <Clock className="w-6 h-6 text-yellow-400" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="border-l-4 border-l-green-500" data-testid="kpi-completed-cases">
+          <Card className="bg-gradient-to-br from-[#1E293B] to-[#334155] border-l-4 border-l-green-500 border-slate-700" data-testid="kpi-completed-cases">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-slate-600 mb-1">Completed</p>
-                  <p className="text-3xl font-bold text-slate-900">{stats?.completed_cases || 0}</p>
+                  <p className="text-sm text-slate-400 mb-1">Terminés</p>
+                  <p className="text-3xl font-bold text-white">{stats?.completed_cases || 0}</p>
                 </div>
-                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                  <CheckCircle className="w-6 h-6 text-green-600" />
+                <div className="w-12 h-12 bg-green-500/10 rounded-lg flex items-center justify-center border border-green-500/20">
+                  <CheckCircle className="w-6 h-6 text-green-400" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="border-l-4 border-l-orange-500" data-testid="kpi-total-clients">
+          <Card className="bg-gradient-to-br from-[#1E293B] to-[#334155] border-l-4 border-l-orange-500 border-slate-700" data-testid="kpi-total-clients">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-slate-600 mb-1">Total Clients</p>
-                  <p className="text-3xl font-bold text-slate-900">{stats?.total_clients || 0}</p>
+                  <p className="text-sm text-slate-400 mb-1">Total Clients</p>
+                  <p className="text-3xl font-bold text-white">{stats?.total_clients || 0}</p>
                 </div>
-                <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
-                  <Users className="w-6 h-6 text-orange-600" />
+                <div className="w-12 h-12 bg-orange-500/10 rounded-lg flex items-center justify-center border border-orange-500/20">
+                  <Users className="w-6 h-6 text-orange-400" />
                 </div>
               </div>
             </CardContent>
