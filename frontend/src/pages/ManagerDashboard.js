@@ -300,6 +300,113 @@ export default function ManagerDashboard() {
                     <CardDescription className="text-slate-400">Gérer et surveiller les dossiers clients</CardDescription>
                   </div>
                   <div className="flex space-x-2">
+                    <Dialog open={showCreateClient} onOpenChange={setShowCreateClient}>
+                      <DialogTrigger asChild>
+                        <Button className="bg-orange-500 hover:bg-orange-600 text-white">
+                          <UserPlus className="w-4 h-4 mr-2" />
+                          Nouveau Client
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="bg-[#1E293B] border-slate-700 max-w-lg">
+                        <DialogHeader>
+                          <DialogTitle className="text-white">Créer un Nouveau Client</DialogTitle>
+                          <DialogDescription className="text-slate-400">
+                            Remplissez les informations du client pour créer son dossier
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="space-y-4">
+                          <div>
+                            <Label className="text-slate-300">Nom Complet</Label>
+                            <Input
+                              value={newClient.full_name}
+                              onChange={(e) => setNewClient({...newClient, full_name: e.target.value})}
+                              className="bg-[#0F172A] border-slate-600 text-white"
+                              placeholder="Nom complet du client"
+                            />
+                          </div>
+                          <div>
+                            <Label className="text-slate-300">Email</Label>
+                            <Input
+                              type="email"
+                              value={newClient.email}
+                              onChange={(e) => setNewClient({...newClient, email: e.target.value})}
+                              className="bg-[#0F172A] border-slate-600 text-white"
+                              placeholder="email@example.com"
+                            />
+                          </div>
+                          <div>
+                            <Label className="text-slate-300">Téléphone</Label>
+                            <Input
+                              value={newClient.phone}
+                              onChange={(e) => setNewClient({...newClient, phone: e.target.value})}
+                              className="bg-[#0F172A] border-slate-600 text-white"
+                              placeholder="+33 1 23 45 67 89"
+                            />
+                          </div>
+                          <div>
+                            <Label className="text-slate-300">Pays de Destination</Label>
+                            <Select value={newClient.country} onValueChange={(value) => setNewClient({...newClient, country: value})}>
+                              <SelectTrigger className="bg-[#0F172A] border-slate-600 text-white">
+                                <SelectValue placeholder="Sélectionner un pays" />
+                              </SelectTrigger>
+                              <SelectContent className="bg-[#1E293B] border-slate-600">
+                                <SelectItem value="Canada" className="text-white hover:bg-slate-700">Canada</SelectItem>
+                                <SelectItem value="France" className="text-white hover:bg-slate-700">France</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div>
+                            <Label className="text-slate-300">Type de Visa</Label>
+                            <Select value={newClient.visa_type} onValueChange={(value) => setNewClient({...newClient, visa_type: value})}>
+                              <SelectTrigger className="bg-[#0F172A] border-slate-600 text-white">
+                                <SelectValue placeholder="Sélectionner le type de visa" />
+                              </SelectTrigger>
+                              <SelectContent className="bg-[#1E293B] border-slate-600">
+                                {newClient.country === 'Canada' && (
+                                  <>
+                                    <SelectItem value="Work Permit" className="text-white hover:bg-slate-700">Permis de Travail</SelectItem>
+                                    <SelectItem value="Study Permit" className="text-white hover:bg-slate-700">Permis d'Études</SelectItem>
+                                    <SelectItem value="Permanent Residence (Express Entry)" className="text-white hover:bg-slate-700">Résidence Permanente</SelectItem>
+                                  </>
+                                )}
+                                {newClient.country === 'France' && (
+                                  <>
+                                    <SelectItem value="Work Permit (Talent Permit)" className="text-white hover:bg-slate-700">Permis Talent</SelectItem>
+                                    <SelectItem value="Student Visa" className="text-white hover:bg-slate-700">Visa Étudiant</SelectItem>
+                                    <SelectItem value="Family Reunification" className="text-white hover:bg-slate-700">Regroupement Familial</SelectItem>
+                                  </>
+                                )}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div>
+                            <Label className="text-slate-300">Message Initial (Optionnel)</Label>
+                            <Input
+                              value={newClient.message}
+                              onChange={(e) => setNewClient({...newClient, message: e.target.value})}
+                              className="bg-[#0F172A] border-slate-600 text-white"
+                              placeholder="Note ou demande spécifique..."
+                            />
+                          </div>
+                          <div className="flex space-x-2">
+                            <Button 
+                              onClick={handleCreateClient}
+                              className="flex-1 bg-orange-500 hover:bg-orange-600 text-white"
+                            >
+                              Créer le Client
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              onClick={() => setShowCreateClient(false)}
+                              className="border-slate-600 text-slate-300 hover:bg-slate-800"
+                            >
+                              Annuler
+                            </Button>
+                          </div>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                    
                     <Input
                       placeholder="Rechercher des clients..."
                       value={searchTerm}
