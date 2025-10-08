@@ -10,12 +10,13 @@ body {
   font-family: 'Inter', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: #FFFFFF;
-  color: #1A2238;
+  background: #0F172A;
+  color: #F1F5F9;
 }
 
 .App {
   min-height: 100vh;
+  background: #0F172A;
 }
 
 /* Custom scrollbar */
