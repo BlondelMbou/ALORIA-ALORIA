@@ -330,26 +330,26 @@ export default function ManagerDashboard() {
                             <td className="py-3 px-4">
                               <Dialog>
                                 <DialogTrigger asChild>
-                                  <Button variant="outline" size="sm" onClick={() => setSelectedClient(client)}>
-                                    Reassign
+                                  <Button variant="outline" size="sm" onClick={() => setSelectedClient(client)} className="border-slate-600 text-slate-300 hover:bg-slate-800 hover:text-white">
+                                    Réassigner
                                   </Button>
                                 </DialogTrigger>
-                                <DialogContent>
+                                <DialogContent className="bg-[#1E293B] border-slate-700">
                                   <DialogHeader>
-                                    <DialogTitle>Reassign Client</DialogTitle>
-                                    <DialogDescription>
-                                      Select a new counselor for {clientCase?.client_name}
+                                    <DialogTitle className="text-white">Réassigner le Client</DialogTitle>
+                                    <DialogDescription className="text-slate-400">
+                                      Sélectionner un nouveau conseiller pour {clientCase?.client_name}
                                     </DialogDescription>
                                   </DialogHeader>
                                   <div className="space-y-4">
-                                    <Label>Select Employee</Label>
+                                    <Label className="text-slate-300">Sélectionner l'Employé</Label>
                                     <Select onValueChange={(value) => handleReassignClient(client.id, value)}>
-                                      <SelectTrigger>
-                                        <SelectValue placeholder="Choose employee" />
+                                      <SelectTrigger className="bg-[#0F172A] border-slate-600 text-white">
+                                        <SelectValue placeholder="Choisir un employé" />
                                       </SelectTrigger>
-                                      <SelectContent>
+                                      <SelectContent className="bg-[#1E293B] border-slate-600">
                                         {employees.map((emp) => (
-                                          <SelectItem key={emp.id} value={emp.id}>
+                                          <SelectItem key={emp.id} value={emp.id} className="text-white hover:bg-slate-700">
                                             {emp.full_name}
                                           </SelectItem>
                                         ))}
