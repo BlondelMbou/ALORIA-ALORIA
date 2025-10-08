@@ -63,9 +63,7 @@ export default function LandingPage() {
 
   const countries = [
     { value: 'Canada', label: 'Canada', flag: '🇨🇦' },
-    { value: 'France', label: 'France', flag: '🇫🇷' },
-    { value: 'Belgique', label: 'Belgique', flag: '🇧🇪' },
-    { value: 'Allemagne', label: 'Allemagne', flag: '🇩🇪' }
+    { value: 'France', label: 'France', flag: '🇫🇷' }
   ];
 
   const visaTypes = {
