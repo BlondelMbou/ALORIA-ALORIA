@@ -982,12 +982,15 @@ class APITester:
 
     def run_all_tests(self):
         """Run all test suites"""
-        print("🚀 Starting ALORIA AGENCY Backend API Tests")
+        print("🚀 Starting ALORIA AGENCY Backend API Tests - NOUVELLES FONCTIONNALITÉS")
         print(f"Testing against: {API_BASE}")
         print("=" * 60)
         
         self.test_user_registration_and_login()
-        self.test_client_creation_permissions()
+        self.test_client_creation_permissions()  # CORRECTED: Employee can now create clients
+        self.test_notification_system()  # NEW: Test notification APIs
+        self.test_automatic_notifications()  # NEW: Test automatic notification creation
+        self.test_complete_integration()  # NEW: Complete integration test with notifications
         self.test_client_creation_with_password()
         self.test_password_change_api()
         self.test_client_credentials_api()
