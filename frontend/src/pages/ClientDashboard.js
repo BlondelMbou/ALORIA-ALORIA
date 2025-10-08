@@ -139,6 +139,14 @@ export default function ClientDashboard() {
               <Globe className="w-8 h-8 text-orange-500" />
               <div>
                 <h1 className="text-xl font-bold text-white">ALORIA AGENCY</h1>
+                <p className="text-sm text-slate-400">Mon Profil Client</p>
+              </div>
+            </div>
+            <div className="flex items-center space-x-4">
+              <div className="text-right">
+                <p className="text-sm font-medium text-white">{user.full_name}</p>
+                <p className="text-xs text-slate-400">{user.role}</p>
+              </div>
                 <p className="text-sm text-slate-400">Portail Client</p>
               </div>
             </div>
