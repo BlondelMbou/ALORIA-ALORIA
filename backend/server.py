@@ -777,12 +777,34 @@ async def update_case(case_id: str, update_data: CaseUpdate, current_user: dict 
             }}
         )
         
-        # Notify client via WebSocket
+        # Create notifications for case update
+        client_name = user["full_name"] if user else "Unknown"
+        
+        # Notify client
+        await create_notification(
+            user_id=client["user_id"],
+            title="Mise à jour de votre dossier",
+            message=f"Votre dossier a été mis à jour par {current_user['full_name']}. Statut: {update_data.status or case['status']}",
+            type="case_update",
+            related_id=case_id
+        )
+        
+        # Notify assigned employee if different from current user
+        if client.get("assigned_employee_id") and client["assigned_employee_id"] != current_user["id"]:
+            await create_notification(
+                user_id=client["assigned_employee_id"],
+                title="Dossier client mis à jour",
+                message=f"Le dossier de {client_name} a été mis à jour par {current_user['full_name']}",
+                type="case_update",
+                related_id=case_id
+            )
+        
+        # Send WebSocket updates
         client_sid = connected_users.get(client["user_id"])
         if client_sid:
             await sio.emit('case_updated', {
                 'case_id': case_id,
-                'client_name': user["full_name"] if user else "Unknown",
+                'client_name': client_name,
                 'current_step': update_data.current_step_index,
                 'progress': progress,
                 'status': update_data.status or case["status"],
@@ -795,7 +817,7 @@ async def update_case(case_id: str, update_data: CaseUpdate, current_user: dict 
             if employee_sid:
                 await sio.emit('case_updated', {
                     'case_id': case_id,
-                    'client_name': user["full_name"] if user else "Unknown", 
+                    'client_name': client_name,
                     'current_step': update_data.current_step_index,
                     'progress': progress,
                     'status': update_data.status or case["status"],
