@@ -85,11 +85,21 @@ export default function ClientDashboard() {
 
   const getStatusColor = (status) => {
     switch (status?.toLowerCase()) {
-      case 'new': return 'bg-blue-100 text-blue-700';
-      case 'in progress': return 'bg-yellow-100 text-yellow-700';
-      case 'approved': case 'completed': return 'bg-green-100 text-green-700';
-      case 'rejected': return 'bg-red-100 text-red-700';
-      default: return 'bg-gray-100 text-gray-700';
+      case 'nouveau': case 'new': return 'bg-blue-500 text-white';
+      case 'en cours': case 'in progress': return 'bg-yellow-500 text-white';
+      case 'approuvé': case 'terminé': case 'approved': case 'completed': return 'bg-green-500 text-white';
+      case 'rejeté': case 'rejected': return 'bg-red-500 text-white';
+      default: return 'bg-slate-500 text-white';
+    }
+  };
+  
+  const getStepIcon = (stepIndex, currentStepIndex) => {
+    if (stepIndex < currentStepIndex) {
+      return <CheckCircle className="w-6 h-6 text-green-500" />;
+    } else if (stepIndex === currentStepIndex) {
+      return <Clock className="w-6 h-6 text-orange-500" />;
+    } else {
+      return <div className="w-6 h-6 rounded-full border-2 border-slate-600"></div>;
     }
   };
 
