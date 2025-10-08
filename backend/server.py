@@ -674,35 +674,27 @@ async def get_case(case_id: str, current_user: dict = Depends(get_current_user))
 
 @api_router.patch("/cases/{case_id}", response_model=CaseResponse)
 async def update_case(case_id: str, update_data: CaseUpdate, current_user: dict = Depends(get_current_user)):
-    # Only MANAGER can update case status, employees can only update notes
-    if current_user["role"] not in ["MANAGER", "EMPLOYEE"]:
-        raise HTTPException(status_code=403, detail="Access denied")
+    # Only MANAGER can update cases - employees have read-only access
+    if current_user["role"] != "MANAGER":
+        raise HTTPException(status_code=403, detail="Seuls les gestionnaires peuvent modifier les dossiers")
         
     case = await db.cases.find_one({"id": case_id})
     if not case:
-        raise HTTPException(status_code=404, detail="Case not found")
+        raise HTTPException(status_code=404, detail="Dossier non trouvé")
     
-    # Check permissions
+    # Check if case exists
     client = await db.clients.find_one({"id": case["client_id"]})
-    if current_user["role"] == "EMPLOYEE" and client["assigned_employee_id"] != current_user["id"]:
-        raise HTTPException(status_code=403, detail="Access denied")
+    if not client:
+        raise HTTPException(status_code=404, detail="Client non trouvé")
     
-    # Update case - Only manager can update status and step
-    update_dict = {}
-    if current_user["role"] == "MANAGER":
-        # Manager can update everything
-        update_dict = {k: v for k, v in update_data.model_dump().items() if v is not None}
-    else:
-        # Employee can only update notes
-        if update_data.notes is not None:
-            update_dict["notes"] = update_data.notes
-    
+    # Manager can update everything
+    update_dict = {k: v for k, v in update_data.model_dump().items() if v is not None}
     update_dict["updated_at"] = datetime.now(timezone.utc).isoformat()
     
     await db.cases.update_one({"id": case_id}, {"$set": update_dict})
     
-    # Update client progress (only manager)
-    if current_user["role"] == "MANAGER" and update_data.current_step_index is not None:
+    # Update client progress if step is updated
+    if update_data.current_step_index is not None:
         total_steps = len(case["workflow_steps"])
         progress = (update_data.current_step_index / total_steps) * 100 if total_steps > 0 else 0
         await db.clients.update_one(
