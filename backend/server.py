@@ -334,6 +334,14 @@ class CustomWorkflowStep(BaseModel):
     documents: List[str]
     duration: str
 
+class PasswordChange(BaseModel):
+    old_password: str
+    new_password: str
+    
+class ClientCredentials(BaseModel):
+    email: str
+    password: str
+
 class DashboardStats(BaseModel):
     total_cases: int
     active_cases: int
