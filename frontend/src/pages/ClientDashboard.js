@@ -69,38 +69,18 @@ export default function ClientDashboard() {
         await fetchMessages();
       }
     } catch (error) {
-      toast.error('Failed to load dashboard');
+      toast.error('Erreur lors du chargement');
       console.error(error);
     } finally {
       setLoading(false);
     }
   };
-
-  const fetchMessages = async () => {
-    if (!client) return;
-    try {
-      const response = await messagesAPI.getByClient(client.id);
-      setMessages(response.data);
-    } catch (error) {
-      console.error('Failed to load messages:', error);
-    }
-  };
-
-  const handleSendMessage = async () => {
-    if (!messageText.trim() || !counselor) return;
-
-    try {
-      await messagesAPI.send({
-        receiver_id: counselor.id,
-        client_id: client.id,
-        message: messageText
-      });
-      setMessageText('');
-      fetchMessages();
-      toast.success('Message sent');
-    } catch (error) {
-      toast.error('Failed to send message');
-    }
+  
+  const toggleDocumentComplete = (docName) => {
+    setDocumentChecklist(prev => ({
+      ...prev,
+      [docName]: !prev[docName]
+    }));
   };
 
   const getStatusColor = (status) => {
