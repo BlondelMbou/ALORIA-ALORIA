@@ -48,7 +48,7 @@ export default function LandingPage() {
 
     setLoading(true);
     try {
-      await clientsAPI.create(formData);
+      await api.clients.create(formData);
       toast.success('Votre demande a été soumise ! Vérifiez votre email pour les détails de connexion.');
       setFormData({
         full_name: '',
