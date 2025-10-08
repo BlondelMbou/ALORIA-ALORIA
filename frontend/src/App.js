@@ -70,6 +70,7 @@ function App() {
       <BrowserRouter>
         <AuthProvider>
           <AppRoutes />
+          <Toaster position="top-right" richColors />
         </AuthProvider>
       </BrowserRouter>
     </div>
