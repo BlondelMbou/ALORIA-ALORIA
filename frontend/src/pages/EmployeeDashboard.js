@@ -167,50 +167,50 @@ export default function EmployeeDashboard() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card className="border-l-4 border-l-blue-500" data-testid="stat-total-clients">
+          <Card className="bg-gradient-to-br from-[#1E293B] to-[#334155] border-l-4 border-l-blue-500 border-slate-700" data-testid="stat-total-clients">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-slate-600 mb-1">My Clients</p>
-                  <p className="text-3xl font-bold text-slate-900">{myStats.totalClients}</p>
+                  <p className="text-sm text-slate-400 mb-1">Mes Clients</p>
+                  <p className="text-3xl font-bold text-white">{myStats.totalClients}</p>
                 </div>
-                <Users className="w-8 h-8 text-blue-500" />
+                <Users className="w-8 h-8 text-blue-400" />
               </div>
             </CardContent>
           </Card>
 
-          <Card className="border-l-4 border-l-yellow-500" data-testid="stat-active-cases">
+          <Card className="bg-gradient-to-br from-[#1E293B] to-[#334155] border-l-4 border-l-yellow-500 border-slate-700" data-testid="stat-active-cases">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-slate-600 mb-1">Active Cases</p>
-                  <p className="text-3xl font-bold text-slate-900">{myStats.activeCases}</p>
+                  <p className="text-sm text-slate-400 mb-1">Dossiers Actifs</p>
+                  <p className="text-3xl font-bold text-white">{myStats.activeCases}</p>
                 </div>
-                <Clock className="w-8 h-8 text-yellow-500" />
+                <Clock className="w-8 h-8 text-yellow-400" />
               </div>
             </CardContent>
           </Card>
 
-          <Card className="border-l-4 border-l-green-500" data-testid="stat-completed-cases">
+          <Card className="bg-gradient-to-br from-[#1E293B] to-[#334155] border-l-4 border-l-green-500 border-slate-700" data-testid="stat-completed-cases">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-slate-600 mb-1">Completed</p>
-                  <p className="text-3xl font-bold text-slate-900">{myStats.completedCases}</p>
+                  <p className="text-sm text-slate-400 mb-1">Terminés</p>
+                  <p className="text-3xl font-bold text-white">{myStats.completedCases}</p>
                 </div>
-                <CheckCircle className="w-8 h-8 text-green-500" />
+                <CheckCircle className="w-8 h-8 text-green-400" />
               </div>
             </CardContent>
           </Card>
 
-          <Card className="border-l-4 border-l-orange-500" data-testid="stat-pending-cases">
+          <Card className="bg-gradient-to-br from-[#1E293B] to-[#334155] border-l-4 border-l-orange-500 border-slate-700" data-testid="stat-pending-cases">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-slate-600 mb-1">Pending</p>
-                  <p className="text-3xl font-bold text-slate-900">{myStats.pendingCases}</p>
+                  <p className="text-sm text-slate-400 mb-1">En Attente</p>
+                  <p className="text-3xl font-bold text-white">{myStats.pendingCases}</p>
                 </div>
-                <FileText className="w-8 h-8 text-orange-500" />
+                <FileText className="w-8 h-8 text-orange-400" />
               </div>
             </CardContent>
           </Card>
