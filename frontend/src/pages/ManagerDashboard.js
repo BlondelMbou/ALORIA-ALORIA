@@ -82,8 +82,24 @@ export default function ManagerDashboard() {
 
   const handleCreateClient = async () => {
     try {
-      await clientsAPI.create(newClient);
-      toast.success('Client créé avec succès');
+      const response = await clientsAPI.create(newClient);
+      const clientData = response.data;
+      
+      // Show login credentials if new account was created
+      if (clientData.default_password) {
+        toast.success(
+          <div>
+            <p className="font-bold">Client créé avec succès!</p>
+            <p>Email: {clientData.login_email}</p>
+            <p>Mot de passe: {clientData.default_password}</p>
+            <p className="text-xs text-slate-400 mt-1">Le client doit changer ce mot de passe lors de sa première connexion</p>
+          </div>,
+          { duration: 8000 }
+        );
+      } else {
+        toast.success('Client créé avec succès (compte existant utilisé)');
+      }
+      
       setNewClient({
         email: '',
         full_name: '',
