@@ -32,14 +32,7 @@ export default function ClientDashboard() {
 
   useEffect(() => {
     fetchData();
-    // Poll messages every 10 seconds
-    const interval = setInterval(() => {
-      if (client) {
-        fetchMessages();
-      }
-    }, 10000);
-    return () => clearInterval(interval);
-  }, [client]);
+  }, []);
 
   const fetchData = async () => {
     setLoading(true);
@@ -54,11 +47,23 @@ export default function ClientDashboard() {
         setCaseData(myCase);
 
         if (myClient.assigned_employee_id) {
-          // Fetch counselor details through messages (we'll get the name from messages)
           setCounselor({
             id: myClient.assigned_employee_id,
-            name: myClient.assigned_employee_name || 'Your Counselor'
+            name: myClient.assigned_employee_name || 'Votre Conseiller'
           });
+        }
+        
+        // Initialize document checklist based on current step
+        if (myCase && myCase.workflow_steps) {
+          const checklist = {};
+          myCase.workflow_steps.forEach((step, index) => {
+            if (step.documents) {
+              step.documents.forEach(doc => {
+                checklist[doc] = index < myCase.current_step_index;
+              });
+            }
+          });
+          setDocumentChecklist(checklist);
         }
 
         await fetchMessages();
