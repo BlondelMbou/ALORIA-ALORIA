@@ -123,8 +123,8 @@ class APITester:
             self.log_result("Employee Registration", False, "Exception occurred", str(e))
 
     def test_client_creation_permissions(self):
-        """Test client creation - only managers should be able to create clients"""
-        print("=== Testing Client Creation Permissions ===")
+        """Test client creation - CORRECTED: Both managers and employees can create clients"""
+        print("=== Testing Client Creation Permissions (CORRECTED) ===")
         
         client_data = {
             "email": "client.test@example.com",
@@ -151,19 +151,56 @@ class APITester:
         else:
             self.log_result("Manager Client Creation", False, "No manager token available")
 
-        # Test Employee cannot create client
+        # Test Employee CAN NOW create client (CORRECTED)
         if self.employee_token:
             try:
                 headers = {"Authorization": f"Bearer {self.employee_token}"}
+                employee_client_data = {
+                    "email": "employee.client@example.com",
+                    "full_name": "Client créé par Employé",
+                    "phone": "+33777888999",
+                    "country": "France",
+                    "visa_type": "Student Visa",
+                    "message": "Client créé par un employé - test correction"
+                }
+                response = self.session.post(f"{API_BASE}/clients", json=employee_client_data, headers=headers)
+                if response.status_code == 200 or response.status_code == 201:
+                    data = response.json()
+                    self.log_result("Employee Client Creation (CORRECTED)", True, f"Employee can now create clients. Client ID: {data['id']}")
+                    # Verify auto-assignment and login info
+                    if "login_email" in data and "default_password" in data:
+                        self.log_result("Employee Client Auto-Assignment", True, f"Auto-assignment working, login: {data['login_email']}, password: {data['default_password']}")
+                    else:
+                        self.log_result("Employee Client Auto-Assignment", False, "Missing login_email or default_password in response")
+                else:
+                    self.log_result("Employee Client Creation (CORRECTED)", False, f"Employee should now be able to create clients. Status: {response.status_code}, Response: {response.text}")
+            except Exception as e:
+                self.log_result("Employee Client Creation (CORRECTED)", False, "Exception occurred", str(e))
+        else:
+            self.log_result("Employee Client Creation (CORRECTED)", False, "No employee token available")
+
+        # Test CLIENT still cannot create clients
+        # First create a client user to test with
+        client_token = None
+        try:
+            client_login_data = {
+                "email": "client.test@example.com",
+                "password": "Aloria2024!"
+            }
+            login_response = self.session.post(f"{API_BASE}/auth/login", json=client_login_data)
+            if login_response.status_code == 200:
+                client_token = login_response.json()['access_token']
+                
+                headers = {"Authorization": f"Bearer {client_token}"}
                 response = self.session.post(f"{API_BASE}/clients", json=client_data, headers=headers)
                 if response.status_code == 403:
-                    self.log_result("Employee Client Creation (should fail)", True, "Employee correctly denied client creation")
+                    self.log_result("Client User Creation (should fail)", True, "Client user correctly denied client creation")
                 else:
-                    self.log_result("Employee Client Creation (should fail)", False, f"Employee should not be able to create clients. Status: {response.status_code}")
-            except Exception as e:
-                self.log_result("Employee Client Creation (should fail)", False, "Exception occurred", str(e))
-        else:
-            self.log_result("Employee Client Creation (should fail)", False, "No employee token available")
+                    self.log_result("Client User Creation (should fail)", False, f"Client user should not be able to create clients. Status: {response.status_code}")
+            else:
+                self.log_result("Client User Creation (should fail)", False, "Could not login as client to test permissions")
+        except Exception as e:
+            self.log_result("Client User Creation (should fail)", False, "Exception occurred", str(e))
 
     def test_chat_apis(self):
         """Test chat functionality"""
