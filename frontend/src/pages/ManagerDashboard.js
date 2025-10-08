@@ -624,7 +624,63 @@ export default function ManagerDashboard() {
                           <h3 className="font-semibold text-lg text-white">{caseItem.client_name}</h3>
                           <p className="text-sm text-slate-400">{caseItem.country} - {caseItem.visa_type}</p>
                         </div>
-                        <Badge className={getStatusColor(caseItem.status)}>{caseItem.status}</Badge>
+                        <div className="flex items-center space-x-2">
+                          <Badge className={getStatusColor(caseItem.status)}>{caseItem.status}</Badge>
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button variant="outline" size="sm" className="border-slate-600 text-slate-300 hover:bg-slate-800 hover:text-white">
+                                Mise à jour
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent className="bg-[#1E293B] border-slate-700">
+                              <DialogHeader>
+                                <DialogTitle className="text-white">Mise à jour du Dossier</DialogTitle>
+                                <DialogDescription className="text-slate-400">
+                                  Mettre à jour le statut et la progression de {caseItem.client_name}
+                                </DialogDescription>
+                              </DialogHeader>
+                              <div className="space-y-4">
+                                <div>
+                                  <Label className="text-slate-300">Étape actuelle</Label>
+                                  <Select 
+                                    value={caseItem.current_step_index.toString()}
+                                    onValueChange={(value) => handleUpdateCase(caseItem.id, { current_step_index: parseInt(value) })}
+                                  >
+                                    <SelectTrigger className="bg-[#0F172A] border-slate-600 text-white">
+                                      <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent className="bg-[#1E293B] border-slate-600">
+                                      {caseItem.workflow_steps.map((step, idx) => (
+                                        <SelectItem key={idx} value={idx.toString()} className="text-white hover:bg-slate-700">
+                                          Étape {idx + 1}: {step.title}
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                                <div>
+                                  <Label className="text-slate-300">Statut</Label>
+                                  <Select 
+                                    value={caseItem.status}
+                                    onValueChange={(value) => handleUpdateCase(caseItem.id, { status: value })}
+                                  >
+                                    <SelectTrigger className="bg-[#0F172A] border-slate-600 text-white">
+                                      <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent className="bg-[#1E293B] border-slate-600">
+                                      <SelectItem value="Nouveau" className="text-white hover:bg-slate-700">Nouveau</SelectItem>
+                                      <SelectItem value="En cours" className="text-white hover:bg-slate-700">En cours</SelectItem>
+                                      <SelectItem value="En attente" className="text-white hover:bg-slate-700">En attente</SelectItem>
+                                      <SelectItem value="Approuvé" className="text-white hover:bg-slate-700">Approuvé</SelectItem>
+                                      <SelectItem value="Terminé" className="text-white hover:bg-slate-700">Terminé</SelectItem>
+                                      <SelectItem value="Rejeté" className="text-white hover:bg-slate-700">Rejeté</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                              </div>
+                            </DialogContent>
+                          </Dialog>
+                        </div>
                       </div>
                       <div className="mb-3">
                         <div className="flex justify-between text-sm text-slate-400 mb-1">
