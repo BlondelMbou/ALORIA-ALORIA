@@ -378,9 +378,9 @@ export default function LandingPage() {
               </h1>
               
               <p className="text-xl lg:text-2xl text-slate-300 leading-relaxed">
-                Expertise premium pour vos demandes de visa vers le <span className="text-orange-400 font-semibold">Canada</span>, 
-                la <span className="text-blue-400 font-semibold">France</span>, la <span className="text-yellow-400 font-semibold">Belgique</span> et 
-                l'<span className="text-red-400 font-semibold">Allemagne</span>. Nous transformons la complexité en simplicité.
+                Expertise premium pour vos demandes de visa vers le <span className="text-orange-400 font-semibold">Canada</span> et 
+                la <span className="text-blue-400 font-semibold">France</span>. Nos experts certifiés transforment la complexité 
+                de l'immigration en un processus simple, transparent et efficace.
               </p>
 
               <div className="grid grid-cols-2 gap-4">
