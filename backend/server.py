@@ -344,6 +344,24 @@ class ClientCredentials(BaseModel):
     email: str
     password: str
 
+class NotificationCreate(BaseModel):
+    user_id: str
+    title: str
+    message: str
+    type: str  # 'message', 'case_update', 'visitor', etc.
+    related_id: Optional[str] = None  # ID of related entity (case_id, message_id, etc.)
+
+class NotificationResponse(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str
+    user_id: str
+    title: str
+    message: str
+    type: str
+    related_id: Optional[str]
+    read: bool
+    created_at: str
+
 class DashboardStats(BaseModel):
     total_cases: int
     active_cases: int
