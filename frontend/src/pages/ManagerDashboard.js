@@ -258,12 +258,12 @@ export default function ManagerDashboard() {
 
           {/* Clients Tab */}
           <TabsContent value="clients">
-            <Card>
+            <Card className="bg-gradient-to-br from-[#1E293B] to-[#334155] border-slate-700">
               <CardHeader>
                 <div className="flex justify-between items-center">
                   <div>
-                    <CardTitle>All Clients</CardTitle>
-                    <CardDescription>Manage and monitor client cases</CardDescription>
+                    <CardTitle className="text-white">Tous les Clients</CardTitle>
+                    <CardDescription className="text-slate-400">Gérer et surveiller les dossiers clients</CardDescription>
                   </div>
                   <div className="flex space-x-2">
                     <Input
