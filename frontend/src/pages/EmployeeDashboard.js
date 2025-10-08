@@ -195,6 +195,84 @@ export default function EmployeeDashboard() {
               </div>
             </div>
             <div className="flex items-center space-x-4">
+              <Dialog open={showVisitorForm} onOpenChange={setShowVisitorForm}>
+                <DialogTrigger asChild>
+                  <Button className="bg-orange-500 hover:bg-orange-600 text-white">
+                    <Building2 className="w-4 h-4 mr-2" />
+                    Visiteur
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="bg-[#1E293B] border-slate-700 max-w-lg">
+                  <DialogHeader>
+                    <DialogTitle className="text-white">Enregistrer un Visiteur</DialogTitle>
+                    <DialogDescription className="text-slate-400">
+                      Enregistrez les informations du visiteur
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <div>
+                      <Label className="text-slate-300">Nom du visiteur</Label>
+                      <Input
+                        value={newVisitor.name}
+                        onChange={(e) => setNewVisitor({...newVisitor, name: e.target.value})}
+                        className="bg-[#0F172A] border-slate-600 text-white"
+                        placeholder="Nom complet"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-slate-300">Entreprise (optionnel)</Label>
+                      <Input
+                        value={newVisitor.company}
+                        onChange={(e) => setNewVisitor({...newVisitor, company: e.target.value})}
+                        className="bg-[#0F172A] border-slate-600 text-white"
+                        placeholder="Nom de l'entreprise"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-slate-300">Motif de la visite</Label>
+                      <Select value={newVisitor.purpose} onValueChange={(value) => setNewVisitor({...newVisitor, purpose: value})}>
+                        <SelectTrigger className="bg-[#0F172A] border-slate-600 text-white">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="bg-[#1E293B] border-slate-600">
+                          {visitorPurposeOptions.map(option => (
+                            <SelectItem key={option} value={option} className="text-white hover:bg-slate-700">
+                              {option}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    {newVisitor.purpose === 'Autre' && (
+                      <div>
+                        <Label className="text-slate-300">Précisions</Label>
+                        <Input
+                          value={newVisitor.details}
+                          onChange={(e) => setNewVisitor({...newVisitor, details: e.target.value})}
+                          className="bg-[#0F172A] border-slate-600 text-white"
+                          placeholder="Veuillez préciser..."
+                        />
+                      </div>
+                    )}
+                    <div className="flex space-x-2">
+                      <Button 
+                        onClick={handleCreateVisitor}
+                        className="flex-1 bg-orange-500 hover:bg-orange-600 text-white"
+                      >
+                        Enregistrer
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        onClick={() => setShowVisitorForm(false)}
+                        className="border-slate-600 text-slate-300 hover:bg-slate-800"
+                      >
+                        Annuler
+                      </Button>
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
+              
               <div className="text-right">
                 <p className="text-sm font-medium text-white">{user.full_name}</p>
                 <p className="text-xs text-slate-400">{user.role}</p>
