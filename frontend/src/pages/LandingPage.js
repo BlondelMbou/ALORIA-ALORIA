@@ -452,7 +452,7 @@ export default function LandingPage() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             {[
               { name: 'Canada', flag: '🇨🇦', desc: 'Travail, Études & Résidence Permanente - Immigration Express Entry, Permis de travail fermé/ouvert, Études supérieures', color: 'hover:border-red-500/50', bg: 'from-red-500/10 to-red-600/10' },
               { name: 'France', flag: '🇫🇷', desc: 'Passeport Talent & Études Supérieures - Visa étudiant, Regroupement familial, Carte de résident long séjour', color: 'hover:border-blue-500/50', bg: 'from-blue-500/10 to-blue-600/10' }
