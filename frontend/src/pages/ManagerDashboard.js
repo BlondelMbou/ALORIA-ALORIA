@@ -465,67 +465,70 @@ export default function ManagerDashboard() {
           {/* Visitors Tab */}
           <TabsContent value="visitors">
             <div className="grid md:grid-cols-2 gap-6">
-              <Card>
+              <Card className="bg-gradient-to-br from-[#1E293B] to-[#334155] border-slate-700">
                 <CardHeader>
-                  <CardTitle>Register New Visitor</CardTitle>
+                  <CardTitle className="text-white">Enregistrer un Visiteur</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
                     <div>
-                      <Label>Visitor Name</Label>
+                      <Label className="text-slate-300">Nom du Visiteur</Label>
                       <Input
                         value={newVisitor.name}
                         onChange={(e) => setNewVisitor({ ...newVisitor, name: e.target.value })}
-                        placeholder="Enter name"
+                        placeholder="Entrer le nom"
+                        className="bg-[#0F172A] border-slate-600 text-white placeholder:text-slate-500"
                         data-testid="visitor-name-input"
                       />
                     </div>
                     <div>
-                      <Label>Company</Label>
+                      <Label className="text-slate-300">Entreprise</Label>
                       <Input
                         value={newVisitor.company}
                         onChange={(e) => setNewVisitor({ ...newVisitor, company: e.target.value })}
-                        placeholder="Enter company"
+                        placeholder="Entrer l'entreprise"
+                        className="bg-[#0F172A] border-slate-600 text-white placeholder:text-slate-500"
                         data-testid="visitor-company-input"
                       />
                     </div>
                     <div>
-                      <Label>Purpose</Label>
+                      <Label className="text-slate-300">Motif</Label>
                       <Input
                         value={newVisitor.purpose}
                         onChange={(e) => setNewVisitor({ ...newVisitor, purpose: e.target.value })}
-                        placeholder="Purpose of visit"
+                        placeholder="Motif de la visite"
+                        className="bg-[#0F172A] border-slate-600 text-white placeholder:text-slate-500"
                         data-testid="visitor-purpose-input"
                       />
                     </div>
-                    <Button onClick={handleAddVisitor} className="w-full bg-orange-500 hover:bg-orange-600" data-testid="add-visitor-btn">
+                    <Button onClick={handleAddVisitor} className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg shadow-orange-500/50" data-testid="add-visitor-btn">
                       <Building2 className="w-4 h-4 mr-2" />
-                      Register Visitor
+                      Enregistrer le Visiteur
                     </Button>
                   </div>
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="bg-gradient-to-br from-[#1E293B] to-[#334155] border-slate-700">
                 <CardHeader>
-                  <CardTitle>Today's Visitors</CardTitle>
+                  <CardTitle className="text-white">Visiteurs d'Aujourd'hui</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
                     {visitors.slice(0, 10).map((visitor) => (
-                      <div key={visitor.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                      <div key={visitor.id} className="flex items-center justify-between p-3 bg-[#0F172A] border border-slate-700 rounded-lg">
                         <div>
-                          <p className="font-semibold text-slate-900">{visitor.name}</p>
-                          <p className="text-sm text-slate-600">{visitor.company} - {visitor.purpose}</p>
-                          <p className="text-xs text-slate-500">Arrived: {new Date(visitor.arrival_time).toLocaleTimeString()}</p>
+                          <p className="font-semibold text-white">{visitor.name}</p>
+                          <p className="text-sm text-slate-400">{visitor.company} - {visitor.purpose}</p>
+                          <p className="text-xs text-slate-500">Arrivée: {new Date(visitor.arrival_time).toLocaleTimeString()}</p>
                         </div>
                         {!visitor.departure_time && (
-                          <Button variant="outline" size="sm" onClick={() => handleCheckoutVisitor(visitor.id)}>
+                          <Button variant="outline" size="sm" onClick={() => handleCheckoutVisitor(visitor.id)} className="border-slate-600 text-slate-300 hover:bg-slate-800 hover:text-white">
                             Check Out
                           </Button>
                         )}
                         {visitor.departure_time && (
-                          <Badge variant="secondary">Checked Out</Badge>
+                          <Badge variant="secondary" className="bg-slate-700 text-slate-400">Parti</Badge>
                         )}
                       </div>
                     ))}
