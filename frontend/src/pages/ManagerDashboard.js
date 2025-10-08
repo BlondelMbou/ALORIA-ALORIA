@@ -307,9 +307,9 @@ export default function ManagerDashboard() {
                           <tr key={client.id} className="border-b border-slate-700/50 hover:bg-slate-800/30">
                             <td className="py-3 px-4 text-white">{clientCase?.client_name || 'N/A'}</td>
                             <td className="py-3 px-4">
-                              <Badge variant="outline">{client.country}</Badge>
+                              <Badge variant="outline" className="border-slate-600 text-slate-300">{client.country}</Badge>
                             </td>
-                            <td className="py-3 px-4 text-sm">{client.visa_type}</td>
+                            <td className="py-3 px-4 text-sm text-slate-300">{client.visa_type}</td>
                             <td className="py-3 px-4">
                               <Badge className={getStatusColor(client.current_status)}>
                                 {client.current_status}
