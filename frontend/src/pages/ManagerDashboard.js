@@ -80,6 +80,25 @@ export default function ManagerDashboard() {
     }
   };
 
+  const handleCreateClient = async () => {
+    try {
+      await clientsAPI.create(newClient);
+      toast.success('Client créé avec succès');
+      setNewClient({
+        email: '',
+        full_name: '',
+        phone: '',
+        country: '',
+        visa_type: '',
+        message: ''
+      });
+      setShowCreateClient(false);
+      fetchData();
+    } catch (error) {
+      toast.error('Erreur lors de la création du client');
+    }
+  };
+
   const handleAddVisitor = async () => {
     try {
       await visitorsAPI.create(newVisitor);
