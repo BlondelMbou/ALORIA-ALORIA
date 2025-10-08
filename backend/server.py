@@ -166,10 +166,21 @@ class MessageResponse(BaseModel):
     read_status: bool
     created_at: str
 
+class VisitorPurpose(str, Enum):
+    CONSULTATION = "Consultation initiale"
+    DOCUMENT_SUBMISSION = "Remise de documents"
+    STATUS_UPDATE = "Mise à jour du dossier"
+    APPOINTMENT = "Rendez-vous planifié"
+    URGENT_MATTER = "Affaire urgente"
+    INFORMATION_REQUEST = "Demande d'informations"
+    PAYMENT = "Paiement"
+    OTHER = "Autre"
+
 class VisitorCreate(BaseModel):
     name: str
-    company: str
-    purpose: str
+    company: Optional[str] = None
+    purpose: VisitorPurpose
+    details: Optional[str] = None  # Pour précisions si "Autre" sélectionné
 
 class VisitorResponse(BaseModel):
     model_config = ConfigDict(extra="ignore")
