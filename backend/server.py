@@ -186,11 +186,47 @@ class VisitorResponse(BaseModel):
     model_config = ConfigDict(extra="ignore")
     id: str
     name: str
-    company: str
-    purpose: str
+    company: Optional[str]
+    purpose: VisitorPurpose
+    details: Optional[str]
     arrival_time: str
     departure_time: Optional[str]
     created_at: str
+    
+class ChatMessage(BaseModel):
+    id: str
+    sender_id: str
+    sender_name: str
+    sender_role: str
+    receiver_id: str
+    receiver_name: str
+    receiver_role: str
+    message: str
+    timestamp: str
+    read_status: bool
+    
+class ChatMessageCreate(BaseModel):
+    receiver_id: str
+    message: str
+    
+class ChatConversation(BaseModel):
+    participant_id: str
+    participant_name: str
+    participant_role: str
+    last_message: Optional[str]
+    last_message_time: Optional[str]
+    unread_count: int
+
+class WorkflowStepUpdate(BaseModel):
+    step_index: int
+    status: Optional[str] = None
+    notes: Optional[str] = None
+    
+class CustomWorkflowStep(BaseModel):
+    title: str
+    description: str
+    documents: List[str]
+    duration: str
 
 class DashboardStats(BaseModel):
     total_cases: int
