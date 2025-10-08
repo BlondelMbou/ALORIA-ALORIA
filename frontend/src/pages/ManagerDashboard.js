@@ -424,36 +424,36 @@ export default function ManagerDashboard() {
 
           {/* Cases Tab */}
           <TabsContent value="cases">
-            <Card>
+            <Card className="bg-gradient-to-br from-[#1E293B] to-[#334155] border-slate-700">
               <CardHeader>
-                <CardTitle>All Cases</CardTitle>
-                <CardDescription>Complete overview of all immigration cases</CardDescription>
+                <CardTitle className="text-white">Tous les Dossiers</CardTitle>
+                <CardDescription className="text-slate-400">Vue complète de tous les dossiers d'immigration</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   {cases.map((caseItem) => (
-                    <div key={caseItem.id} className="border border-slate-200 rounded-lg p-4 hover:border-orange-500 transition-all">
+                    <div key={caseItem.id} className="bg-[#0F172A] border border-slate-700 rounded-lg p-4 hover:border-orange-500 transition-all">
                       <div className="flex justify-between items-start mb-3">
                         <div>
-                          <h3 className="font-semibold text-lg text-slate-900">{caseItem.client_name}</h3>
-                          <p className="text-sm text-slate-600">{caseItem.country} - {caseItem.visa_type}</p>
+                          <h3 className="font-semibold text-lg text-white">{caseItem.client_name}</h3>
+                          <p className="text-sm text-slate-400">{caseItem.country} - {caseItem.visa_type}</p>
                         </div>
                         <Badge className={getStatusColor(caseItem.status)}>{caseItem.status}</Badge>
                       </div>
                       <div className="mb-3">
-                        <div className="flex justify-between text-sm text-slate-600 mb-1">
-                          <span>Step {caseItem.current_step_index + 1} of {caseItem.workflow_steps.length}</span>
+                        <div className="flex justify-between text-sm text-slate-400 mb-1">
+                          <span>Étape {caseItem.current_step_index + 1} sur {caseItem.workflow_steps.length}</span>
                           <span>{Math.round(((caseItem.current_step_index + 1) / caseItem.workflow_steps.length) * 100)}%</span>
                         </div>
-                        <div className="w-full bg-slate-200 rounded-full h-2">
+                        <div className="w-full bg-slate-700 rounded-full h-2">
                           <div
                             className="bg-orange-500 h-2 rounded-full transition-all"
                             style={{ width: `${((caseItem.current_step_index + 1) / caseItem.workflow_steps.length) * 100}%` }}
                           ></div>
                         </div>
                       </div>
-                      <p className="text-sm text-slate-700">
-                        <strong>Current Step:</strong> {caseItem.workflow_steps[caseItem.current_step_index]?.title || 'N/A'}
+                      <p className="text-sm text-slate-300">
+                        <strong>Étape Actuelle:</strong> {caseItem.workflow_steps[caseItem.current_step_index]?.title || 'N/A'}
                       </p>
                     </div>
                   ))}
