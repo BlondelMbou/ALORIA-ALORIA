@@ -13,6 +13,7 @@ import { dashboardAPI, clientsAPI, casesAPI, employeesAPI, visitorsAPI } from '.
 import api from '../utils/api';
 import { Globe, LogOut, Users, FileText, TrendingUp, CheckCircle, Clock, AlertCircle, UserCheck, Building2, Search, Filter, Plus, UserPlus, MessageCircle } from 'lucide-react';
 import ChatWidget from '../components/ChatWidget';
+import NotificationBell from '../components/NotificationBell';
 import useSocket from '../hooks/useSocket';
 
 export default function ManagerDashboard() {
