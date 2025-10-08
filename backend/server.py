@@ -542,9 +542,9 @@ async def get_client_credentials(client_id: str, current_user: dict = Depends(ge
 # Client Management
 @api_router.post("/clients", response_model=ClientResponse) 
 async def create_client(client_data: ClientCreate, current_user: dict = Depends(get_current_user)):
-    # Only MANAGER can create clients now
-    if current_user["role"] != "MANAGER":
-        raise HTTPException(status_code=403, detail="Only managers can create clients")
+    # MANAGER and EMPLOYEE can create clients
+    if current_user["role"] not in ["MANAGER", "EMPLOYEE"]:
+        raise HTTPException(status_code=403, detail="Seuls les gestionnaires et employés peuvent créer des clients")
         
     # Check if user exists with this email
     existing_user = await db.users.find_one({"email": client_data.email})
