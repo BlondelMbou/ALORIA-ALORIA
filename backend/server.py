@@ -1161,6 +1161,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Mount Socket.IO at /socket.io
+app.mount("/socket.io", socket_app)
+
 @app.on_event("shutdown")
 async def shutdown_db_client():
     client.close()
