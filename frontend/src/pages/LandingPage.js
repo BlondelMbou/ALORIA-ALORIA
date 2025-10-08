@@ -68,9 +68,7 @@ export default function LandingPage() {
 
   const visaTypes = {
     Canada: ['Permis de Travail', 'Permis d\'Études', 'Résidence Permanente (Entrée Express)', 'Visa de Visiteur', 'Parrainage Familial'],
-    France: ['Permis de Travail (Passeport Talent)', 'Visa Étudiant', 'Regroupement Familial', 'Carte de Résident', 'Visa Touristique'],
-    Belgique: ['Permis de Travail', 'Visa Étudiant', 'Regroupement Familial', 'Carte Bleue Européenne'],
-    Allemagne: ['Carte Bleue EU', 'Visa Travail Qualifié', 'Visa Étudiant', 'Regroupement Familial']
+    France: ['Permis de Travail (Passeport Talent)', 'Visa Étudiant', 'Regroupement Familial', 'Carte de Résident', 'Visa Touristique']
   };
 
   const services = [
