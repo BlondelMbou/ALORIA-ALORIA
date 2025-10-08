@@ -829,8 +829,7 @@ async def update_case(case_id: str, update_data: CaseUpdate, current_user: dict 
     
     # Get updated case
     updated_case = await db.cases.find_one({"id": case_id}, {"_id": 0})
-    user = await db.users.find_one({"id": client["user_id"]})
-    updated_case["client_name"] = user["full_name"] if user else "Unknown"
+    updated_case["client_name"] = client_name
     
     return CaseResponse(**updated_case)
 
