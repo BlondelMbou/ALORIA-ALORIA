@@ -89,6 +89,35 @@ export default function ClientDashboard() {
     }));
   };
 
+  const handleChangePassword = async () => {
+    if (passwordForm.new_password !== passwordForm.confirm_password) {
+      toast.error('Les mots de passe ne correspondent pas');
+      return;
+    }
+
+    if (passwordForm.new_password.length < 8) {
+      toast.error('Le mot de passe doit contenir au moins 8 caractères');
+      return;
+    }
+
+    try {
+      const response = await api.patch('/auth/change-password', {
+        old_password: passwordForm.old_password,
+        new_password: passwordForm.new_password
+      });
+      
+      toast.success('Mot de passe mis à jour avec succès');
+      setShowPasswordChange(false);
+      setPasswordForm({
+        old_password: '',
+        new_password: '',
+        confirm_password: ''
+      });
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Erreur lors de la mise à jour du mot de passe');
+    }
+  };
+
   const getStatusColor = (status) => {
     switch (status?.toLowerCase()) {
       case 'nouveau': case 'new': return 'bg-blue-500 text-white';
