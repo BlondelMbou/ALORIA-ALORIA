@@ -953,6 +953,15 @@ async def send_chat_message(message_data: ChatMessageCreate, current_user: dict 
     
     await db.chat_messages.insert_one(message_dict)
     
+    # Create notification for message
+    await create_notification(
+        user_id=message_data.receiver_id,
+        title=f"Nouveau message de {current_user['full_name']}",
+        message=message_data.message[:100] + ("..." if len(message_data.message) > 100 else ""),
+        type="message",
+        related_id=message_id
+    )
+    
     # Send via WebSocket if receiver is online
     receiver_sid = connected_users.get(message_data.receiver_id)
     if receiver_sid:
