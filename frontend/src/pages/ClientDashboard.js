@@ -24,9 +24,10 @@ export default function ClientDashboard() {
   const [loading, setLoading] = useState(true);
   const [counselor, setCounselor] = useState(null);
   const [chatUnreadCount, setChatUnreadCount] = useState(0);
-  const [documentChecklist, setDocumentChecklist] = useState([]);
+  const [documentChecklist, setDocumentChecklist] = useState({});
+  const [activeTab, setActiveTab] = useState('progress');
   
-  // WebSocket hook
+  // WebSocket hook  
   const { connected } = useSocket(localStorage.getItem('token'));
 
   useEffect(() => {
