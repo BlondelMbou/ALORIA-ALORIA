@@ -371,10 +371,10 @@ export default function ManagerDashboard() {
 
           {/* Employees Tab */}
           <TabsContent value="employees">
-            <Card>
+            <Card className="bg-gradient-to-br from-[#1E293B] to-[#334155] border-slate-700">
               <CardHeader>
-                <CardTitle>Team Members</CardTitle>
-                <CardDescription>View and manage your immigration counselors</CardDescription>
+                <CardTitle className="text-white">Membres de l'Équipe</CardTitle>
+                <CardDescription className="text-slate-400">Voir et gérer vos conseillers en immigration</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
