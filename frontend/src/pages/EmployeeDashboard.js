@@ -684,6 +684,12 @@ export default function EmployeeDashboard() {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Chat Widget */}
+      <ChatWidget 
+        currentUser={user} 
+        onUnreadCountChange={setChatUnreadCount}
+      />
     </div>
   );
 }
