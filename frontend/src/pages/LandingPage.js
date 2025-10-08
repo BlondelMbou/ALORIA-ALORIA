@@ -925,19 +925,19 @@ export default function LandingPage() {
               <ul className="space-y-3 text-slate-400">
                 <li className="flex items-center space-x-2">
                   <span>🇨🇦</span>
-                  <span>Canada - Express Entry</span>
+                  <span>Canada - Express Entry, Permis de Travail</span>
                 </li>
                 <li className="flex items-center space-x-2">
                   <span>🇫🇷</span>
-                  <span>France - Passeport Talent</span>
+                  <span>France - Passeport Talent, Visa Étudiant</span>
                 </li>
                 <li className="flex items-center space-x-2">
-                  <span>🇧🇪</span>
-                  <span>Belgique - Carte Bleue</span>
+                  <span>💼</span>
+                  <span>Regroupement Familial</span>
                 </li>
                 <li className="flex items-center space-x-2">
-                  <span>🇩🇪</span>
-                  <span>Allemagne - Migration</span>
+                  <span>🎓</span>
+                  <span>Visas Étudiants & Académiques</span>
                 </li>
               </ul>
             </div>
