@@ -368,60 +368,73 @@ export default function EmployeeDashboard() {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => setSelectedCase(caseItem)}
-                                data-testid={`update-case-${caseItem.id}-btn`}
+                                data-testid={`view-case-${caseItem.id}-btn`}
                               >
-                                Update
+                                <FileText className="w-4 h-4 mr-2" />
+                                Voir Détails
                               </Button>
                             </DialogTrigger>
                             <DialogContent className="max-w-2xl">
                               <DialogHeader>
-                                <DialogTitle>Update Case Progress</DialogTitle>
-                                <DialogDescription>
+                                <DialogTitle className="text-white">Détails du Dossier</DialogTitle>
+                                <DialogDescription className="text-slate-400">
                                   {caseItem.client_name} - {caseItem.country} {caseItem.visa_type}
                                 </DialogDescription>
                               </DialogHeader>
-                              <div className="space-y-4">
-                                <div>
-                                  <Label>Current Step</Label>
-                                  <Select
-                                    defaultValue={caseItem.current_step_index.toString()}
-                                    onValueChange={(value) => {
-                                      handleUpdateCase(caseItem.id, { current_step_index: parseInt(value) });
-                                    }}
-                                  >
-                                    <SelectTrigger>
-                                      <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      {caseItem.workflow_steps.map((step, idx) => (
-                                        <SelectItem key={idx} value={idx.toString()}>
-                                          Step {idx + 1}: {step.title}
-                                        </SelectItem>
-                                      ))}
-                                    </SelectContent>
-                                  </Select>
+                              <div className="space-y-6">
+                                <div className="bg-[#0F172A] p-4 rounded-lg">
+                                  <h4 className="font-medium text-white mb-3">État Actuel</h4>
+                                  <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                      <p className="text-sm text-slate-400">Statut</p>
+                                      <Badge className={getStatusColor(caseItem.status)}>{caseItem.status}</Badge>
+                                    </div>
+                                    <div>
+                                      <p className="text-sm text-slate-400">Étape</p>
+                                      <p className="text-white font-medium">
+                                        {caseItem.current_step_index + 1} sur {caseItem.workflow_steps.length}
+                                      </p>
+                                    </div>
+                                  </div>
                                 </div>
+                                
                                 <div>
-                                  <Label>Status</Label>
-                                  <Select
-                                    defaultValue={caseItem.status}
-                                    onValueChange={(value) => {
-                                      handleUpdateCase(caseItem.id, { status: value });
-                                    }}
-                                  >
-                                    <SelectTrigger>
-                                      <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      <SelectItem value="New">New</SelectItem>
-                                      <SelectItem value="In Progress">In Progress</SelectItem>
-                                      <SelectItem value="Documents Pending">Documents Pending</SelectItem>
-                                      <SelectItem value="Under Review">Under Review</SelectItem>
-                                      <SelectItem value="Approved">Approved</SelectItem>
-                                      <SelectItem value="Rejected">Rejected</SelectItem>
-                                    </SelectContent>
-                                  </Select>
+                                  <h4 className="font-medium text-white mb-3">Progression des Étapes</h4>
+                                  <div className="space-y-3">
+                                    {caseItem.workflow_steps.map((step, idx) => {
+                                      const isCompleted = idx < caseItem.current_step_index;
+                                      const isCurrent = idx === caseItem.current_step_index;
+                                      
+                                      return (
+                                        <div key={idx} className="flex items-center space-x-3">
+                                          <div className={`w-8 h-8 rounded-full flex items-center justify-center font-semibold text-sm ${
+                                            isCompleted ? 'bg-green-500 text-white' : 
+                                            isCurrent ? 'bg-orange-500 text-white' : 
+                                            'bg-slate-700 text-slate-400'
+                                          }`}>
+                                            {isCompleted ? '✓' : idx + 1}
+                                          </div>
+                                          <div className="flex-1">
+                                            <p className={`font-medium ${
+                                              isCompleted ? 'text-green-400' : 
+                                              isCurrent ? 'text-orange-400' : 
+                                              'text-slate-500'
+                                            }`}>
+                                              {step.title}
+                                            </p>
+                                            <p className="text-sm text-slate-400">{step.description}</p>
+                                          </div>
+                                        </div>
+                                      );
+                                    })}
+                                  </div>
+                                </div>
+                                
+                                <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
+                                  <p className="text-blue-400 text-sm">
+                                    ℹ️ Les mises à jour de statut sont effectuées par le gestionnaire. 
+                                    Vous recevrez une notification en cas de modification.
+                                  </p>
                                 </div>
                               </div>
                             </DialogContent>
