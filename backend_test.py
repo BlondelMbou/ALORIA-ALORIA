@@ -666,10 +666,14 @@ class APITester:
         
         self.test_user_registration_and_login()
         self.test_client_creation_permissions()
+        self.test_client_creation_with_password()
+        self.test_password_change_api()
+        self.test_client_credentials_api()
         self.test_chat_apis()
         self.test_visitor_management()
         self.test_workflow_management()
         self.test_permissions_and_case_management()
+        self.test_complete_scenario()
         self.test_error_cases_and_validation()
         
         print("=" * 60)
