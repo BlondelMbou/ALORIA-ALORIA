@@ -800,6 +800,104 @@ async def get_unread_count(current_user: dict = Depends(get_current_user)):
     })
     return count
 
+# Chat API
+@api_router.get("/chat/conversations", response_model=List[ChatConversation])
+async def get_chat_conversations(current_user: dict = Depends(get_current_user)):
+    # Get all conversations for current user
+    messages = await db.chat_messages.find({
+        "$or": [
+            {"sender_id": current_user["id"]}, 
+            {"receiver_id": current_user["id"]}
+        ]
+    }, {"_id": 0}).sort("timestamp", -1).to_list(1000)
+    
+    # Group by participant
+    conversations = {}
+    for msg in messages:
+        other_user_id = msg["receiver_id"] if msg["sender_id"] == current_user["id"] else msg["sender_id"]
+        other_user_name = msg["receiver_name"] if msg["sender_id"] == current_user["id"] else msg["sender_name"]  
+        other_user_role = msg["receiver_role"] if msg["sender_id"] == current_user["id"] else msg["sender_role"]
+        
+        if other_user_id not in conversations:
+            conversations[other_user_id] = {
+                "participant_id": other_user_id,
+                "participant_name": other_user_name,
+                "participant_role": other_user_role,
+                "last_message": msg["message"],
+                "last_message_time": msg["timestamp"],
+                "unread_count": 0
+            }
+            
+        # Count unread messages from this participant
+        if msg["receiver_id"] == current_user["id"] and not msg["read_status"]:
+            conversations[other_user_id]["unread_count"] += 1
+    
+    return [ChatConversation(**conv) for conv in conversations.values()]
+
+@api_router.get("/chat/messages/{participant_id}", response_model=List[ChatMessage])
+async def get_chat_messages(participant_id: str, current_user: dict = Depends(get_current_user)):
+    # Get messages between current user and participant
+    messages = await db.chat_messages.find({
+        "$or": [
+            {"sender_id": current_user["id"], "receiver_id": participant_id},
+            {"sender_id": participant_id, "receiver_id": current_user["id"]}
+        ]
+    }, {"_id": 0}).sort("timestamp", 1).to_list(1000)
+    
+    # Mark messages as read
+    await db.chat_messages.update_many(
+        {"sender_id": participant_id, "receiver_id": current_user["id"]},
+        {"$set": {"read_status": True}}
+    )
+    
+    return [ChatMessage(**msg) for msg in messages]
+
+@api_router.post("/chat/send", response_model=ChatMessage)
+async def send_chat_message(message_data: ChatMessageCreate, current_user: dict = Depends(get_current_user)):
+    # Get receiver info
+    receiver = await db.users.find_one({"id": message_data.receiver_id})
+    if not receiver:
+        raise HTTPException(status_code=404, detail="Receiver not found")
+    
+    # Create message
+    message_id = str(uuid.uuid4())
+    message_dict = {
+        "id": message_id,
+        "sender_id": current_user["id"],
+        "sender_name": current_user["full_name"],
+        "sender_role": current_user["role"],
+        "receiver_id": message_data.receiver_id,
+        "receiver_name": receiver["full_name"],
+        "receiver_role": receiver["role"],
+        "message": message_data.message,
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "read_status": False
+    }
+    
+    await db.chat_messages.insert_one(message_dict)
+    
+    # Send via WebSocket if receiver is online
+    receiver_sid = connected_users.get(message_data.receiver_id)
+    if receiver_sid:
+        await sio.emit('new_message', {
+            'id': message_id,
+            'sender_id': current_user["id"],
+            'sender_name': current_user["full_name"],
+            'sender_role': current_user["role"],
+            'message': message_data.message,
+            'timestamp': message_dict["timestamp"]
+        }, room=receiver_sid)
+    
+    return ChatMessage(**message_dict)
+
+@api_router.get("/chat/unread-count")
+async def get_unread_chat_count(current_user: dict = Depends(get_current_user)):
+    count = await db.chat_messages.count_documents({
+        "receiver_id": current_user["id"],
+        "read_status": False
+    })
+    return {"unread_count": count}
+
 # Visitors
 @api_router.post("/visitors", response_model=VisitorResponse)
 async def create_visitor(visitor_data: VisitorCreate, current_user: dict = Depends(get_current_user)):
@@ -811,9 +909,11 @@ async def create_visitor(visitor_data: VisitorCreate, current_user: dict = Depen
         "id": visitor_id,
         "name": visitor_data.name,
         "company": visitor_data.company,
-        "purpose": visitor_data.purpose,
+        "purpose": visitor_data.purpose.value,
+        "details": visitor_data.details,
         "arrival_time": datetime.now(timezone.utc).isoformat(),
         "departure_time": None,
+        "registered_by": current_user["id"],
         "created_at": datetime.now(timezone.utc).isoformat()
     }
     
