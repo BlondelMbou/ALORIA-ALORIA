@@ -508,7 +508,7 @@ async def create_client(client_data: ClientCreate, current_user: dict = Depends(
         user_dict = {
             "id": user_id,
             "email": client_data.email,
-            "password": hash_password("temp123"),  # Temporary password
+            "password": hash_password("Aloria2024!"),  # Temporary password - must be changed
             "full_name": client_data.full_name,
             "phone": client_data.phone,
             "role": "CLIENT",
