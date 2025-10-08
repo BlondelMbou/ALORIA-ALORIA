@@ -206,23 +206,23 @@ export default function ManagerDashboard() {
 
         {/* Cases by Country */}
         <div className="grid md:grid-cols-2 gap-6 mb-8">
-          <Card>
+          <Card className="bg-gradient-to-br from-[#1E293B] to-[#334155] border-slate-700">
             <CardHeader>
-              <CardTitle>Cases by Country</CardTitle>
+              <CardTitle className="text-white">Dossiers par Pays</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 {stats?.cases_by_country && Object.entries(stats.cases_by_country).map(([country, count]) => (
                   <div key={country} className="flex items-center justify-between">
-                    <span className="text-slate-700 font-medium">{country}</span>
+                    <span className="text-slate-300 font-medium">{country}</span>
                     <div className="flex items-center space-x-3">
-                      <div className="w-32 bg-slate-200 rounded-full h-2">
+                      <div className="w-32 bg-slate-700 rounded-full h-2">
                         <div
                           className="bg-orange-500 h-2 rounded-full"
                           style={{ width: `${(count / stats.total_cases) * 100}%` }}
                         ></div>
                       </div>
-                      <span className="text-slate-900 font-semibold w-8 text-right">{count}</span>
+                      <span className="text-white font-semibold w-8 text-right">{count}</span>
                     </div>
                   </div>
                 ))}
@@ -230,16 +230,16 @@ export default function ManagerDashboard() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="bg-gradient-to-br from-[#1E293B] to-[#334155] border-slate-700">
             <CardHeader>
-              <CardTitle>Cases by Status</CardTitle>
+              <CardTitle className="text-white">Dossiers par Statut</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 {stats?.cases_by_status && Object.entries(stats.cases_by_status).map(([status, count]) => (
                   <div key={status} className="flex items-center justify-between">
                     <Badge className={getStatusColor(status)}>{status}</Badge>
-                    <span className="text-slate-900 font-semibold">{count}</span>
+                    <span className="text-white font-semibold">{count}</span>
                   </div>
                 ))}
               </div>
