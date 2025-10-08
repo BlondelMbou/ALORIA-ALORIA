@@ -468,6 +468,71 @@ export default function ClientDashboard() {
                         </div>
                       </div>
                     )}
+                    
+                    {/* Change Password Section */}
+                    <div className="pt-4 border-t border-slate-600">
+                      <Dialog open={showPasswordChange} onOpenChange={setShowPasswordChange}>
+                        <DialogTrigger asChild>
+                          <Button className="bg-orange-500 hover:bg-orange-600 text-white">
+                            <Lock className="w-4 h-4 mr-2" />
+                            Changer le mot de passe
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="bg-[#1E293B] border-slate-700">
+                          <DialogHeader>
+                            <DialogTitle className="text-white">Changer le mot de passe</DialogTitle>
+                            <DialogDescription className="text-slate-400">
+                              Entrez votre mot de passe actuel et votre nouveau mot de passe
+                            </DialogDescription>
+                          </DialogHeader>
+                          <div className="space-y-4">
+                            <div>
+                              <Label className="text-slate-300">Mot de passe actuel</Label>
+                              <Input
+                                type="password"
+                                value={passwordForm.old_password}
+                                onChange={(e) => setPasswordForm({...passwordForm, old_password: e.target.value})}
+                                className="bg-[#0F172A] border-slate-600 text-white"
+                              />
+                            </div>
+                            <div>
+                              <Label className="text-slate-300">Nouveau mot de passe</Label>
+                              <Input
+                                type="password"
+                                value={passwordForm.new_password}
+                                onChange={(e) => setPasswordForm({...passwordForm, new_password: e.target.value})}
+                                className="bg-[#0F172A] border-slate-600 text-white"
+                                placeholder="Minimum 8 caractères"
+                              />
+                            </div>
+                            <div>
+                              <Label className="text-slate-300">Confirmer le nouveau mot de passe</Label>
+                              <Input
+                                type="password"
+                                value={passwordForm.confirm_password}
+                                onChange={(e) => setPasswordForm({...passwordForm, confirm_password: e.target.value})}
+                                className="bg-[#0F172A] border-slate-600 text-white"
+                              />
+                            </div>
+                            <div className="flex space-x-2">
+                              <Button 
+                                onClick={handleChangePassword}
+                                className="flex-1 bg-orange-500 hover:bg-orange-600 text-white"
+                              >
+                                Mettre à jour
+                              </Button>
+                              <Button 
+                                variant="outline" 
+                                onClick={() => setShowPasswordChange(false)}
+                                className="border-slate-600 text-slate-300 hover:bg-slate-800"
+                              >
+                                Annuler
+                              </Button>
+                            </div>
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
