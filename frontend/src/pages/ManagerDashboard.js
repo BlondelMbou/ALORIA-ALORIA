@@ -207,6 +207,7 @@ export default function ManagerDashboard() {
               </div>
             </div>
             <div className="flex items-center space-x-4">
+              <NotificationBell currentUser={user} />
               <div className="text-right">
                 <p className="text-sm font-medium text-white">{user.full_name}</p>
                 <p className="text-xs text-slate-400">{user.role}</p>
