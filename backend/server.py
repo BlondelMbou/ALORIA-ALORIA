@@ -757,6 +757,10 @@ async def update_case(case_id: str, update_data: CaseUpdate, current_user: dict 
     if not client:
         raise HTTPException(status_code=404, detail="Client non trouvé")
     
+    # Get client user info for notifications
+    user = await db.users.find_one({"id": client["user_id"]})
+    client_name = user["full_name"] if user else "Unknown"
+    
     # Manager can update everything
     update_dict = {k: v for k, v in update_data.model_dump().items() if v is not None}
     update_dict["updated_at"] = datetime.now(timezone.utc).isoformat()
@@ -778,7 +782,6 @@ async def update_case(case_id: str, update_data: CaseUpdate, current_user: dict 
         )
         
         # Create notifications for case update
-        client_name = user["full_name"] if user else "Unknown"
         
         # Notify client
         await create_notification(
