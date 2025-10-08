@@ -27,6 +27,19 @@ export default function ManagerDashboard() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCountry, setFilterCountry] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
+  const [showCreateClient, setShowCreateClient] = useState(false);
+  const [newClient, setNewClient] = useState({
+    email: '',
+    full_name: '',
+    phone: '',
+    country: '',
+    visa_type: '',
+    message: ''
+  });
+  const [chatUnreadCount, setChatUnreadCount] = useState(0);
+  
+  // WebSocket hook
+  const { connected } = useSocket(localStorage.getItem('token'));
 
   useEffect(() => {
     fetchData();
