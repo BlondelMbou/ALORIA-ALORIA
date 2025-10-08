@@ -317,16 +317,16 @@ export default function ManagerDashboard() {
                             </td>
                             <td className="py-3 px-4">
                               <div className="flex items-center space-x-2">
-                                <div className="w-20 bg-slate-200 rounded-full h-2">
+                                <div className="w-20 bg-slate-700 rounded-full h-2">
                                   <div
                                     className="bg-orange-500 h-2 rounded-full"
                                     style={{ width: `${client.progress_percentage}%` }}
                                   ></div>
                                 </div>
-                                <span className="text-xs text-slate-600">{Math.round(client.progress_percentage)}%</span>
+                                <span className="text-xs text-slate-400">{Math.round(client.progress_percentage)}%</span>
                               </div>
                             </td>
-                            <td className="py-3 px-4 text-sm">{client.assigned_employee_name || 'Unassigned'}</td>
+                            <td className="py-3 px-4 text-sm text-slate-300">{client.assigned_employee_name || 'Non assigné'}</td>
                             <td className="py-3 px-4">
                               <Dialog>
                                 <DialogTrigger asChild>
