@@ -629,7 +629,9 @@ async def create_client(client_data: ClientCreate, current_user: dict = Depends(
         current_step=0,
         progress_percentage=0.0,
         created_at=client_dict["created_at"],
-        updated_at=client_dict["updated_at"]
+        updated_at=client_dict["updated_at"],
+        login_email=client_data.email,
+        default_password="Aloria2024!" if not existing_user else None
     )
 
 @api_router.get("/clients", response_model=List[ClientResponse])
