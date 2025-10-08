@@ -21,6 +21,7 @@ export const clientsAPI = {
   getOne: (id) => api.get(`/clients/${id}`),
   create: (data) => api.post('/clients', data),
   reassign: (clientId, employeeId) => api.patch(`/clients/${clientId}/reassign?new_employee_id=${employeeId}`),
+  getCredentials: (clientId) => api.get(`/clients/${clientId}/credentials`),
 };
 
 export const casesAPI = {
