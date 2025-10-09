@@ -19,13 +19,7 @@ export default function LoginPage() {
     password: ''
   });
 
-  const [registerData, setRegisterData] = useState({
-    email: '',
-    password: '',
-    full_name: '',
-    phone: '',
-    role: 'EMPLOYEE'
-  });
+  // Registration removed - only SuperAdmin can create users via hierarchy
 
   const handleLogin = async (e) => {
     e.preventDefault();
