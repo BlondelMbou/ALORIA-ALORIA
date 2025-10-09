@@ -11,7 +11,7 @@ import { Label } from '../components/ui/label';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '../components/ui/dialog';
 import { toast } from 'sonner';
 import { clientsAPI, casesAPI, messagesAPI } from '../utils/api';
-import { Globe, LogOut, CheckCircle, Clock, FileText, MessageCircle, Send, User, Mail, Phone, Calendar, ArrowRight, CheckSquare, Square, Lock } from 'lucide-react';
+import { Globe, LogOut, CheckCircle, Clock, FileText, MessageCircle, Send, User, Mail, Phone, Calendar, ArrowRight, CheckSquare, Square, Lock, Euro, CreditCard } from 'lucide-react';
 import ChatWidget from '../components/ChatWidget';
 import NotificationBell from '../components/NotificationBell';
 import useSocket from '../hooks/useSocket';
