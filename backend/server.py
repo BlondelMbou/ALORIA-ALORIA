@@ -643,6 +643,65 @@ async def login(user_credentials: UserLogin):
         user=UserResponse(**user)
     )
 
+# API spéciale pour créer le premier SuperAdmin
+@api_router.post("/auth/create-superadmin")
+async def create_first_superadmin(
+    superadmin_data: UserRegister,
+    secret_key: str  # Clé secrète pour sécuriser cette API
+):
+    """Crée le premier SuperAdmin - API sécurisée"""
+    
+    # Vérifier la clé secrète (devrait être dans les variables d'environnement)
+    expected_secret = os.environ.get("SUPERADMIN_CREATION_SECRET", "ALORIA_SUPER_SECRET_2024")
+    if secret_key != expected_secret:
+        raise HTTPException(status_code=403, detail="Clé secrète incorrecte")
+    
+    # Vérifier qu'il n'y a pas déjà de SuperAdmin
+    existing_superadmin = await db.users.find_one({"role": "SUPERADMIN"})
+    if existing_superadmin:
+        raise HTTPException(status_code=400, detail="Un SuperAdmin existe déjà")
+    
+    # Vérifier que l'email n'existe pas
+    existing_user = await db.users.find_one({"email": superadmin_data.email})
+    if existing_user:
+        raise HTTPException(status_code=400, detail="Un utilisateur avec cet email existe déjà")
+    
+    # Créer le SuperAdmin
+    user_id = str(uuid.uuid4())
+    hashed_password = hash_password(superadmin_data.password)
+    
+    superadmin_dict = {
+        "id": user_id,
+        "email": superadmin_data.email,
+        "password": hashed_password,
+        "full_name": superadmin_data.full_name,
+        "phone": superadmin_data.phone,
+        "role": "SUPERADMIN",
+        "is_active": True,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "created_by": "system",
+        "password_changed": True  # SuperAdmin n'a pas besoin de changer son mot de passe
+    }
+    
+    await db.users.insert_one(superadmin_dict)
+    
+    # Log la création
+    await log_user_activity(
+        user_id=user_id,
+        action="superadmin_created",
+        details={"created_by": "system", "initial_setup": True}
+    )
+    
+    return {
+        "message": "SuperAdmin créé avec succès",
+        "user": {
+            "id": user_id,
+            "email": superadmin_data.email,
+            "full_name": superadmin_data.full_name,
+            "role": "SUPERADMIN"
+        }
+    }
+
 @api_router.get("/auth/me", response_model=UserResponse)
 async def get_me(current_user: dict = Depends(get_current_user)):
     return UserResponse(**current_user)
