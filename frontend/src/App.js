@@ -61,6 +61,14 @@ function AppRoutes() {
           </PrivateRoute>
         }
       />
+      <Route
+        path="/superadmin/*"
+        element={
+          <PrivateRoute allowedRoles={['SUPERADMIN']}>
+            <SuperAdminDashboard />
+          </PrivateRoute>
+        }
+      />
     </Routes>
   );
 }
