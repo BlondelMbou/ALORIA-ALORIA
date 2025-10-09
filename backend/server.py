@@ -36,7 +36,10 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 7 days
 sio = socketio.AsyncServer(
     cors_allowed_origins="*",
     logger=True,
-    engineio_logger=True
+    engineio_logger=True,
+    async_mode='asgi',
+    ping_timeout=60,
+    ping_interval=25
 )
 
 # Create the main app
