@@ -1506,6 +1506,211 @@ async def send_welcome_email(email: str, name: str, role: str, password: str, cr
     
     return True
 
+# Système de gestion des paiements déclaratifs
+@api_router.post("/payments/declare", response_model=PaymentDeclarationResponse)
+async def declare_payment(payment_data: PaymentDeclaration, current_user: dict = Depends(get_current_user)):
+    """Client déclare un paiement effectué"""
+    if current_user["role"] != "CLIENT":
+        raise HTTPException(status_code=403, detail="Seuls les clients peuvent déclarer des paiements")
+    
+    # Trouver le client
+    client = await db.clients.find_one({"user_id": current_user["id"]})
+    if not client:
+        raise HTTPException(status_code=404, detail="Profil client non trouvé")
+    
+    # Créer la déclaration de paiement
+    payment_id = str(uuid.uuid4())
+    payment_dict = {
+        "id": payment_id,
+        "client_id": client["id"],
+        "client_name": current_user["full_name"],
+        "amount": payment_data.amount,
+        "currency": payment_data.currency,
+        "description": payment_data.description,
+        "payment_method": payment_data.payment_method,
+        "status": "pending",
+        "declared_at": datetime.now(timezone.utc).isoformat(),
+        "confirmed_at": None,
+        "confirmed_by": None,
+        "invoice_number": None
+    }
+    
+    await db.payment_declarations.insert_one(payment_dict)
+    
+    # Notifier le manager
+    managers = await db.users.find({"role": "MANAGER", "is_active": True}).to_list(100)
+    for manager in managers:
+        await create_notification(
+            user_id=manager["id"],
+            title=f"Nouveau paiement déclaré - {current_user['full_name']}",
+            message=f"Montant: {payment_data.amount} {payment_data.currency} - Méthode: {payment_data.payment_method}",
+            type="payment_declaration",
+            related_id=payment_id
+        )
+        
+        # WebSocket en temps réel
+        manager_sid = connected_users.get(manager["id"])
+        if manager_sid:
+            await sio.emit('payment_declared', {
+                'payment_id': payment_id,
+                'client_name': current_user["full_name"],
+                'amount': payment_data.amount,
+                'currency': payment_data.currency,
+                'payment_method': payment_data.payment_method
+            }, room=manager_sid)
+    
+    # Log activité
+    await log_user_activity(
+        user_id=current_user["id"],
+        action="declare_payment",
+        details={"payment_id": payment_id, "amount": payment_data.amount}
+    )
+    
+    return PaymentDeclarationResponse(**payment_dict)
+
+@api_router.get("/payments/pending", response_model=List[PaymentDeclarationResponse])
+async def get_pending_payments(current_user: dict = Depends(get_current_user)):
+    """Manager récupère les paiements en attente de confirmation"""
+    if current_user["role"] not in ["MANAGER", "SUPERADMIN"]:
+        raise HTTPException(status_code=403, detail="Accès refusé")
+    
+    payments = await db.payment_declarations.find(
+        {"status": "pending"}, {"_id": 0}
+    ).sort("declared_at", -1).to_list(100)
+    
+    return [PaymentDeclarationResponse(**payment) for payment in payments]
+
+@api_router.patch("/payments/{payment_id}/confirm", response_model=PaymentDeclarationResponse)
+async def confirm_payment(payment_id: str, confirmation: PaymentConfirmation, current_user: dict = Depends(get_current_user)):
+    """Manager confirme ou rejette un paiement"""
+    if current_user["role"] not in ["MANAGER", "SUPERADMIN"]:
+        raise HTTPException(status_code=403, detail="Seuls les managers peuvent confirmer les paiements")
+    
+    payment = await db.payment_declarations.find_one({"id": payment_id})
+    if not payment:
+        raise HTTPException(status_code=404, detail="Paiement non trouvé")
+    
+    if payment["status"] != "pending":
+        raise HTTPException(status_code=400, detail="Ce paiement a déjà été traité")
+    
+    # Générer un numéro de facture si confirmé
+    invoice_number = None
+    if confirmation.action == "confirm":
+        invoice_number = f"INV-{datetime.now().strftime('%Y%m%d')}-{payment_id[:8].upper()}"
+    
+    # Mettre à jour le paiement
+    update_data = {
+        "status": "confirmed" if confirmation.action == "confirm" else "rejected",
+        "confirmed_at": datetime.now(timezone.utc).isoformat(),
+        "confirmed_by": current_user["id"],
+        "confirmation_notes": confirmation.notes,
+        "invoice_number": invoice_number
+    }
+    
+    await db.payment_declarations.update_one({"id": payment_id}, {"$set": update_data})
+    
+    # Notifier le client
+    client = await db.clients.find_one({"id": payment["client_id"]})
+    if client:
+        client_user = await db.users.find_one({"id": client["user_id"]})
+        if client_user:
+            await create_notification(
+                user_id=client_user["id"],
+                title=f"Paiement {'confirmé' if confirmation.action == 'confirm' else 'rejeté'}",
+                message=f"Votre paiement de {payment['amount']} {payment['currency']} a été {'confirmé' if confirmation.action == 'confirm' else 'rejeté'} par {current_user['full_name']}",
+                type="payment_confirmation",
+                related_id=payment_id
+            )
+            
+            # WebSocket
+            client_sid = connected_users.get(client_user["id"])
+            if client_sid:
+                await sio.emit('payment_confirmed', {
+                    'payment_id': payment_id,
+                    'status': confirmation.action,
+                    'invoice_number': invoice_number,
+                    'confirmed_by': current_user["full_name"]
+                }, room=client_sid)
+    
+    # Générer la facture PDF si confirmé
+    if confirmation.action == "confirm":
+        await generate_invoice_pdf(payment_id, invoice_number)
+    
+    # Log activité
+    await log_user_activity(
+        user_id=current_user["id"],
+        action="confirm_payment",
+        details={"payment_id": payment_id, "action": confirmation.action}
+    )
+    
+    # Retourner le paiement mis à jour
+    updated_payment = await db.payment_declarations.find_one({"id": payment_id}, {"_id": 0})
+    return PaymentDeclarationResponse(**updated_payment)
+
+# Fonction pour générer une facture PDF simple
+async def generate_invoice_pdf(payment_id: str, invoice_number: str):
+    """Génère une facture PDF simple pour le paiement confirmé"""
+    try:
+        payment = await db.payment_declarations.find_one({"id": payment_id})
+        if not payment:
+            return
+            
+        # Données de la facture
+        invoice_data = {
+            "invoice_number": invoice_number,
+            "date": datetime.now().strftime("%d/%m/%Y"),
+            "client_name": payment["client_name"],
+            "amount": payment["amount"],
+            "currency": payment["currency"],
+            "description": payment["description"] or "Services d'immigration",
+            "payment_method": payment["payment_method"]
+        }
+        
+        # Stocker les données de facture (en attendant la génération PDF réelle)
+        invoice_record = {
+            "id": str(uuid.uuid4()),
+            "payment_id": payment_id,
+            "invoice_number": invoice_number,
+            "data": invoice_data,
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
+        
+        await db.invoices.insert_one(invoice_record)
+        
+        # TODO: Implémenter génération PDF réelle avec ReportLab ou WeasyPrint
+        logger.info(f"Facture {invoice_number} générée pour le paiement {payment_id}")
+        
+    except Exception as e:
+        logger.error(f"Erreur génération facture: {e}")
+
+@api_router.get("/payments/client-history", response_model=List[PaymentDeclarationResponse])
+async def get_client_payment_history(current_user: dict = Depends(get_current_user)):
+    """Client récupère son historique de paiements"""
+    if current_user["role"] != "CLIENT":
+        raise HTTPException(status_code=403, detail="Accès refusé")
+    
+    client = await db.clients.find_one({"user_id": current_user["id"]})
+    if not client:
+        raise HTTPException(status_code=404, detail="Profil client non trouvé")
+    
+    payments = await db.payment_declarations.find(
+        {"client_id": client["id"]}, {"_id": 0}
+    ).sort("declared_at", -1).to_list(100)
+    
+    return [PaymentDeclarationResponse(**payment) for payment in payments]
+
+@api_router.get("/payments/manager-history", response_model=List[PaymentDeclarationResponse])
+async def get_manager_payment_history(current_user: dict = Depends(get_current_user)):
+    """Manager récupère l'historique complet des paiements"""
+    if current_user["role"] not in ["MANAGER", "SUPERADMIN"]:
+        raise HTTPException(status_code=403, detail="Accès refusé")
+    
+    payments = await db.payment_declarations.find(
+        {}, {"_id": 0}
+    ).sort("declared_at", -1).to_list(1000)
+    
+    return [PaymentDeclarationResponse(**payment) for payment in payments]
+
 # Notifications API
 async def create_notification(user_id: str, title: str, message: str, type: str, related_id: str = None):
     """Helper function to create notifications"""
