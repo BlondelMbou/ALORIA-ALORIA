@@ -6,6 +6,7 @@ import LoginPage from '@/pages/LoginPage';
 import ManagerDashboard from '@/pages/ManagerDashboard';
 import EmployeeDashboard from '@/pages/EmployeeDashboard';
 import ClientDashboard from '@/pages/ClientDashboard';
+import SuperAdminDashboard from '@/pages/SuperAdminDashboard';
 import { AuthProvider, useAuth } from '@/context/AuthContext';
 import { Toaster } from 'sonner';
 
