@@ -44,6 +44,12 @@ export default function ManagerDashboard() {
   const [activeSearchTab, setActiveSearchTab] = useState('clients');
   const [pendingPayments, setPendingPayments] = useState([]);
   const [paymentHistory, setPaymentHistory] = useState([]);
+  const [showPasswordDialog, setShowPasswordDialog] = useState(false);
+  const [passwordForm, setPasswordForm] = useState({
+    old_password: '',
+    new_password: '',
+    confirm_password: ''
+  });
   
   // WebSocket hook
   const { connected } = useSocket(localStorage.getItem('token'));
