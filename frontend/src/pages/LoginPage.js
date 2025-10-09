@@ -35,7 +35,9 @@ export default function LoginPage() {
       const user = await login(loginData.email, loginData.password);
       toast.success('Connexion réussie !');
       
-      if (user.role === 'MANAGER') {
+      if (user.role === 'SUPERADMIN') {
+        navigate('/superadmin/dashboard');
+      } else if (user.role === 'MANAGER') {
         navigate('/manager/dashboard');
       } else if (user.role === 'EMPLOYEE') {
         navigate('/employee/dashboard');
