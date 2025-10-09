@@ -243,7 +243,7 @@ export default function ClientDashboard() {
 
         {/* Main Content Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-4 mb-6 bg-[#1E293B] border border-slate-700">
+          <TabsList className="grid w-full grid-cols-5 mb-6 bg-[#1E293B] border border-slate-700">
             <TabsTrigger value="progress" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white text-slate-300">
               Progression
             </TabsTrigger>
@@ -252,6 +252,9 @@ export default function ClientDashboard() {
             </TabsTrigger>
             <TabsTrigger value="timeline" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white text-slate-300">
               Étapes À Venir
+            </TabsTrigger>
+            <TabsTrigger value="payments" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white text-slate-300">
+              Paiements
             </TabsTrigger>
             <TabsTrigger value="profile" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white text-slate-300">
               Mon Profil
