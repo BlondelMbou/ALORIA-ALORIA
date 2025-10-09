@@ -92,6 +92,52 @@ export default function ClientDashboard() {
       setLoading(false);
     }
   };
+
+  const fetchPayments = async () => {
+    try {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/payments/history`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setPayments(data);
+      }
+    } catch (error) {
+      console.error('Error fetching payments:', error);
+    }
+  };
+
+  const handlePaymentDeclaration = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/payments/declare`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify(paymentForm)
+      });
+
+      if (response.ok) {
+        toast.success('Déclaration de paiement envoyée avec succès !');
+        setPaymentForm({
+          amount: '',
+          currency: 'EUR',
+          description: '',
+          payment_method: 'Virement bancaire'
+        });
+        await fetchPayments();
+      } else {
+        throw new Error('Erreur lors de la déclaration');
+      }
+    } catch (error) {
+      toast.error('Erreur lors de la déclaration de paiement');
+      console.error(error);
+    }
+  };
   
   const toggleDocumentComplete = (docName) => {
     setDocumentChecklist(prev => ({
