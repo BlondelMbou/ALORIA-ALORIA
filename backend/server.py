@@ -268,6 +268,17 @@ class TokenResponse(BaseModel):
     token_type: str
     user: UserResponse
 
+class UserRegister(BaseModel):
+    email: EmailStr
+    full_name: str
+    phone: Optional[str] = None
+    password: str
+
+class LoginResponse(BaseModel):
+    access_token: str
+    token_type: str
+    user: UserResponse
+
 class ClientCreate(BaseModel):
     email: EmailStr
     full_name: str
