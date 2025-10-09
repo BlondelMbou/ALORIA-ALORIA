@@ -2283,9 +2283,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Create combined app with Socket.IO
-app = socketio.ASGIApp(sio, other_asgi_app=app)
-
+# Setup shutdown event first
 @app.on_event("shutdown")
 async def shutdown_db_client():
     client.close()
+
+# Create combined app with Socket.IO
+app = socketio.ASGIApp(sio, other_asgi_app=app)
