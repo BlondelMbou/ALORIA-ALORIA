@@ -42,6 +42,8 @@ export default function ManagerDashboard() {
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
   const [activeSearchTab, setActiveSearchTab] = useState('clients');
+  const [pendingPayments, setPendingPayments] = useState([]);
+  const [paymentHistory, setPaymentHistory] = useState([]);
   
   // WebSocket hook
   const { connected } = useSocket(localStorage.getItem('token'));
