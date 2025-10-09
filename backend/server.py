@@ -274,6 +274,11 @@ class MessageResponse(BaseModel):
     read_status: bool
     created_at: str
 
+class UserRole(str, Enum):
+    SUPERADMIN = "SUPERADMIN"
+    MANAGER = "MANAGER"
+    EMPLOYEE = "EMPLOYEE" 
+    CLIENT = "CLIENT"
 class VisitorPurpose(str, Enum):
     CONSULTATION = "Consultation initiale"
     DOCUMENT_SUBMISSION = "Remise de documents"
