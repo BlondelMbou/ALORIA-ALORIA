@@ -151,9 +151,6 @@ export default function LoginPage() {
                 </form>
               </CardContent>
             </Card>
-          </TabsContent>
-
-          <TabsContent value="register">
             <Card className="bg-gradient-to-br from-[#1E293B] to-[#334155] border-slate-700">
               <CardHeader>
                 <CardTitle className="text-white">Créer un Compte</CardTitle>
