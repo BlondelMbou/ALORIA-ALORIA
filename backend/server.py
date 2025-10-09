@@ -2283,8 +2283,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Integrate Socket.IO with FastAPI using socketio.ASGIApp as a submount
-socket_app_wrapper = socketio.ASGIApp(sio, other_asgi_app=app, socketio_path="/api/socket.io")
+# Create combined app with Socket.IO
+app = socketio.ASGIApp(sio, other_asgi_app=app)
 
 @app.on_event("shutdown")
 async def shutdown_db_client():
