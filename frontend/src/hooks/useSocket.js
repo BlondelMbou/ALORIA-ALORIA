@@ -14,6 +14,7 @@ const useSocket = (token) => {
     const backendUrl = process.env.REACT_APP_BACKEND_URL || import.meta.env.REACT_APP_BACKEND_URL;
     
     socketRef.current = io(backendUrl, {
+      path: '/socket.io',
       transports: ['websocket', 'polling'],
       timeout: 20000,
       forceNew: true
