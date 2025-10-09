@@ -98,12 +98,11 @@ export default function LoginPage() {
             <p className="text-slate-400 mt-2">Accédez à votre espace avec vos identifiants</p>
           </div>
 
-          <TabsContent value="login">
-            <Card className="bg-gradient-to-br from-[#1E293B] to-[#334155] border-slate-700">
-              <CardHeader>
-                <CardTitle className="text-white">Bon Retour</CardTitle>
-                <CardDescription className="text-slate-400">Entrez vos identifiants pour accéder à votre compte</CardDescription>
-              </CardHeader>
+          <Card className="bg-gradient-to-br from-[#1E293B] to-[#334155] border-slate-700">
+            <CardHeader>
+              <CardTitle className="text-white">Bon Retour</CardTitle>
+              <CardDescription className="text-slate-400">Entrez vos identifiants pour accéder à votre compte</CardDescription>
+            </CardHeader>
               <CardContent>
                 <form onSubmit={handleLogin} className="space-y-4">
                   <div>
