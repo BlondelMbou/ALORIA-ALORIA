@@ -83,6 +83,7 @@ export default function ClientDashboard() {
         }
 
         await fetchMessages();
+        await fetchPayments();
       }
     } catch (error) {
       toast.error('Erreur lors du chargement');
