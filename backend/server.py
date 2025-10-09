@@ -2283,8 +2283,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Mount Socket.IO at /api/socket.io for Kubernetes ingress routing
-app.mount("/api/socket.io", socket_app)
+# Integrate Socket.IO with FastAPI using socketio.ASGIApp as a submount
+socket_app_wrapper = socketio.ASGIApp(sio, other_asgi_app=app, socketio_path="/api/socket.io")
 
 @app.on_event("shutdown")
 async def shutdown_db_client():
