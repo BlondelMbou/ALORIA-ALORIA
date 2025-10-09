@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-## user_problem_statement: "Implémentation complète des fonctionnalités ALORIA AGENCY: 1) Manager peut créer clients et mettre à jour statuts, 2) Employé peut enregistrer visiteurs, 3) Profil client complet avec suivi dossier, 4) Chat temps réel WebSocket intégré dans tous dashboards, 5) Harmonisation couleurs, 6) Amélioration landing page"
+## user_problem_statement: "ALORIA AGENCY V2 - Evolution majeure: 1) Nouvelle hiérarchie SUPERADMIN→MANAGER→EMPLOYEE→CLIENT avec permissions strictes, 2) Système de paiements déclaratifs avec génération factures PDF, 3) Search bars intelligentes et tri chronologique, 4) Interface SuperAdmin avec monitoring complet et impersonation, 5) Intégration email pour informations de connexion, 6) Gestion visiteurs étendue pour employés"
 
 ## backend:
   - task: "Employee client creation API (CORRECTED)"
