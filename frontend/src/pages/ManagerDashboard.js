@@ -342,6 +342,90 @@ export default function ManagerDashboard() {
                 <p className="text-sm font-medium text-white">{user.full_name}</p>
                 <p className="text-xs text-slate-400">{user.role}</p>
               </div>
+              
+              {/* Profile Button */}
+              <Dialog open={showPasswordDialog} onOpenChange={setShowPasswordDialog}>
+                <DialogTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="border-slate-600 text-slate-300 hover:bg-slate-800 hover:text-white"
+                  >
+                    <User className="w-4 h-4 mr-2" />
+                    Profil
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="bg-slate-800 border-slate-600 text-white">
+                  <DialogHeader>
+                    <DialogTitle className="flex items-center space-x-2">
+                      <Lock className="w-5 h-5 text-orange-500" />
+                      <span>Changer le Mot de Passe</span>
+                    </DialogTitle>
+                    <DialogDescription className="text-slate-400">
+                      Modifiez votre mot de passe pour sécuriser votre compte
+                    </DialogDescription>
+                  </DialogHeader>
+                  
+                  <form onSubmit={handleChangePassword} className="space-y-4">
+                    <div>
+                      <Label htmlFor="old_password" className="text-slate-300">Mot de passe actuel</Label>
+                      <Input
+                        id="old_password"
+                        type="password"
+                        value={passwordForm.old_password}
+                        onChange={(e) => setPasswordForm({...passwordForm, old_password: e.target.value})}
+                        placeholder="Entrez votre mot de passe actuel"
+                        required
+                        className="bg-slate-700 border-slate-600 text-white"
+                      />
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="new_password" className="text-slate-300">Nouveau mot de passe</Label>
+                      <Input
+                        id="new_password"
+                        type="password"
+                        value={passwordForm.new_password}
+                        onChange={(e) => setPasswordForm({...passwordForm, new_password: e.target.value})}
+                        placeholder="Entrez un nouveau mot de passe (min. 8 caractères)"
+                        required
+                        className="bg-slate-700 border-slate-600 text-white"
+                      />
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="confirm_password" className="text-slate-300">Confirmer le nouveau mot de passe</Label>
+                      <Input
+                        id="confirm_password"
+                        type="password"
+                        value={passwordForm.confirm_password}
+                        onChange={(e) => setPasswordForm({...passwordForm, confirm_password: e.target.value})}
+                        placeholder="Confirmez votre nouveau mot de passe"
+                        required
+                        className="bg-slate-700 border-slate-600 text-white"
+                      />
+                    </div>
+                    
+                    <div className="flex justify-end space-x-3 pt-4">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => setShowPasswordDialog(false)}
+                        className="border-slate-600 text-slate-300"
+                      >
+                        Annuler
+                      </Button>
+                      <Button
+                        type="submit"
+                        className="bg-orange-600 hover:bg-orange-700 text-white"
+                      >
+                        <Lock className="w-4 h-4 mr-2" />
+                        Modifier
+                      </Button>
+                    </div>
+                  </form>
+                </DialogContent>
+              </Dialog>
+              
               <Button
                 variant="outline"
                 onClick={logout}
