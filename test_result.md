@@ -431,11 +431,19 @@
   run_ui: false
 
 ## test_plan:
-  current_focus: []
+  current_focus:
+    - "Landing page with contact form France/Canada"
+    - "LoginPage with JWT authentication"
+    - "ManagerDashboard complete functionality"
+    - "EmployeeDashboard with client portfolio"
+    - "ClientDashboard with case progression"
+    - "WebSocket chat system integration"
+    - "Notification system integration"
+    - "Color theme harmonization"
   stuck_tasks: []
-  test_all: false
+  test_all: true
   test_priority: "high_first"
-  last_test_session: "ALORIA AGENCY V2 - COMPREHENSIVE TESTING: 1) SuperAdmin creation with secret key, 2) Role hierarchy permissions (SuperAdmin→Manager→Employee→Client), 3) Declarative payment system with invoice generation, 4) SuperAdmin monitoring APIs (users, activities, impersonation, dashboard stats), 5) Global search system, 6) Extended visitor management with statistics, 7) Complete V2 workflow scenario testing"
+  last_test_session: "ALORIA AGENCY FRONTEND VALIDATION V2 - Complete frontend testing to validate existing functionalities before V2 implementation: 1) Landing page with France/Canada contact form, 2) LoginPage with JWT authentication, 3) ManagerDashboard with client/case/visitor management, 4) EmployeeDashboard with client portfolio and visitor registration, 5) ClientDashboard with case progression and documents, 6) WebSocket chat system, 7) Notification system, 8) Color theme harmonization"
 
 ## agent_communication:
     -agent: "main"
