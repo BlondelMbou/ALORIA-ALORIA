@@ -279,6 +279,7 @@ class UserRole(str, Enum):
     MANAGER = "MANAGER"
     EMPLOYEE = "EMPLOYEE" 
     CLIENT = "CLIENT"
+
 class VisitorPurpose(str, Enum):
     CONSULTATION = "Consultation initiale"
     DOCUMENT_SUBMISSION = "Remise de documents"
