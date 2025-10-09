@@ -484,13 +484,82 @@ export default function ManagerDashboard() {
                       </DialogContent>
                     </Dialog>
                     
-                    <Input
-                      placeholder="Rechercher des clients..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="w-64 bg-[#0F172A] border-slate-600 text-white placeholder:text-slate-500"
-                      data-testid="search-clients-input"
-                    />
+                    <div className="relative">
+                      <Input
+                        placeholder="Recherche intelligente (clients, dossiers, employés...)"
+                        value={searchTerm}
+                        onChange={(e) => {
+                          setSearchTerm(e.target.value);
+                          performIntelligentSearch(e.target.value, activeSearchTab);
+                        }}
+                        className="w-80 bg-[#0F172A] border-slate-600 text-white placeholder:text-slate-500 pr-10"
+                        data-testid="search-clients-input"
+                      />
+                      <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+                      
+                      {/* Search Results Dropdown */}
+                      {(searchTerm && searchResults.length > 0) && (
+                        <div className="absolute top-full left-0 right-0 bg-slate-800 border border-slate-600 rounded-lg shadow-lg z-50 mt-1">
+                          <div className="p-3 border-b border-slate-600">
+                            <div className="flex space-x-2 text-xs">
+                              {['clients', 'cases', 'users', 'visitors'].map((tab) => (
+                                <button
+                                  key={tab}
+                                  onClick={() => {
+                                    setActiveSearchTab(tab);
+                                    performIntelligentSearch(searchTerm, tab);
+                                  }}
+                                  className={`px-3 py-1 rounded ${
+                                    activeSearchTab === tab 
+                                      ? 'bg-orange-600 text-white' 
+                                      : 'bg-slate-600 text-slate-300 hover:bg-slate-500'
+                                  }`}
+                                >
+                                  {tab === 'clients' ? 'Clients' :
+                                   tab === 'cases' ? 'Dossiers' :
+                                   tab === 'users' ? 'Utilisateurs' : 'Visiteurs'}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                          <div className="max-h-64 overflow-y-auto">
+                            {searchResults.map((result, index) => (
+                              <div 
+                                key={index}
+                                className="p-3 hover:bg-slate-700 cursor-pointer border-b border-slate-700 last:border-b-0"
+                                onClick={() => {
+                                  // Handle result click based on type
+                                  setSearchTerm('');
+                                  setSearchResults([]);
+                                  toast.success(`Sélectionné: ${result.title}`);
+                                }}
+                              >
+                                <div className="flex items-center justify-between">
+                                  <div>
+                                    <p className="text-white font-medium">{result.title}</p>
+                                    <p className="text-slate-400 text-sm">{result.description}</p>
+                                  </div>
+                                  <Badge className={`${
+                                    result.category === 'clients' ? 'bg-blue-500/20 text-blue-400' :
+                                    result.category === 'cases' ? 'bg-green-500/20 text-green-400' :
+                                    result.category === 'users' ? 'bg-purple-500/20 text-purple-400' :
+                                    'bg-orange-500/20 text-orange-400'
+                                  }`}>
+                                    {result.category}
+                                  </Badge>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                          {isSearching && (
+                            <div className="p-4 text-center text-slate-400">
+                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-orange-500 mx-auto"></div>
+                              <span className="ml-2">Recherche...</span>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
                     <Select value={filterCountry} onValueChange={setFilterCountry}>
                       <SelectTrigger className="w-32 bg-[#0F172A] border-slate-600 text-white">
                         <SelectValue />
