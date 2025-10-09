@@ -39,6 +39,9 @@ export default function ManagerDashboard() {
     message: ''
   });
   const [chatUnreadCount, setChatUnreadCount] = useState(0);
+  const [searchResults, setSearchResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [activeSearchTab, setActiveSearchTab] = useState('clients');
   
   // WebSocket hook
   const { connected } = useSocket(localStorage.getItem('token'));
