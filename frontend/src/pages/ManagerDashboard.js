@@ -157,6 +157,50 @@ export default function ManagerDashboard() {
     }
   };
 
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+    
+    if (passwordForm.new_password !== passwordForm.confirm_password) {
+      toast.error('Les nouveaux mots de passe ne correspondent pas');
+      return;
+    }
+
+    if (passwordForm.new_password.length < 8) {
+      toast.error('Le nouveau mot de passe doit contenir au moins 8 caractères');
+      return;
+    }
+
+    try {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/auth/change-password`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+          old_password: passwordForm.old_password,
+          new_password: passwordForm.new_password
+        })
+      });
+
+      if (response.ok) {
+        toast.success('Mot de passe modifié avec succès !');
+        setPasswordForm({
+          old_password: '',
+          new_password: '',
+          confirm_password: ''
+        });
+        setShowPasswordDialog(false);
+      } else {
+        const error = await response.json();
+        throw new Error(error.detail || 'Erreur lors du changement de mot de passe');
+      }
+    } catch (error) {
+      toast.error(error.message);
+      console.error('Error changing password:', error);
+    }
+  };
+
   const handleReassignClient = async (clientId, employeeId) => {
     try {
       await clientsAPI.reassign(clientId, employeeId);
