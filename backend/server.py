@@ -1918,6 +1918,225 @@ async def admin_delete_user(user_id: str, current_user: dict = Depends(get_curre
     
     return {"message": "Utilisateur supprimé avec succès"}
 
+# APIs de recherche intelligente
+@api_router.get("/search/global")
+async def global_search(
+    query: str,
+    category: Optional[str] = None,  # "users", "clients", "cases", "visitors"
+    limit: int = 20,
+    current_user: dict = Depends(get_current_user)
+):
+    """Recherche intelligente globale dans toute l'application"""
+    
+    if len(query.strip()) < 2:
+        return {"results": [], "total": 0}
+    
+    results = []
+    
+    # Construire le pattern de recherche (insensible à la casse)
+    search_pattern = {"$regex": query, "$options": "i"}
+    
+    # Recherche dans les utilisateurs (si autorisé)
+    if (category is None or category == "users") and current_user["role"] in ["MANAGER", "SUPERADMIN"]:
+        users = await db.users.find({
+            "$or": [
+                {"full_name": search_pattern},
+                {"email": search_pattern},
+                {"phone": search_pattern}
+            ],
+            "is_active": True
+        }, {"_id": 0, "password": 0}).limit(limit).to_list(limit)
+        
+        for user in users:
+            results.append({
+                "type": "user",
+                "id": user["id"],
+                "title": user["full_name"],
+                "subtitle": f"{user['email']} - {user['role']}",
+                "data": user
+            })
+    
+    # Recherche dans les clients
+    if (category is None or category == "clients") and current_user["role"] in ["MANAGER", "EMPLOYEE", "SUPERADMIN"]:
+        # Pour les employés, limiter aux clients assignés
+        client_filter = {}
+        if current_user["role"] == "EMPLOYEE":
+            client_filter["assigned_employee_id"] = current_user["id"]
+        
+        clients = await db.clients.find(client_filter, {"_id": 0}).to_list(1000)
+        client_ids = [c["id"] for c in clients]
+        
+        # Rechercher dans les utilisateurs clients correspondants
+        client_users = await db.users.find({
+            "id": {"$in": [c["user_id"] for c in clients]},
+            "$or": [
+                {"full_name": search_pattern},
+                {"email": search_pattern},
+                {"phone": search_pattern}
+            ]
+        }, {"_id": 0, "password": 0}).limit(limit).to_list(limit)
+        
+        for client_user in client_users:
+            client_data = next((c for c in clients if c["user_id"] == client_user["id"]), None)
+            if client_data:
+                results.append({
+                    "type": "client",
+                    "id": client_data["id"],
+                    "title": client_user["full_name"],
+                    "subtitle": f"{client_data['country']} - {client_data['visa_type']} - {client_data['current_status']}",
+                    "data": {**client_user, **client_data}
+                })
+    
+    # Recherche dans les dossiers/cas
+    if (category is None or category == "cases") and current_user["role"] in ["MANAGER", "EMPLOYEE", "SUPERADMIN"]:
+        case_filter = {}
+        if current_user["role"] == "EMPLOYEE":
+            # Limiter aux cas des clients assignés à cet employé
+            employee_clients = await db.clients.find(
+                {"assigned_employee_id": current_user["id"]}, {"_id": 0}
+            ).to_list(1000)
+            case_filter["client_id"] = {"$in": [c["id"] for c in employee_clients]}
+        
+        # Recherche par status, country, visa_type, notes
+        case_filter["$or"] = [
+            {"status": search_pattern},
+            {"country": search_pattern},
+            {"visa_type": search_pattern},
+            {"notes": search_pattern}
+        ]
+        
+        cases = await db.cases.find(case_filter, {"_id": 0}).sort("updated_at", -1).limit(limit).to_list(limit)
+        
+        for case in cases:
+            # Récupérer le nom du client
+            client = await db.clients.find_one({"id": case["client_id"]})
+            client_name = "Client inconnu"
+            if client:
+                client_user = await db.users.find_one({"id": client["user_id"]})
+                if client_user:
+                    client_name = client_user["full_name"]
+            
+            results.append({
+                "type": "case",
+                "id": case["id"],
+                "title": f"Dossier {client_name}",
+                "subtitle": f"{case['country']} - {case['visa_type']} - {case['status']}",
+                "data": {**case, "client_name": client_name}
+            })
+    
+    # Recherche dans les visiteurs
+    if (category is None or category == "visitors") and current_user["role"] in ["MANAGER", "EMPLOYEE", "SUPERADMIN"]:
+        visitors = await db.visitors.find({
+            "$or": [
+                {"name": search_pattern},
+                {"company": search_pattern},
+                {"purpose": search_pattern}
+            ]
+        }, {"_id": 0}).sort("created_at", -1).limit(limit).to_list(limit)
+        
+        for visitor in visitors:
+            results.append({
+                "type": "visitor",
+                "id": visitor["id"],
+                "title": visitor["name"],
+                "subtitle": f"{visitor.get('company', 'N/A')} - {visitor['purpose']} - {visitor['arrival_time'][:10]}",
+                "data": visitor
+            })
+    
+    # Trier les résultats par pertinence (nom exact en premier)
+    def sort_key(item):
+        title_lower = item["title"].lower()
+        query_lower = query.lower()
+        if title_lower == query_lower:
+            return 0  # Correspondance exacte
+        elif title_lower.startswith(query_lower):
+            return 1  # Commence par la query
+        else:
+            return 2  # Contient la query
+    
+    results.sort(key=sort_key)
+    
+    return {
+        "results": results[:limit],
+        "total": len(results),
+        "query": query
+    }
+
+# API étendue pour la gestion des visiteurs
+@api_router.get("/visitors/list", response_model=List[VisitorResponse])
+async def get_visitors_list(
+    limit: int = 100,
+    date_from: Optional[str] = None,
+    date_to: Optional[str] = None,
+    purpose: Optional[str] = None,
+    current_user: dict = Depends(get_current_user)
+):
+    """Récupère la liste des visiteurs avec filtres"""
+    if current_user["role"] not in ["MANAGER", "EMPLOYEE", "SUPERADMIN"]:
+        raise HTTPException(status_code=403, detail="Accès refusé")
+    
+    # Construire le filtre
+    filter_dict = {}
+    
+    if date_from:
+        filter_dict["created_at"] = {"$gte": date_from}
+    if date_to:
+        if "created_at" in filter_dict:
+            filter_dict["created_at"]["$lte"] = date_to
+        else:
+            filter_dict["created_at"] = {"$lte": date_to}
+    
+    if purpose:
+        filter_dict["purpose"] = purpose
+    
+    # Récupérer les visiteurs
+    visitors = await db.visitors.find(
+        filter_dict, {"_id": 0}
+    ).sort("created_at", -1).limit(limit).to_list(limit)
+    
+    return [VisitorResponse(**visitor) for visitor in visitors]
+
+@api_router.get("/visitors/stats")
+async def get_visitor_stats(current_user: dict = Depends(get_current_user)):
+    """Statistiques des visiteurs"""
+    if current_user["role"] not in ["MANAGER", "EMPLOYEE", "SUPERADMIN"]:
+        raise HTTPException(status_code=403, detail="Accès refusé")
+    
+    # Visiteurs aujourd'hui
+    today = datetime.now(timezone.utc).date().isoformat()
+    today_visitors = await db.visitors.count_documents({
+        "created_at": {"$regex": f"^{today}"}
+    })
+    
+    # Visiteurs cette semaine
+    week_ago = (datetime.now(timezone.utc) - timedelta(days=7)).isoformat()
+    week_visitors = await db.visitors.count_documents({
+        "created_at": {"$gte": week_ago}
+    })
+    
+    # Visiteurs par motif
+    purpose_stats = []
+    purposes = ["Consultation initiale", "Remise de documents", "Mise à jour du dossier", 
+               "Rendez-vous planifié", "Affaire urgente", "Demande d'informations", 
+               "Paiement", "Autre"]
+    
+    for purpose in purposes:
+        count = await db.visitors.count_documents({"purpose": purpose})
+        if count > 0:
+            purpose_stats.append({"purpose": purpose, "count": count})
+    
+    # Visiteurs actuellement présents (arrivés mais pas encore partis)
+    present_visitors = await db.visitors.count_documents({
+        "departure_time": None
+    })
+    
+    return {
+        "today": today_visitors,
+        "week": week_visitors,
+        "present": present_visitors,
+        "by_purpose": purpose_stats
+    }
+
 # Notifications API
 async def create_notification(user_id: str, title: str, message: str, type: str, related_id: str = None):
     """Helper function to create notifications"""
