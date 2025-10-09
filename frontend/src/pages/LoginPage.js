@@ -92,11 +92,11 @@ export default function LoginPage() {
           <p className="text-slate-300">Accédez à votre tableau de bord d'immigration</p>
         </div>
 
-        <Tabs defaultValue="login" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 bg-[#1E293B] border border-slate-700">
-            <TabsTrigger value="login" data-testid="tab-login" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white text-slate-300">Connexion</TabsTrigger>
-            <TabsTrigger value="register" data-testid="tab-register" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white text-slate-300">S'inscrire</TabsTrigger>
-          </TabsList>
+        <div className="w-full">
+          <div className="text-center mb-6">
+            <h2 className="text-2xl font-bold text-orange-500">Connexion</h2>
+            <p className="text-slate-400 mt-2">Accédez à votre espace avec vos identifiants</p>
+          </div>
 
           <TabsContent value="login">
             <Card className="bg-gradient-to-br from-[#1E293B] to-[#334155] border-slate-700">
