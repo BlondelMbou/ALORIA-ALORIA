@@ -45,25 +45,7 @@ export default function LoginPage() {
     }
   };
 
-  const handleRegister = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-
-    try {
-      const user = await register(registerData);
-      toast.success('Inscription réussie !');
-      
-      if (user.role === 'MANAGER') {
-        navigate('/manager/dashboard');
-      } else if (user.role === 'EMPLOYEE') {
-        navigate('/employee/dashboard');
-      }
-    } catch (error) {
-      toast.error(error.response?.data?.detail || 'Échec de l\'inscription');
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Registration function removed - hierarchical user creation only
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0F172A] via-[#1E293B] to-[#0F172A] flex items-center justify-center p-4">
