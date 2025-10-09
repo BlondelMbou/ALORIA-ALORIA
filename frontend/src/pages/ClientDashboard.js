@@ -495,6 +495,159 @@ export default function ClientDashboard() {
             </Card>
           </TabsContent>
 
+          {/* Payments Tab */}
+          <TabsContent value="payments">
+            <div className="grid lg:grid-cols-2 gap-6">
+              {/* Payment Declaration Form */}
+              <Card className="bg-gradient-to-br from-[#1E293B] to-[#334155] border-slate-700">
+                <CardHeader>
+                  <CardTitle className="text-white flex items-center space-x-2">
+                    <Euro className="h-6 w-6 text-orange-500" />
+                    <span>Déclarer un Paiement</span>
+                  </CardTitle>
+                  <CardDescription className="text-slate-400">
+                    Déclarez vos paiements pour traitement et confirmation par votre gestionnaire
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <form onSubmit={handlePaymentDeclaration} className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="amount" className="text-slate-300">Montant</Label>
+                        <Input
+                          id="amount"
+                          type="number"
+                          step="0.01"
+                          placeholder="0.00"
+                          value={paymentForm.amount}
+                          onChange={(e) => setPaymentForm({...paymentForm, amount: e.target.value})}
+                          required
+                          className="bg-slate-600 border-slate-500 text-white"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="currency" className="text-slate-300">Devise</Label>
+                        <select
+                          id="currency"
+                          value={paymentForm.currency}
+                          onChange={(e) => setPaymentForm({...paymentForm, currency: e.target.value})}
+                          className="w-full px-3 py-2 bg-slate-600 border border-slate-500 text-white rounded-md"
+                        >
+                          <option value="EUR">EUR (€)</option>
+                          <option value="CAD">CAD ($)</option>
+                          <option value="USD">USD ($)</option>
+                        </select>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="payment_method" className="text-slate-300">Méthode de Paiement</Label>
+                      <select
+                        id="payment_method"
+                        value={paymentForm.payment_method}
+                        onChange={(e) => setPaymentForm({...paymentForm, payment_method: e.target.value})}
+                        className="w-full px-3 py-2 bg-slate-600 border border-slate-500 text-white rounded-md"
+                      >
+                        <option value="Virement bancaire">Virement bancaire</option>
+                        <option value="Carte bancaire">Carte bancaire</option>
+                        <option value="Chèque">Chèque</option>
+                        <option value="Espèces">Espèces</option>
+                        <option value="PayPal">PayPal</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="description" className="text-slate-300">Description (optionnelle)</Label>
+                      <textarea
+                        id="description"
+                        placeholder="Décrivez le paiement (ex: Frais de dossier, Honoraires consultation...)"
+                        value={paymentForm.description}
+                        onChange={(e) => setPaymentForm({...paymentForm, description: e.target.value})}
+                        rows={3}
+                        className="w-full px-3 py-2 bg-slate-600 border border-slate-500 text-white rounded-md resize-none"
+                      />
+                    </div>
+
+                    <Button 
+                      type="submit"
+                      className="w-full bg-orange-600 hover:bg-orange-700 text-white"
+                    >
+                      <CreditCard className="h-4 w-4 mr-2" />
+                      Déclarer le Paiement
+                    </Button>
+                  </form>
+                </CardContent>
+              </Card>
+
+              {/* Payment History */}
+              <Card className="bg-gradient-to-br from-[#1E293B] to-[#334155] border-slate-700">
+                <CardHeader>
+                  <CardTitle className="text-white flex items-center space-x-2">
+                    <FileText className="h-6 w-6 text-orange-500" />
+                    <span>Historique des Paiements</span>
+                  </CardTitle>
+                  <CardDescription className="text-slate-400">
+                    Suivez le statut de vos paiements déclarés
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4 max-h-96 overflow-y-auto">
+                    {payments.length === 0 ? (
+                      <div className="text-center py-8">
+                        <Euro className="h-12 w-12 text-slate-500 mx-auto mb-3" />
+                        <p className="text-slate-400">Aucun paiement déclaré</p>
+                        <p className="text-slate-500 text-sm">Utilisez le formulaire pour déclarer votre premier paiement</p>
+                      </div>
+                    ) : (
+                      payments.map((payment) => (
+                        <div key={payment.id} className="bg-slate-600 rounded-lg p-4 border border-slate-500">
+                          <div className="flex justify-between items-start mb-2">
+                            <div>
+                              <p className="text-white font-medium">
+                                {payment.amount} {payment.currency}
+                              </p>
+                              <p className="text-slate-400 text-sm">{payment.payment_method}</p>
+                            </div>
+                            <Badge 
+                              className={`${
+                                payment.status === 'CONFIRMED' 
+                                  ? 'bg-green-500/20 text-green-400' 
+                                  : payment.status === 'REJECTED'
+                                  ? 'bg-red-500/20 text-red-400'
+                                  : 'bg-yellow-500/20 text-yellow-400'
+                              }`}
+                            >
+                              {payment.status === 'CONFIRMED' ? 'Confirmé' : 
+                               payment.status === 'REJECTED' ? 'Rejeté' : 'En attente'}
+                            </Badge>
+                          </div>
+                          
+                          {payment.description && (
+                            <p className="text-slate-300 text-sm mb-2">{payment.description}</p>
+                          )}
+                          
+                          <div className="flex justify-between text-xs text-slate-500">
+                            <span>Déclaré le: {new Date(payment.created_at).toLocaleDateString('fr-FR')}</span>
+                            {payment.invoice_number && (
+                              <span>Facture: {payment.invoice_number}</span>
+                            )}
+                          </div>
+                          
+                          {payment.confirmation_date && (
+                            <div className="mt-2 text-xs text-slate-400">
+                              <CheckCircle className="h-3 w-3 inline mr-1" />
+                              Confirmé le: {new Date(payment.confirmation_date).toLocaleDateString('fr-FR')}
+                            </div>
+                          )}
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
           {/* Profile Tab */}
           <TabsContent value="profile">
             <div className="grid lg:grid-cols-2 gap-6">
