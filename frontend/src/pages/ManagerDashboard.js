@@ -102,6 +102,54 @@ export default function ManagerDashboard() {
     }
   };
 
+  const fetchPayments = async () => {
+    try {
+      const [pendingRes, historyRes] = await Promise.all([
+        fetch(`${process.env.REACT_APP_BACKEND_URL}/api/payments/pending`, {
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        }),
+        fetch(`${process.env.REACT_APP_BACKEND_URL}/api/payments/history`, {
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        })
+      ]);
+
+      if (pendingRes.ok) {
+        const pending = await pendingRes.json();
+        setPendingPayments(pending);
+      }
+
+      if (historyRes.ok) {
+        const history = await historyRes.json();
+        setPaymentHistory(history);
+      }
+    } catch (error) {
+      console.error('Error fetching payments:', error);
+    }
+  };
+
+  const handlePaymentAction = async (paymentId, action) => {
+    try {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/payments/${paymentId}/confirm`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({ action })
+      });
+
+      if (response.ok) {
+        toast.success(action === 'CONFIRMED' ? 'Paiement confirmé avec succès !' : 'Paiement rejeté');
+        fetchPayments(); // Refresh payments
+      } else {
+        throw new Error('Erreur lors de la mise à jour du paiement');
+      }
+    } catch (error) {
+      toast.error(error.message);
+      console.error('Error updating payment:', error);
+    }
+  };
+
   const handleReassignClient = async (clientId, employeeId) => {
     try {
       await clientsAPI.reassign(clientId, employeeId);
