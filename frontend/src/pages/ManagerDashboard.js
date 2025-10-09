@@ -74,6 +74,32 @@ export default function ManagerDashboard() {
     }
   };
 
+  const performIntelligentSearch = async (query, category = 'all') => {
+    if (!query.trim()) {
+      setSearchResults([]);
+      return;
+    }
+
+    setIsSearching(true);
+    try {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/search/global?q=${encodeURIComponent(query)}&category=${category}&limit=10`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+
+      if (response.ok) {
+        const results = await response.json();
+        setSearchResults(results);
+      }
+    } catch (error) {
+      console.error('Search error:', error);
+      toast.error('Erreur lors de la recherche');
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
   const handleReassignClient = async (clientId, employeeId) => {
     try {
       await clientsAPI.reassign(clientId, employeeId);
