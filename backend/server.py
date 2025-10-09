@@ -1377,6 +1377,135 @@ async def get_available_contacts(current_user: dict = Depends(get_current_user))
     
     return unique_contacts
 
+# Gestion avancée des utilisateurs avec hiérarchie
+@api_router.post("/users/create", response_model=UserCreateResponse)
+async def create_user_advanced(user_data: UserCreateRequest, current_user: dict = Depends(get_current_user)):
+    """Créer un utilisateur selon la hiérarchie des rôles"""
+    
+    # Vérifier les permissions
+    if not can_create_role(current_user["role"], user_data.role.value):
+        raise HTTPException(
+            status_code=403, 
+            detail=f"Vous n'avez pas l'autorisation de créer un utilisateur {user_data.role.value}"
+        )
+    
+    # Vérifier si l'utilisateur existe déjà
+    existing_user = await db.users.find_one({"email": user_data.email})
+    if existing_user:
+        raise HTTPException(status_code=400, detail="Un utilisateur avec cet email existe déjà")
+    
+    # Générer un mot de passe temporaire
+    temp_password = generate_temporary_password()
+    hashed_password = hash_password(temp_password)
+    
+    # Créer l'utilisateur
+    user_id = str(uuid.uuid4())
+    new_user = {
+        "id": user_id,
+        "email": user_data.email,
+        "password": hashed_password,
+        "full_name": user_data.full_name,
+        "phone": user_data.phone,
+        "role": user_data.role.value,
+        "is_active": True,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "created_by": current_user["id"],
+        "password_changed": False  # Pour forcer le changement au premier login
+    }
+    
+    await db.users.insert_one(new_user)
+    
+    # Enregistrer l'activité
+    await log_user_activity(
+        user_id=current_user["id"],
+        action="create_user",
+        details={
+            "created_user_id": user_id,
+            "created_user_role": user_data.role.value,
+            "created_user_email": user_data.email
+        }
+    )
+    
+    # Envoyer email (simulation pour l'instant, sera implémenté avec un vrai service)
+    email_sent = False
+    if user_data.send_email:
+        try:
+            # TODO: Implémenter vraie intégration email
+            await send_welcome_email(
+                email=user_data.email,
+                name=user_data.full_name,
+                role=user_data.role.value,
+                password=temp_password,
+                created_by=current_user["full_name"]
+            )
+            email_sent = True
+        except Exception as e:
+            logger.error(f"Échec envoi email: {e}")
+            email_sent = False
+    
+    return UserCreateResponse(
+        id=user_id,
+        email=user_data.email,
+        full_name=user_data.full_name,
+        phone=user_data.phone,
+        role=user_data.role.value,
+        temporary_password=temp_password if not user_data.send_email else None,
+        email_sent=email_sent
+    )
+
+# Fonction pour enregistrer l'activité utilisateur (monitoring SuperAdmin)
+async def log_user_activity(user_id: str, action: str, details: dict = None, ip_address: str = None):
+    """Enregistre l'activité utilisateur pour le monitoring"""
+    try:
+        user = await db.users.find_one({"id": user_id})
+        if user:
+            activity = {
+                "id": str(uuid.uuid4()),
+                "user_id": user_id,
+                "user_name": user["full_name"],
+                "user_role": user["role"],
+                "action": action,
+                "details": details or {},
+                "ip_address": ip_address,
+                "timestamp": datetime.now(timezone.utc).isoformat()
+            }
+            await db.user_activities.insert_one(activity)
+    except Exception as e:
+        logger.error(f"Erreur lors de l'enregistrement de l'activité: {e}")
+
+# Fonction d'envoi d'email (placeholder pour l'instant)
+async def send_welcome_email(email: str, name: str, role: str, password: str, created_by: str):
+    """Envoie un email de bienvenue avec les informations de connexion"""
+    # TODO: Intégrer avec un service d'email réel (SendGrid, Mailgun, etc.)
+    subject = f"Bienvenue chez ALORIA AGENCY - Vos informations de connexion"
+    
+    body = f"""
+    Bonjour {name},
+    
+    Vous avez été ajouté(e) à la plateforme ALORIA AGENCY par {created_by}.
+    
+    Voici vos informations de connexion :
+    - Email : {email}
+    - Mot de passe temporaire : {password}
+    - Rôle : {role}
+    
+    Veuillez vous connecter et changer votre mot de passe dès votre première connexion.
+    
+    Lien de connexion : https://aloria-agency.com/login
+    
+    Cordialement,
+    L'équipe ALORIA AGENCY
+    """
+    
+    # Simulation d'envoi d'email (pour l'instant on log juste)
+    logger.info(f"EMAIL ENVOYÉ À {email}: {subject}")
+    logger.info(f"Contenu: {body}")
+    
+    # Dans une vraie implémentation, on utiliserait un service comme SendGrid:
+    # await sendgrid_client.send_email(to=email, subject=subject, body=body)
+    
+    return True
+
 # Notifications API
 async def create_notification(user_id: str, title: str, message: str, type: str, related_id: str = None):
     """Helper function to create notifications"""
