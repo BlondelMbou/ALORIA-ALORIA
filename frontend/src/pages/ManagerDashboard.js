@@ -942,6 +942,138 @@ export default function ManagerDashboard() {
               </Card>
             </div>
           </TabsContent>
+
+          {/* Payments Tab */}
+          <TabsContent value="payments">
+            <div className="grid lg:grid-cols-2 gap-6">
+              {/* Pending Payments */}
+              <Card className="bg-gradient-to-br from-[#1E293B] to-[#334155] border-slate-700">
+                <CardHeader>
+                  <CardTitle className="text-white flex items-center space-x-2">
+                    <span className="text-orange-500">💰</span>
+                    <span>Paiements En Attente</span>
+                  </CardTitle>
+                  <CardDescription className="text-slate-400">
+                    Validez ou rejetez les déclarations de paiement des clients
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4 max-h-96 overflow-y-auto">
+                    {pendingPayments.length === 0 ? (
+                      <div className="text-center py-8">
+                        <div className="text-4xl mb-3">✅</div>
+                        <p className="text-slate-400">Aucun paiement en attente</p>
+                        <p className="text-slate-500 text-sm">Tous les paiements ont été traités</p>
+                      </div>
+                    ) : (
+                      pendingPayments.map((payment) => (
+                        <div key={payment.id} className="bg-slate-600 rounded-lg p-4 border border-slate-500">
+                          <div className="flex justify-between items-start mb-3">
+                            <div>
+                              <p className="text-white font-bold text-lg">
+                                {payment.amount} {payment.currency}
+                              </p>
+                              <p className="text-slate-300 font-medium">{payment.client_name}</p>
+                              <p className="text-slate-400 text-sm">{payment.payment_method}</p>
+                            </div>
+                            <Badge className="bg-yellow-500/20 text-yellow-400">
+                              En attente
+                            </Badge>
+                          </div>
+                          
+                          {payment.description && (
+                            <p className="text-slate-300 text-sm mb-3 italic">"{payment.description}"</p>
+                          )}
+                          
+                          <div className="flex items-center justify-between text-xs text-slate-500 mb-4">
+                            <span>Déclaré le: {new Date(payment.created_at).toLocaleDateString('fr-FR')}</span>
+                            <span>Client ID: {payment.client_id}</span>
+                          </div>
+
+                          <div className="flex space-x-2">
+                            <Button
+                              onClick={() => handlePaymentAction(payment.id, 'CONFIRMED')}
+                              className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+                              size="sm"
+                            >
+                              ✅ Confirmer
+                            </Button>
+                            <Button
+                              onClick={() => handlePaymentAction(payment.id, 'REJECTED')}
+                              className="flex-1 bg-red-600 hover:bg-red-700 text-white"
+                              size="sm"
+                            >
+                              ❌ Rejeter
+                            </Button>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Payment History */}
+              <Card className="bg-gradient-to-br from-[#1E293B] to-[#334155] border-slate-700">
+                <CardHeader>
+                  <CardTitle className="text-white flex items-center space-x-2">
+                    <span className="text-orange-500">📋</span>
+                    <span>Historique des Paiements</span>
+                  </CardTitle>
+                  <CardDescription className="text-slate-400">
+                    Tous les paiements confirmés et rejetés
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3 max-h-96 overflow-y-auto">
+                    {paymentHistory.length === 0 ? (
+                      <div className="text-center py-8">
+                        <div className="text-4xl mb-3">📋</div>
+                        <p className="text-slate-400">Aucun historique</p>
+                        <p className="text-slate-500 text-sm">Les paiements traités apparaîtront ici</p>
+                      </div>
+                    ) : (
+                      paymentHistory.map((payment) => (
+                        <div key={payment.id} className="bg-slate-600 rounded-lg p-3 border border-slate-500">
+                          <div className="flex justify-between items-start mb-2">
+                            <div>
+                              <p className="text-white font-medium">
+                                {payment.amount} {payment.currency}
+                              </p>
+                              <p className="text-slate-300 text-sm">{payment.client_name}</p>
+                            </div>
+                            <div className="text-right">
+                              <Badge 
+                                className={`mb-1 ${
+                                  payment.status === 'CONFIRMED' 
+                                    ? 'bg-green-500/20 text-green-400' 
+                                    : 'bg-red-500/20 text-red-400'
+                                }`}
+                              >
+                                {payment.status === 'CONFIRMED' ? 'Confirmé' : 'Rejeté'}
+                              </Badge>
+                              {payment.invoice_number && (
+                                <p className="text-xs text-slate-400">
+                                  {payment.invoice_number}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                          
+                          <div className="flex justify-between text-xs text-slate-500">
+                            <span>Déclaré: {new Date(payment.created_at).toLocaleDateString('fr-FR')}</span>
+                            {payment.confirmation_date && (
+                              <span>Traité: {new Date(payment.confirmation_date).toLocaleDateString('fr-FR')}</span>
+                            )}
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
         </Tabs>
       </div>
 
