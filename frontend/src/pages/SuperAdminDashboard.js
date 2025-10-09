@@ -315,6 +315,7 @@ const SuperAdminDashboard = () => {
         {/* Tab Content */}
         {activeTab === 'users' && <UsersTab />}
         {activeTab === 'activities' && <ActivitiesTab />}
+        {activeTab === 'users-creation' && <HierarchicalUserCreation />}
       </div>
     </div>
   );
