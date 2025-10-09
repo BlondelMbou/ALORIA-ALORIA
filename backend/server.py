@@ -1711,6 +1711,213 @@ async def get_manager_payment_history(current_user: dict = Depends(get_current_u
     
     return [PaymentDeclarationResponse(**payment) for payment in payments]
 
+# APIs SuperAdmin pour monitoring et gestion complète
+@api_router.get("/admin/users", response_model=List[UserResponse])
+async def get_all_users(current_user: dict = Depends(get_current_user)):
+    """SuperAdmin récupère tous les utilisateurs"""
+    if current_user["role"] != "SUPERADMIN":
+        raise HTTPException(status_code=403, detail="Accès SuperAdmin requis")
+    
+    users = await db.users.find({}, {"_id": 0, "password": 0}).sort("created_at", -1).to_list(1000)
+    return [UserResponse(**user) for user in users]
+
+@api_router.get("/admin/activities", response_model=List[UserActivity])
+async def get_user_activities(
+    limit: int = 100, 
+    user_id: str = None, 
+    action: str = None,
+    current_user: dict = Depends(get_current_user)
+):
+    """SuperAdmin récupère les activités utilisateur"""
+    if current_user["role"] != "SUPERADMIN":
+        raise HTTPException(status_code=403, detail="Accès SuperAdmin requis")
+    
+    filter_dict = {}
+    if user_id:
+        filter_dict["user_id"] = user_id
+    if action:
+        filter_dict["action"] = {"$regex": action, "$options": "i"}
+    
+    activities = await db.user_activities.find(
+        filter_dict, {"_id": 0}
+    ).sort("timestamp", -1).limit(limit).to_list(limit)
+    
+    return [UserActivity(**activity) for activity in activities]
+
+@api_router.post("/admin/impersonate")
+async def impersonate_user(request: ImpersonationRequest, current_user: dict = Depends(get_current_user)):
+    """SuperAdmin peut se connecter en tant qu'autre utilisateur"""
+    if current_user["role"] != "SUPERADMIN":
+        raise HTTPException(status_code=403, detail="Accès SuperAdmin requis")
+    
+    # Vérifier que l'utilisateur cible existe
+    target_user = await db.users.find_one({"id": request.target_user_id})
+    if not target_user:
+        raise HTTPException(status_code=404, detail="Utilisateur cible non trouvé")
+    
+    # Ne pas permettre l'impersonation d'un autre SuperAdmin
+    if target_user["role"] == "SUPERADMIN" and target_user["id"] != current_user["id"]:
+        raise HTTPException(status_code=403, detail="Impossible d'impersonner un autre SuperAdmin")
+    
+    # Générer un token d'impersonation
+    impersonation_data = {
+        "sub": target_user["id"],
+        "role": target_user["role"],
+        "impersonated_by": current_user["id"],
+        "impersonation": True,
+        "exp": datetime.now(timezone.utc) + timedelta(hours=1)  # Token valide 1h
+    }
+    
+    impersonation_token = jwt.encode(impersonation_data, SECRET_KEY, algorithm=ALGORITHM)
+    
+    # Log l'impersonation
+    await log_user_activity(
+        user_id=current_user["id"],
+        action="impersonate_user",
+        details={
+            "target_user_id": request.target_user_id,
+            "target_user_name": target_user["full_name"],
+            "target_user_role": target_user["role"]
+        }
+    )
+    
+    return {
+        "impersonation_token": impersonation_token,
+        "target_user": {
+            "id": target_user["id"],
+            "name": target_user["full_name"],
+            "email": target_user["email"],
+            "role": target_user["role"]
+        },
+        "expires_in": 3600  # 1 heure
+    }
+
+@api_router.get("/admin/dashboard-stats")
+async def get_admin_dashboard_stats(current_user: dict = Depends(get_current_user)):
+    """SuperAdmin récupère les statistiques globales"""
+    if current_user["role"] != "SUPERADMIN":
+        raise HTTPException(status_code=403, detail="Accès SuperAdmin requis")
+    
+    # Compter les utilisateurs par rôle
+    total_users = await db.users.count_documents({"is_active": True})
+    managers = await db.users.count_documents({"role": "MANAGER", "is_active": True})
+    employees = await db.users.count_documents({"role": "EMPLOYEE", "is_active": True})
+    clients = await db.users.count_documents({"role": "CLIENT", "is_active": True})
+    
+    # Compter les éléments métier
+    total_cases = await db.cases.count_documents({})
+    active_cases = await db.cases.count_documents({"status": {"$nin": ["Terminated", "Rejected"]}})
+    total_payments = await db.payment_declarations.count_documents({})
+    pending_payments = await db.payment_declarations.count_documents({"status": "pending"})
+    
+    # Activités récentes
+    recent_activities = await db.user_activities.find(
+        {}, {"_id": 0}
+    ).sort("timestamp", -1).limit(10).to_list(10)
+    
+    # Connexions aujourd'hui
+    today = datetime.now(timezone.utc).date().isoformat()
+    daily_logins = await db.user_activities.count_documents({
+        "action": "login",
+        "timestamp": {"$regex": f"^{today}"}
+    })
+    
+    return {
+        "users": {
+            "total": total_users,
+            "managers": managers,
+            "employees": employees,
+            "clients": clients
+        },
+        "business": {
+            "total_cases": total_cases,
+            "active_cases": active_cases,
+            "total_payments": total_payments,
+            "pending_payments": pending_payments
+        },
+        "activity": {
+            "daily_logins": daily_logins,
+            "recent_activities": recent_activities
+        }
+    }
+
+@api_router.patch("/admin/users/{user_id}")
+async def admin_update_user(
+    user_id: str, 
+    updates: dict,
+    current_user: dict = Depends(get_current_user)
+):
+    """SuperAdmin peut modifier n'importe quel utilisateur"""
+    if current_user["role"] != "SUPERADMIN":
+        raise HTTPException(status_code=403, detail="Accès SuperAdmin requis")
+    
+    # Vérifier que l'utilisateur existe
+    target_user = await db.users.find_one({"id": user_id})
+    if not target_user:
+        raise HTTPException(status_code=404, detail="Utilisateur non trouvé")
+    
+    # Empêcher la modification d'autres SuperAdmins (sauf soi-même)
+    if target_user["role"] == "SUPERADMIN" and target_user["id"] != current_user["id"]:
+        raise HTTPException(status_code=403, detail="Impossible de modifier un autre SuperAdmin")
+    
+    # Valider et appliquer les modifications
+    allowed_fields = ["full_name", "phone", "is_active", "role"]
+    update_dict = {k: v for k, v in updates.items() if k in allowed_fields}
+    
+    if update_dict:
+        update_dict["updated_at"] = datetime.now(timezone.utc).isoformat()
+        await db.users.update_one({"id": user_id}, {"$set": update_dict})
+        
+        # Log l'action
+        await log_user_activity(
+            user_id=current_user["id"],
+            action="admin_update_user",
+            details={
+                "target_user_id": user_id,
+                "modifications": update_dict
+            }
+        )
+    
+    return {"message": "Utilisateur mis à jour avec succès", "modified_fields": list(update_dict.keys())}
+
+@api_router.delete("/admin/users/{user_id}")
+async def admin_delete_user(user_id: str, current_user: dict = Depends(get_current_user)):
+    """SuperAdmin peut supprimer un utilisateur (soft delete)"""
+    if current_user["role"] != "SUPERADMIN":
+        raise HTTPException(status_code=403, detail="Accès SuperAdmin requis")
+    
+    # Vérifier que l'utilisateur existe
+    target_user = await db.users.find_one({"id": user_id})
+    if not target_user:
+        raise HTTPException(status_code=404, detail="Utilisateur non trouvé")
+    
+    # Empêcher la suppression d'autres SuperAdmins
+    if target_user["role"] == "SUPERADMIN":
+        raise HTTPException(status_code=403, detail="Impossible de supprimer un SuperAdmin")
+    
+    # Soft delete
+    await db.users.update_one(
+        {"id": user_id}, 
+        {"$set": {
+            "is_active": False, 
+            "deleted_at": datetime.now(timezone.utc).isoformat(),
+            "deleted_by": current_user["id"]
+        }}
+    )
+    
+    # Log l'action
+    await log_user_activity(
+        user_id=current_user["id"],
+        action="admin_delete_user",
+        details={
+            "target_user_id": user_id,
+            "target_user_name": target_user["full_name"],
+            "target_user_role": target_user["role"]
+        }
+    )
+    
+    return {"message": "Utilisateur supprimé avec succès"}
+
 # Notifications API
 async def create_notification(user_id: str, title: str, message: str, type: str, related_id: str = None):
     """Helper function to create notifications"""
