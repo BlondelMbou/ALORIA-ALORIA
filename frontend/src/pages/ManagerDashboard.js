@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { toast } from 'sonner';
 import { dashboardAPI, clientsAPI, casesAPI, employeesAPI, visitorsAPI } from '../utils/api';
 import api from '../utils/api';
-import { Globe, LogOut, Users, FileText, TrendingUp, CheckCircle, Clock, AlertCircle, UserCheck, Building2, Search, Filter, Plus, UserPlus, MessageCircle } from 'lucide-react';
+import { Globe, LogOut, Users, FileText, TrendingUp, CheckCircle, Clock, AlertCircle, UserCheck, Building2, Search, Filter, Plus, UserPlus, MessageCircle, User, Lock } from 'lucide-react';
 import ChatWidget from '../components/ChatWidget';
 import NotificationBell from '../components/NotificationBell';
 import useSocket from '../hooks/useSocket';
