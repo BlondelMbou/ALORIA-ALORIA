@@ -50,6 +50,7 @@ export default function ManagerDashboard() {
 
   useEffect(() => {
     fetchData();
+    fetchPayments();
   }, []);
 
   const fetchData = async () => {
