@@ -618,28 +618,30 @@ async def register(user_data: UserCreate):
     
     return TokenResponse(access_token=access_token, token_type="bearer", user=user_response)
 
-@api_router.post("/auth/login", response_model=TokenResponse)
-async def login(credentials: UserLogin):
-    user = await db.users.find_one({"email": credentials.email})
-    if not user or not verify_password(credentials.password, user["password"]):
-        raise HTTPException(status_code=401, detail="Invalid email or password")
+@api_router.post("/auth/login", response_model=LoginResponse)
+async def login(user_credentials: UserLogin):
+    user = await db.users.find_one({"email": user_credentials.email})
+    
+    if not user or not verify_password(user_credentials.password, user["password"]):
+        raise HTTPException(status_code=401, detail="Email ou mot de passe incorrect")
     
     if not user.get("is_active", True):
-        raise HTTPException(status_code=403, detail="Account is inactive")
+        raise HTTPException(status_code=401, detail="Compte désactivé")
     
-    access_token = create_access_token({"sub": user["id"], "role": user["role"]})
+    access_token = create_access_token(data={"sub": user["id"], "role": user["role"]})
     
-    user_response = UserResponse(
-        id=user["id"],
-        email=user["email"],
-        full_name=user["full_name"],
-        phone=user.get("phone"),
-        role=user["role"],
-        is_active=user["is_active"],
-        created_at=user["created_at"]
+    # Log de connexion
+    await log_user_activity(
+        user_id=user["id"],
+        action="login",
+        details={"login_time": datetime.now(timezone.utc).isoformat()}
     )
     
-    return TokenResponse(access_token=access_token, token_type="bearer", user=user_response)
+    return LoginResponse(
+        access_token=access_token,
+        token_type="bearer",
+        user=UserResponse(**user)
+    )
 
 @api_router.get("/auth/me", response_model=UserResponse)
 async def get_me(current_user: dict = Depends(get_current_user)):
