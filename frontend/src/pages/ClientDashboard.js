@@ -82,8 +82,7 @@ export default function ClientDashboard() {
           setDocumentChecklist(checklist);
         }
 
-        await fetchMessages();
-        await fetchPayments();
+        // Messages and payments will be loaded separately
       }
     } catch (error) {
       toast.error('Erreur lors du chargement');
