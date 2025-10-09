@@ -393,7 +393,7 @@
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
-  last_test_session: "TESTS SPÉCIFIQUES ALORIA AGENCY - Test des nouvelles modifications demandées: 1) Création client avec assignation employé, 2) Restrictions dashboard employé, 3) Système notifications complet, 4) Workflow complet avec notifications, 5) Pays limités (Canada/France)"
+  last_test_session: "ALORIA AGENCY V2 - COMPREHENSIVE TESTING: 1) SuperAdmin creation with secret key, 2) Role hierarchy permissions (SuperAdmin→Manager→Employee→Client), 3) Declarative payment system with invoice generation, 4) SuperAdmin monitoring APIs (users, activities, impersonation, dashboard stats), 5) Global search system, 6) Extended visitor management with statistics, 7) Complete V2 workflow scenario testing"
 
 ## agent_communication:
     -agent: "main"
