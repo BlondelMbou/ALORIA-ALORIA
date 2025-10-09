@@ -987,17 +987,546 @@ class APITester:
             except Exception as e:
                 self.log_result("Invalid Visitor Purpose Validation", False, "Exception occurred", str(e))
 
+    def test_superadmin_creation(self):
+        """Test SuperAdmin creation with secret key"""
+        print("=== Testing SuperAdmin Creation ===")
+        
+        superadmin_data = {
+            "email": "superadmin@aloria.com",
+            "password": "SuperAdmin123!",
+            "full_name": "Super Administrator",
+            "phone": "+33100000000"
+        }
+        
+        # Test with correct secret key
+        try:
+            response = self.session.post(f"{API_BASE}/auth/create-superadmin", 
+                                       json=superadmin_data,
+                                       params={"secret_key": "ALORIA_SUPER_SECRET_2024"})
+            if response.status_code == 200 or response.status_code == 201:
+                data = response.json()
+                self.log_result("SuperAdmin Creation (correct secret)", True, f"SuperAdmin created: {data['user']['full_name']}")
+            elif response.status_code == 400 and "existe déjà" in response.text:
+                self.log_result("SuperAdmin Creation (already exists)", True, "SuperAdmin already exists - expected behavior")
+            else:
+                self.log_result("SuperAdmin Creation (correct secret)", False, f"Status: {response.status_code}", response.text)
+        except Exception as e:
+            self.log_result("SuperAdmin Creation (correct secret)", False, "Exception occurred", str(e))
+
+        # Test with incorrect secret key
+        try:
+            response = self.session.post(f"{API_BASE}/auth/create-superadmin", 
+                                       json=superadmin_data,
+                                       params={"secret_key": "WRONG_SECRET"})
+            if response.status_code == 403:
+                self.log_result("SuperAdmin Creation (wrong secret)", True, "Wrong secret key correctly rejected")
+            else:
+                self.log_result("SuperAdmin Creation (wrong secret)", False, f"Expected 403, got {response.status_code}")
+        except Exception as e:
+            self.log_result("SuperAdmin Creation (wrong secret)", False, "Exception occurred", str(e))
+
+    def test_role_hierarchy_permissions(self):
+        """Test role hierarchy and user creation permissions"""
+        print("=== Testing Role Hierarchy Permissions ===")
+        
+        # First login as SuperAdmin if exists
+        superadmin_token = None
+        try:
+            login_response = self.session.post(f"{API_BASE}/auth/login", json={
+                "email": "superadmin@aloria.com",
+                "password": "SuperAdmin123!"
+            })
+            if login_response.status_code == 200:
+                superadmin_token = login_response.json()['access_token']
+                self.log_result("SuperAdmin Login", True, "SuperAdmin logged in successfully")
+            else:
+                self.log_result("SuperAdmin Login", False, "Could not login as SuperAdmin")
+        except Exception as e:
+            self.log_result("SuperAdmin Login", False, "Exception occurred", str(e))
+
+        # Test SuperAdmin can create Manager
+        if superadmin_token:
+            try:
+                headers = {"Authorization": f"Bearer {superadmin_token}"}
+                manager_data = {
+                    "email": "new.manager@aloria.com",
+                    "full_name": "New Manager Created by SuperAdmin",
+                    "phone": "+33200000001",
+                    "role": "MANAGER",
+                    "send_email": False
+                }
+                response = self.session.post(f"{API_BASE}/users/create", json=manager_data, headers=headers)
+                if response.status_code == 200 or response.status_code == 201:
+                    data = response.json()
+                    self.log_result("SuperAdmin Creates Manager", True, f"Manager created with temp password: {data.get('temporary_password', 'N/A')}")
+                elif response.status_code == 400 and "existe déjà" in response.text:
+                    self.log_result("SuperAdmin Creates Manager", True, "Manager already exists - expected")
+                else:
+                    self.log_result("SuperAdmin Creates Manager", False, f"Status: {response.status_code}", response.text)
+            except Exception as e:
+                self.log_result("SuperAdmin Creates Manager", False, "Exception occurred", str(e))
+
+        # Test Manager can create Employee and Client
+        if self.manager_token:
+            try:
+                headers = {"Authorization": f"Bearer {self.manager_token}"}
+                employee_data = {
+                    "email": "new.employee@aloria.com",
+                    "full_name": "New Employee Created by Manager",
+                    "phone": "+33200000002",
+                    "role": "EMPLOYEE",
+                    "send_email": False
+                }
+                response = self.session.post(f"{API_BASE}/users/create", json=employee_data, headers=headers)
+                if response.status_code == 200 or response.status_code == 201:
+                    data = response.json()
+                    self.log_result("Manager Creates Employee", True, f"Employee created with temp password: {data.get('temporary_password', 'N/A')}")
+                elif response.status_code == 400 and "existe déjà" in response.text:
+                    self.log_result("Manager Creates Employee", True, "Employee already exists - expected")
+                else:
+                    self.log_result("Manager Creates Employee", False, f"Status: {response.status_code}", response.text)
+            except Exception as e:
+                self.log_result("Manager Creates Employee", False, "Exception occurred", str(e))
+
+        # Test Employee can create Client
+        if self.employee_token:
+            try:
+                headers = {"Authorization": f"Bearer {self.employee_token}"}
+                client_data = {
+                    "email": "new.client@aloria.com",
+                    "full_name": "New Client Created by Employee",
+                    "phone": "+33200000003",
+                    "role": "CLIENT",
+                    "send_email": False
+                }
+                response = self.session.post(f"{API_BASE}/users/create", json=client_data, headers=headers)
+                if response.status_code == 200 or response.status_code == 201:
+                    data = response.json()
+                    self.log_result("Employee Creates Client User", True, f"Client user created with temp password: {data.get('temporary_password', 'N/A')}")
+                elif response.status_code == 400 and "existe déjà" in response.text:
+                    self.log_result("Employee Creates Client User", True, "Client user already exists - expected")
+                else:
+                    self.log_result("Employee Creates Client User", False, f"Status: {response.status_code}", response.text)
+            except Exception as e:
+                self.log_result("Employee Creates Client User", False, "Exception occurred", str(e))
+
+        # Test permission restrictions - Employee cannot create Manager
+        if self.employee_token:
+            try:
+                headers = {"Authorization": f"Bearer {self.employee_token}"}
+                invalid_data = {
+                    "email": "invalid.manager@aloria.com",
+                    "full_name": "Invalid Manager",
+                    "phone": "+33200000004",
+                    "role": "MANAGER",
+                    "send_email": False
+                }
+                response = self.session.post(f"{API_BASE}/users/create", json=invalid_data, headers=headers)
+                if response.status_code == 403:
+                    self.log_result("Employee Cannot Create Manager", True, "Employee correctly denied manager creation")
+                else:
+                    self.log_result("Employee Cannot Create Manager", False, f"Expected 403, got {response.status_code}")
+            except Exception as e:
+                self.log_result("Employee Cannot Create Manager", False, "Exception occurred", str(e))
+
+    def test_payment_system(self):
+        """Test declarative payment system"""
+        print("=== Testing Payment System ===")
+        
+        # First create a client to test payments
+        test_payment_client_id = None
+        if self.manager_token:
+            try:
+                headers = {"Authorization": f"Bearer {self.manager_token}"}
+                import time
+                timestamp = int(time.time())
+                client_data = {
+                    "email": f"payment.client.{timestamp}@example.com",
+                    "full_name": "Client Test Paiements",
+                    "phone": "+33300000001",
+                    "country": "France",
+                    "visa_type": "Work Permit (Talent Permit)",
+                    "message": "Client pour tester les paiements"
+                }
+                response = self.session.post(f"{API_BASE}/clients", json=client_data, headers=headers)
+                if response.status_code == 200 or response.status_code == 201:
+                    test_payment_client_id = response.json()['id']
+                    self.log_result("Create Payment Test Client", True, f"Payment test client created: {test_payment_client_id}")
+                else:
+                    self.log_result("Create Payment Test Client", False, f"Status: {response.status_code}")
+            except Exception as e:
+                self.log_result("Create Payment Test Client", False, "Exception occurred", str(e))
+
+        # Test client declares payment
+        payment_id = None
+        if test_payment_client_id:
+            try:
+                # Login as the client
+                client_login_data = {
+                    "email": f"payment.client.{timestamp}@example.com",
+                    "password": "Aloria2024!"
+                }
+                client_login_response = self.session.post(f"{API_BASE}/auth/login", json=client_login_data)
+                if client_login_response.status_code == 200:
+                    client_token = client_login_response.json()['access_token']
+                    client_headers = {"Authorization": f"Bearer {client_token}"}
+                    
+                    payment_data = {
+                        "amount": 1500.00,
+                        "currency": "EUR",
+                        "description": "Paiement pour dossier visa de travail",
+                        "payment_method": "Bank Transfer"
+                    }
+                    response = self.session.post(f"{API_BASE}/payments/declare", json=payment_data, headers=client_headers)
+                    if response.status_code == 200 or response.status_code == 201:
+                        payment_response = response.json()
+                        payment_id = payment_response['id']
+                        self.log_result("Client Declares Payment", True, f"Payment declared with ID: {payment_id}")
+                    else:
+                        self.log_result("Client Declares Payment", False, f"Status: {response.status_code}", response.text)
+                else:
+                    self.log_result("Client Login for Payment", False, "Could not login as client")
+            except Exception as e:
+                self.log_result("Client Declares Payment", False, "Exception occurred", str(e))
+
+        # Test manager sees pending payments
+        if self.manager_token:
+            try:
+                headers = {"Authorization": f"Bearer {self.manager_token}"}
+                response = self.session.get(f"{API_BASE}/payments/pending", headers=headers)
+                if response.status_code == 200:
+                    pending_payments = response.json()
+                    self.log_result("Manager Views Pending Payments", True, f"Found {len(pending_payments)} pending payments")
+                else:
+                    self.log_result("Manager Views Pending Payments", False, f"Status: {response.status_code}", response.text)
+            except Exception as e:
+                self.log_result("Manager Views Pending Payments", False, "Exception occurred", str(e))
+
+        # Test manager confirms payment
+        if self.manager_token and payment_id:
+            try:
+                headers = {"Authorization": f"Bearer {self.manager_token}"}
+                confirmation_data = {
+                    "action": "confirm",
+                    "notes": "Paiement vérifié et confirmé par le manager"
+                }
+                response = self.session.patch(f"{API_BASE}/payments/{payment_id}/confirm", json=confirmation_data, headers=headers)
+                if response.status_code == 200:
+                    confirmed_payment = response.json()
+                    invoice_number = confirmed_payment.get('invoice_number')
+                    self.log_result("Manager Confirms Payment", True, f"Payment confirmed with invoice: {invoice_number}")
+                else:
+                    self.log_result("Manager Confirms Payment", False, f"Status: {response.status_code}", response.text)
+            except Exception as e:
+                self.log_result("Manager Confirms Payment", False, "Exception occurred", str(e))
+
+        # Test payment history endpoints
+        if self.manager_token:
+            try:
+                headers = {"Authorization": f"Bearer {self.manager_token}"}
+                response = self.session.get(f"{API_BASE}/payments/history", headers=headers)
+                if response.status_code == 200:
+                    payment_history = response.json()
+                    self.log_result("Manager Payment History", True, f"Retrieved {len(payment_history)} payment records")
+                else:
+                    self.log_result("Manager Payment History", False, f"Status: {response.status_code}", response.text)
+            except Exception as e:
+                self.log_result("Manager Payment History", False, "Exception occurred", str(e))
+
+    def test_superadmin_apis(self):
+        """Test SuperAdmin specific APIs"""
+        print("=== Testing SuperAdmin APIs ===")
+        
+        # Login as SuperAdmin
+        superadmin_token = None
+        try:
+            login_response = self.session.post(f"{API_BASE}/auth/login", json={
+                "email": "superadmin@aloria.com",
+                "password": "SuperAdmin123!"
+            })
+            if login_response.status_code == 200:
+                superadmin_token = login_response.json()['access_token']
+                self.log_result("SuperAdmin Login for APIs", True, "SuperAdmin logged in successfully")
+            else:
+                self.log_result("SuperAdmin Login for APIs", False, "Could not login as SuperAdmin")
+        except Exception as e:
+            self.log_result("SuperAdmin Login for APIs", False, "Exception occurred", str(e))
+
+        if not superadmin_token:
+            self.log_result("SuperAdmin APIs", False, "No SuperAdmin token available")
+            return
+
+        headers = {"Authorization": f"Bearer {superadmin_token}"}
+
+        # Test get all users
+        try:
+            response = self.session.get(f"{API_BASE}/admin/users", headers=headers)
+            if response.status_code == 200:
+                users = response.json()
+                self.log_result("SuperAdmin Get All Users", True, f"Retrieved {len(users)} users")
+            else:
+                self.log_result("SuperAdmin Get All Users", False, f"Status: {response.status_code}", response.text)
+        except Exception as e:
+            self.log_result("SuperAdmin Get All Users", False, "Exception occurred", str(e))
+
+        # Test get activities
+        try:
+            response = self.session.get(f"{API_BASE}/admin/activities", headers=headers)
+            if response.status_code == 200:
+                activities = response.json()
+                self.log_result("SuperAdmin Get Activities", True, f"Retrieved {len(activities)} activities")
+            else:
+                self.log_result("SuperAdmin Get Activities", False, f"Status: {response.status_code}", response.text)
+        except Exception as e:
+            self.log_result("SuperAdmin Get Activities", False, "Exception occurred", str(e))
+
+        # Test dashboard stats
+        try:
+            response = self.session.get(f"{API_BASE}/admin/dashboard-stats", headers=headers)
+            if response.status_code == 200:
+                stats = response.json()
+                self.log_result("SuperAdmin Dashboard Stats", True, f"Retrieved dashboard stats: {len(stats)} metrics")
+            else:
+                self.log_result("SuperAdmin Dashboard Stats", False, f"Status: {response.status_code}", response.text)
+        except Exception as e:
+            self.log_result("SuperAdmin Dashboard Stats", False, "Exception occurred", str(e))
+
+        # Test impersonation
+        if self.manager_user:
+            try:
+                impersonation_data = {
+                    "target_user_id": self.manager_user['id']
+                }
+                response = self.session.post(f"{API_BASE}/admin/impersonate", json=impersonation_data, headers=headers)
+                if response.status_code == 200:
+                    impersonation_response = response.json()
+                    self.log_result("SuperAdmin Impersonation", True, f"Impersonation token created for manager")
+                else:
+                    self.log_result("SuperAdmin Impersonation", False, f"Status: {response.status_code}", response.text)
+            except Exception as e:
+                self.log_result("SuperAdmin Impersonation", False, "Exception occurred", str(e))
+
+    def test_search_apis(self):
+        """Test search functionality"""
+        print("=== Testing Search APIs ===")
+        
+        # Test global search
+        if self.manager_token:
+            try:
+                headers = {"Authorization": f"Bearer {self.manager_token}"}
+                search_params = {"q": "test", "limit": 10}
+                response = self.session.get(f"{API_BASE}/search/global", params=search_params, headers=headers)
+                if response.status_code == 200:
+                    search_results = response.json()
+                    total_results = sum(len(results) for results in search_results.values())
+                    self.log_result("Global Search", True, f"Global search returned {total_results} results across categories")
+                else:
+                    self.log_result("Global Search", False, f"Status: {response.status_code}", response.text)
+            except Exception as e:
+                self.log_result("Global Search", False, "Exception occurred", str(e))
+
+        # Test category-specific searches
+        categories = ["users", "clients", "cases", "visitors"]
+        for category in categories:
+            if self.manager_token:
+                try:
+                    headers = {"Authorization": f"Bearer {self.manager_token}"}
+                    search_params = {"q": "test", "category": category, "limit": 5}
+                    response = self.session.get(f"{API_BASE}/search/global", params=search_params, headers=headers)
+                    if response.status_code == 200:
+                        search_results = response.json()
+                        category_results = search_results.get(category, [])
+                        self.log_result(f"Search {category.title()}", True, f"Found {len(category_results)} {category} results")
+                    else:
+                        self.log_result(f"Search {category.title()}", False, f"Status: {response.status_code}", response.text)
+                except Exception as e:
+                    self.log_result(f"Search {category.title()}", False, "Exception occurred", str(e))
+
+    def test_visitor_stats(self):
+        """Test visitor statistics"""
+        print("=== Testing Visitor Statistics ===")
+        
+        # Test visitor list with extended info
+        if self.manager_token:
+            try:
+                headers = {"Authorization": f"Bearer {self.manager_token}"}
+                response = self.session.get(f"{API_BASE}/visitors/list", headers=headers)
+                if response.status_code == 200:
+                    visitors_list = response.json()
+                    self.log_result("Visitor List Extended", True, f"Retrieved extended visitor list: {len(visitors_list)} visitors")
+                else:
+                    self.log_result("Visitor List Extended", False, f"Status: {response.status_code}", response.text)
+            except Exception as e:
+                self.log_result("Visitor List Extended", False, "Exception occurred", str(e))
+
+        # Test visitor statistics
+        if self.manager_token:
+            try:
+                headers = {"Authorization": f"Bearer {self.manager_token}"}
+                response = self.session.get(f"{API_BASE}/visitors/stats", headers=headers)
+                if response.status_code == 200:
+                    visitor_stats = response.json()
+                    self.log_result("Visitor Statistics", True, f"Retrieved visitor statistics: {len(visitor_stats)} metrics")
+                else:
+                    self.log_result("Visitor Statistics", False, f"Status: {response.status_code}", response.text)
+            except Exception as e:
+                self.log_result("Visitor Statistics", False, "Exception occurred", str(e))
+
+    def test_comprehensive_v2_scenario(self):
+        """Test comprehensive V2 scenario with all new features"""
+        print("=== Testing Comprehensive V2 Scenario ===")
+        
+        try:
+            # 1. SuperAdmin creates Manager
+            superadmin_token = None
+            login_response = self.session.post(f"{API_BASE}/auth/login", json={
+                "email": "superadmin@aloria.com",
+                "password": "SuperAdmin123!"
+            })
+            if login_response.status_code == 200:
+                superadmin_token = login_response.json()['access_token']
+                
+                # Create new manager
+                headers = {"Authorization": f"Bearer {superadmin_token}"}
+                import time
+                timestamp = int(time.time())
+                manager_data = {
+                    "email": f"v2.manager.{timestamp}@aloria.com",
+                    "full_name": "V2 Test Manager",
+                    "phone": "+33400000001",
+                    "role": "MANAGER",
+                    "send_email": False
+                }
+                response = self.session.post(f"{API_BASE}/users/create", json=manager_data, headers=headers)
+                if response.status_code == 200 or response.status_code == 201:
+                    manager_temp_password = response.json().get('temporary_password')
+                    self.log_result("V2 Scenario Step 1: SuperAdmin Creates Manager", True, f"Manager created with temp password")
+                    
+                    # 2. Manager logs in and creates Employee
+                    manager_login_response = self.session.post(f"{API_BASE}/auth/login", json={
+                        "email": manager_data["email"],
+                        "password": manager_temp_password
+                    })
+                    if manager_login_response.status_code == 200:
+                        v2_manager_token = manager_login_response.json()['access_token']
+                        
+                        # Manager creates employee
+                        manager_headers = {"Authorization": f"Bearer {v2_manager_token}"}
+                        employee_data = {
+                            "email": f"v2.employee.{timestamp}@aloria.com",
+                            "full_name": "V2 Test Employee",
+                            "phone": "+33400000002",
+                            "role": "EMPLOYEE",
+                            "send_email": False
+                        }
+                        emp_response = self.session.post(f"{API_BASE}/users/create", json=employee_data, headers=manager_headers)
+                        if emp_response.status_code == 200 or emp_response.status_code == 201:
+                            self.log_result("V2 Scenario Step 2: Manager Creates Employee", True, "Employee created successfully")
+                            
+                            # 3. Employee creates Client and declares payment
+                            employee_temp_password = emp_response.json().get('temporary_password')
+                            emp_login_response = self.session.post(f"{API_BASE}/auth/login", json={
+                                "email": employee_data["email"],
+                                "password": employee_temp_password
+                            })
+                            if emp_login_response.status_code == 200:
+                                v2_employee_token = emp_login_response.json()['access_token']
+                                employee_headers = {"Authorization": f"Bearer {v2_employee_token}"}
+                                
+                                # Employee creates client
+                                client_data = {
+                                    "email": f"v2.client.{timestamp}@aloria.com",
+                                    "full_name": "V2 Test Client",
+                                    "phone": "+33400000003",
+                                    "country": "Canada",
+                                    "visa_type": "Work Permit",
+                                    "message": "V2 comprehensive test client"
+                                }
+                                client_response = self.session.post(f"{API_BASE}/clients", json=client_data, headers=employee_headers)
+                                if client_response.status_code == 200 or client_response.status_code == 201:
+                                    v2_client_id = client_response.json()['id']
+                                    self.log_result("V2 Scenario Step 3: Employee Creates Client", True, f"Client created: {v2_client_id}")
+                                    
+                                    # 4. Client declares payment
+                                    client_login_response = self.session.post(f"{API_BASE}/auth/login", json={
+                                        "email": client_data["email"],
+                                        "password": "Aloria2024!"
+                                    })
+                                    if client_login_response.status_code == 200:
+                                        v2_client_token = client_login_response.json()['access_token']
+                                        client_headers = {"Authorization": f"Bearer {v2_client_token}"}
+                                        
+                                        payment_data = {
+                                            "amount": 2000.00,
+                                            "currency": "EUR",
+                                            "description": "V2 Test Payment",
+                                            "payment_method": "Bank Transfer"
+                                        }
+                                        payment_response = self.session.post(f"{API_BASE}/payments/declare", json=payment_data, headers=client_headers)
+                                        if payment_response.status_code == 200 or payment_response.status_code == 201:
+                                            v2_payment_id = payment_response.json()['id']
+                                            self.log_result("V2 Scenario Step 4: Client Declares Payment", True, f"Payment declared: {v2_payment_id}")
+                                            
+                                            # 5. Manager confirms payment
+                                            confirmation_data = {
+                                                "action": "confirm",
+                                                "notes": "V2 test payment confirmed"
+                                            }
+                                            confirm_response = self.session.patch(f"{API_BASE}/payments/{v2_payment_id}/confirm", json=confirmation_data, headers=manager_headers)
+                                            if confirm_response.status_code == 200:
+                                                invoice_number = confirm_response.json().get('invoice_number')
+                                                self.log_result("V2 Scenario Step 5: Manager Confirms Payment", True, f"Payment confirmed with invoice: {invoice_number}")
+                                                
+                                                # 6. SuperAdmin monitors activities
+                                                activities_response = self.session.get(f"{API_BASE}/admin/activities", headers=headers)
+                                                if activities_response.status_code == 200:
+                                                    activities = activities_response.json()
+                                                    self.log_result("V2 Scenario Step 6: SuperAdmin Monitors", True, f"SuperAdmin can see {len(activities)} activities")
+                                                else:
+                                                    self.log_result("V2 Scenario Step 6: SuperAdmin Monitors", False, "Could not retrieve activities")
+                                            else:
+                                                self.log_result("V2 Scenario Step 5: Manager Confirms Payment", False, f"Status: {confirm_response.status_code}")
+                                        else:
+                                            self.log_result("V2 Scenario Step 4: Client Declares Payment", False, f"Status: {payment_response.status_code}")
+                                    else:
+                                        self.log_result("V2 Scenario Step 4: Client Login", False, "Could not login as client")
+                                else:
+                                    self.log_result("V2 Scenario Step 3: Employee Creates Client", False, f"Status: {client_response.status_code}")
+                            else:
+                                self.log_result("V2 Scenario Step 3: Employee Login", False, "Could not login as employee")
+                        else:
+                            self.log_result("V2 Scenario Step 2: Manager Creates Employee", False, f"Status: {emp_response.status_code}")
+                    else:
+                        self.log_result("V2 Scenario Step 2: Manager Login", False, "Could not login as manager")
+                else:
+                    self.log_result("V2 Scenario Step 1: SuperAdmin Creates Manager", False, f"Status: {response.status_code}")
+            else:
+                self.log_result("V2 Scenario: SuperAdmin Login", False, "Could not login as SuperAdmin")
+                
+        except Exception as e:
+            self.log_result("V2 Comprehensive Scenario", False, "Exception occurred", str(e))
+
     def run_all_tests(self):
-        """Run all test suites"""
-        print("🚀 Starting ALORIA AGENCY Backend API Tests - NOUVELLES FONCTIONNALITÉS")
+        """Run all test suites including V2 features"""
+        print("🚀 Starting ALORIA AGENCY V2 Backend API Tests - COMPREHENSIVE TESTING")
         print(f"Testing against: {API_BASE}")
         print("=" * 60)
         
+        # V2 New Features Tests
+        self.test_superadmin_creation()
+        self.test_role_hierarchy_permissions()
+        self.test_payment_system()
+        self.test_superadmin_apis()
+        self.test_search_apis()
+        self.test_visitor_stats()
+        self.test_comprehensive_v2_scenario()
+        
+        # Existing Features Tests
         self.test_user_registration_and_login()
-        self.test_client_creation_permissions()  # CORRECTED: Employee can now create clients
-        self.test_notification_system()  # NEW: Test notification APIs
-        self.test_automatic_notifications()  # NEW: Test automatic notification creation
-        self.test_complete_integration()  # NEW: Complete integration test with notifications
+        self.test_client_creation_permissions()
+        self.test_notification_system()
+        self.test_automatic_notifications()
+        self.test_complete_integration()
         self.test_client_creation_with_password()
         self.test_password_change_api()
         self.test_client_credentials_api()
