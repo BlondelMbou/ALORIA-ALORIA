@@ -2283,8 +2283,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Mount Socket.IO at /socket.io
-app.mount("/socket.io", socket_app)
+# Mount Socket.IO at /api/socket.io for Kubernetes ingress routing
+app.mount("/api/socket.io", socket_app)
 
 @app.on_event("shutdown")
 async def shutdown_db_client():
