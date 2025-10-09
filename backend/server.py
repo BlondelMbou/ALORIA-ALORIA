@@ -350,6 +350,63 @@ class ClientCredentials(BaseModel):
     email: str
     password: str
 
+# Nouveaux modèles pour les paiements
+class PaymentDeclaration(BaseModel):
+    amount: float
+    currency: str = "EUR"
+    description: Optional[str] = None
+    payment_method: str  # "Cash", "Bank Transfer", "Check", etc.
+    
+class PaymentDeclarationResponse(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str
+    client_id: str
+    client_name: str
+    amount: float
+    currency: str
+    description: Optional[str]
+    payment_method: str
+    status: str  # "pending", "confirmed", "rejected"
+    declared_at: str
+    confirmed_at: Optional[str]
+    confirmed_by: Optional[str]
+    invoice_number: Optional[str]
+    
+class PaymentConfirmation(BaseModel):
+    action: str  # "confirm" or "reject"
+    notes: Optional[str] = None
+    
+# Modèles pour la création d'utilisateurs avec email
+class UserCreateRequest(BaseModel):
+    email: str
+    full_name: str
+    phone: str
+    role: UserRole
+    send_email: bool = True
+    
+class UserCreateResponse(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str
+    email: str
+    full_name: str
+    phone: str
+    role: str
+    temporary_password: Optional[str]  # Seulement si send_email=False
+    email_sent: bool
+    
+# Modèles pour le monitoring SuperAdmin
+class UserActivity(BaseModel):
+    user_id: str
+    user_name: str
+    user_role: str
+    action: str
+    details: Optional[dict]
+    ip_address: Optional[str]
+    timestamp: str
+    
+class ImpersonationRequest(BaseModel):
+    target_user_id: str
+
 class NotificationCreate(BaseModel):
     user_id: str
     title: str
