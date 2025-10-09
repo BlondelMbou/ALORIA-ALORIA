@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { toast } from 'sonner';
 import NotificationBell from '../components/NotificationBell';
+import HierarchicalUserCreation from '../components/HierarchicalUserCreation';
 import api from '../utils/api';
 
 const SuperAdminDashboard = () => {
