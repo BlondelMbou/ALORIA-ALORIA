@@ -172,6 +172,60 @@ def create_access_token(data: dict) -> str:
     to_encode.update({"exp": expire})
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
+# Système de permissions hiérarchiques
+ROLE_HIERARCHY = {
+    "SUPERADMIN": 4,
+    "MANAGER": 3, 
+    "EMPLOYEE": 2,
+    "CLIENT": 1
+}
+
+def can_create_role(creator_role: str, target_role: str) -> bool:
+    """Vérifie si un utilisateur peut créer un autre utilisateur d'un certain rôle"""
+    creator_level = ROLE_HIERARCHY.get(creator_role, 0)
+    target_level = ROLE_HIERARCHY.get(target_role, 0)
+    
+    # SuperAdmin peut créer Manager
+    if creator_role == "SUPERADMIN" and target_role == "MANAGER":
+        return True
+    # Manager peut créer Employee et Client  
+    elif creator_role == "MANAGER" and target_role in ["EMPLOYEE", "CLIENT"]:
+        return True
+    # Employee peut créer Client
+    elif creator_role == "EMPLOYEE" and target_role == "CLIENT":
+        return True
+    
+    return False
+
+def can_access_user(accessor_role: str, target_role: str, accessor_id: str = None, target_id: str = None) -> bool:
+    """Vérifie si un utilisateur peut accéder aux données d'un autre"""
+    accessor_level = ROLE_HIERARCHY.get(accessor_role, 0)
+    target_level = ROLE_HIERARCHY.get(target_role, 0)
+    
+    # SuperAdmin peut tout voir
+    if accessor_role == "SUPERADMIN":
+        return True
+    # Manager peut voir Employee et Client
+    elif accessor_role == "MANAGER" and target_role in ["EMPLOYEE", "CLIENT"]:
+        return True
+    # Employee peut voir ses propres clients assignés
+    elif accessor_role == "EMPLOYEE" and target_role == "CLIENT":
+        return True  # Vérification spécifique dans l'API
+    # Chacun peut voir ses propres données
+    elif accessor_id == target_id:
+        return True
+        
+    return False
+
+# Fonction pour générer un mot de passe temporaire
+import secrets
+import string
+
+def generate_temporary_password(length: int = 12) -> str:
+    """Génère un mot de passe temporaire sécurisé"""
+    alphabet = string.ascii_letters + string.digits + "!@#$%^&*"
+    return ''.join(secrets.choice(alphabet) for _ in range(length))
+
 async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
     try:
         token = credentials.credentials
