@@ -35,6 +35,13 @@ export default function ClientDashboard() {
     new_password: '',
     confirm_password: ''
   });
+  const [payments, setPayments] = useState([]);
+  const [paymentForm, setPaymentForm] = useState({
+    amount: '',
+    currency: 'EUR',
+    description: '',
+    payment_method: 'Virement bancaire'
+  });
   
   // WebSocket hook  
   const { connected } = useSocket(localStorage.getItem('token'));
