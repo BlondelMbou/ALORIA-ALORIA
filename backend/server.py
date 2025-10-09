@@ -1477,7 +1477,7 @@ async def log_user_activity(user_id: str, action: str, details: dict = None, ip_
 async def send_welcome_email(email: str, name: str, role: str, password: str, created_by: str):
     """Envoie un email de bienvenue avec les informations de connexion"""
     # TODO: Intégrer avec un service d'email réel (SendGrid, Mailgun, etc.)
-    subject = f"Bienvenue chez ALORIA AGENCY - Vos informations de connexion"
+    subject = "Bienvenue chez ALORIA AGENCY - Vos informations de connexion"
     
     body = f"""
     Bonjour {name},
