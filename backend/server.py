@@ -2779,9 +2779,16 @@ async def confirm_payment_with_code(
         )
         
     elif confirmation_data.action == "CONFIRMED":
+        logger.info(f"=== PAYMENT CONFIRMATION DEBUG ===")
+        logger.info(f"Payment ID: {payment_id}")
+        logger.info(f"Action: {confirmation_data.action}")
+        logger.info(f"Payment has code: {bool(payment.get('confirmation_code'))}")
+        logger.info(f"Received code: {confirmation_data.confirmation_code}")
+        
         # Étape 1: Générer un code de confirmation si pas encore fait
         if not payment.get("confirmation_code"):
             confirmation_code = generate_confirmation_code()
+            logger.info(f"Generated new code: {confirmation_code}")
             await db.payment_declarations.update_one(
                 {"id": payment_id}, 
                 {"$set": {"confirmation_code": confirmation_code, "confirmation_required": True}}
@@ -2796,9 +2803,17 @@ async def confirm_payment_with_code(
         
         # Étape 2: Vérifier le code saisi
         if not confirmation_data.confirmation_code:
+            logger.error("No confirmation code provided")
             raise HTTPException(status_code=400, detail="Code de confirmation requis")
         
-        if confirmation_data.confirmation_code != payment["confirmation_code"]:
+        stored_code = payment["confirmation_code"]
+        provided_code = confirmation_data.confirmation_code
+        logger.info(f"Stored code: {stored_code}")
+        logger.info(f"Provided code: {provided_code}")
+        logger.info(f"Codes match: {provided_code == stored_code}")
+        
+        if provided_code != stored_code:
+            logger.error(f"Code mismatch: expected {stored_code}, got {provided_code}")
             raise HTTPException(status_code=400, detail="Code de confirmation incorrect")
         
         # Confirmer le paiement
