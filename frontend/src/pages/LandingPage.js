@@ -19,16 +19,7 @@ import {
 
 export default function LandingPage() {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    full_name: '',
-    email: '',
-    phone: '',
-    country: '',
-    visa_type: '',
-    message: '',
-    assigned_employee_id: ''
-  });
-  const [loading, setLoading] = useState(false);
+  // Removed form state - now managed by ContactFormWidget component
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showAuthForm, setShowAuthForm] = useState(false);
   const [authData, setAuthData] = useState({
