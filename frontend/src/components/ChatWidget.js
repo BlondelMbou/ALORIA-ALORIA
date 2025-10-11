@@ -214,7 +214,7 @@ const ChatWidget = ({ currentUser, onUnreadCountChange }) => {
                           className={`max-w-[80%] rounded-lg p-3 ${
                             message.sender_id === currentUser.id
                               ? 'bg-orange-500 text-white'
-                              : 'bg-slate-700 text-white'
+                              : 'bg-slate-700/70 text-slate-100 border border-slate-600'
                           }`}
                         >
                           {message.sender_id !== currentUser.id && (
