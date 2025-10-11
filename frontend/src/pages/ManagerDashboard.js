@@ -306,8 +306,7 @@ export default function ManagerDashboard() {
     try {
       await clientsAPI.reassign(clientId, employeeId);
       toast.success('Client reassigned successfully');
-      fetchData();
-      setTimeout(() => fetchData(), 1500); // Refresh delayed pour synchronisation
+      fetchData(); // Refresh unique
       setSelectedClient(null);
     } catch (error) {
       toast.error('Failed to reassign client');
