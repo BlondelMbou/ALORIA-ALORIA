@@ -2028,9 +2028,9 @@ class APITester:
             "country": "France",
             "visa_type": "Permis de Travail (Passeport Talent)",
             "budget_range": "5000+€",
-            "urgency_level": "URGENT",
+            "urgency_level": "Urgent",
             "message": "Je souhaite immigrer en France pour des opportunités professionnelles dans le secteur tech. J'ai 5 ans d'expérience et cherche à obtenir un passeport talent.",
-            "lead_source": "WEBSITE"
+            "lead_source": "Site web"
         }
         
         contact_message_id = None
