@@ -234,64 +234,7 @@ export default function LandingPage() {
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    if (!isAuthenticated) {
-      setShowAuthForm(true);
-      return;
-    }
-    
-    if (!formData.full_name || !formData.email || !formData.phone || !formData.country || !formData.visa_type) {
-      toast.error('Veuillez remplir tous les champs obligatoires');
-      return;
-    }
-
-    // Si c'est un manager et qu'aucun employé n'est sélectionné, demander la sélection
-    if (currentUser.role === 'MANAGER' && !formData.assigned_employee_id) {
-      toast.error('Veuillez sélectionner un employé pour suivre ce dossier');
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const clientData = { ...formData };
-      
-      // Si c'est un employé, l'auto-assigner
-      if (currentUser.role === 'EMPLOYEE') {
-        clientData.assigned_employee_id = currentUser.id;
-      }
-      
-      const response = await api.post('/clients', clientData);
-      const createdClient = response.data;
-      
-      // Afficher les informations de connexion
-      toast.success(
-        <div>
-          <p className="font-bold">🎉 Client créé avec succès !</p>
-          <p>Email: {createdClient.login_email || formData.email}</p>
-          <p>Mot de passe: Aloria2024!</p>
-          <p className="text-xs text-slate-400 mt-1">Le client peut se connecter et changer son mot de passe</p>
-        </div>,
-        { duration: 8000 }
-      );
-      
-      setFormData({
-        full_name: '',
-        email: '',
-        phone: '',
-        country: '',
-        visa_type: '',
-        message: '',
-        assigned_employee_id: ''
-      });
-      
-    } catch (error) {
-      toast.error(error.response?.data?.detail || 'Erreur lors de la création du client. Veuillez réessayer.');
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Old form handler removed - contact form now handled by ContactFormWidget
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0F172A] via-[#1E293B] to-[#0F172A] overflow-hidden">
