@@ -382,7 +382,7 @@ class PaymentSystemTester:
         if self.client_token:
             try:
                 headers = {"Authorization": f"Bearer {self.client_token}"}
-                response = self.session.get(f"{API_BASE}/payments/history", headers=headers)
+                response = self.session.get(f"{API_BASE}/payments/client-history", headers=headers)
                 
                 if response.status_code == 200:
                     client_history = response.json()
