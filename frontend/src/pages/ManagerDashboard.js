@@ -146,26 +146,103 @@ export default function ManagerDashboard() {
     }
   };
 
-  const handlePaymentAction = async (paymentId, action) => {
+  const handlePaymentAction = async (payment, action) => {
+    if (action === 'REJECTED') {
+      setRejectionDialog({ show: true, payment, reason: '' });
+      return;
+    }
+    
+    if (action === 'CONFIRMED') {
+      try {
+        // Première étape : générer le code de confirmation
+        const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/payments/${payment.id}/confirm`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          },
+          body: JSON.stringify({ action: 'CONFIRMED' })
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          if (result.confirmation_code) {
+            // Code généré, demander la confirmation
+            setConfirmationDialog({ 
+              show: true, 
+              payment: result, 
+              code: '', 
+              action: 'CONFIRMED',
+              generatedCode: result.confirmation_code
+            });
+          }
+        } else {
+          throw new Error('Erreur lors de la génération du code de confirmation');
+        }
+      } catch (error) {
+        toast.error(error.message);
+        console.error('Error generating confirmation code:', error);
+      }
+    }
+  };
+
+  const confirmPaymentWithCode = async () => {
     try {
-      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/payments/${paymentId}/confirm`, {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/payments/${confirmationDialog.payment.id}/confirm`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
-        body: JSON.stringify({ action })
+        body: JSON.stringify({ 
+          action: 'CONFIRMED',
+          confirmation_code: confirmationDialog.code
+        })
       });
 
       if (response.ok) {
-        toast.success(action === 'CONFIRMED' ? 'Paiement confirmé avec succès !' : 'Paiement rejeté');
-        fetchPayments(); // Refresh payments
+        toast.success('Paiement confirmé avec succès ! Facture générée automatiquement.');
+        setConfirmationDialog({ show: false, payment: null, code: '', action: '' });
+        fetchPayments();
       } else {
-        throw new Error('Erreur lors de la mise à jour du paiement');
+        const error = await response.json();
+        throw new Error(error.detail || 'Code de confirmation incorrect');
       }
     } catch (error) {
       toast.error(error.message);
-      console.error('Error updating payment:', error);
+      console.error('Error confirming payment:', error);
+    }
+  };
+
+  const rejectPaymentWithReason = async () => {
+    if (!rejectionDialog.reason.trim()) {
+      toast.error('Un motif de rejet est obligatoire');
+      return;
+    }
+
+    try {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/payments/${rejectionDialog.payment.id}/confirm`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({ 
+          action: 'REJECTED',
+          rejection_reason: rejectionDialog.reason
+        })
+      });
+
+      if (response.ok) {
+        toast.success('Paiement rejeté. Le client a été notifié.');
+        setRejectionDialog({ show: false, payment: null, reason: '' });
+        fetchPayments();
+      } else {
+        throw new Error('Erreur lors du rejet du paiement');
+      }
+    } catch (error) {
+      toast.error(error.message);
+      console.error('Error rejecting payment:', error);
     }
   };
 
