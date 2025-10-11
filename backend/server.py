@@ -2931,6 +2931,23 @@ async def get_pending_payments(current_user: dict = Depends(get_current_user)):
     
     return [PaymentDeclarationResponse(**p) for p in payments]
 
+@api_router.get("/payments/history", response_model=List[PaymentDeclarationResponse])
+async def get_payment_history(current_user: dict = Depends(get_current_user)):
+    """Obtenir l'historique des paiements"""
+    query = {}
+    
+    # Client voit ses propres paiements, Manager voit tout
+    if current_user["role"] == "CLIENT":
+        query["client_id"] = current_user["id"]
+    elif current_user["role"] not in ["MANAGER", "SUPERADMIN"]:
+        raise HTTPException(status_code=403, detail="Accès refusé")
+    
+    payments = await db.payment_declarations.find(
+        query, {"_id": 0}
+    ).sort("declared_at", -1).to_list(100)
+    
+    return [PaymentDeclarationResponse(**p) for p in payments]
+
 # Contact Messages & CRM
 @api_router.post("/contact-messages", response_model=ContactMessageResponse)
 async def create_contact_message(message_data: ContactMessageCreate):
