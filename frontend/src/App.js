@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import '@/App.css';
-import LandingPageV3 from '@/pages/LandingPageV3';
+import LandingPage from '@/pages/LandingPage';
 import LoginPage from '@/pages/LoginPage';
 import ManagerDashboard from '@/pages/ManagerDashboard';
 import EmployeeDashboard from '@/pages/EmployeeDashboard';
