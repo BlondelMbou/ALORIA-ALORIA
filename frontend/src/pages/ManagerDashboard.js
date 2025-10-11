@@ -198,25 +198,36 @@ export default function ManagerDashboard() {
 
   const confirmPaymentWithCode = async () => {
     try {
+      console.log('=== DEBUGGING PAYMENT CONFIRMATION ===');
+      console.log('Payment ID:', confirmationDialog.payment.id);
+      console.log('Confirmation code:', confirmationDialog.code);
+      console.log('Generated code:', confirmationDialog.generatedCode);
+      
+      const requestBody = { 
+        action: 'CONFIRMED',
+        confirmation_code: confirmationDialog.code
+      };
+      console.log('Request body:', requestBody);
+
       const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/payments/${confirmationDialog.payment.id}/confirm`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
-        body: JSON.stringify({ 
-          action: 'CONFIRMED',
-          confirmation_code: confirmationDialog.code
-        })
+        body: JSON.stringify(requestBody)
       });
+
+      console.log('Response status:', response.status);
+      const responseData = await response.json();
+      console.log('Response data:', responseData);
 
       if (response.ok) {
         toast.success('Paiement confirmé avec succès ! Facture générée automatiquement.');
         setConfirmationDialog({ show: false, payment: null, code: '', action: '' });
         fetchPayments(); // Refresh unique
       } else {
-        const error = await response.json();
-        throw new Error(error.detail || 'Code de confirmation incorrect');
+        throw new Error(responseData.detail || 'Code de confirmation incorrect');
       }
     } catch (error) {
       toast.error(error.message);
