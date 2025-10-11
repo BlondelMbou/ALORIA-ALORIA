@@ -206,10 +206,7 @@ export default function LandingPage() {
       setIsAuthenticated(true);
       setShowAuthForm(false);
       
-      // Charger la liste des employés si c'est un manager
-      if (user.role === 'MANAGER') {
-        await loadEmployees();
-      }
+      // Employee loading now handled by ContactFormWidget
       
       toast.success(`Bienvenue ${user.full_name} !`);
     } catch (error) {
