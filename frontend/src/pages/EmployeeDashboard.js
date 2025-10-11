@@ -589,6 +589,11 @@ export default function EmployeeDashboard() {
             </Card>
           </TabsContent>
 
+          {/* CRM */}
+          <TabsContent value="crm">
+            <EmployeeCRM />
+          </TabsContent>
+
           {/* Create Client */}
           <TabsContent value="create">
             <Card>
