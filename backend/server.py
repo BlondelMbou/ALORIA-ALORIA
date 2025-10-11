@@ -696,16 +696,31 @@ class ExpenseCategoryInfo(BaseModel):
     icon: str
     color: str
 
+class ServiceInfo(BaseModel):
+    name: str
+    description: str
+    duration: str
+    success_rate: int
+    price_from: int
+
+class TeamMember(BaseModel):
+    name: str
+    role: str
+    specialization: str
+    experience: str
+    languages: List[str]
+
 class CompanyInfo(BaseModel):
     name: str
     tagline: str
     description: str
     contact: Dict[str, Any]
     business_hours: Dict[str, str]
-    services: List[str]
+    services: List[ServiceInfo]
     social_media: Dict[str, str]
     certifications: List[str]
     statistics: Dict[str, Any]
+    team: List[TeamMember]
 
 class PaymentConfirmRequest(BaseModel):
     action: str  # "CONFIRMED" or "REJECTED"
