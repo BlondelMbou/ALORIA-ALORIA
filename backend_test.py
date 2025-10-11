@@ -2206,6 +2206,7 @@ class APITester:
         self.test_superadmin_apis()
         self.test_search_apis()
         self.test_visitor_stats()
+        self.test_contact_messages_crm()  # NEW: Contact Messages & CRM System
         self.test_comprehensive_v2_scenario()
         
         # Existing Features Tests
