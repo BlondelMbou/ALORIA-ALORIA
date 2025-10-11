@@ -2016,6 +2016,183 @@ class APITester:
         
         print("=" * 60)
 
+    def test_contact_messages_crm(self):
+        """Test contact messages and CRM system"""
+        print("=== Testing Contact Messages & CRM System ===")
+        
+        # Test data as specified in the review request
+        contact_data = {
+            "name": "Jean Dupont",
+            "email": "jean.dupont@test.com",
+            "phone": "+33123456789",
+            "country": "France",
+            "visa_type": "Permis de Travail (Passeport Talent)",
+            "budget_range": "5000+€",
+            "urgency_level": "URGENT",
+            "message": "Je souhaite immigrer en France pour des opportunités professionnelles dans le secteur tech. J'ai 5 ans d'expérience et cherche à obtenir un passeport talent.",
+            "lead_source": "WEBSITE"
+        }
+        
+        contact_message_id = None
+        
+        # 1. Test POST /api/contact-messages (public endpoint)
+        try:
+            response = self.session.post(f"{API_BASE}/contact-messages", json=contact_data)
+            if response.status_code == 200 or response.status_code == 201:
+                data = response.json()
+                contact_message_id = data['id']
+                
+                # Verify lead score calculation
+                expected_score = 50 + 30 + 20 + 15 + 10 + 5  # Base + budget + urgency + country + message length + complete info
+                actual_score = data.get('conversion_probability', 0)
+                
+                if actual_score >= 90:  # Should be around 130 but capped at 100
+                    self.log_result("Contact Message Creation with Lead Score", True, 
+                                  f"Message created with ID: {contact_message_id}, Lead Score: {actual_score}%")
+                else:
+                    self.log_result("Contact Message Creation with Lead Score", False, 
+                                  f"Lead score calculation incorrect. Expected ~100%, got {actual_score}%")
+                
+                # Verify status is "NEW"
+                if data.get('status') == 'NEW':
+                    self.log_result("Contact Message Status", True, "Message created with status 'NEW'")
+                else:
+                    self.log_result("Contact Message Status", False, f"Expected status 'NEW', got '{data.get('status')}'")
+                    
+            else:
+                self.log_result("Contact Message Creation", False, f"Status: {response.status_code}", response.text)
+        except Exception as e:
+            self.log_result("Contact Message Creation", False, "Exception occurred", str(e))
+        
+        # 2. Test GET /api/contact-messages (Manager access)
+        if self.manager_token:
+            try:
+                headers = {"Authorization": f"Bearer {self.manager_token}"}
+                response = self.session.get(f"{API_BASE}/contact-messages", headers=headers)
+                if response.status_code == 200:
+                    messages = response.json()
+                    self.log_result("Manager Get Contact Messages", True, f"Retrieved {len(messages)} contact messages")
+                    
+                    # Verify our message is in the list
+                    if contact_message_id:
+                        found_message = any(msg['id'] == contact_message_id for msg in messages)
+                        if found_message:
+                            self.log_result("Contact Message Retrieval", True, "Created message found in CRM list")
+                        else:
+                            self.log_result("Contact Message Retrieval", False, "Created message not found in CRM list")
+                else:
+                    self.log_result("Manager Get Contact Messages", False, f"Status: {response.status_code}", response.text)
+            except Exception as e:
+                self.log_result("Manager Get Contact Messages", False, "Exception occurred", str(e))
+        
+        # 3. Test GET /api/contact-messages (Employee access)
+        if self.employee_token:
+            try:
+                headers = {"Authorization": f"Bearer {self.employee_token}"}
+                response = self.session.get(f"{API_BASE}/contact-messages", headers=headers)
+                if response.status_code == 200:
+                    messages = response.json()
+                    self.log_result("Employee Get Contact Messages", True, f"Employee can access {len(messages)} assigned messages")
+                else:
+                    self.log_result("Employee Get Contact Messages", False, f"Status: {response.status_code}", response.text)
+            except Exception as e:
+                self.log_result("Employee Get Contact Messages", False, "Exception occurred", str(e))
+        
+        # 4. Test filtering by status
+        if self.manager_token:
+            try:
+                headers = {"Authorization": f"Bearer {self.manager_token}"}
+                response = self.session.get(f"{API_BASE}/contact-messages?status=NEW", headers=headers)
+                if response.status_code == 200:
+                    new_messages = response.json()
+                    self.log_result("Contact Messages Filter by Status", True, f"Found {len(new_messages)} NEW messages")
+                else:
+                    self.log_result("Contact Messages Filter by Status", False, f"Status: {response.status_code}", response.text)
+            except Exception as e:
+                self.log_result("Contact Messages Filter by Status", False, "Exception occurred", str(e))
+        
+        # 5. Test assignment functionality
+        if self.manager_token and self.employee_user and contact_message_id:
+            try:
+                headers = {"Authorization": f"Bearer {self.manager_token}"}
+                assignment_data = {"assigned_to": self.employee_user['id']}
+                response = self.session.patch(f"{API_BASE}/contact-messages/{contact_message_id}/assign", 
+                                            json=assignment_data, headers=headers)
+                if response.status_code == 200:
+                    self.log_result("Contact Message Assignment", True, f"Message assigned to employee {self.employee_user['full_name']}")
+                else:
+                    self.log_result("Contact Message Assignment", False, f"Status: {response.status_code}", response.text)
+            except Exception as e:
+                self.log_result("Contact Message Assignment", False, "Exception occurred", str(e))
+        
+        # 6. Test data validation
+        try:
+            invalid_data = {
+                "name": "A",  # Too short
+                "email": "invalid-email",  # Invalid format
+                "country": "France",
+                "message": "Short"  # Too short
+            }
+            response = self.session.post(f"{API_BASE}/contact-messages", json=invalid_data)
+            if response.status_code == 422:  # Validation error
+                self.log_result("Contact Form Validation", True, "Invalid data correctly rejected")
+            else:
+                self.log_result("Contact Form Validation", False, f"Expected 422, got {response.status_code}")
+        except Exception as e:
+            self.log_result("Contact Form Validation", False, "Exception occurred", str(e))
+        
+        # 7. Test lead score calculation with different scenarios
+        test_scenarios = [
+            {
+                "name": "Low Score Test",
+                "data": {
+                    "name": "Test User",
+                    "email": "test@example.com",
+                    "country": "Other",
+                    "urgency_level": "INFORMATION",
+                    "budget_range": "500-1000€",
+                    "message": "Short message",
+                    "lead_source": "WEBSITE"
+                },
+                "expected_min": 50,  # Base score only
+                "expected_max": 70
+            },
+            {
+                "name": "High Score Test", 
+                "data": {
+                    "name": "Premium Client",
+                    "email": "premium@example.com",
+                    "phone": "+33123456789",
+                    "country": "Canada",
+                    "visa_type": "Work Permit",
+                    "urgency_level": "URGENT",
+                    "budget_range": "5000+€",
+                    "message": "I am looking for comprehensive immigration services for my family. We have significant experience in tech industry and are looking for the best possible service to ensure our successful immigration to Canada. We have done extensive research and are ready to proceed immediately with the right partner.",
+                    "lead_source": "REFERRAL"
+                },
+                "expected_min": 95,  # Should be close to 100
+                "expected_max": 100
+            }
+        ]
+        
+        for scenario in test_scenarios:
+            try:
+                response = self.session.post(f"{API_BASE}/contact-messages", json=scenario["data"])
+                if response.status_code == 200 or response.status_code == 201:
+                    data = response.json()
+                    score = data.get('conversion_probability', 0)
+                    if scenario["expected_min"] <= score <= scenario["expected_max"]:
+                        self.log_result(f"Lead Score Calculation - {scenario['name']}", True, 
+                                      f"Score {score}% within expected range {scenario['expected_min']}-{scenario['expected_max']}%")
+                    else:
+                        self.log_result(f"Lead Score Calculation - {scenario['name']}", False, 
+                                      f"Score {score}% outside expected range {scenario['expected_min']}-{scenario['expected_max']}%")
+                else:
+                    self.log_result(f"Lead Score Calculation - {scenario['name']}", False, 
+                                  f"Status: {response.status_code}", response.text)
+            except Exception as e:
+                self.log_result(f"Lead Score Calculation - {scenario['name']}", False, "Exception occurred", str(e))
+
     def run_all_tests(self):
         """Run all test suites including V2 features"""
         print("🚀 Starting ALORIA AGENCY V2 Backend API Tests - COMPREHENSIVE TESTING")
