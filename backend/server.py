@@ -16,6 +16,12 @@ import socketio
 from fastapi.middleware import Middleware
 import asyncio
 from enum import Enum
+import random
+import string
+import io
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
+from reportlab.lib.units import inch
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
