@@ -51,6 +51,17 @@ export default function ManagerDashboard() {
     new_password: '',
     confirm_password: ''
   });
+  const [confirmationDialog, setConfirmationDialog] = useState({
+    show: false,
+    payment: null,
+    code: '',
+    action: ''
+  });
+  const [rejectionDialog, setRejectionDialog] = useState({
+    show: false,
+    payment: null,
+    reason: ''
+  });
   
   // WebSocket hook
   const { connected } = useSocket(localStorage.getItem('token'));
