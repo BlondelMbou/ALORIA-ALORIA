@@ -44,6 +44,7 @@ export default function LandingPage() {
     experience: 0
   });
   const [openFAQ, setOpenFAQ] = useState(null);
+  const [showContactWidget, setShowContactWidget] = useState(false);
 
   const faqs = [
     {
