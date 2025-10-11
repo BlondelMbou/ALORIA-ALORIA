@@ -1052,6 +1052,72 @@ export default function LandingPage() {
         </div>
       </footer>
 
+      {/* Contact Widget Flottant */}
+      <div className="fixed bottom-6 right-6 z-50">
+        {showContactWidget && (
+          <Card className="mb-4 w-80 bg-[#1E293B] border-orange-500/50 shadow-2xl animate-fade-in">
+            <CardHeader className="pb-3">
+              <div className="flex justify-between items-center">
+                <CardTitle className="text-white text-lg">Besoin d'aide ?</CardTitle>
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => setShowContactWidget(false)}
+                  className="text-slate-400 hover:text-white"
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="flex items-center space-x-3 p-3 bg-slate-800/50 rounded-lg hover:bg-slate-800/70 cursor-pointer transition-all">
+                <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center">
+                  <Phone className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <p className="text-white font-medium">Appel Gratuit</p>
+                  <p className="text-sm text-slate-400">+33 1 75 43 89 12</p>
+                </div>
+              </div>
+              
+              <div className="flex items-center space-x-3 p-3 bg-slate-800/50 rounded-lg hover:bg-slate-800/70 cursor-pointer transition-all">
+                <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
+                  <Mail className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <p className="text-white font-medium">Email</p>
+                  <p className="text-sm text-slate-400">contact@aloria-agency.com</p>
+                </div>
+              </div>
+              
+              <div 
+                className="flex items-center space-x-3 p-3 bg-slate-800/50 rounded-lg hover:bg-slate-800/70 cursor-pointer transition-all"
+                onClick={() => document.getElementById('start-application').scrollIntoView({ behavior: 'smooth' })}
+              >
+                <div className="w-10 h-10 bg-gradient-to-r from-orange-500 to-orange-600 rounded-full flex items-center justify-center">
+                  <MessageCircle className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <p className="text-white font-medium">Évaluation Gratuite</p>
+                  <p className="text-sm text-slate-400">Formulaire en ligne</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+        
+        <Button
+          onClick={() => setShowContactWidget(!showContactWidget)}
+          className="w-14 h-14 rounded-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 shadow-2xl hover:scale-110 transition-all duration-300"
+        >
+          {showContactWidget ? (
+            <X className="w-6 h-6" />
+          ) : (
+            <MessageCircle className="w-6 h-6" />
+          )}
+        </Button>
+      </div>
+
       <style jsx>{`
         @keyframes fade-in {
           from { opacity: 0; transform: translateY(30px); }
