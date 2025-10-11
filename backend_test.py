@@ -1382,12 +1382,13 @@ class APITester:
                 self.log_result("9. Client Payment History", False, "Exception occurred", str(e))
 
         # Test 7: Test double confirmation (should fail)
-        if self.manager_token and payment_id:
+        if self.manager_token and payment_id and confirmation_code:
             try:
                 headers = {"Authorization": f"Bearer {self.manager_token}"}
+                # Try to confirm again with the same code
                 confirmation_data = {
                     "action": "CONFIRMED",
-                    "confirmation_code": confirmation_code if confirmation_code else "TEST"
+                    "confirmation_code": confirmation_code
                 }
                 response = self.session.patch(f"{API_BASE}/payments/{payment_id}/confirm", json=confirmation_data, headers=headers)
                 
