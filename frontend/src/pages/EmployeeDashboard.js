@@ -423,8 +423,8 @@ export default function EmployeeDashboard() {
                                   </div>
                                 </div>
                                 
-                                <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
-                                  <p className="text-blue-400 text-sm">
+                                <div className="bg-slate-700/30 border border-slate-600 rounded-lg p-4">
+                                  <p className="text-slate-300 text-sm">
                                     ℹ️ Les mises à jour de statut sont effectuées par le gestionnaire. 
                                     Vous recevrez une notification en cas de modification.
                                   </p>
