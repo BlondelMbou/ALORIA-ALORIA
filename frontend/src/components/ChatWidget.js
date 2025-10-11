@@ -152,13 +152,13 @@ const ChatWidget = ({ currentUser, onUnreadCountChange }) => {
                 <>
                   <button
                     onClick={() => setShowContactList(true)}
-                    className="hover:bg-orange-600 p-1 rounded"
+                    className="hover:bg-slate-700 text-slate-300 hover:text-white p-1 rounded transition-colors"
                   >
                     <Users size={16} />
                   </button>
                   <button
                     onClick={() => setActiveConversation(null)}
-                    className="hover:bg-orange-600 p-1 rounded"
+                    className="hover:bg-slate-700 text-slate-300 hover:text-white p-1 rounded transition-colors"
                   >
                     ←
                   </button>
