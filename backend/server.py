@@ -478,9 +478,7 @@ class PaymentDeclarationResponse(BaseModel):
     confirmed_by: Optional[str]
     invoice_number: Optional[str]
     
-class PaymentConfirmation(BaseModel):
-    action: str  # "confirm" or "reject"
-    notes: Optional[str] = None
+# PaymentConfirmation model removed - replaced by PaymentConfirmRequest
     
 # Modèles pour la création d'utilisateurs avec email
 class UserCreateRequest(BaseModel):
