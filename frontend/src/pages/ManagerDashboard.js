@@ -19,7 +19,7 @@ import NotificationBell from '../components/NotificationBell';
 import useSocket from '../hooks/useSocket';
 
 export default function ManagerDashboard() {
-  const { user, logout } = useAuth();
+  const { user, logout } = useContext(AuthContext);
   const [stats, setStats] = useState(null);
   const [clients, setClients] = useState([]);
   const [cases, setCases] = useState([]);
