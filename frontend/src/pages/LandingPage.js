@@ -87,15 +87,7 @@ export default function LandingPage() {
     return () => timers.forEach(timer => clearInterval(timer));
   }, []);
 
-  const countries = [
-    { value: 'Canada', label: 'Canada', flag: '🇨🇦' },
-    { value: 'France', label: 'France', flag: '🇫🇷' }
-  ];
-
-  const visaTypes = {
-    Canada: ['Permis de Travail', 'Permis d\'Études', 'Résidence Permanente (Entrée Express)', 'Visa de Visiteur', 'Parrainage Familial'],
-    France: ['Permis de Travail (Passeport Talent)', 'Visa Étudiant', 'Regroupement Familial', 'Carte de Résident', 'Visa Touristique']
-  };
+  // Form data moved to ContactFormWidget component
 
   const services = [
     {
