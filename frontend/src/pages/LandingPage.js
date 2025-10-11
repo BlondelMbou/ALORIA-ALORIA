@@ -1123,8 +1123,34 @@ export default function LandingPage() {
           from { opacity: 0; transform: translateY(30px); }
           to { opacity: 1; transform: translateY(0); }
         }
+        
         .animate-fade-in {
-          animation: fade-in 0.8s ease-out forwards;
+          animation: fade-in 0.6s ease-out forwards;
+        }
+        
+        .animate-bounce-gentle {
+          animation: bounce 2s infinite;
+        }
+        
+        @keyframes bounce {
+          0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+          40% { transform: translateY(-10px); }
+          60% { transform: translateY(-5px); }
+        }
+        
+        @keyframes pulse-glow {
+          0%, 100% { 
+            box-shadow: 0 0 20px rgba(249, 115, 22, 0.4);
+            transform: scale(1);
+          }
+          50% { 
+            box-shadow: 0 0 40px rgba(249, 115, 22, 0.8);
+            transform: scale(1.05);
+          }
+        }
+        
+        .animate-pulse-glow {
+          animation: pulse-glow 3s ease-in-out infinite;
         }
       `}</style>
     </div>
