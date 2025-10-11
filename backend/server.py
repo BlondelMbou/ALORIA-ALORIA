@@ -364,6 +364,38 @@ class VisitorPurpose(str, Enum):
     PAYMENT = "Paiement"
     OTHER = "Autre"
 
+# V3 New Enums
+class ExpenseCategory(str, Enum):
+    SALAIRES = "SALAIRES"
+    BUREAUX = "BUREAUX"
+    JURIDIQUE = "JURIDIQUE"
+    DOSSIERS = "DOSSIERS"
+    MARKETING = "MARKETING"
+    TECH = "TECH"
+    TRANSPORT = "TRANSPORT"
+    FORMATION = "FORMATION"
+
+class ContactStatus(str, Enum):
+    NEW = "NEW"
+    CONTACTED = "CONTACTED"
+    QUALIFIED = "QUALIFIED"
+    CONVERTED = "CONVERTED"
+    ARCHIVED = "ARCHIVED"
+
+class UrgencyLevel(str, Enum):
+    URGENT = "Urgent"
+    NORMAL = "Normal"
+    INFORMATION = "Information"
+
+class LeadSource(str, Enum):
+    WEBSITE = "Site web"
+    REFERRAL = "Référencement"
+    WORD_OF_MOUTH = "Bouche à oreille"
+    SOCIAL_MEDIA = "Réseaux sociaux"
+    ADVERTISING = "Publicité"
+    PARTNER = "Partenaire"
+    OTHER = "Autre"
+
 class VisitorCreate(BaseModel):
     name: str
     company: Optional[str] = None
