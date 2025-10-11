@@ -217,14 +217,7 @@ export default function LandingPage() {
     }
   };
 
-  const loadEmployees = async () => {
-    try {
-      const response = await api.get('/employees');
-      setEmployees(response.data);
-    } catch (error) {
-      console.error('Erreur lors du chargement des employés:', error);
-    }
-  };
+  // loadEmployees function moved to ContactFormWidget component
 
   // Old form handler removed - contact form now handled by ContactFormWidget
 
