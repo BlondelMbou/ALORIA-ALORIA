@@ -213,6 +213,7 @@ export default function ManagerDashboard() {
         toast.success('Paiement confirmé avec succès ! Facture générée automatiquement.');
         setConfirmationDialog({ show: false, payment: null, code: '', action: '' });
         fetchPayments();
+        setTimeout(() => fetchPayments(), 2000); // Refresh delayed pour PDF
       } else {
         const error = await response.json();
         throw new Error(error.detail || 'Code de confirmation incorrect');
