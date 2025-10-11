@@ -247,6 +247,7 @@ export default function ManagerDashboard() {
         toast.success('Paiement rejeté. Le client a été notifié.');
         setRejectionDialog({ show: false, payment: null, reason: '' });
         fetchPayments();
+        setTimeout(() => fetchPayments(), 1500); // Refresh delayed pour notifications
       } else {
         throw new Error('Erreur lors du rejet du paiement');
       }
