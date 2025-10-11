@@ -29,7 +29,7 @@ export default function ContactFormWidget() {
     country: '',
     visa_type: '',
     budget_range: '',
-    urgency_level: 'NORMAL',
+    urgency_level: 'Normal',
     message: '',
     lead_source: 'WEBSITE'
   });
@@ -128,7 +128,7 @@ export default function ContactFormWidget() {
           country: '',
           visa_type: '',
           budget_range: '',
-          urgency_level: 'NORMAL',
+          urgency_level: 'Normal',
           message: '',
           lead_source: 'WEBSITE'
         });
