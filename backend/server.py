@@ -2759,7 +2759,7 @@ async def confirm_payment_with_code(
         
         # Rejeter le paiement
         update_dict = {
-            "status": "REJECTED",
+            "status": "rejected",
             "rejection_reason": confirmation_data.rejection_reason,
             "confirmed_by": current_user["id"],
             "confirmed_at": datetime.now(timezone.utc).isoformat()
