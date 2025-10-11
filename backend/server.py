@@ -3035,6 +3035,120 @@ async def assign_contact_message(
     
     return {"message": "Assignment mis à jour avec succès"}
 
+@api_router.patch("/contact-messages/{message_id}/status")
+async def update_contact_message_status(
+    message_id: str,
+    status_data: dict,
+    current_user: dict = Depends(get_current_user)
+):
+    """Mettre à jour le statut d'un message de contact"""
+    if current_user["role"] not in ["MANAGER", "EMPLOYEE", "SUPERADMIN"]:
+        raise HTTPException(status_code=403, detail="Accès refusé")
+    
+    # Vérifier que le message existe et que l'utilisateur y a accès
+    query = {"id": message_id}
+    if current_user["role"] == "EMPLOYEE":
+        query["assigned_to"] = current_user["id"]
+    
+    message = await db.contact_messages.find_one(query)
+    if not message:
+        raise HTTPException(status_code=404, detail="Message non trouvé")
+    
+    new_status = status_data.get("status")
+    valid_statuses = ["new", "read", "responded", "converted", "closed"]
+    
+    if new_status not in valid_statuses:
+        raise HTTPException(status_code=400, detail=f"Statut invalide. Statuts autorisés: {valid_statuses}")
+    
+    # Mettre à jour le message
+    result = await db.contact_messages.update_one(
+        {"id": message_id},
+        {
+            "$set": {
+                "status": new_status,
+                "updated_at": datetime.now(timezone.utc).isoformat()
+            }
+        }
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Erreur lors de la mise à jour")
+    
+    return {"message": "Statut mis à jour avec succès", "new_status": new_status}
+
+@api_router.post("/contact-messages/{message_id}/respond")
+async def respond_to_contact_message(
+    message_id: str,
+    response_data: dict,
+    current_user: dict = Depends(get_current_user)
+):
+    """Répondre à un message de contact"""
+    if current_user["role"] not in ["MANAGER", "EMPLOYEE", "SUPERADMIN"]:
+        raise HTTPException(status_code=403, detail="Accès refusé")
+    
+    # Vérifier que le message existe et que l'utilisateur y a accès
+    query = {"id": message_id}
+    if current_user["role"] == "EMPLOYEE":
+        query["assigned_to"] = current_user["id"]
+    
+    message = await db.contact_messages.find_one(query)
+    if not message:
+        raise HTTPException(status_code=404, detail="Message non trouvé")
+    
+    # Données de la réponse
+    subject = response_data.get("subject", "")
+    response_message = response_data.get("message", "")
+    
+    if not response_message.strip():
+        raise HTTPException(status_code=400, detail="Le message de réponse est requis")
+    
+    # Créer l'entrée de réponse
+    response_id = str(uuid.uuid4())
+    response_entry = {
+        "id": response_id,
+        "message_id": message_id,
+        "responder_id": current_user["id"],
+        "responder_name": current_user["full_name"],
+        "subject": subject,
+        "message": response_message,
+        "sent_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    # Sauvegarder la réponse dans une collection séparée
+    await db.contact_responses.insert_one(response_entry)
+    
+    # Mettre à jour le statut du message original
+    await db.contact_messages.update_one(
+        {"id": message_id},
+        {
+            "$set": {
+                "status": ContactStatus.RESPONDED,
+                "last_response_at": datetime.now(timezone.utc).isoformat(),
+                "updated_at": datetime.now(timezone.utc).isoformat()
+            },
+            "$inc": {"response_count": 1}
+        }
+    )
+    
+    # Log d'activité
+    await log_user_activity(
+        user_id=current_user["id"],
+        action="RESPOND_TO_CONTACT",
+        resource_type="contact_message",
+        resource_id=message_id,
+        details={
+            "contact_email": message["email"],
+            "subject": subject,
+            "response_length": len(response_message)
+        }
+    )
+    
+    return {
+        "message": "Réponse envoyée avec succès",
+        "response_id": response_id,
+        "sent_to": message["email"]
+    }
+
 # Activity Logs
 @api_router.get("/activities", response_model=List[ActivityLogResponse])
 async def get_activity_logs(
