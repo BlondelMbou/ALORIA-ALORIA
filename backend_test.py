@@ -2149,10 +2149,10 @@ class APITester:
                     "name": "Test User",
                     "email": "test@example.com",
                     "country": "Other",
-                    "urgency_level": "INFORMATION",
+                    "urgency_level": "Information",
                     "budget_range": "500-1000€",
                     "message": "Short message",
-                    "lead_source": "WEBSITE"
+                    "lead_source": "Site web"
                 },
                 "expected_min": 50,  # Base score only
                 "expected_max": 70
@@ -2165,10 +2165,10 @@ class APITester:
                     "phone": "+33123456789",
                     "country": "Canada",
                     "visa_type": "Work Permit",
-                    "urgency_level": "URGENT",
+                    "urgency_level": "Urgent",
                     "budget_range": "5000+€",
                     "message": "I am looking for comprehensive immigration services for my family. We have significant experience in tech industry and are looking for the best possible service to ensure our successful immigration to Canada. We have done extensive research and are ready to proceed immediately with the right partner.",
-                    "lead_source": "REFERRAL"
+                    "lead_source": "Référencement"
                 },
                 "expected_min": 95,  # Should be close to 100
                 "expected_max": 100
