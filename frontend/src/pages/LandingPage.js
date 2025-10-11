@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../co
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 // Select components removed - now handled by ContactFormWidget
-import { Textarea } from '../components/ui/textarea';
+// Textarea component removed - now handled by ContactFormWidget
 import { Badge } from '../components/ui/badge';
 import { toast } from 'sonner';
 import api from '../utils/api';
