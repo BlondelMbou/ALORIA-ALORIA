@@ -1216,14 +1216,14 @@ export default function ManagerDashboard() {
 
                           <div className="flex space-x-2">
                             <Button
-                              onClick={() => handlePaymentAction(payment.id, 'CONFIRMED')}
+                              onClick={() => handlePaymentAction(payment, 'CONFIRMED')}
                               className="flex-1 bg-green-600 hover:bg-green-700 text-white"
                               size="sm"
                             >
                               ✅ Confirmer
                             </Button>
                             <Button
-                              onClick={() => handlePaymentAction(payment.id, 'REJECTED')}
+                              onClick={() => handlePaymentAction(payment, 'REJECTED')}
                               className="flex-1 bg-red-600 hover:bg-red-700 text-white"
                               size="sm"
                             >
