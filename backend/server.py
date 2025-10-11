@@ -2801,7 +2801,7 @@ async def confirm_payment_with_code(
         invoice_number = f"ALO-{datetime.now().strftime('%Y%m%d')}-{payment_id[:8].upper()}"
         
         update_dict = {
-            "status": "CONFIRMED",
+            "status": "confirmed",
             "confirmed_by": current_user["id"],
             "confirmed_at": datetime.now(timezone.utc).isoformat(),
             "invoice_number": invoice_number
