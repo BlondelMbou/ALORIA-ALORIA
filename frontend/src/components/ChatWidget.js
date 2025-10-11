@@ -141,9 +141,9 @@ const ChatWidget = ({ currentUser, onUnreadCountChange }) => {
 
       {/* Chat Widget */}
       {isOpen && (
-        <div className="bg-slate-800 border border-slate-700 rounded-lg shadow-xl w-96 h-[500px] flex flex-col">
+        <div className="bg-[#1E293B] border border-slate-600 rounded-xl shadow-2xl w-96 h-[500px] flex flex-col">
           {/* Header */}
-          <div className="bg-orange-500 text-white p-4 rounded-t-lg flex justify-between items-center">
+          <div className="bg-gradient-to-r from-[#1E293B] to-[#334155] text-white p-4 rounded-t-xl flex justify-between items-center border-b border-slate-600">
             <h3 className="font-semibold">
               {activeConversation ? activeConversation.participant_name : 'Messages'}
             </h3>
