@@ -1740,10 +1740,10 @@ class APITester:
         print(f"Testing against: {API_BASE}")
         print("=" * 60)
         
-        # V2 New Features Tests
+        # V2 New Features Tests - PRIORITY: PAYMENT SYSTEM CRITICAL BUGS
         self.test_superadmin_creation()
         self.test_role_hierarchy_permissions()
-        self.test_payment_system()
+        self.test_payment_system_comprehensive()  # CRITICAL PAYMENT SYSTEM TESTING
         self.test_superadmin_apis()
         self.test_search_apis()
         self.test_visitor_stats()
