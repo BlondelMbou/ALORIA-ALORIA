@@ -119,11 +119,11 @@
 
   - task: "Declarative payment system"
     implemented: true
-    working: false
+    working: true
     file: "server.py"
-    stuck_count: 1
+    stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
         -working: false
         -agent: "main"
@@ -131,6 +131,9 @@
         -working: true
         -agent: "testing"
         -comment: "✅ TESTED V2: Complete payment system working perfectly. Client declares payment with POST /api/payments/declare (amount, currency, description, payment_method). Manager views pending payments with GET /api/payments/pending. Manager confirms/rejects with PATCH /api/payments/{id}/confirm. Invoice number generation working (format: INV-YYYYMMDD-XXXXXXXX). Payment history accessible via GET /api/payments/history. Full workflow tested: Client declares €2000 payment → Manager confirms → Invoice INV-20251009-FC4693BE generated."
+        -working: true
+        -agent: "testing"
+        -comment: "🔧 CRITICAL BUGS FIXED - COMPREHENSIVE TESTING COMPLETE: All payment system issues resolved! Fixed duplicate API endpoints causing conflicts, corrected status value inconsistencies (pending vs PENDING), added missing fields to PaymentDeclarationResponse model (confirmation_code, pdf_invoice_url, rejection_reason), fixed client payment history query (user_id vs client_id mapping). ✅ TESTED WORKFLOW: 1) Client declares payment (€2500) → 2) Manager views pending → 3) Two-step confirmation (code generation: 71XO → confirmation with code) → 4) Invoice generated (ALO-20251011-DE428A44) → 5) PDF URL created → 6) Rejection workflow tested → 7) History working (Manager sees all, Client sees own only) → 8) Double confirmation prevention → 9) Invalid code validation. ALL 12 CRITICAL TESTS PASSED 100%!"
 
   - task: "SuperAdmin monitoring APIs"
     implemented: true
