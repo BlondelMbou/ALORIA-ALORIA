@@ -670,6 +670,61 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* FAQ Section */}
+      <section id="faq" className="py-20 bg-gradient-to-b from-transparent to-[#1E293B]/50">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <Badge className="bg-blue-500/10 text-blue-400 border-blue-500/30 mb-4">
+              <MessageCircle className="w-4 h-4 mr-2" />
+              Questions Fréquentes
+            </Badge>
+            <h2 className="text-5xl font-bold text-white mb-6">Tout Ce Que Vous Devez Savoir</h2>
+            <p className="text-xl text-slate-300 max-w-2xl mx-auto">
+              Les réponses aux questions les plus posées par nos futurs clients
+            </p>
+          </div>
+
+          <div className="space-y-4">
+            {faqs.map((faq, index) => (
+              <Card key={index} className="bg-[#1E293B] border-slate-700 overflow-hidden">
+                <CardHeader 
+                  className="cursor-pointer hover:bg-slate-800/50 transition-all duration-200"
+                  onClick={() => setOpenFAQ(openFAQ === index ? null : index)}
+                >
+                  <div className="flex justify-between items-center">
+                    <CardTitle className="text-white text-lg font-medium">{faq.question}</CardTitle>
+                    <ChevronRight 
+                      className={`w-5 h-5 text-orange-500 transform transition-transform duration-200 ${
+                        openFAQ === index ? 'rotate-90' : ''
+                      }`}
+                    />
+                  </div>
+                </CardHeader>
+                {openFAQ === index && (
+                  <CardContent className="pt-0 pb-6">
+                    <p className="text-slate-300 leading-relaxed">{faq.answer}</p>
+                  </CardContent>
+                )}
+              </Card>
+            ))}
+          </div>
+
+          <div className="text-center mt-12">
+            <Card className="bg-gradient-to-r from-orange-500/10 to-orange-600/10 border-orange-500/30 p-6 inline-block">
+              <div className="flex items-center space-x-4">
+                <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-orange-600 rounded-full flex items-center justify-center">
+                  <Headphones className="w-6 h-6 text-white" />
+                </div>
+                <div className="text-left">
+                  <h3 className="text-white font-bold">Une question spécifique ?</h3>
+                  <p className="text-slate-300 text-sm">Contactez notre équipe au +33 1 75 43 89 12</p>
+                </div>
+              </div>
+            </Card>
+          </div>
+        </div>
+      </section>
+
       {/* Application Form */}
       <section id="start-application" className="py-20 bg-gradient-to-b from-[#1E293B]/50 to-[#0F172A]">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
