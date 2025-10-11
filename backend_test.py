@@ -1736,6 +1736,286 @@ class APITester:
         except Exception as e:
             self.log_result("V2 Comprehensive Scenario", False, "Exception occurred", str(e))
 
+    def test_sequential_case_progression(self):
+        """Test sequential case progression validation - RAPID TEST"""
+        print("=== Testing Sequential Case Progression (RAPID) ===")
+        
+        if not self.manager_token:
+            self.log_result("Sequential Case Progression", False, "No manager token available")
+            return
+            
+        try:
+            headers = {"Authorization": f"Bearer {self.manager_token}"}
+            
+            # Get a case to test with
+            cases_response = self.session.get(f"{API_BASE}/cases", headers=headers)
+            if cases_response.status_code != 200:
+                self.log_result("Sequential Case Progression - Get Cases", False, f"Status: {cases_response.status_code}")
+                return
+                
+            cases = cases_response.json()
+            if not cases:
+                self.log_result("Sequential Case Progression", False, "No cases available for testing")
+                return
+                
+            case_id = cases[0]['id']
+            current_step = cases[0]['current_step_index']
+            
+            # Test 1: Valid progression (+1 step)
+            valid_progression = {
+                "current_step_index": current_step + 1
+            }
+            response = self.session.patch(f"{API_BASE}/cases/{case_id}/progress", json=valid_progression, headers=headers)
+            if response.status_code == 200:
+                self.log_result("Sequential Progression - Valid +1 Step", True, f"Successfully advanced from step {current_step} to {current_step + 1}")
+            else:
+                self.log_result("Sequential Progression - Valid +1 Step", False, f"Status: {response.status_code}, Response: {response.text}")
+            
+            # Test 2: Invalid progression (jumping steps - should fail)
+            invalid_progression = {
+                "current_step_index": current_step + 5  # Jump 5 steps
+            }
+            response = self.session.patch(f"{API_BASE}/cases/{case_id}/progress", json=invalid_progression, headers=headers)
+            if response.status_code == 400:
+                self.log_result("Sequential Progression - Invalid Jump (should fail)", True, "Correctly prevented jumping multiple steps")
+            else:
+                self.log_result("Sequential Progression - Invalid Jump (should fail)", False, f"Should have prevented step jumping. Status: {response.status_code}")
+            
+            # Test 3: Valid backward progression (-1 step)
+            if current_step > 0:
+                backward_progression = {
+                    "current_step_index": current_step - 1
+                }
+                response = self.session.patch(f"{API_BASE}/cases/{case_id}/progress", json=backward_progression, headers=headers)
+                if response.status_code == 200:
+                    self.log_result("Sequential Progression - Valid -1 Step", True, f"Successfully moved back from step {current_step} to {current_step - 1}")
+                else:
+                    self.log_result("Sequential Progression - Valid -1 Step", False, f"Status: {response.status_code}")
+            
+            # Test 4: Invalid backward progression (jumping back - should fail)
+            if current_step > 2:
+                invalid_backward = {
+                    "current_step_index": current_step - 3  # Jump back 3 steps
+                }
+                response = self.session.patch(f"{API_BASE}/cases/{case_id}/progress", json=invalid_backward, headers=headers)
+                if response.status_code == 400:
+                    self.log_result("Sequential Progression - Invalid Backward Jump (should fail)", True, "Correctly prevented jumping backward multiple steps")
+                else:
+                    self.log_result("Sequential Progression - Invalid Backward Jump (should fail)", False, f"Should have prevented backward jumping. Status: {response.status_code}")
+                    
+        except Exception as e:
+            self.log_result("Sequential Case Progression", False, "Exception occurred", str(e))
+
+    def test_payment_system_rapid_validation(self):
+        """Test payment system - RAPID VALIDATION"""
+        print("=== Testing Payment System (RAPID VALIDATION) ===")
+        
+        # Test with existing credentials from test_result.md
+        manager_credentials = {"email": "manager@test.com", "password": "password123"}
+        
+        try:
+            # Login as manager
+            login_response = self.session.post(f"{API_BASE}/auth/login", json=manager_credentials)
+            if login_response.status_code != 200:
+                self.log_result("Payment System - Manager Login", False, f"Could not login with manager@test.com. Status: {login_response.status_code}")
+                return
+                
+            manager_token = login_response.json()['access_token']
+            headers = {"Authorization": f"Bearer {manager_token}"}
+            
+            # Test 1: Get pending payments
+            response = self.session.get(f"{API_BASE}/payments/pending", headers=headers)
+            if response.status_code == 200:
+                pending_payments = response.json()
+                self.log_result("Payment System - Get Pending Payments", True, f"Retrieved {len(pending_payments)} pending payments")
+            else:
+                self.log_result("Payment System - Get Pending Payments", False, f"Status: {response.status_code}")
+            
+            # Test 2: Get payment history
+            response = self.session.get(f"{API_BASE}/payments/history", headers=headers)
+            if response.status_code == 200:
+                payment_history = response.json()
+                self.log_result("Payment System - Get Payment History", True, f"Retrieved {len(payment_history)} payment history entries")
+            else:
+                self.log_result("Payment System - Get Payment History", False, f"Status: {response.status_code}")
+            
+            # Test 3: Client payment declaration (need to login as client)
+            # Try to find an existing client or create one for testing
+            clients_response = self.session.get(f"{API_BASE}/clients", headers=headers)
+            if clients_response.status_code == 200:
+                clients = clients_response.json()
+                if clients:
+                    # Try to login as first client
+                    client_login = {"email": "client@test.com", "password": "Aloria2024!"}
+                    client_login_response = self.session.post(f"{API_BASE}/auth/login", json=client_login)
+                    
+                    if client_login_response.status_code == 200:
+                        client_token = client_login_response.json()['access_token']
+                        client_headers = {"Authorization": f"Bearer {client_token}"}
+                        
+                        # Declare a payment
+                        payment_data = {
+                            "amount": 1500.0,
+                            "currency": "EUR",
+                            "description": "Test payment declaration - rapid validation",
+                            "payment_method": "Bank Transfer"
+                        }
+                        
+                        payment_response = self.session.post(f"{API_BASE}/payments/declare", json=payment_data, headers=client_headers)
+                        if payment_response.status_code == 200 or payment_response.status_code == 201:
+                            payment_data_response = payment_response.json()
+                            payment_id = payment_data_response['id']
+                            self.log_result("Payment System - Client Payment Declaration", True, f"Payment declared with ID: {payment_id}")
+                            
+                            # Test 4: Manager confirmation workflow
+                            # First generate confirmation code
+                            confirm_data = {"action": "CONFIRMED"}
+                            confirm_response = self.session.patch(f"{API_BASE}/payments/{payment_id}/confirm", json=confirm_data, headers=headers)
+                            
+                            if confirm_response.status_code == 200:
+                                confirm_result = confirm_response.json()
+                                if 'confirmation_code' in confirm_result:
+                                    confirmation_code = confirm_result['confirmation_code']
+                                    self.log_result("Payment System - Generate Confirmation Code", True, f"Confirmation code generated: {confirmation_code}")
+                                    
+                                    # Test 5: Complete confirmation with code
+                                    final_confirm_data = {
+                                        "action": "CONFIRMED",
+                                        "confirmation_code": confirmation_code
+                                    }
+                                    final_response = self.session.patch(f"{API_BASE}/payments/{payment_id}/confirm", json=final_confirm_data, headers=headers)
+                                    
+                                    if final_response.status_code == 200:
+                                        final_result = final_response.json()
+                                        if 'invoice_number' in final_result:
+                                            self.log_result("Payment System - Complete Confirmation & Invoice Generation", True, f"Payment confirmed, invoice: {final_result['invoice_number']}")
+                                        else:
+                                            self.log_result("Payment System - Complete Confirmation & Invoice Generation", False, "Invoice number not generated")
+                                    else:
+                                        self.log_result("Payment System - Complete Confirmation", False, f"Status: {final_response.status_code}")
+                                else:
+                                    self.log_result("Payment System - Generate Confirmation Code", False, "No confirmation code in response")
+                            else:
+                                self.log_result("Payment System - Generate Confirmation Code", False, f"Status: {confirm_response.status_code}")
+                        else:
+                            self.log_result("Payment System - Client Payment Declaration", False, f"Status: {payment_response.status_code}")
+                    else:
+                        self.log_result("Payment System - Client Login", False, "Could not login as client for payment testing")
+                else:
+                    self.log_result("Payment System - Find Client", False, "No clients available for payment testing")
+            else:
+                self.log_result("Payment System - Get Clients", False, f"Status: {clients_response.status_code}")
+                
+        except Exception as e:
+            self.log_result("Payment System Rapid Validation", False, "Exception occurred", str(e))
+
+    def test_basic_apis_sanity_check(self):
+        """Test basic APIs - SANITY CHECK"""
+        print("=== Testing Basic APIs (SANITY CHECK) ===")
+        
+        # Test 1: Manager Login
+        manager_credentials = {"email": "manager@test.com", "password": "password123"}
+        try:
+            response = self.session.post(f"{API_BASE}/auth/login", json=manager_credentials)
+            if response.status_code == 200:
+                manager_data = response.json()
+                self.manager_token = manager_data['access_token']
+                self.log_result("Sanity Check - Manager Login", True, "Manager login successful")
+            else:
+                self.log_result("Sanity Check - Manager Login", False, f"Status: {response.status_code}")
+        except Exception as e:
+            self.log_result("Sanity Check - Manager Login", False, "Exception occurred", str(e))
+        
+        # Test 2: Employee Login
+        employee_credentials = {"email": "employee@test.com", "password": "password123"}
+        try:
+            response = self.session.post(f"{API_BASE}/auth/login", json=employee_credentials)
+            if response.status_code == 200:
+                employee_data = response.json()
+                self.employee_token = employee_data['access_token']
+                self.log_result("Sanity Check - Employee Login", True, "Employee login successful")
+            else:
+                self.log_result("Sanity Check - Employee Login", False, f"Status: {response.status_code}")
+        except Exception as e:
+            self.log_result("Sanity Check - Employee Login", False, "Exception occurred", str(e))
+        
+        # Test 3: Client Creation
+        if self.manager_token:
+            try:
+                headers = {"Authorization": f"Bearer {self.manager_token}"}
+                import time
+                timestamp = int(time.time())
+                client_data = {
+                    "email": f"sanity.client.{timestamp}@test.com",
+                    "full_name": "Sanity Check Client",
+                    "phone": "+33123456789",
+                    "country": "France",
+                    "visa_type": "Work Permit (Talent Permit)",
+                    "message": "Sanity check client creation"
+                }
+                response = self.session.post(f"{API_BASE}/clients", json=client_data, headers=headers)
+                if response.status_code == 200 or response.status_code == 201:
+                    client_result = response.json()
+                    self.log_result("Sanity Check - Client Creation", True, f"Client created with ID: {client_result['id']}")
+                else:
+                    self.log_result("Sanity Check - Client Creation", False, f"Status: {response.status_code}")
+            except Exception as e:
+                self.log_result("Sanity Check - Client Creation", False, "Exception occurred", str(e))
+        
+        # Test 4: Visitor Management
+        if self.employee_token:
+            try:
+                headers = {"Authorization": f"Bearer {self.employee_token}"}
+                visitor_data = {
+                    "name": "Sanity Check Visitor",
+                    "company": "Test Company",
+                    "purpose": "Consultation initiale",
+                    "details": "Sanity check visitor registration"
+                }
+                response = self.session.post(f"{API_BASE}/visitors", json=visitor_data, headers=headers)
+                if response.status_code == 200 or response.status_code == 201:
+                    visitor_result = response.json()
+                    self.log_result("Sanity Check - Visitor Registration", True, f"Visitor registered with ID: {visitor_result['id']}")
+                else:
+                    self.log_result("Sanity Check - Visitor Registration", False, f"Status: {response.status_code}")
+            except Exception as e:
+                self.log_result("Sanity Check - Visitor Registration", False, "Exception occurred", str(e))
+
+    def run_rapid_tests(self):
+        """Run rapid tests focusing on recent improvements"""
+        print("🚀 ALORIA AGENCY - RAPID VALIDATION TESTS")
+        print("=" * 60)
+        print(f"Testing against: {API_BASE}")
+        print("Testing recent improvements and system stability")
+        print("=" * 60)
+        
+        # 1. Basic APIs Sanity Check
+        self.test_basic_apis_sanity_check()
+        
+        # 2. Sequential Case Progression
+        self.test_sequential_case_progression()
+        
+        # 3. Payment System Final Validation
+        self.test_payment_system_rapid_validation()
+        
+        # Print final results
+        print("\n" + "=" * 60)
+        print("🎯 RAPID TEST RESULTS")
+        print("=" * 60)
+        total_tests = self.results['passed'] + self.results['failed']
+        success_rate = (self.results['passed'] / total_tests * 100) if total_tests > 0 else 0
+        
+        print(f"✅ PASSED: {self.results['passed']}")
+        print(f"❌ FAILED: {self.results['failed']}")
+        print(f"📊 SUCCESS RATE: {success_rate:.1f}%")
+        
+        if self.results['errors']:
+            print(f"\n🔍 FAILED TESTS SUMMARY:")
+            for error in self.results['errors']:
+                print(f"   • {error['test']}: {error['message']}")
+        
+        print("=" * 60)
+
     def run_all_tests(self):
         """Run all test suites including V2 features"""
         print("🚀 Starting ALORIA AGENCY V2 Backend API Tests - COMPREHENSIVE TESTING")
