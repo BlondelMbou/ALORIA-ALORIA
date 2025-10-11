@@ -447,7 +447,7 @@
 
 ## agent_communication:
     -agent: "main"
-    -message: "Starting comprehensive implementation of ALORIA AGENCY features including WebSocket chat, client management, visitor registry, and enhanced dashboards"
+    -message: "🔧 CORRECTION SYSTÈME DE PAIEMENTS - V3.1 EN COURS: L'utilisateur signale des bugs critiques dans le système de paiements. Investigation en cours pour identifier les problèmes spécifiques avec le workflow acceptance/rejet et génération PDF. Le backend semble fonctionnel selon tests précédents mais il y a manifestement des dysfonctionnements côté frontend ou logique."
     -agent: "testing"
     -message: "🎉 BACKEND TESTING COMPLETE - ALL SYSTEMS OPERATIONAL! Comprehensive testing of ALORIA AGENCY backend completed with 100% success rate (22/22 tests passed). All core functionalities working: ✅ Authentication (Manager/Employee registration & login) ✅ Client Management (Manager-only creation with auto-assignment) ✅ Case Status Updates (Manager permissions working) ✅ WebSocket Chat System (Real-time messaging with role-based contacts) ✅ Visitor Management (Registration, listing, checkout by Employee/Manager) ✅ Workflow System (Base workflows + custom step addition by Manager) ✅ Permission System (Proper role-based access control) ✅ Error Handling & Validation (401/403/422 responses working correctly). Fixed minor data validation issues during testing. Backend is production-ready for frontend integration."
     -agent: "testing"
