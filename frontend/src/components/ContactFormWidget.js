@@ -86,9 +86,9 @@ export default function ContactFormWidget() {
   ];
 
   const urgencyLevels = [
-    { value: 'URGENT', label: 'Urgent (< 3 mois)', icon: '🚀' },
-    { value: 'NORMAL', label: 'Normal (3-6 mois)', icon: '📅' },
-    { value: 'FLEXIBLE', label: 'Flexible (> 6 mois)', icon: '⏰' }
+    { value: 'Urgent', label: 'Urgent (< 3 mois)', icon: '🚀' },
+    { value: 'Normal', label: 'Normal (3-6 mois)', icon: '📅' },
+    { value: 'Information', label: 'Information générale', icon: '⏰' }
   ];
 
   const handleSubmit = async (e) => {
