@@ -2750,7 +2750,7 @@ async def confirm_payment_with_code(
     if not payment:
         raise HTTPException(status_code=404, detail="Paiement non trouvé")
     
-    if payment["status"] != "PENDING":
+    if payment["status"] != "pending":
         raise HTTPException(status_code=400, detail="Ce paiement a déjà été traité")
     
     if confirmation_data.action == "REJECTED":
