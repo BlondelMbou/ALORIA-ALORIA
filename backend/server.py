@@ -2818,9 +2818,9 @@ async def confirm_payment_with_code(
         }
         
         try:
-            pdf_content = await generate_invoice_pdf(payment_data_for_pdf)
-            # Ici on sauvegarderait le PDF dans un système de stockage
-            # Pour l'instant, on stocke juste l'URL/path
+            # Use the existing PDF generation function
+            await generate_invoice_pdf(payment_id, invoice_number)
+            # Store PDF URL
             pdf_url = f"/invoices/{invoice_number}.pdf"
             await db.payment_declarations.update_one(
                 {"id": payment_id}, 
