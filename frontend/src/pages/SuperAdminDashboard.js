@@ -3,6 +3,7 @@ import { AuthContext } from '../context/AuthContext';
 import { toast } from 'sonner';
 import NotificationBell from '../components/NotificationBell';
 import HierarchicalUserCreation from '../components/HierarchicalUserCreation';
+import BalanceMonitor from '../components/BalanceMonitor';
 import api from '../utils/api';
 
 const SuperAdminDashboard = () => {
