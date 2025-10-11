@@ -31,7 +31,7 @@ export default function ContactFormWidget() {
     budget_range: '',
     urgency_level: 'Normal',
     message: '',
-    lead_source: 'WEBSITE'
+    lead_source: 'Site web'
   });
 
   const countries = [
@@ -130,7 +130,7 @@ export default function ContactFormWidget() {
           budget_range: '',
           urgency_level: 'Normal',
           message: '',
-          lead_source: 'WEBSITE'
+          lead_source: 'Site web'
         });
 
       } else {
