@@ -311,6 +311,16 @@ const SuperAdminDashboard = () => {
           >
             Créer Utilisateur
           </button>
+          <button
+            onClick={() => setActiveTab('balance')}
+            className={`px-6 py-3 rounded-lg font-medium transition-colors ${
+              activeTab === 'balance'
+                ? 'bg-orange-600 text-white'
+                : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+            }`}
+          >
+            Solde & Finances
+          </button>
         </div>
 
         {/* Tab Content */}
