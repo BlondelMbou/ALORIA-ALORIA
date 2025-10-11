@@ -459,7 +459,7 @@ export default function EmployeeDashboard() {
                                           className={`max-w-[70%] rounded-lg p-3 ${
                                             msg.sender_id === user.id
                                               ? 'bg-orange-500 text-white'
-                                              : 'bg-slate-100 text-white'
+                                              : 'bg-slate-700 text-slate-300 border border-slate-600'
                                           }`}
                                         >
                                           <p className="text-sm mb-1">{msg.message}</p>
