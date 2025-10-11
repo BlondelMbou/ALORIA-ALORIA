@@ -35,7 +35,7 @@ function PrivateRoute({ children, allowedRoles }) {
 function AppRoutes() {
   return (
     <Routes>
-      <Route path="/" element={<LandingPage />} />
+      <Route path="/" element={<LandingPageV3 />} />
       <Route path="/login" element={<LoginPage />} />
       <Route
         path="/manager/*"
