@@ -902,6 +902,35 @@ def calculate_lead_score(message_data: dict) -> int:
         
     return min(score, 100)  # Max 100
 
+async def log_user_activity(user_id: str, action: str, details: Optional[Dict[str, Any]] = None):
+    """Log une activité utilisateur"""
+    try:
+        activity_id = str(uuid.uuid4())
+        
+        # Obtenir le nom de l'utilisateur
+        user_name = "System"
+        if user_id != "system" and user_id != "public":
+            user = await db.users.find_one({"id": user_id})
+            if user:
+                user_name = user["full_name"]
+        elif user_id == "public":
+            user_name = "Visiteur Public"
+        
+        activity_dict = {
+            "id": activity_id,
+            "user_id": user_id,
+            "user_name": user_name,
+            "action": action,
+            "resource_type": details.get("resource_type", "unknown") if details else "unknown",
+            "resource_id": details.get("resource_id") if details else None,
+            "details": details or {},
+            "timestamp": datetime.now(timezone.utc).isoformat()
+        }
+        
+        await db.activity_logs.insert_one(activity_dict)
+    except Exception as e:
+        logger.error(f"Erreur lors du log d'activité: {e}")
+
 async def generate_invoice_pdf(payment_data: dict) -> bytes:
     """Génère une facture PDF basique"""
     buffer = io.BytesIO()
