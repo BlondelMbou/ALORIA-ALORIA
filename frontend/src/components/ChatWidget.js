@@ -242,22 +242,22 @@ const ChatWidget = ({ currentUser, onUnreadCountChange }) => {
                 </div>
                 
                 {/* Message Input */}
-                <div className="border-t border-slate-700 p-4">
-                  <div className="flex space-x-2">
+                <div className="border-t border-slate-600 p-4 bg-[#0F172A]">
+                  <div className="flex space-x-3">
                     <input
                       type="text"
                       value={newMessage}
                       onChange={(e) => setNewMessage(e.target.value)}
                       onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
                       placeholder="Tapez votre message..."
-                      className="flex-1 bg-slate-700 text-white border border-slate-600 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      className="flex-1 bg-[#1E293B] text-white border border-slate-600 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 placeholder:text-slate-400"
                     />
                     <button
                       onClick={sendMessage}
                       disabled={!newMessage.trim()}
-                      className="bg-orange-500 hover:bg-orange-600 disabled:bg-slate-600 text-white rounded-lg p-2 transition-colors"
+                      className="bg-orange-500 hover:bg-orange-600 disabled:bg-slate-700 disabled:text-slate-400 text-white rounded-lg px-4 py-3 transition-all duration-200 flex items-center justify-center min-w-[48px]"
                     >
-                      <Send size={16} />
+                      <Send size={18} />
                     </button>
                   </div>
                 </div>
