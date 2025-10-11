@@ -712,6 +712,239 @@ class PaymentConfirmRequest(BaseModel):
     rejection_reason: Optional[str] = None
     confirmation_code: Optional[str] = None
 
+# V3 Configuration Data
+EXPENSE_CATEGORIES_CONFIG = {
+    "SALAIRES": {
+        "name": "Salaires & Charges",
+        "subcategories": ["Salaires", "Charges sociales", "Primes", "Formation", "Mutuelle"],
+        "icon": "💼",
+        "color": "#3B82F6"
+    },
+    "BUREAUX": {
+        "name": "Locaux & Bureaux", 
+        "subcategories": ["Loyer", "Charges locatives", "Électricité", "Internet", "Téléphone", "Assurance"],
+        "icon": "🏢",
+        "color": "#8B5CF6"
+    },
+    "JURIDIQUE": {
+        "name": "Juridique & Administration",
+        "subcategories": ["Frais avocat", "Traductions", "Légalisations", "Frais consulaires", "Notaire"],
+        "icon": "⚖️", 
+        "color": "#EF4444"
+    },
+    "DOSSIERS": {
+        "name": "Traitement Dossiers",
+        "subcategories": ["Frais préfecture", "Timbres fiscaux", "Courriers recommandés", "Déplacements clients"],
+        "icon": "📋",
+        "color": "#F59E0B"
+    },
+    "MARKETING": {
+        "name": "Marketing & Communication",
+        "subcategories": ["Publicité en ligne", "Site web", "Réseaux sociaux", "Événements", "Print"],
+        "icon": "📈",
+        "color": "#10B981"
+    },
+    "TECH": {
+        "name": "Outils & Logiciels",
+        "subcategories": ["Logiciels", "Matériel informatique", "Maintenance", "Sauvegardes", "Licences"],
+        "icon": "💻", 
+        "color": "#F97316"
+    },
+    "TRANSPORT": {
+        "name": "Transport & Déplacements",
+        "subcategories": ["Carburant", "Transports clients", "Missions", "Parking", "Location véhicule"],
+        "icon": "🚗",
+        "color": "#06B6D4"
+    },
+    "FORMATION": {
+        "name": "Formation & Veille Juridique", 
+        "subcategories": ["Formations équipe", "Abonnements juridiques", "Conférences", "Certifications"],
+        "icon": "📚",
+        "color": "#84CC16"
+    }
+}
+
+# Données entreprise réalistes
+COMPANY_DATA = {
+    "name": "ALORIA AGENCY",
+    "tagline": "Votre Partenaire Immigration de Confiance",
+    "description": "Spécialistes en immigration France-Canada depuis 2020. Nous accompagnons particuliers et entreprises dans toutes leurs démarches d'immigration avec un taux de réussite de 95%.",
+    "contact": {
+        "phone": "+33 1 75 43 89 12",
+        "email": "contact@aloria-agency.com", 
+        "whatsapp": "+33 6 78 92 45 31",
+        "address": "45 Avenue Victor Hugo",
+        "postal_code": "75016",
+        "city": "Paris",
+        "country": "France",
+        "metro": "Métro Victor Hugo (Ligne 2)",
+        "parking": "Parking disponible à proximité"
+    },
+    "business_hours": {
+        "monday": "09:00-18:00",
+        "tuesday": "09:00-18:00", 
+        "wednesday": "09:00-18:00",
+        "thursday": "09:00-18:00",
+        "friday": "09:00-17:00",
+        "saturday": "10:00-14:00",
+        "sunday": "Fermé"
+    },
+    "services": [
+        {
+            "name": "Visa Étudiant France",
+            "description": "Accompagnement complet pour obtenir votre visa étudiant français",
+            "duration": "2-4 semaines",
+            "success_rate": 98,
+            "price_from": 890
+        },
+        {
+            "name": "Permis de Travail Canada", 
+            "description": "Expertise LMIA et permis de travail fermé/ouvert",
+            "duration": "3-6 mois",
+            "success_rate": 94,
+            "price_from": 1590
+        },
+        {
+            "name": "Regroupement Familial",
+            "description": "Réunissez votre famille en France ou au Canada",
+            "duration": "4-8 mois",
+            "success_rate": 96,
+            "price_from": 1290
+        },
+        {
+            "name": "Naturalisation française",
+            "description": "Obtenez la nationalité française par naturalisation",
+            "duration": "12-18 mois",
+            "success_rate": 92,
+            "price_from": 2190
+        },
+        {
+            "name": "Visa Investisseur",
+            "description": "Visa entrepreneur et investisseur France/Canada",
+            "duration": "6-12 mois", 
+            "success_rate": 89,
+            "price_from": 2890
+        }
+    ],
+    "social_media": {
+        "linkedin": "https://linkedin.com/company/aloria-agency",
+        "facebook": "https://facebook.com/aloria.agency.officiel",
+        "instagram": "https://instagram.com/aloria_agency",
+        "youtube": "https://youtube.com/@aloria-agency"
+    },
+    "certifications": [
+        "Membre du Conseil National des Barreaux (France)",
+        "ICCRC Certified Immigration Consultant (Canada)",
+        "Certification ISO 9001:2015 Qualité",
+        "Agrément Préfecture de Paris"
+    ],
+    "statistics": {
+        "years_experience": 5,
+        "successful_cases": 1247,
+        "countries_served": 28,
+        "success_rate": 95,
+        "average_processing_time": "45 jours",
+        "client_satisfaction": 4.9
+    },
+    "team": [
+        {
+            "name": "Sophie Dubois",
+            "role": "Directrice & Avocate",
+            "specialization": "Droit des étrangers France",
+            "experience": "12 ans",
+            "languages": ["Français", "Anglais", "Espagnol"]
+        },
+        {
+            "name": "Jean-Marc Tremblay", 
+            "role": "Consultant Immigration Canada",
+            "specialization": "Immigration Canada & Québec",
+            "experience": "8 ans",
+            "languages": ["Français", "Anglais"]
+        }
+    ]
+}
+
+# Helper Functions V3
+def generate_confirmation_code() -> str:
+    """Génère un code de confirmation aléatoire de 4 caractères"""
+    return ''.join(random.choices(string.ascii_uppercase + string.digits, k=4))
+
+def calculate_lead_score(message_data: dict) -> int:
+    """Calcule le score de lead basé sur différents critères"""
+    score = 50  # Score de base
+    
+    # Budget élevé = +30 points
+    if message_data.get('budget_range') == "5000+€":
+        score += 30
+    elif message_data.get('budget_range') == "3000-5000€":
+        score += 20
+    elif message_data.get('budget_range') == "1000-3000€":
+        score += 10
+    
+    # Urgence = +20 points  
+    if message_data.get('urgency_level') == "Urgent":
+        score += 20
+    elif message_data.get('urgency_level') == "Normal":
+        score += 10
+    
+    # Pays facilité = +15 points
+    easy_countries = ["France", "Canada", "Belgique", "Suisse"]
+    if message_data.get('country') in easy_countries:
+        score += 15
+    
+    # Message détaillé = +10 points
+    if len(message_data.get('message', '')) > 200:
+        score += 10
+    
+    # Informations complètes = +5 points
+    if message_data.get('phone') and message_data.get('visa_type'):
+        score += 5
+        
+    return min(score, 100)  # Max 100
+
+async def generate_invoice_pdf(payment_data: dict) -> bytes:
+    """Génère une facture PDF basique"""
+    buffer = io.BytesIO()
+    
+    # Créer le PDF avec reportlab
+    c = canvas.Canvas(buffer, pagesize=letter)
+    width, height = letter
+    
+    # En-tête
+    c.setFont("Helvetica-Bold", 20)
+    c.drawString(50, height - 50, "ALORIA AGENCY")
+    c.setFont("Helvetica", 10)
+    c.drawString(50, height - 70, "45 Avenue Victor Hugo, 75016 Paris")
+    c.drawString(50, height - 85, "Tél: +33 1 75 43 89 12 | Email: contact@aloria-agency.com")
+    
+    # Titre facture
+    c.setFont("Helvetica-Bold", 16)
+    c.drawString(50, height - 130, f"FACTURE N° {payment_data['invoice_number']}")
+    
+    # Informations client
+    c.setFont("Helvetica", 12)
+    c.drawString(50, height - 170, f"Client: {payment_data['client_name']}")
+    c.drawString(50, height - 190, f"Date: {payment_data['created_at'][:10]}")
+    
+    # Détails paiement
+    c.drawString(50, height - 230, "DESCRIPTION DES SERVICES:")
+    c.drawString(50, height - 250, payment_data.get('description', 'Services d\'immigration'))
+    
+    # Montant
+    c.setFont("Helvetica-Bold", 14)
+    c.drawString(50, height - 300, f"MONTANT: {payment_data['amount']} {payment_data['currency']}")
+    
+    # Méthode de paiement
+    c.setFont("Helvetica", 12)
+    c.drawString(50, height - 330, f"Méthode de paiement: {payment_data['payment_method']}")
+    
+    # Pied de page
+    c.drawString(50, 50, "Merci de votre confiance - ALORIA AGENCY")
+    
+    c.save()
+    buffer.seek(0)
+    return buffer.getvalue()
+
 # Authentication Endpoints
 @api_router.post("/auth/register", response_model=TokenResponse)
 async def register(user_data: UserCreate):
