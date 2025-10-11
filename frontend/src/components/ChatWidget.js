@@ -285,7 +285,7 @@ const ChatWidget = ({ currentUser, onUnreadCountChange }) => {
                         setActiveConversation(conversation);
                         loadMessages(conversation.participant_id);
                       }}
-                      className="w-full text-left p-3 hover:bg-slate-700 rounded-lg mb-2 relative"
+                      className="w-full text-left p-3 hover:bg-slate-700/50 rounded-lg mb-2 relative border border-transparent hover:border-slate-600 transition-all duration-200"
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex-1">
