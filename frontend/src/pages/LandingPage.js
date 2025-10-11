@@ -9,6 +9,7 @@ import { Textarea } from '../components/ui/textarea';
 import { Badge } from '../components/ui/badge';
 import { toast } from 'sonner';
 import api from '../utils/api';
+import ContactFormWidget from '../components/ContactFormWidget';
 import { 
   Globe, ArrowRight, CheckCircle, Users, FileText, Clock, Star, MapPin, 
   Briefcase, GraduationCap, Heart, Shield, Award, TrendingUp, Phone, 
