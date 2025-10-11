@@ -387,6 +387,9 @@
         -working: true
         -agent: "testing"
         -comment: "✅ TESTED SUCCESSFULLY: EmployeeDashboard fully functional with 4 statistics cards (Mes Clients: 0, Dossiers Actifs: 0, Terminés: 0, En Attente: 0), 3 navigation tabs (Mes Dossiers, Mes Clients, Créer un Client), visitor registration button ('Visiteur') working, notification bell system, proper employee branding ('Tableau de Bord Employé'), client portfolio view, case tracking capabilities, and logout functionality. Employee-specific permissions and features working correctly."
+        -working: true
+        -agent: "main"
+        -comment: "🎨 UI COLOR HARMONIZATION COMPLETED: Updated EmployeeDashboard color scheme to match consistent 'bleu nuit' theme. Fixed getStatusColor function to use dark theme colors (bg-slate-700/50, bg-orange-500/10 for statuses), harmonized form backgrounds (bg-[#1E293B]), progress bars (bg-slate-700), and message components. All UI elements now consistently follow the dark blue night theme with proper borders and opacity levels."
     
   - task: "ClientDashboard with case progression"
     implemented: true
