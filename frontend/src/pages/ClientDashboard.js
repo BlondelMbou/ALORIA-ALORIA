@@ -94,7 +94,7 @@ export default function ClientDashboard() {
 
   const fetchPayments = async () => {
     try {
-      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/payments/history`, {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/payments/client-history`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
