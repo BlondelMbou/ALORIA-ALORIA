@@ -511,7 +511,7 @@ export default function EmployeeDashboard() {
                       </div>
 
                       {/* Current Step Details */}
-                      <div className="bg-slate-50 rounded-lg p-4">
+                      <div className="bg-[#1E293B] border border-slate-600 rounded-lg p-4">
                         <h4 className="font-semibold text-white mb-2">
                           Current Step: {caseItem.workflow_steps[caseItem.current_step_index]?.title}
                         </h4>
