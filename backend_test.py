@@ -1233,57 +1233,62 @@ class APITester:
             except Exception as e:
                 self.log_result("3. Manager Views Pending Payments", False, "Exception occurred", str(e))
 
-        # Test 3: Test confirmation code generation and validation
+        # Test 3: Test confirmation code generation and validation (Two-step process)
         confirmation_code = None
+        invoice_number = None
         if self.manager_token and payment_id:
             try:
                 headers = {"Authorization": f"Bearer {self.manager_token}"}
                 
-                # First, try to confirm with CONFIRMED action (should generate confirmation code)
+                # Step 1: Generate confirmation code
                 confirmation_data = {
-                    "action": "CONFIRMED",
-                    "confirmation_code": None  # Should be auto-generated
+                    "action": "CONFIRMED"
                 }
                 response = self.session.patch(f"{API_BASE}/payments/{payment_id}/confirm", json=confirmation_data, headers=headers)
                 
                 if response.status_code == 200:
-                    confirmed_payment = response.json()
+                    step1_result = response.json()
                     
                     # Check if confirmation code was generated
-                    if 'confirmation_code' in confirmed_payment:
-                        confirmation_code = confirmed_payment['confirmation_code']
+                    if 'confirmation_code' in step1_result and step1_result['confirmation_code']:
+                        confirmation_code = step1_result['confirmation_code']
                         self.log_result("4. Confirmation Code Generation", True, 
                                       f"Code de confirmation généré: {confirmation_code}")
+                        
+                        # Step 2: Confirm with the generated code
+                        confirmation_data_with_code = {
+                            "action": "CONFIRMED",
+                            "confirmation_code": confirmation_code
+                        }
+                        
+                        step2_response = self.session.patch(f"{API_BASE}/payments/{payment_id}/confirm", 
+                                                          json=confirmation_data_with_code, headers=headers)
+                        
+                        if step2_response.status_code == 200:
+                            final_result = step2_response.json()
+                            
+                            # Check invoice number generation
+                            if 'invoice_number' in final_result and final_result['invoice_number']:
+                                invoice_number = final_result['invoice_number']
+                                self.log_result("5. Invoice Number Generation", True, 
+                                              f"Numéro de facture généré: {invoice_number}")
+                            else:
+                                self.log_result("5. Invoice Number Generation", False, 
+                                              "Numéro de facture manquant ou vide")
+                            
+                            # Check status change
+                            if final_result.get('status') == 'confirmed':
+                                self.log_result("6. Payment Status Update", True, 
+                                              f"Statut mis à jour: {final_result['status']}")
+                            else:
+                                self.log_result("6. Payment Status Update", False, 
+                                              f"Statut incorrect: {final_result.get('status')}")
+                        else:
+                            self.log_result("5. Payment Final Confirmation", False, 
+                                          f"Échec confirmation finale: {step2_response.status_code}", step2_response.text)
                     else:
                         self.log_result("4. Confirmation Code Generation", False, 
                                       "Code de confirmation manquant dans la réponse")
-                    
-                    # Check invoice number generation
-                    if 'invoice_number' in confirmed_payment and confirmed_payment['invoice_number']:
-                        invoice_number = confirmed_payment['invoice_number']
-                        self.log_result("5. Invoice Number Generation", True, 
-                                      f"Numéro de facture généré: {invoice_number}")
-                    else:
-                        self.log_result("5. Invoice Number Generation", False, 
-                                      "Numéro de facture manquant ou vide")
-                    
-                    # Check status change
-                    if confirmed_payment.get('status') == 'confirmed':
-                        self.log_result("6. Payment Status Update", True, 
-                                      f"Statut mis à jour: {confirmed_payment['status']}")
-                    else:
-                        self.log_result("6. Payment Status Update", False, 
-                                      f"Statut incorrect: {confirmed_payment.get('status')}")
-                        
-                elif response.status_code == 400:
-                    # Check if it's asking for confirmation code
-                    error_msg = response.text
-                    if "confirmation" in error_msg.lower() or "code" in error_msg.lower():
-                        self.log_result("4. Confirmation Code Validation", True, 
-                                      "Système demande code de confirmation - workflow correct")
-                    else:
-                        self.log_result("4. Confirmation Code Validation", False, 
-                                      f"Erreur inattendue: {error_msg}")
                 else:
                     self.log_result("4. Payment Confirmation Process", False, 
                                   f"Status: {response.status_code}", response.text)
