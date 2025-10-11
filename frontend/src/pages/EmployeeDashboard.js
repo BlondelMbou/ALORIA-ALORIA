@@ -570,7 +570,7 @@ export default function EmployeeDashboard() {
                                 <span>Progress:</span>
                                 <span>{Math.round(client.progress_percentage)}%</span>
                               </div>
-                              <div className="w-full bg-slate-200 rounded-full h-2">
+                              <div className="w-full bg-slate-700 rounded-full h-2">
                                 <div
                                   className="bg-orange-500 h-2 rounded-full"
                                   style={{ width: `${client.progress_percentage}%` }}
