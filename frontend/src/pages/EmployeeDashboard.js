@@ -502,7 +502,7 @@ export default function EmployeeDashboard() {
                           <span>Step {caseItem.current_step_index + 1} of {caseItem.workflow_steps.length}</span>
                           <span>{Math.round(((caseItem.current_step_index + 1) / caseItem.workflow_steps.length) * 100)}%</span>
                         </div>
-                        <div className="w-full bg-slate-200 rounded-full h-3">
+                        <div className="w-full bg-slate-700 rounded-full h-3">
                           <div
                             className="bg-orange-500 h-3 rounded-full transition-all progress-bar"
                             style={{ width: `${((caseItem.current_step_index + 1) / caseItem.workflow_steps.length) * 100}%` }}
