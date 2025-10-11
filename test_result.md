@@ -351,6 +351,18 @@
         -agent: "testing"
         -comment: "✅ TESTED: Client creation with default password fully functional. New clients created with default password 'Aloria2024!' and automatic user account creation. Response includes login_email and default_password fields for new accounts. Client can successfully login with default credentials and change password. Employee load balancing for client assignment working correctly."
 
+  - task: "Contact Messages & CRM System"
+    implemented: true
+    working: true
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: true
+        -agent: "testing"
+        -comment: "✅ TESTED SUCCESSFULLY: Contact Messages & CRM system fully functional! POST /api/contact-messages creates messages with lead score calculation (tested with Jean Dupont data: 100% score for high-value prospect). GET /api/contact-messages works for Manager/Employee with proper permissions (Manager sees all 3 messages, Employee sees assigned only). Lead score algorithm working correctly: Base(50) + Budget(30) + Urgency(20) + Country(15) + Message length(10) + Complete info(5) = 100% (capped). Status filtering (?status=NEW) functional. Assignment system working (PATCH /api/contact-messages/{id}/assign). Data validation working (422 for invalid data). Manager login with review credentials (manager@test.com/password123) successful. ⚠️ NOTE: Status update (/status) and respond (/respond) endpoints mentioned in review request are not implemented - only assignment endpoint exists."
+
 ## frontend:
   - task: "Landing page with contact form France/Canada"
     implemented: true
