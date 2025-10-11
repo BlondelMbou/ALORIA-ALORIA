@@ -2861,7 +2861,7 @@ async def get_pending_payments(current_user: dict = Depends(get_current_user)):
         raise HTTPException(status_code=403, detail="Accès refusé")
     
     payments = await db.payment_declarations.find(
-        {"status": "PENDING"}, {"_id": 0}
+        {"status": "pending"}, {"_id": 0}
     ).sort("declared_at", 1).to_list(100)
     
     return [PaymentDeclarationResponse(**p) for p in payments]
