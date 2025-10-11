@@ -2634,6 +2634,596 @@ async def get_unread_notifications_count(current_user: dict = Depends(get_curren
     })
     return {"unread_count": count}
 
+# ==================== V3 NEW ENDPOINTS ====================
+
+# Balance & Withdrawals Management
+@api_router.get("/balance/current", response_model=BalanceResponse)
+async def get_current_balance(current_user: dict = Depends(get_current_user)):
+    """Obtenir le solde actuel de l'entreprise (SuperAdmin/Manager seulement)"""
+    if current_user["role"] not in ["SUPERADMIN", "MANAGER"]:
+        raise HTTPException(status_code=403, detail="Accès refusé")
+    
+    # Calculer le solde en temps réel
+    # Total des paiements confirmés
+    payments_pipeline = [
+        {"$match": {"status": "CONFIRMED"}},
+        {"$group": {"_id": None, "total": {"$sum": "$amount"}}}
+    ]
+    payments_result = await db.payment_declarations.aggregate(payments_pipeline).to_list(1)
+    total_payments = payments_result[0]["total"] if payments_result else 0.0
+    
+    # Total des retraits
+    withdrawals_pipeline = [
+        {"$group": {"_id": None, "total": {"$sum": "$amount"}}}
+    ]
+    withdrawals_result = await db.withdrawals.aggregate(withdrawals_pipeline).to_list(1)
+    total_withdrawals = withdrawals_result[0]["total"] if withdrawals_result else 0.0
+    
+    current_balance = total_payments - total_withdrawals
+    
+    # Mettre à jour le solde dans la base
+    await db.company_balance.update_one(
+        {},
+        {
+            "$set": {
+                "current_balance": current_balance,
+                "total_payments": total_payments,
+                "total_withdrawals": total_withdrawals,
+                "last_updated": datetime.now(timezone.utc).isoformat(),
+                "last_calculation": {
+                    "total_payments": total_payments,
+                    "total_withdrawals": total_withdrawals,
+                    "balance": current_balance
+                }
+            }
+        },
+        upsert=True
+    )
+    
+    return BalanceResponse(
+        current_balance=current_balance,
+        total_payments=total_payments,
+        total_withdrawals=total_withdrawals,
+        last_updated=datetime.now(timezone.utc).isoformat()
+    )
+
+@api_router.post("/withdrawals", response_model=WithdrawalResponse)
+async def create_withdrawal(withdrawal_data: WithdrawalCreate, current_user: dict = Depends(get_current_user)):
+    """Créer un nouveau retrait (Manager seulement)"""
+    if current_user["role"] != "MANAGER":
+        raise HTTPException(status_code=403, detail="Seuls les managers peuvent déclarer des retraits")
+    
+    withdrawal_id = str(uuid.uuid4())
+    withdrawal_dict = {
+        "id": withdrawal_id,
+        "manager_id": current_user["id"],
+        "manager_name": current_user["full_name"],
+        "amount": withdrawal_data.amount,
+        "category": withdrawal_data.category,
+        "subcategory": withdrawal_data.subcategory,
+        "description": withdrawal_data.description,
+        "receipt_url": withdrawal_data.receipt_url,
+        "withdrawal_date": datetime.now(timezone.utc).isoformat(),
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.withdrawals.insert_one(withdrawal_dict)
+    
+    # Log de l'activité
+    await log_user_activity(
+        user_id=current_user["id"],
+        action="withdrawal_created",
+        details={
+            "withdrawal_id": withdrawal_id,
+            "amount": withdrawal_data.amount,
+            "category": withdrawal_data.category,
+            "subcategory": withdrawal_data.subcategory
+        }
+    )
+    
+    # Notification au SuperAdmin
+    superadmin = await db.users.find_one({"role": "SUPERADMIN"})
+    if superadmin:
+        await create_notification(
+            user_id=superadmin["id"],
+            title="Nouveau retrait déclaré",
+            message=f"{current_user['full_name']} a déclaré un retrait de {withdrawal_data.amount}€ ({withdrawal_data.category})",
+            type="withdrawal",
+            related_id=withdrawal_id
+        )
+    
+    return WithdrawalResponse(**withdrawal_dict)
+
+@api_router.get("/withdrawals", response_model=List[WithdrawalResponse])
+async def get_withdrawals(current_user: dict = Depends(get_current_user)):
+    """Obtenir la liste des retraits"""
+    query = {}
+    
+    # Manager voit ses propres retraits, SuperAdmin voit tout
+    if current_user["role"] == "MANAGER":
+        query["manager_id"] = current_user["id"]
+    elif current_user["role"] not in ["SUPERADMIN"]:
+        raise HTTPException(status_code=403, detail="Accès refusé")
+    
+    withdrawals = await db.withdrawals.find(query, {"_id": 0}).sort("withdrawal_date", -1).to_list(100)
+    return [WithdrawalResponse(**w) for w in withdrawals]
+
+@api_router.get("/expense-categories", response_model=Dict[str, ExpenseCategoryInfo])
+async def get_expense_categories():
+    """Obtenir les catégories de dépenses disponibles"""
+    return {
+        cat_key: ExpenseCategoryInfo(**cat_data) 
+        for cat_key, cat_data in EXPENSE_CATEGORIES_CONFIG.items()
+    }
+
+# Enhanced Payments with Confirmation Code
+@api_router.patch("/payments/{payment_id}/confirm", response_model=PaymentDeclarationResponse)
+async def confirm_payment_with_code(
+    payment_id: str, 
+    confirmation_data: PaymentConfirmRequest, 
+    current_user: dict = Depends(get_current_user)
+):
+    """Confirmer ou rejeter un paiement (Manager seulement)"""
+    if current_user["role"] != "MANAGER":
+        raise HTTPException(status_code=403, detail="Seuls les managers peuvent confirmer les paiements")
+    
+    payment = await db.payment_declarations.find_one({"id": payment_id})
+    if not payment:
+        raise HTTPException(status_code=404, detail="Paiement non trouvé")
+    
+    if payment["status"] != "PENDING":
+        raise HTTPException(status_code=400, detail="Ce paiement a déjà été traité")
+    
+    if confirmation_data.action == "REJECTED":
+        if not confirmation_data.rejection_reason:
+            raise HTTPException(status_code=400, detail="Un motif de rejet est obligatoire")
+        
+        # Rejeter le paiement
+        update_dict = {
+            "status": "REJECTED",
+            "rejection_reason": confirmation_data.rejection_reason,
+            "confirmed_by": current_user["id"],
+            "confirmed_at": datetime.now(timezone.utc).isoformat()
+        }
+        
+        await db.payment_declarations.update_one({"id": payment_id}, {"$set": update_dict})
+        
+        # Notifier le client du rejet
+        await create_notification(
+            user_id=payment["client_id"],
+            title="Paiement rejeté",
+            message=f"Votre paiement de {payment['amount']} {payment['currency']} a été rejeté. Motif: {confirmation_data.rejection_reason}",
+            type="payment_rejected",
+            related_id=payment_id
+        )
+        
+    elif confirmation_data.action == "CONFIRMED":
+        # Étape 1: Générer un code de confirmation si pas encore fait
+        if not payment.get("confirmation_code"):
+            confirmation_code = generate_confirmation_code()
+            await db.payment_declarations.update_one(
+                {"id": payment_id}, 
+                {"$set": {"confirmation_code": confirmation_code, "confirmation_required": True}}
+            )
+            return PaymentDeclarationResponse(
+                **payment,
+                confirmation_code=confirmation_code,
+                message="Code de confirmation généré. Veuillez le saisir pour valider."
+            )
+        
+        # Étape 2: Vérifier le code saisi
+        if not confirmation_data.confirmation_code:
+            raise HTTPException(status_code=400, detail="Code de confirmation requis")
+        
+        if confirmation_data.confirmation_code != payment["confirmation_code"]:
+            raise HTTPException(status_code=400, detail="Code de confirmation incorrect")
+        
+        # Confirmer le paiement
+        invoice_number = f"ALO-{datetime.now().strftime('%Y%m%d')}-{payment_id[:8].upper()}"
+        
+        update_dict = {
+            "status": "CONFIRMED",
+            "confirmed_by": current_user["id"],
+            "confirmed_at": datetime.now(timezone.utc).isoformat(),
+            "invoice_number": invoice_number
+        }
+        
+        await db.payment_declarations.update_one({"id": payment_id}, {"$set": update_dict})
+        
+        # Générer le PDF de la facture
+        payment_data_for_pdf = {
+            **payment,
+            **update_dict,
+            "client_name": payment.get("client_name", "Client"),
+            "manager_name": current_user["full_name"]
+        }
+        
+        try:
+            pdf_content = await generate_invoice_pdf(payment_data_for_pdf)
+            # Ici on sauvegarderait le PDF dans un système de stockage
+            # Pour l'instant, on stocke juste l'URL/path
+            pdf_url = f"/invoices/{invoice_number}.pdf"
+            await db.payment_declarations.update_one(
+                {"id": payment_id}, 
+                {"$set": {"pdf_invoice_url": pdf_url}}
+            )
+        except Exception as e:
+            logger.error(f"Erreur génération PDF: {e}")
+        
+        # Notifier le client de la confirmation
+        await create_notification(
+            user_id=payment["client_id"],
+            title="Paiement confirmé",
+            message=f"Votre paiement de {payment['amount']} {payment['currency']} a été confirmé. Facture N° {invoice_number}",
+            type="payment_confirmed",
+            related_id=payment_id
+        )
+    
+    # Log de l'activité
+    await log_user_activity(
+        user_id=current_user["id"],
+        action=f"payment_{confirmation_data.action.lower()}",
+        details={
+            "payment_id": payment_id,
+            "amount": payment["amount"],
+            "client_id": payment["client_id"],
+            "action": confirmation_data.action
+        }
+    )
+    
+    # Retourner le paiement mis à jour
+    updated_payment = await db.payment_declarations.find_one({"id": payment_id}, {"_id": 0})
+    return PaymentDeclarationResponse(**updated_payment)
+
+@api_router.get("/payments/pending", response_model=List[PaymentDeclarationResponse])
+async def get_pending_payments(current_user: dict = Depends(get_current_user)):
+    """Obtenir les paiements en attente (Manager seulement)"""
+    if current_user["role"] != "MANAGER":
+        raise HTTPException(status_code=403, detail="Accès refusé")
+    
+    payments = await db.payment_declarations.find(
+        {"status": "PENDING"}, {"_id": 0}
+    ).sort("declared_at", 1).to_list(100)
+    
+    return [PaymentDeclarationResponse(**p) for p in payments]
+
+# Contact Messages & CRM
+@api_router.post("/contact-messages", response_model=ContactMessageResponse)
+async def create_contact_message(message_data: ContactMessageCreate):
+    """Créer un nouveau message de contact (API publique)"""
+    message_id = str(uuid.uuid4())
+    
+    # Calculer le score de lead
+    lead_score = calculate_lead_score(message_data.model_dump())
+    
+    message_dict = {
+        "id": message_id,
+        "name": message_data.name,
+        "email": message_data.email,
+        "phone": message_data.phone,
+        "country": message_data.country,
+        "visa_type": message_data.visa_type,
+        "budget_range": message_data.budget_range,
+        "urgency_level": message_data.urgency_level,
+        "message": message_data.message,
+        "status": ContactStatus.NEW,
+        "assigned_to": None,
+        "assigned_to_name": None,
+        "lead_source": message_data.lead_source,
+        "conversion_probability": lead_score,
+        "notes": "",
+        "follow_up_date": None,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "updated_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.contact_messages.insert_one(message_dict)
+    
+    # Notifier les managers du nouveau lead
+    managers = await db.users.find({"role": "MANAGER", "is_active": True}).to_list(10)
+    for manager in managers:
+        await create_notification(
+            user_id=manager["id"],
+            title="Nouveau contact prospect",
+            message=f"{message_data.name} ({message_data.country}) - Score: {lead_score}%",
+            type="new_lead",
+            related_id=message_id
+        )
+    
+    # Log de l'activité
+    await log_user_activity(
+        user_id="public",
+        action="contact_message_created",
+        details={
+            "message_id": message_id,
+            "name": message_data.name,
+            "country": message_data.country,
+            "lead_score": lead_score
+        }
+    )
+    
+    return ContactMessageResponse(**message_dict)
+
+@api_router.get("/contact-messages", response_model=List[ContactMessageResponse])
+async def get_contact_messages(
+    status: Optional[str] = None,
+    current_user: dict = Depends(get_current_user)
+):
+    """Obtenir les messages de contact (Manager/Employee)"""
+    if current_user["role"] not in ["MANAGER", "EMPLOYEE"]:
+        raise HTTPException(status_code=403, detail="Accès refusé")
+    
+    query = {}
+    if status:
+        query["status"] = status
+    
+    # Employee voit seulement les messages qui lui sont assignés
+    if current_user["role"] == "EMPLOYEE":
+        query["assigned_to"] = current_user["id"]
+    
+    messages = await db.contact_messages.find(query, {"_id": 0}).sort("created_at", -1).to_list(100)
+    return [ContactMessageResponse(**msg) for msg in messages]
+
+@api_router.patch("/contact-messages/{message_id}/assign")
+async def assign_contact_message(
+    message_id: str,
+    assignment_data: dict,
+    current_user: dict = Depends(get_current_user)
+):
+    """Assigner un message de contact à un employé (Manager seulement)"""
+    if current_user["role"] != "MANAGER":
+        raise HTTPException(status_code=403, detail="Seuls les managers peuvent assigner les prospects")
+    
+    assignee_id = assignment_data.get("assigned_to")
+    if assignee_id:
+        assignee = await db.users.find_one({"id": assignee_id, "role": {"$in": ["MANAGER", "EMPLOYEE"]}})
+        if not assignee:
+            raise HTTPException(status_code=404, detail="Utilisateur assigné non trouvé")
+        assignee_name = assignee["full_name"]
+    else:
+        assignee_name = None
+    
+    result = await db.contact_messages.update_one(
+        {"id": message_id},
+        {
+            "$set": {
+                "assigned_to": assignee_id,
+                "assigned_to_name": assignee_name,
+                "status": ContactStatus.CONTACTED if assignee_id else ContactStatus.NEW,
+                "updated_at": datetime.now(timezone.utc).isoformat()
+            }
+        }
+    )
+    
+    if result.modified_count == 0:
+        raise HTTPException(status_code=404, detail="Message non trouvé")
+    
+    # Notifier l'assigné
+    if assignee_id:
+        message = await db.contact_messages.find_one({"id": message_id})
+        await create_notification(
+            user_id=assignee_id,
+            title="Nouveau prospect assigné",
+            message=f"Le prospect {message['name']} vous a été assigné",
+            type="prospect_assigned",
+            related_id=message_id
+        )
+    
+    return {"message": "Assignment mis à jour avec succès"}
+
+# Activity Logs
+@api_router.get("/activities", response_model=List[ActivityLogResponse])
+async def get_activity_logs(
+    limit: int = 50,
+    user_id: Optional[str] = None,
+    action: Optional[str] = None,
+    current_user: dict = Depends(get_current_user)
+):
+    """Obtenir l'historique des activités (SuperAdmin/Manager)"""
+    if current_user["role"] not in ["SUPERADMIN", "MANAGER"]:
+        raise HTTPException(status_code=403, detail="Accès refusé")
+    
+    query = {}
+    if user_id:
+        query["user_id"] = user_id
+    if action:
+        query["action"] = {"$regex": action, "$options": "i"}
+    
+    activities = await db.activity_logs.find(query, {"_id": 0}).sort("timestamp", -1).limit(limit).to_list(limit)
+    return [ActivityLogResponse(**activity) for activity in activities]
+
+# Company Information
+@api_router.get("/company-info", response_model=CompanyInfo)
+async def get_company_info():
+    """Obtenir les informations de l'entreprise (API publique)"""
+    return CompanyInfo(**COMPANY_DATA)
+
+# Search Enhancement
+@api_router.get("/search/global")
+async def global_search(
+    q: str,
+    category: str = "all",
+    limit: int = 10,
+    current_user: dict = Depends(get_current_user)
+):
+    """Recherche globale intelligente"""
+    if len(q.strip()) < 2:
+        return []
+    
+    results = []
+    query_regex = {"$regex": q, "$options": "i"}
+    
+    # Recherche dans les clients
+    if category in ["all", "clients"]:
+        clients_query = {}
+        if current_user["role"] == "EMPLOYEE":
+            clients_query["assigned_employee_id"] = current_user["id"]
+        
+        clients_query["$or"] = [
+            {"country": query_regex},
+            {"visa_type": query_regex},
+            {"current_status": query_regex}
+        ]
+        
+        clients = await db.clients.find(clients_query, {"_id": 0}).limit(limit//3).to_list(limit//3)
+        
+        for client in clients:
+            user = await db.users.find_one({"id": client["user_id"]})
+            if user and q.lower() in user["full_name"].lower():
+                results.append({
+                    "id": client["id"],
+                    "title": user["full_name"],
+                    "description": f"{client['country']} - {client['visa_type']} - {client['current_status']}",
+                    "category": "clients",
+                    "url": f"/clients/{client['id']}"
+                })
+    
+    # Recherche dans les dossiers
+    if category in ["all", "cases"]:
+        cases = await db.cases.find({
+            "$or": [
+                {"country": query_regex},
+                {"visa_type": query_regex},
+                {"status": query_regex}
+            ]
+        }, {"_id": 0}).limit(limit//3).to_list(limit//3)
+        
+        for case in cases:
+            client = await db.clients.find_one({"id": case["client_id"]})
+            if client:
+                user = await db.users.find_one({"id": client["user_id"]})
+                client_name = user["full_name"] if user else "Client inconnu"
+                results.append({
+                    "id": case["id"],
+                    "title": f"Dossier {client_name}",
+                    "description": f"{case['country']} - {case['visa_type']} - Étape {case['current_step_index']}",
+                    "category": "cases",
+                    "url": f"/cases/{case['id']}"
+                })
+    
+    # Recherche dans les utilisateurs (Manager/SuperAdmin seulement)
+    if category in ["all", "users"] and current_user["role"] in ["MANAGER", "SUPERADMIN"]:
+        users = await db.users.find({
+            "$or": [
+                {"full_name": query_regex},
+                {"email": query_regex},
+                {"role": query_regex}
+            ],
+            "role": {"$ne": "CLIENT"}  # Exclure les clients de la recherche utilisateurs
+        }, {"_id": 0}).limit(limit//3).to_list(limit//3)
+        
+        for user in users:
+            results.append({
+                "id": user["id"],
+                "title": user["full_name"],
+                "description": f"{user['role']} - {user['email']}",
+                "category": "users",
+                "url": f"/users/{user['id']}"
+            })
+    
+    # Recherche dans les visiteurs (Employee/Manager)
+    if category in ["all", "visitors"] and current_user["role"] in ["EMPLOYEE", "MANAGER"]:
+        visitors = await db.visitors.find({
+            "$or": [
+                {"name": query_regex},
+                {"company": query_regex},
+                {"purpose": query_regex}
+            ]
+        }, {"_id": 0}).limit(limit//3).to_list(limit//3)
+        
+        for visitor in visitors:
+            results.append({
+                "id": visitor["id"],
+                "title": visitor["name"],
+                "description": f"{visitor.get('company', 'Particulier')} - {visitor['purpose']}",
+                "category": "visitors",
+                "url": f"/visitors/{visitor['id']}"
+            })
+    
+    # Trier par pertinence (simple)
+    results.sort(key=lambda x: q.lower() in x["title"].lower(), reverse=True)
+    
+    return results[:limit]
+
+# Sequential Case Progression Validation
+@api_router.patch("/cases/{case_id}/progress", response_model=CaseResponse)
+async def update_case_progress_sequential(
+    case_id: str,
+    progress_data: WorkflowStepUpdate,
+    current_user: dict = Depends(get_current_user)
+):
+    """Mettre à jour la progression d'un dossier avec validation séquentielle (Manager seulement)"""
+    if current_user["role"] != "MANAGER":
+        raise HTTPException(status_code=403, detail="Seuls les gestionnaires peuvent modifier la progression")
+    
+    case = await db.cases.find_one({"id": case_id})
+    if not case:
+        raise HTTPException(status_code=404, detail="Dossier non trouvé")
+    
+    current_step = case.get("current_step_index", 0)
+    new_step = progress_data.step_index
+    
+    # Validation séquentielle : ne peut avancer que d'une étape à la fois
+    if new_step > current_step + 1:
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Progression séquentielle obligatoire. Vous devez d'abord valider l'étape {current_step + 1}"
+        )
+    
+    # Ne peut pas reculer de plus d'une étape
+    if new_step < current_step - 1:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Vous ne pouvez pas revenir plus d'une étape en arrière"
+        )
+    
+    # Mise à jour autorisée
+    total_steps = len(case.get("workflow_steps", []))
+    progress_percentage = (new_step / total_steps * 100) if total_steps > 0 else 0
+    
+    update_dict = {
+        "current_step_index": new_step,
+        "updated_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    if progress_data.status:
+        update_dict["status"] = progress_data.status
+    if progress_data.notes:
+        update_dict["notes"] = progress_data.notes
+    
+    await db.cases.update_one({"id": case_id}, {"$set": update_dict})
+    
+    # Mettre à jour le client
+    await db.clients.update_one(
+        {"id": case["client_id"]},
+        {"$set": {
+            "current_step": new_step,
+            "progress_percentage": progress_percentage,
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    # Log de l'activité
+    await log_user_activity(
+        user_id=current_user["id"],
+        action="case_progress_updated",
+        details={
+            "case_id": case_id,
+            "previous_step": current_step,
+            "new_step": new_step,
+            "progress_percentage": progress_percentage
+        }
+    )
+    
+    # Obtenir le dossier mis à jour
+    updated_case = await db.cases.find_one({"id": case_id}, {"_id": 0})
+    client = await db.clients.find_one({"id": case["client_id"]})
+    if client:
+        user = await db.users.find_one({"id": client["user_id"]})
+        updated_case["client_name"] = user["full_name"] if user else "Client inconnu"
+    
+    return CaseResponse(**updated_case)
+
 # Include router
 app.include_router(api_router)
 
