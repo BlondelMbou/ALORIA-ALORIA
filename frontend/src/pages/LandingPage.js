@@ -368,6 +368,9 @@ export default function LandingPage() {
               <a href="#temoignages" className="block text-xl text-slate-300 hover:text-orange-500 transition-colors">
                 Témoignages
               </a>
+              <a href="#faq" className="block text-xl text-slate-300 hover:text-orange-500 transition-colors">
+                FAQ
+              </a>
               <Button 
                 onClick={() => navigate('/login')}
                 className="bg-orange-500 text-white hover:bg-orange-600 w-full"
