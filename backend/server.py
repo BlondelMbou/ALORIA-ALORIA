@@ -2064,72 +2064,7 @@ async def get_pending_payments(current_user: dict = Depends(get_current_user)):
     
     return [PaymentDeclarationResponse(**payment) for payment in payments]
 
-@api_router.patch("/payments/{payment_id}/confirm", response_model=PaymentDeclarationResponse)
-async def confirm_payment(payment_id: str, confirmation: PaymentConfirmation, current_user: dict = Depends(get_current_user)):
-    """Manager confirme ou rejette un paiement"""
-    if current_user["role"] not in ["MANAGER", "SUPERADMIN"]:
-        raise HTTPException(status_code=403, detail="Seuls les managers peuvent confirmer les paiements")
-    
-    payment = await db.payment_declarations.find_one({"id": payment_id})
-    if not payment:
-        raise HTTPException(status_code=404, detail="Paiement non trouvé")
-    
-    if payment["status"] != "pending":
-        raise HTTPException(status_code=400, detail="Ce paiement a déjà été traité")
-    
-    # Générer un numéro de facture si confirmé
-    invoice_number = None
-    if confirmation.action == "confirm":
-        invoice_number = f"INV-{datetime.now().strftime('%Y%m%d')}-{payment_id[:8].upper()}"
-    
-    # Mettre à jour le paiement
-    update_data = {
-        "status": "confirmed" if confirmation.action == "confirm" else "rejected",
-        "confirmed_at": datetime.now(timezone.utc).isoformat(),
-        "confirmed_by": current_user["id"],
-        "confirmation_notes": confirmation.notes,
-        "invoice_number": invoice_number
-    }
-    
-    await db.payment_declarations.update_one({"id": payment_id}, {"$set": update_data})
-    
-    # Notifier le client
-    client = await db.clients.find_one({"id": payment["client_id"]})
-    if client:
-        client_user = await db.users.find_one({"id": client["user_id"]})
-        if client_user:
-            await create_notification(
-                user_id=client_user["id"],
-                title=f"Paiement {'confirmé' if confirmation.action == 'confirm' else 'rejeté'}",
-                message=f"Votre paiement de {payment['amount']} {payment['currency']} a été {'confirmé' if confirmation.action == 'confirm' else 'rejeté'} par {current_user['full_name']}",
-                type="payment_confirmation",
-                related_id=payment_id
-            )
-            
-            # WebSocket
-            client_sid = connected_users.get(client_user["id"])
-            if client_sid:
-                await sio.emit('payment_confirmed', {
-                    'payment_id': payment_id,
-                    'status': confirmation.action,
-                    'invoice_number': invoice_number,
-                    'confirmed_by': current_user["full_name"]
-                }, room=client_sid)
-    
-    # Générer la facture PDF si confirmé
-    if confirmation.action == "confirm":
-        await generate_invoice_pdf(payment_id, invoice_number)
-    
-    # Log activité
-    await log_user_activity(
-        user_id=current_user["id"],
-        action="confirm_payment",
-        details={"payment_id": payment_id, "action": confirmation.action}
-    )
-    
-    # Retourner le paiement mis à jour
-    updated_payment = await db.payment_declarations.find_one({"id": payment_id}, {"_id": 0})
-    return PaymentDeclarationResponse(**updated_payment)
+# OLD PAYMENT CONFIRMATION ENDPOINT REMOVED - DUPLICATE OF ENHANCED VERSION BELOW
 
 # Fonction pour générer une facture PDF simple
 async def generate_invoice_pdf(payment_id: str, invoice_number: str):
