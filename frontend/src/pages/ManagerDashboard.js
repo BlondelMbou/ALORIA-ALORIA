@@ -339,7 +339,9 @@ export default function ManagerDashboard() {
         message: ''
       });
       setShowCreateClient(false);
+      // Refresh immédiat + attendre un peu pour la synchronisation
       fetchData();
+      setTimeout(() => fetchData(), 2000);
     } catch (error) {
       toast.error('Erreur lors de la création du client');
     }
