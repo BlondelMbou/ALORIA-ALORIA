@@ -477,6 +477,10 @@ class PaymentDeclarationResponse(BaseModel):
     confirmed_at: Optional[str]
     confirmed_by: Optional[str]
     invoice_number: Optional[str]
+    confirmation_code: Optional[str] = None
+    pdf_invoice_url: Optional[str] = None
+    rejection_reason: Optional[str] = None
+    message: Optional[str] = None
     
 # PaymentConfirmation model removed - replaced by PaymentConfirmRequest
     
