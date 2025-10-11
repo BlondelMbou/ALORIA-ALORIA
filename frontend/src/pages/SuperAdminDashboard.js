@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import NotificationBell from '../components/NotificationBell';
 import HierarchicalUserCreation from '../components/HierarchicalUserCreation';
 import BalanceMonitor from '../components/BalanceMonitor';
+import ActivityHistory from '../components/ActivityHistory';
 import api from '../utils/api';
 
 const SuperAdminDashboard = () => {
