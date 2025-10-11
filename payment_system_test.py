@@ -109,7 +109,7 @@ class PaymentSystemTester:
                 self.log_result(
                     "Create Payment Client", 
                     True, 
-                    f"Client created: {client_info['full_name']} (ID: {client_id})"
+                    f"Client created: {client_data['full_name']} (ID: {client_id})"
                 )
                 
                 # Try to login as client
