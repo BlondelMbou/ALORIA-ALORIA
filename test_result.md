@@ -300,6 +300,18 @@
         -agent: "testing"
         -comment: "✅ TESTED: Manager-only case update permissions fully functional. PATCH /api/cases/{id} correctly restricted to MANAGER role only. Employee attempts return 403 'Seuls les gestionnaires peuvent modifier les dossiers'. WebSocket notifications sent to both client and assigned employee when case is updated by manager. Tested case status update with current_step_index=1, status='En cours', and notes successfully."
 
+  - task: "Sequential case progression validation"
+    implemented: true
+    working: true
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: true
+        -agent: "main"
+        -comment: "✅ IMPLEMENTED: Sequential case progression system already exists in backend via PATCH /api/cases/{case_id}/progress endpoint. Validates that managers can only advance cases one step at a time (no jumping from step 1 to 7). Endpoint enforces: 1) Cannot advance more than +1 step at a time, 2) Cannot go backward more than -1 step, 3) Returns appropriate error messages for invalid progression attempts. Progress percentage calculation and activity logging included."
+
   - task: "Password change API"
     implemented: true
     working: true
