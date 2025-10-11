@@ -43,6 +43,30 @@ export default function LandingPage() {
     countries: 0,
     experience: 0
   });
+  const [openFAQ, setOpenFAQ] = useState(null);
+
+  const faqs = [
+    {
+      question: "Combien de temps prend le processus d'immigration ?",
+      answer: "Les délais varient selon le pays et le type de visa. En moyenne : 3-6 mois pour les permis de travail, 6-12 mois pour les résidences permanentes. Nous vous fournissons un calendrier précis lors de l'évaluation initiale."
+    },
+    {
+      question: "Quels sont vos taux de réussite ?",
+      answer: "Notre taux de réussite global est de 98%. Ce taux élevé est dû à notre évaluation rigoureuse en amont et notre expertise dans la préparation des dossiers. Nous ne prenons que les dossiers où nous sommes confiants du succès."
+    },
+    {
+      question: "Combien coûtent vos services ?",
+      answer: "Nos honoraires varient selon la complexité du dossier (1500€ - 5000€). Nous proposons des plans de paiement flexibles et une transparence totale sur les coûts. L'évaluation initiale est gratuite."
+    },
+    {
+      question: "Que se passe-t-il si mon dossier est refusé ?",
+      answer: "Dans le rare cas d'un refus (2% des cas), nous analysons les motifs et préparons un nouveau dossier sans frais supplémentaires. Notre garantie satisfaction couvre cette situation."
+    },
+    {
+      question: "Puis-je suivre l'avancement de mon dossier ?",
+      answer: "Absolument ! Notre plateforme digitale vous permet de suivre chaque étape en temps réel. Vous recevez également des notifications par email et SMS pour chaque mise à jour importante."
+    }
+  ];
 
   // Animation des statistiques au scroll
   useEffect(() => {
