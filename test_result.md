@@ -432,18 +432,18 @@
 
 ## test_plan:
   current_focus:
-    - "Landing page with contact form France/Canada"
-    - "LoginPage with JWT authentication"
-    - "ManagerDashboard complete functionality"
-    - "EmployeeDashboard with client portfolio"
-    - "ClientDashboard with case progression"
-    - "WebSocket chat system integration"
-    - "Notification system integration"
-    - "Color theme harmonization"
-  stuck_tasks: []
-  test_all: true
-  test_priority: "high_first"
-  last_test_session: "ALORIA AGENCY FRONTEND VALIDATION V2 - Complete frontend testing to validate existing functionalities before V2 implementation: 1) Landing page with France/Canada contact form, 2) LoginPage with JWT authentication, 3) ManagerDashboard with client/case/visitor management, 4) EmployeeDashboard with client portfolio and visitor registration, 5) ClientDashboard with case progression and documents, 6) WebSocket chat system, 7) Notification system, 8) Color theme harmonization"
+    - "Payment system accept/reject workflow fixes"
+    - "Payment confirmation code generation and validation"
+    - "PDF invoice generation for confirmed payments"
+    - "Payment history display both sides (client/manager)"
+    - "Sequential case progression implementation"
+    - "Employee UI color harmonization"
+    - "Component auto-update functionality"
+  stuck_tasks:
+    - "Payment system logic bugs reported by user"
+  test_all: false
+  test_priority: "stuck_first"
+  last_test_session: "PAYMENT SYSTEM CRITICAL FIXES V3.1 - Focus on resolving payment system bugs: 1) Accept/reject workflow, 2) Confirmation codes, 3) PDF generation, 4) History display, 5) Status updates"
 
 ## agent_communication:
     -agent: "main"
