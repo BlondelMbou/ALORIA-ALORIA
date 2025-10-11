@@ -149,12 +149,14 @@ export default function EmployeeDashboard() {
   ];
 
   const getStatusColor = (status) => {
-    switch (status.toLowerCase()) {
-      case 'new': return 'bg-blue-100 text-blue-700';
-      case 'in progress': return 'bg-yellow-100 text-yellow-700';
-      case 'approved': case 'completed': return 'bg-green-100 text-green-700';
-      case 'rejected': return 'bg-red-100 text-red-700';
-      default: return 'bg-gray-100 text-gray-700';
+    switch (status?.toLowerCase()) {
+      case 'nouveau': return 'bg-slate-700/50 text-slate-300 border border-slate-600';
+      case 'en cours': return 'bg-orange-500/10 text-orange-400 border border-orange-500/30';
+      case 'terminé': return 'bg-green-500/10 text-green-400 border border-green-500/30';
+      case 'new': return 'bg-slate-700/50 text-slate-300 border border-slate-600';
+      case 'in progress': return 'bg-orange-500/10 text-orange-400 border border-orange-500/30';
+      case 'completed': return 'bg-green-500/10 text-green-400 border border-green-500/30';
+      default: return 'bg-slate-700/50 text-slate-300 border border-slate-600';
     }
   };
 
