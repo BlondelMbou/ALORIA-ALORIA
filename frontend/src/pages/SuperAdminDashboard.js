@@ -326,7 +326,7 @@ const SuperAdminDashboard = () => {
 
         {/* Tab Content */}
         {activeTab === 'users' && <UsersTab />}
-        {activeTab === 'activities' && <ActivitiesTab />}
+        {activeTab === 'activities' && <ActivityHistory />}
         {activeTab === 'users-creation' && <HierarchicalUserCreation onUserCreated={fetchDashboardData} />}
         {activeTab === 'balance' && <BalanceMonitor />}
       </div>
