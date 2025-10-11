@@ -55,4 +55,12 @@ export const workflowsAPI = {
   getAll: () => api.get('/workflows'),
 };
 
+export const paymentsAPI = {
+  declare: (data) => api.post('/payments/declare', data),
+  getPending: () => api.get('/payments/pending'),
+  getHistory: () => api.get('/payments/history'), // Manager/SuperAdmin
+  getClientHistory: () => api.get('/payments/client-history'), // Client only
+  confirm: (id, data) => api.patch(`/payments/${id}/confirm`, data),
+};
+
 export default api;
