@@ -28,7 +28,7 @@ export default function LandingPage() {
   });
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
-  const [employees, setEmployees] = useState([]);
+  // Employee state moved to ContactFormWidget component
   const [animatedNumbers, setAnimatedNumbers] = useState({
     clients: 0,
     success: 0,
