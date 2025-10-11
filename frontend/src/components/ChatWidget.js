@@ -166,7 +166,7 @@ const ChatWidget = ({ currentUser, onUnreadCountChange }) => {
               )}
               <button
                 onClick={() => setIsOpen(false)}
-                className="hover:bg-orange-600 p-1 rounded"
+                className="hover:bg-slate-700 text-slate-300 hover:text-white p-1 rounded transition-colors"
               >
                 <X size={16} />
               </button>
