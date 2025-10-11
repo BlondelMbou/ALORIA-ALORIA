@@ -119,12 +119,15 @@
 
   - task: "Declarative payment system"
     implemented: true
-    working: true
+    working: false
     file: "server.py"
-    stuck_count: 0
+    stuck_count: 1
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
+        -working: false
+        -agent: "main"
+        -comment: "❌ USER REPORTED: Critical bugs in payment system. Accept/reject workflow has issues, confirmation codes not working correctly, PDF generation problems, history not displaying properly. User demands complete functional system with working PDFs and history on both sides."
         -working: true
         -agent: "testing"
         -comment: "✅ TESTED V2: Complete payment system working perfectly. Client declares payment with POST /api/payments/declare (amount, currency, description, payment_method). Manager views pending payments with GET /api/payments/pending. Manager confirms/rejects with PATCH /api/payments/{id}/confirm. Invoice number generation working (format: INV-YYYYMMDD-XXXXXXXX). Payment history accessible via GET /api/payments/history. Full workflow tested: Client declares €2000 payment → Manager confirms → Invoice INV-20251009-FC4693BE generated."
