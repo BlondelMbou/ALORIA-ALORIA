@@ -621,6 +621,97 @@ WORKFLOWS = {
     }
 }
 
+# V3 New Models
+class WithdrawalCreate(BaseModel):
+    amount: float = Field(gt=0, description="Montant du retrait")
+    category: ExpenseCategory
+    subcategory: str
+    description: str
+    receipt_url: Optional[str] = None
+
+class WithdrawalResponse(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str
+    manager_id: str
+    manager_name: str
+    amount: float
+    category: ExpenseCategory
+    subcategory: str
+    description: str
+    receipt_url: Optional[str]
+    withdrawal_date: str
+    created_at: str
+
+class ContactMessageCreate(BaseModel):
+    name: str = Field(min_length=2, max_length=100)
+    email: EmailStr
+    phone: Optional[str] = Field(None, max_length=20)
+    country: str
+    visa_type: Optional[str] = None
+    budget_range: Optional[str] = None
+    urgency_level: UrgencyLevel = UrgencyLevel.NORMAL
+    message: str = Field(min_length=10, max_length=1000)
+    lead_source: LeadSource = LeadSource.WEBSITE
+
+class ContactMessageResponse(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str
+    name: str
+    email: str
+    phone: Optional[str]
+    country: str
+    visa_type: Optional[str]
+    budget_range: Optional[str]
+    urgency_level: str
+    message: str
+    status: str
+    assigned_to: Optional[str] = None
+    assigned_to_name: Optional[str] = None
+    lead_source: str
+    conversion_probability: int
+    notes: str
+    created_at: str
+    updated_at: str
+
+class ActivityLogResponse(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str
+    user_id: str
+    user_name: str
+    action: str
+    resource_type: str
+    resource_id: Optional[str]
+    details: Optional[Dict[str, Any]]
+    timestamp: str
+
+class BalanceResponse(BaseModel):
+    current_balance: float
+    total_payments: float
+    total_withdrawals: float
+    last_updated: str
+    
+class ExpenseCategoryInfo(BaseModel):
+    name: str
+    subcategories: List[str]
+    icon: str
+    color: str
+
+class CompanyInfo(BaseModel):
+    name: str
+    tagline: str
+    description: str
+    contact: Dict[str, Any]
+    business_hours: Dict[str, str]
+    services: List[str]
+    social_media: Dict[str, str]
+    certifications: List[str]
+    statistics: Dict[str, Any]
+
+class PaymentConfirmRequest(BaseModel):
+    action: str  # "CONFIRMED" or "REJECTED"
+    rejection_reason: Optional[str] = None
+    confirmation_code: Optional[str] = None
+
 # Authentication Endpoints
 @api_router.post("/auth/register", response_model=TokenResponse)
 async def register(user_data: UserCreate):
