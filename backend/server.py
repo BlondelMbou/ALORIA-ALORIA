@@ -2795,11 +2795,8 @@ async def confirm_payment_with_code(
             )
             # Obtenir le paiement mis à jour avec le code
             updated_payment_with_code = await db.payment_declarations.find_one({"id": payment_id}, {"_id": 0})
-            return PaymentDeclarationResponse(
-                **updated_payment_with_code,
-                confirmation_code=confirmation_code,
-                message="Code de confirmation généré. Veuillez le saisir pour valider."
-            )
+            updated_payment_with_code["message"] = "Code de confirmation généré. Veuillez le saisir pour valider."
+            return PaymentDeclarationResponse(**updated_payment_with_code)
         
         # Étape 2: Vérifier le code saisi
         if not confirmation_data.confirmation_code:
