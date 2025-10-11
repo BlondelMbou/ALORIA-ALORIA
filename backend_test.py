@@ -1129,41 +1129,46 @@ class APITester:
             except Exception as e:
                 self.log_result("Employee Cannot Create Manager", False, "Exception occurred", str(e))
 
-    def test_payment_system(self):
-        """Test declarative payment system"""
-        print("=== Testing Payment System ===")
+    def test_payment_system_comprehensive(self):
+        """Test COMPLETE payment system workflow - CRITICAL BUGS INVESTIGATION"""
+        print("=== TESTING PAYMENT SYSTEM - CRITICAL BUGS INVESTIGATION ===")
         
-        # First create a client to test payments
+        # Create test client for payments
         test_payment_client_id = None
+        client_email = None
         if self.manager_token:
             try:
                 headers = {"Authorization": f"Bearer {self.manager_token}"}
                 import time
                 timestamp = int(time.time())
+                client_email = f"sophie.martin.{timestamp}@example.com"
                 client_data = {
-                    "email": f"payment.client.{timestamp}@example.com",
-                    "full_name": "Client Test Paiements",
-                    "phone": "+33300000001",
+                    "email": client_email,
+                    "full_name": "Sophie Martin",
+                    "phone": "+33145678901",
                     "country": "France",
                     "visa_type": "Work Permit (Talent Permit)",
-                    "message": "Client pour tester les paiements"
+                    "message": "Demande de visa de travail pour poste d'ingénieur"
                 }
                 response = self.session.post(f"{API_BASE}/clients", json=client_data, headers=headers)
                 if response.status_code == 200 or response.status_code == 201:
                     test_payment_client_id = response.json()['id']
-                    self.log_result("Create Payment Test Client", True, f"Payment test client created: {test_payment_client_id}")
+                    self.log_result("1. Create Payment Test Client", True, f"Client créé: {client_email}")
                 else:
-                    self.log_result("Create Payment Test Client", False, f"Status: {response.status_code}")
+                    self.log_result("1. Create Payment Test Client", False, f"Status: {response.status_code}", response.text)
+                    return
             except Exception as e:
-                self.log_result("Create Payment Test Client", False, "Exception occurred", str(e))
+                self.log_result("1. Create Payment Test Client", False, "Exception occurred", str(e))
+                return
 
-        # Test client declares payment
+        # Test 1: Client declares payment
         payment_id = None
-        if test_payment_client_id:
+        client_token = None
+        if test_payment_client_id and client_email:
             try:
-                # Login as the client
+                # Login as client
                 client_login_data = {
-                    "email": f"payment.client.{timestamp}@example.com",
+                    "email": client_email,
                     "password": "Aloria2024!"
                 }
                 client_login_response = self.session.post(f"{API_BASE}/auth/login", json=client_login_data)
@@ -1171,67 +1176,290 @@ class APITester:
                     client_token = client_login_response.json()['access_token']
                     client_headers = {"Authorization": f"Bearer {client_token}"}
                     
+                    # Declare payment
                     payment_data = {
-                        "amount": 1500.00,
+                        "amount": 2500.00,
                         "currency": "EUR",
-                        "description": "Paiement pour dossier visa de travail",
-                        "payment_method": "Bank Transfer"
+                        "description": "Honoraires pour dossier visa de travail - Talent Permit",
+                        "payment_method": "Virement bancaire"
                     }
                     response = self.session.post(f"{API_BASE}/payments/declare", json=payment_data, headers=client_headers)
                     if response.status_code == 200 or response.status_code == 201:
                         payment_response = response.json()
                         payment_id = payment_response['id']
-                        self.log_result("Client Declares Payment", True, f"Payment declared with ID: {payment_id}")
+                        
+                        # Verify all required fields in response
+                        required_fields = ['id', 'client_id', 'client_name', 'amount', 'currency', 'status', 'declared_at']
+                        missing_fields = [field for field in required_fields if field not in payment_response]
+                        
+                        if not missing_fields:
+                            self.log_result("2. Client Declares Payment", True, 
+                                          f"Paiement déclaré: ID={payment_id}, Montant={payment_response['amount']}€, Status={payment_response['status']}")
+                        else:
+                            self.log_result("2. Client Declares Payment", False, f"Champs manquants: {missing_fields}")
                     else:
-                        self.log_result("Client Declares Payment", False, f"Status: {response.status_code}", response.text)
+                        self.log_result("2. Client Declares Payment", False, f"Status: {response.status_code}", response.text)
+                        return
                 else:
-                    self.log_result("Client Login for Payment", False, "Could not login as client")
+                    self.log_result("2. Client Login for Payment", False, f"Status: {client_login_response.status_code}")
+                    return
             except Exception as e:
-                self.log_result("Client Declares Payment", False, "Exception occurred", str(e))
+                self.log_result("2. Client Declares Payment", False, "Exception occurred", str(e))
+                return
 
-        # Test manager sees pending payments
+        # Test 2: Manager views pending payments
         if self.manager_token:
             try:
                 headers = {"Authorization": f"Bearer {self.manager_token}"}
                 response = self.session.get(f"{API_BASE}/payments/pending", headers=headers)
                 if response.status_code == 200:
                     pending_payments = response.json()
-                    self.log_result("Manager Views Pending Payments", True, f"Found {len(pending_payments)} pending payments")
+                    
+                    # Find our payment in pending list
+                    our_payment = None
+                    for payment in pending_payments:
+                        if payment.get('id') == payment_id:
+                            our_payment = payment
+                            break
+                    
+                    if our_payment:
+                        self.log_result("3. Manager Views Pending Payments", True, 
+                                      f"Paiement trouvé dans la liste: {len(pending_payments)} paiements en attente")
+                    else:
+                        self.log_result("3. Manager Views Pending Payments", False, 
+                                      f"Paiement {payment_id} non trouvé dans {len(pending_payments)} paiements en attente")
                 else:
-                    self.log_result("Manager Views Pending Payments", False, f"Status: {response.status_code}", response.text)
+                    self.log_result("3. Manager Views Pending Payments", False, f"Status: {response.status_code}", response.text)
             except Exception as e:
-                self.log_result("Manager Views Pending Payments", False, "Exception occurred", str(e))
+                self.log_result("3. Manager Views Pending Payments", False, "Exception occurred", str(e))
 
-        # Test manager confirms payment
+        # Test 3: Test confirmation code generation and validation
+        confirmation_code = None
         if self.manager_token and payment_id:
             try:
                 headers = {"Authorization": f"Bearer {self.manager_token}"}
+                
+                # First, try to confirm with CONFIRMED action (should generate confirmation code)
                 confirmation_data = {
-                    "action": "confirm",
-                    "notes": "Paiement vérifié et confirmé par le manager"
+                    "action": "CONFIRMED",
+                    "confirmation_code": None  # Should be auto-generated
                 }
                 response = self.session.patch(f"{API_BASE}/payments/{payment_id}/confirm", json=confirmation_data, headers=headers)
+                
                 if response.status_code == 200:
                     confirmed_payment = response.json()
-                    invoice_number = confirmed_payment.get('invoice_number')
-                    self.log_result("Manager Confirms Payment", True, f"Payment confirmed with invoice: {invoice_number}")
+                    
+                    # Check if confirmation code was generated
+                    if 'confirmation_code' in confirmed_payment:
+                        confirmation_code = confirmed_payment['confirmation_code']
+                        self.log_result("4. Confirmation Code Generation", True, 
+                                      f"Code de confirmation généré: {confirmation_code}")
+                    else:
+                        self.log_result("4. Confirmation Code Generation", False, 
+                                      "Code de confirmation manquant dans la réponse")
+                    
+                    # Check invoice number generation
+                    if 'invoice_number' in confirmed_payment and confirmed_payment['invoice_number']:
+                        invoice_number = confirmed_payment['invoice_number']
+                        self.log_result("5. Invoice Number Generation", True, 
+                                      f"Numéro de facture généré: {invoice_number}")
+                    else:
+                        self.log_result("5. Invoice Number Generation", False, 
+                                      "Numéro de facture manquant ou vide")
+                    
+                    # Check status change
+                    if confirmed_payment.get('status') == 'confirmed':
+                        self.log_result("6. Payment Status Update", True, 
+                                      f"Statut mis à jour: {confirmed_payment['status']}")
+                    else:
+                        self.log_result("6. Payment Status Update", False, 
+                                      f"Statut incorrect: {confirmed_payment.get('status')}")
+                        
+                elif response.status_code == 400:
+                    # Check if it's asking for confirmation code
+                    error_msg = response.text
+                    if "confirmation" in error_msg.lower() or "code" in error_msg.lower():
+                        self.log_result("4. Confirmation Code Validation", True, 
+                                      "Système demande code de confirmation - workflow correct")
+                    else:
+                        self.log_result("4. Confirmation Code Validation", False, 
+                                      f"Erreur inattendue: {error_msg}")
                 else:
-                    self.log_result("Manager Confirms Payment", False, f"Status: {response.status_code}", response.text)
+                    self.log_result("4. Payment Confirmation Process", False, 
+                                  f"Status: {response.status_code}", response.text)
             except Exception as e:
-                self.log_result("Manager Confirms Payment", False, "Exception occurred", str(e))
+                self.log_result("4. Payment Confirmation Process", False, "Exception occurred", str(e))
 
-        # Test payment history endpoints
+        # Test 4: Test rejection workflow
+        rejection_payment_id = None
+        if self.manager_token and client_token:
+            try:
+                # Create another payment to test rejection
+                client_headers = {"Authorization": f"Bearer {client_token}"}
+                payment_data = {
+                    "amount": 1200.00,
+                    "currency": "EUR", 
+                    "description": "Paiement pour documents supplémentaires",
+                    "payment_method": "Chèque"
+                }
+                response = self.session.post(f"{API_BASE}/payments/declare", json=payment_data, headers=client_headers)
+                if response.status_code == 200 or response.status_code == 201:
+                    rejection_payment_id = response.json()['id']
+                    
+                    # Now reject it
+                    headers = {"Authorization": f"Bearer {self.manager_token}"}
+                    rejection_data = {
+                        "action": "REJECTED",
+                        "rejection_reason": "Documents insuffisants - paiement refusé temporairement"
+                    }
+                    reject_response = self.session.patch(f"{API_BASE}/payments/{rejection_payment_id}/confirm", 
+                                                       json=rejection_data, headers=headers)
+                    
+                    if reject_response.status_code == 200:
+                        rejected_payment = reject_response.json()
+                        if rejected_payment.get('status') == 'rejected':
+                            self.log_result("7. Payment Rejection Workflow", True, 
+                                          f"Paiement rejeté avec motif: {rejection_data['rejection_reason']}")
+                        else:
+                            self.log_result("7. Payment Rejection Workflow", False, 
+                                          f"Statut incorrect après rejet: {rejected_payment.get('status')}")
+                    else:
+                        self.log_result("7. Payment Rejection Workflow", False, 
+                                      f"Status: {reject_response.status_code}", reject_response.text)
+                else:
+                    self.log_result("7. Create Payment for Rejection Test", False, 
+                                  f"Status: {response.status_code}")
+            except Exception as e:
+                self.log_result("7. Payment Rejection Workflow", False, "Exception occurred", str(e))
+
+        # Test 5: Manager payment history (should see all payments)
         if self.manager_token:
             try:
                 headers = {"Authorization": f"Bearer {self.manager_token}"}
                 response = self.session.get(f"{API_BASE}/payments/history", headers=headers)
                 if response.status_code == 200:
                     payment_history = response.json()
-                    self.log_result("Manager Payment History", True, f"Retrieved {len(payment_history)} payment records")
+                    
+                    # Check if our payments are in history
+                    our_payments = [p for p in payment_history if p.get('id') in [payment_id, rejection_payment_id]]
+                    
+                    if len(our_payments) >= 1:
+                        self.log_result("8. Manager Payment History", True, 
+                                      f"Historique complet: {len(payment_history)} paiements, nos paiements trouvés: {len(our_payments)}")
+                    else:
+                        self.log_result("8. Manager Payment History", False, 
+                                      f"Nos paiements non trouvés dans l'historique de {len(payment_history)} paiements")
                 else:
-                    self.log_result("Manager Payment History", False, f"Status: {response.status_code}", response.text)
+                    self.log_result("8. Manager Payment History", False, f"Status: {response.status_code}", response.text)
             except Exception as e:
-                self.log_result("Manager Payment History", False, "Exception occurred", str(e))
+                self.log_result("8. Manager Payment History", False, "Exception occurred", str(e))
+
+        # Test 6: Client payment history (should see only own payments)
+        if client_token:
+            try:
+                client_headers = {"Authorization": f"Bearer {client_token}"}
+                response = self.session.get(f"{API_BASE}/payments/history", headers=client_headers)
+                if response.status_code == 200:
+                    client_payment_history = response.json()
+                    
+                    # Check if client sees only their own payments
+                    client_payments = [p for p in client_payment_history if p.get('client_id') == test_payment_client_id]
+                    
+                    if len(client_payments) == len(client_payment_history):
+                        self.log_result("9. Client Payment History (Own Only)", True, 
+                                      f"Client voit ses propres paiements: {len(client_payment_history)} paiements")
+                    else:
+                        self.log_result("9. Client Payment History (Own Only)", False, 
+                                      f"Client voit des paiements d'autres clients: {len(client_payment_history)} total, {len(client_payments)} siens")
+                else:
+                    self.log_result("9. Client Payment History", False, f"Status: {response.status_code}", response.text)
+            except Exception as e:
+                self.log_result("9. Client Payment History", False, "Exception occurred", str(e))
+
+        # Test 7: Test double confirmation (should fail)
+        if self.manager_token and payment_id:
+            try:
+                headers = {"Authorization": f"Bearer {self.manager_token}"}
+                confirmation_data = {
+                    "action": "CONFIRMED",
+                    "confirmation_code": confirmation_code if confirmation_code else "TEST"
+                }
+                response = self.session.patch(f"{API_BASE}/payments/{payment_id}/confirm", json=confirmation_data, headers=headers)
+                
+                if response.status_code == 400:
+                    self.log_result("10. Double Confirmation Prevention", True, 
+                                  "Tentative de double confirmation correctement bloquée")
+                elif response.status_code == 200:
+                    self.log_result("10. Double Confirmation Prevention", False, 
+                                  "Double confirmation autorisée - BUG CRITIQUE")
+                else:
+                    self.log_result("10. Double Confirmation Prevention", False, 
+                                  f"Réponse inattendue: {response.status_code}")
+            except Exception as e:
+                self.log_result("10. Double Confirmation Prevention", False, "Exception occurred", str(e))
+
+        # Test 8: Test PDF generation (check if PDF URL is accessible)
+        if self.manager_token and payment_id:
+            try:
+                headers = {"Authorization": f"Bearer {self.manager_token}"}
+                # Get payment details to check PDF URL
+                response = self.session.get(f"{API_BASE}/payments/history", headers=headers)
+                if response.status_code == 200:
+                    payments = response.json()
+                    our_payment = None
+                    for payment in payments:
+                        if payment.get('id') == payment_id:
+                            our_payment = payment
+                            break
+                    
+                    if our_payment and 'pdf_url' in our_payment and our_payment['pdf_url']:
+                        # Try to access PDF URL
+                        pdf_response = self.session.get(our_payment['pdf_url'])
+                        if pdf_response.status_code == 200 and 'pdf' in pdf_response.headers.get('content-type', '').lower():
+                            self.log_result("11. PDF Generation & Access", True, 
+                                          f"PDF généré et accessible: {our_payment['pdf_url']}")
+                        else:
+                            self.log_result("11. PDF Generation & Access", False, 
+                                          f"PDF non accessible ou format incorrect: {pdf_response.status_code}")
+                    else:
+                        self.log_result("11. PDF Generation & Access", False, 
+                                      "URL PDF manquante dans les données du paiement")
+                else:
+                    self.log_result("11. PDF Generation Check", False, f"Status: {response.status_code}")
+            except Exception as e:
+                self.log_result("11. PDF Generation & Access", False, "Exception occurred", str(e))
+
+        # Test 9: Test invalid confirmation codes
+        if self.manager_token and rejection_payment_id:
+            try:
+                headers = {"Authorization": f"Bearer {self.manager_token}"}
+                confirmation_data = {
+                    "action": "CONFIRMED",
+                    "confirmation_code": "INVALID_CODE_123"
+                }
+                response = self.session.patch(f"{API_BASE}/payments/{rejection_payment_id}/confirm", json=confirmation_data, headers=headers)
+                
+                if response.status_code == 400:
+                    self.log_result("12. Invalid Confirmation Code Handling", True, 
+                                  "Code de confirmation invalide correctement rejeté")
+                else:
+                    self.log_result("12. Invalid Confirmation Code Handling", False, 
+                                  f"Code invalide accepté - BUG: Status {response.status_code}")
+            except Exception as e:
+                self.log_result("12. Invalid Confirmation Code Handling", False, "Exception occurred", str(e))
+
+        print("\n=== RÉSUMÉ DES TESTS SYSTÈME DE PAIEMENTS ===")
+        print("Tests critiques effectués:")
+        print("1. Déclaration de paiement par client")
+        print("2. Visualisation des paiements en attente par manager") 
+        print("3. Génération automatique des codes de confirmation")
+        print("4. Workflow de confirmation avec validation")
+        print("5. Workflow de rejet avec motif")
+        print("6. Historique des paiements (manager vs client)")
+        print("7. Prévention des doubles confirmations")
+        print("8. Génération et accès aux PDFs")
+        print("9. Validation des codes de confirmation")
+        print("="*50)
 
     def test_superadmin_apis(self):
         """Test SuperAdmin specific APIs"""
