@@ -2875,7 +2875,11 @@ async def get_payment_history(current_user: dict = Depends(get_current_user)):
     
     # Client voit ses propres paiements, Manager voit tout
     if current_user["role"] == "CLIENT":
-        query["client_id"] = current_user["id"]
+        # Find the client record for this user
+        client = await db.clients.find_one({"user_id": current_user["id"]})
+        if not client:
+            raise HTTPException(status_code=404, detail="Profil client non trouvé")
+        query["client_id"] = client["id"]
     elif current_user["role"] not in ["MANAGER", "SUPERADMIN"]:
         raise HTTPException(status_code=403, detail="Accès refusé")
     
