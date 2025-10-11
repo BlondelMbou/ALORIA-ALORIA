@@ -328,6 +328,9 @@ export default function LandingPage() {
               <a href="#temoignages" className="text-slate-300 hover:text-orange-500 font-medium transition-all duration-300 hover:scale-105">
                 Témoignages
               </a>
+              <a href="#faq" className="text-slate-300 hover:text-orange-500 font-medium transition-all duration-300 hover:scale-105">
+                FAQ
+              </a>
               <Button 
                 onClick={() => navigate('/login')}
                 variant="outline"
