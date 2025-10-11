@@ -71,11 +71,12 @@ export default function ManagerDashboard() {
     fetchData();
     fetchPayments();
     
-    // Auto-refresh des données toutes les 30 secondes
+    // Auto-refresh des données toutes les 30 minutes (sans perdre le travail en cours)
     const refreshInterval = setInterval(() => {
+      // Refresh silencieux sans recharger toute la page
       fetchData();
       fetchPayments();
-    }, 30000);
+    }, 1800000); // 30 minutes
     
     return () => clearInterval(refreshInterval);
   }, []);
