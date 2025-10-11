@@ -379,6 +379,7 @@ class ContactStatus(str, Enum):
     NEW = "NEW"
     CONTACTED = "CONTACTED"
     QUALIFIED = "QUALIFIED"
+    RESPONDED = "RESPONDED"
     CONVERTED = "CONVERTED"
     ARCHIVED = "ARCHIVED"
 
