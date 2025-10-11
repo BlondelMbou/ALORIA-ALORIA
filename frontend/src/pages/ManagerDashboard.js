@@ -70,6 +70,14 @@ export default function ManagerDashboard() {
   useEffect(() => {
     fetchData();
     fetchPayments();
+    
+    // Auto-refresh des données toutes les 30 secondes
+    const refreshInterval = setInterval(() => {
+      fetchData();
+      fetchPayments();
+    }, 30000);
+    
+    return () => clearInterval(refreshInterval);
   }, []);
 
   const fetchData = async () => {
