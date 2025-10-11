@@ -1298,7 +1298,100 @@ export default function ManagerDashboard() {
               </Card>
             </div>
           </TabsContent>
+
+          {/* Withdrawals Tab */}
+          <TabsContent value="withdrawals">
+            <WithdrawalManager />
+          </TabsContent>
         </Tabs>
+
+        {/* Confirmation Dialog */}
+        {confirmationDialog.show && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-slate-800 rounded-lg p-6 w-full max-w-md mx-4 border border-slate-600">
+              <h3 className="text-lg font-bold text-white mb-4">Code de Confirmation</h3>
+              <div className="space-y-4">
+                <div className="bg-orange-500/10 border border-orange-500/20 rounded-lg p-4">
+                  <p className="text-orange-400 text-sm mb-2">Code généré :</p>
+                  <p className="text-2xl font-mono font-bold text-orange-400 text-center tracking-widest">
+                    {confirmationDialog.generatedCode}
+                  </p>
+                </div>
+                
+                <div>
+                  <Label className="text-slate-300">Saisissez le code pour confirmer :</Label>
+                  <Input
+                    type="text"
+                    value={confirmationDialog.code}
+                    onChange={(e) => setConfirmationDialog({
+                      ...confirmationDialog, 
+                      code: e.target.value.toUpperCase()
+                    })}
+                    placeholder="Entrez le code"
+                    className="bg-slate-700 border-slate-600 text-white text-center text-lg font-mono tracking-widest"
+                    maxLength={4}
+                  />
+                </div>
+                
+                <div className="flex space-x-3">
+                  <Button
+                    onClick={() => setConfirmationDialog({ show: false, payment: null, code: '', action: '' })}
+                    variant="outline"
+                    className="flex-1 border-slate-600 text-slate-300"
+                  >
+                    Annuler
+                  </Button>
+                  <Button
+                    onClick={confirmPaymentWithCode}
+                    disabled={confirmationDialog.code !== confirmationDialog.generatedCode}
+                    className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+                  >
+                    Confirmer Paiement
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Rejection Dialog */}
+        {rejectionDialog.show && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-slate-800 rounded-lg p-6 w-full max-w-md mx-4 border border-slate-600">
+              <h3 className="text-lg font-bold text-white mb-4">Motif de Rejet</h3>
+              <div className="space-y-4">
+                <div>
+                  <Label className="text-slate-300">Motif du rejet (obligatoire) :</Label>
+                  <textarea
+                    value={rejectionDialog.reason}
+                    onChange={(e) => setRejectionDialog({...rejectionDialog, reason: e.target.value})}
+                    placeholder="Expliquez pourquoi ce paiement est rejeté..."
+                    rows={4}
+                    className="w-full px-3 py-2 bg-slate-700 border border-slate-600 text-white rounded-md resize-none"
+                    required
+                  />
+                </div>
+                
+                <div className="flex space-x-3">
+                  <Button
+                    onClick={() => setRejectionDialog({ show: false, payment: null, reason: '' })}
+                    variant="outline"
+                    className="flex-1 border-slate-600 text-slate-300"
+                  >
+                    Annuler
+                  </Button>
+                  <Button
+                    onClick={rejectPaymentWithReason}
+                    disabled={!rejectionDialog.reason.trim()}
+                    className="flex-1 bg-red-600 hover:bg-red-700 text-white"
+                  >
+                    Rejeter Paiement
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Chat Widget */}
