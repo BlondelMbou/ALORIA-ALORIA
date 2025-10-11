@@ -276,7 +276,7 @@ const ChatWidget = ({ currentUser, onUnreadCountChange }) => {
                 </div>
                 
                 {conversations.length === 0 ? (
-                  <div className="text-center text-gray-400">Aucune conversation</div>
+                  <div className="text-center text-slate-400 py-8">Aucune conversation</div>
                 ) : (
                   conversations.map((conversation) => (
                     <button
