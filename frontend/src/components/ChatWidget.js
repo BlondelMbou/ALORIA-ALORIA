@@ -201,9 +201,9 @@ const ChatWidget = ({ currentUser, onUnreadCountChange }) => {
               <>
                 <div className="flex-1 overflow-y-auto p-4 space-y-3">
                   {loading ? (
-                    <div className="text-center text-gray-400">Chargement...</div>
+                    <div className="text-center text-slate-400">Chargement...</div>
                   ) : messages.length === 0 ? (
-                    <div className="text-center text-gray-400">Aucun message</div>
+                    <div className="text-center text-slate-400">Aucun message</div>
                   ) : (
                     messages.map((message) => (
                       <div
