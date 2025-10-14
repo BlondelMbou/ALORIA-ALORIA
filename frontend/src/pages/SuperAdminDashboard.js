@@ -162,26 +162,110 @@ const SuperAdminDashboard = () => {
     </div>
   );
 
-  const ActivitiesTab = () => (
-    <div className="bg-slate-700 rounded-lg p-6">
-      <h3 className="text-xl font-bold text-white mb-6">Activités Récentes</h3>
-      <div className="space-y-4">
-        {activities.map((activity, index) => (
-          <div key={index} className="flex items-start space-x-4 p-4 bg-slate-600 rounded-lg">
-            <div className="w-2 h-2 bg-orange-500 rounded-full mt-2"></div>
-            <div className="flex-1">
-              <p className="text-white font-medium">{activity.description}</p>
-              <div className="flex items-center space-x-4 mt-2 text-sm text-slate-400">
-                <span>Utilisateur: {activity.user_email}</span>
-                <span>•</span>
-                <span>{new Date(activity.timestamp).toLocaleString('fr-FR')}</span>
-              </div>
+  const ActivitiesTab = () => {
+    const getActivityIcon = (action) => {
+      switch (action) {
+        case 'LOGIN': return '🔐';
+        case 'CREATE_USER': return '👤';
+        case 'CREATE_CLIENT': return '🤝';
+        case 'PAYMENT_CONFIRMED': return '💰';
+        case 'PAYMENT_DECLARED': return '💳';
+        case 'CASE_UPDATED': return '📂';
+        case 'CASE_CREATED': return '📋';
+        case 'WITHDRAWAL_DECLARED': return '💸';
+        case 'RESPOND_TO_CONTACT': return '📧';
+        default: return '⚡';
+      }
+    };
+
+    const getActivityColor = (action) => {
+      switch (action) {
+        case 'LOGIN': return 'bg-blue-500/20 text-blue-400';
+        case 'CREATE_USER': 
+        case 'CREATE_CLIENT': return 'bg-green-500/20 text-green-400';
+        case 'PAYMENT_CONFIRMED': 
+        case 'PAYMENT_DECLARED': return 'bg-orange-500/20 text-orange-400';
+        case 'CASE_UPDATED':
+        case 'CASE_CREATED': return 'bg-purple-500/20 text-purple-400';
+        case 'WITHDRAWAL_DECLARED': return 'bg-red-500/20 text-red-400';
+        default: return 'bg-slate-500/20 text-slate-400';
+      }
+    };
+
+    return (
+      <div className="bg-[#1E293B] border border-slate-600 rounded-lg p-6">
+        <div className="flex justify-between items-center mb-6">
+          <h3 className="text-xl font-bold text-white">Activités Récentes</h3>
+          <button
+            onClick={fetchDashboardData}
+            className="px-3 py-1 bg-orange-500 hover:bg-orange-600 text-white text-sm rounded transition-colors"
+          >
+            🔄 Actualiser
+          </button>
+        </div>
+        
+        <div className="space-y-3">
+          {activities.length === 0 ? (
+            <div className="text-center py-8 text-slate-400">
+              <span className="text-4xl mb-2 block">📊</span>
+              <p>Aucune activité récente</p>
             </div>
+          ) : (
+            activities.map((activity, index) => (
+              <div key={activity.id || index} className="flex items-start space-x-4 p-4 bg-slate-700/50 rounded-lg hover:bg-slate-700/70 transition-colors">
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center ${getActivityColor(activity.action)}`}>
+                  <span className="text-lg">{getActivityIcon(activity.action)}</span>
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <p className="text-white font-medium">
+                        {activity.user_name || activity.user_id}
+                      </p>
+                      <p className="text-slate-300 text-sm mt-1">
+                        {activity.action === 'LOGIN' && 'Connexion au système'}
+                        {activity.action === 'CREATE_USER' && `Création d'utilisateur ${activity.details?.role || ''}`}
+                        {activity.action === 'CREATE_CLIENT' && 'Création d\'un nouveau client'}
+                        {activity.action === 'PAYMENT_CONFIRMED' && `Paiement confirmé (${activity.details?.amount || 'N/A'}€)`}
+                        {activity.action === 'PAYMENT_DECLARED' && `Paiement déclaré (${activity.details?.amount || 'N/A'}€)`}
+                        {activity.action === 'CASE_UPDATED' && 'Mise à jour de dossier'}
+                        {activity.action === 'CASE_CREATED' && 'Création de dossier'}
+                        {activity.action === 'WITHDRAWAL_DECLARED' && `Retrait déclaré (${activity.details?.amount || 'N/A'}€)`}
+                        {activity.action === 'RESPOND_TO_CONTACT' && 'Réponse à un prospect'}
+                        {!['LOGIN', 'CREATE_USER', 'CREATE_CLIENT', 'PAYMENT_CONFIRMED', 'PAYMENT_DECLARED', 'CASE_UPDATED', 'CASE_CREATED', 'WITHDRAWAL_DECLARED', 'RESPOND_TO_CONTACT'].includes(activity.action) && activity.action}
+                      </p>
+                      {activity.details && (
+                        <div className="text-xs text-slate-400 mt-2">
+                          {activity.details.client_email && <span>Client: {activity.details.client_email} • </span>}
+                          {activity.details.resource_type && <span>Type: {activity.details.resource_type} • </span>}
+                          {activity.resource_id && <span>ID: {activity.resource_id.slice(0, 8)}...</span>}
+                        </div>
+                      )}
+                    </div>
+                    <div className="text-right text-xs text-slate-400">
+                      <div>{new Date(activity.timestamp).toLocaleDateString('fr-FR')}</div>
+                      <div>{new Date(activity.timestamp).toLocaleTimeString('fr-FR')}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+        
+        {activities.length > 0 && (
+          <div className="text-center mt-4">
+            <button
+              onClick={() => window.open('/admin/activities', '_blank')}
+              className="text-orange-400 hover:text-orange-300 text-sm underline"
+            >
+              Voir toutes les activités →
+            </button>
           </div>
-        ))}
+        )}
       </div>
-    </div>
-  );
+    );
+  };
 
   if (loading) {
     return (
