@@ -235,18 +235,18 @@ export default function ContactFormWidget() {
             />
           </div>
 
-          {/* Projet d'immigration */}
-          <div className="grid md:grid-cols-2 gap-6">
+          {/* Projet d'immigration - Mobile responsive */}
+          <div className="grid gap-4 sm:gap-6 md:grid-cols-2">
             <div>
-              <Label htmlFor="country" className="text-slate-300 font-medium flex items-center">
-                <Globe className="w-4 h-4 mr-2" />
+              <Label htmlFor="country" className="text-slate-300 font-medium flex items-center text-sm sm:text-base">
+                <Globe className="w-4 h-4 mr-2 flex-shrink-0" />
                 Pays de Destination
               </Label>
               <Select
                 value={formData.country}
                 onValueChange={(value) => setFormData({ ...formData, country: value, visa_type: '' })}
               >
-                <SelectTrigger className="mt-2 bg-[#0F172A] border-slate-600 text-white focus:border-orange-500">
+                <SelectTrigger className="mt-2 bg-[#0F172A] border-slate-600 text-white focus:border-orange-500 h-11 sm:h-12 text-sm sm:text-base">
                   <SelectValue placeholder="Sélectionnez un pays" />
                 </SelectTrigger>
                 <SelectContent className="bg-[#1E293B] border-slate-600">
@@ -254,7 +254,7 @@ export default function ContactFormWidget() {
                     <SelectItem 
                       key={country.value} 
                       value={country.value} 
-                      className="text-white hover:bg-slate-700"
+                      className="text-white hover:bg-slate-700 text-sm sm:text-base"
                     >
                       {country.flag} {country.label}
                     </SelectItem>
@@ -264,8 +264,8 @@ export default function ContactFormWidget() {
             </div>
 
             <div>
-              <Label htmlFor="visa_type" className="text-slate-300 font-medium flex items-center">
-                <Target className="w-4 h-4 mr-2" />
+              <Label htmlFor="visa_type" className="text-slate-300 font-medium flex items-center text-sm sm:text-base">
+                <Target className="w-4 h-4 mr-2 flex-shrink-0" />
                 Type de Visa
               </Label>
               <Select
@@ -273,7 +273,7 @@ export default function ContactFormWidget() {
                 onValueChange={(value) => setFormData({ ...formData, visa_type: value })}
                 disabled={!formData.country || formData.country === 'Autre'}
               >
-                <SelectTrigger className="mt-2 bg-[#0F172A] border-slate-600 text-white focus:border-orange-500">
+                <SelectTrigger className="mt-2 bg-[#0F172A] border-slate-600 text-white focus:border-orange-500 h-11 sm:h-12 text-sm sm:text-base disabled:opacity-50">
                   <SelectValue placeholder="Type de visa souhaité" />
                 </SelectTrigger>
                 <SelectContent className="bg-[#1E293B] border-slate-600">
@@ -282,13 +282,13 @@ export default function ContactFormWidget() {
                       <SelectItem 
                         key={type} 
                         value={type} 
-                        className="text-white hover:bg-slate-700"
+                        className="text-white hover:bg-slate-700 text-sm sm:text-base"
                       >
                         {type}
                       </SelectItem>
                     ))
                   ) : (
-                    <SelectItem value="Autre" className="text-white hover:bg-slate-700">
+                    <SelectItem value="Autre" className="text-white hover:bg-slate-700 text-sm sm:text-base">
                       Autre / Non défini
                     </SelectItem>
                   )}
