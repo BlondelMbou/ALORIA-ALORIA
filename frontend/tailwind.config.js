@@ -6,7 +6,21 @@ module.exports = {
     "./public/index.html"
   ],
   theme: {
+  	screens: {
+  		'xs': '320px',      // Petits téléphones
+  		'sm': '640px',      // Téléphones
+  		'md': '768px',      // Tablettes
+  		'lg': '1024px',     // Laptops
+  		'xl': '1280px',     // Desktops
+  		'2xl': '1536px'     // Grands écrans
+  	},
   	extend: {
+  		spacing: {
+  			'safe-top': 'env(safe-area-inset-top)',
+  			'safe-bottom': 'env(safe-area-inset-bottom)',
+  			'safe-left': 'env(safe-area-inset-left)',
+  			'safe-right': 'env(safe-area-inset-right)',
+  		},
   		borderRadius: {
   			lg: 'var(--radius)',
   			md: 'calc(var(--radius) - 2px)',
