@@ -70,9 +70,9 @@ export default function LoginPage() {
         </div>
 
         <div className="w-full">
-          <div className="text-center mb-6">
-            <h2 className="text-2xl font-bold text-orange-500">Connexion</h2>
-            <p className="text-slate-400 mt-2">Accédez à votre espace avec vos identifiants</p>
+          <div className="text-center mb-4 sm:mb-6">
+            <h2 className="text-xl sm:text-2xl font-bold text-orange-500">Connexion</h2>
+            <p className="text-slate-400 mt-1 sm:mt-2 text-sm sm:text-base">Accédez à votre espace avec vos identifiants</p>
           </div>
 
           <Card className="bg-gradient-to-br from-[#1E293B] to-[#334155] border-slate-700">
