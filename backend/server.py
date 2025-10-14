@@ -675,6 +675,8 @@ class ContactMessageResponse(BaseModel):
     lead_source: str
     conversion_probability: int
     notes: str
+    how_did_you_know: str
+    referred_by_employee: Optional[str] = None
     created_at: str
     updated_at: str
 
