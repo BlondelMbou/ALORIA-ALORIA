@@ -285,9 +285,9 @@ export default function LandingPage() {
 
             <button 
               className="lg:hidden text-slate-300"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              onClick={() => setShowMobileMenu(!showMobileMenu)}
             >
-              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              {showMobileMenu ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
           </div>
         </div>
