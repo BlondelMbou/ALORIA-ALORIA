@@ -655,6 +655,8 @@ class ContactMessageCreate(BaseModel):
     urgency_level: UrgencyLevel = UrgencyLevel.NORMAL
     message: str = Field(min_length=10, max_length=1000)
     lead_source: LeadSource = LeadSource.WEBSITE
+    how_did_you_know: str = Field(min_length=1, max_length=100)
+    referred_by_employee: Optional[str] = Field(None, max_length=100)
 
 class ContactMessageResponse(BaseModel):
     model_config = ConfigDict(extra="ignore")
