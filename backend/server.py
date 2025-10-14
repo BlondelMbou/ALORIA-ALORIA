@@ -2854,6 +2854,17 @@ async def confirm_payment_with_code(
             type="payment_confirmed",
             related_id=payment_id
         )
+        
+        # Notifier tous les SuperAdmin des paiements confirmés
+        superadmins = await db.users.find({"role": "SUPERADMIN", "is_active": True}).to_list(10)
+        for superadmin in superadmins:
+            await create_notification(
+                user_id=superadmin["id"],
+                title="💰 Paiement confirmé",
+                message=f"Paiement de {payment['amount']} {payment['currency']} confirmé par {current_user['full_name']} - Client: {payment.get('client_name', payment['client_id'])}",
+                type="admin_payment_confirmed",
+                related_id=payment_id
+            )
     
     # Log de l'activité
     await log_user_activity(
