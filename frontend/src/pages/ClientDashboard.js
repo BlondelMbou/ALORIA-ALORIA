@@ -268,11 +268,51 @@ export default function ClientDashboard() {
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Profile Overview */}
-        <Card className="bg-gradient-to-br from-[#1E293B] to-[#334155] border-slate-700 mb-8">
-          <CardContent className="p-8">
-            <div className="flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
+        {/* Profile Overview - Mobile Responsive */}
+        <Card className="bg-gradient-to-br from-[#1E293B] to-[#334155] border-slate-700 mb-4 sm:mb-6 lg:mb-8">
+          <CardContent className="p-4 sm:p-6 lg:p-8">
+            
+            {/* Mobile Layout - Stack vertically */}
+            <div className="block lg:hidden space-y-4">
+              {/* User Info Row */}
+              <div className="flex items-center space-x-3 sm:space-x-4">
+                <Avatar className="w-12 h-12 sm:w-16 sm:h-16">
+                  <AvatarFallback className="bg-orange-500 text-white text-lg sm:text-xl font-bold">
+                    {user.full_name.charAt(0)}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1">
+                  <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-white mb-1">
+                    Bonjour, {user.full_name.split(' ')[0]}
+                  </h1>
+                  <p className="text-slate-300 text-sm sm:text-base">{caseData.country} - {caseData.visa_type}</p>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl sm:text-3xl font-bold text-orange-500">
+                    {Math.round(progressPercentage)}%
+                  </div>
+                  <p className="text-xs sm:text-sm text-slate-400">Progression</p>
+                </div>
+              </div>
+
+              {/* Status and Counselor Row */}
+              <div className="flex flex-col xs:flex-row xs:items-center xs:justify-between gap-2 xs:gap-4">
+                <Badge className={`${getStatusColor(caseData.status)} text-xs sm:text-sm`} data-testid="case-status-badge">
+                  {caseData.status}
+                </Badge>
+                {counselor && (
+                  <div className="flex items-center text-slate-300 text-xs sm:text-sm">
+                    <User className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+                    <span className="hidden xs:inline">Conseiller: </span>
+                    {counselor.name}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Desktop Layout - Side by side */}
+            <div className="hidden lg:flex items-center justify-between">
               <div className="flex items-center space-x-6">
                 <Avatar className="w-20 h-20">
                   <AvatarFallback className="bg-orange-500 text-white text-2xl font-bold">
