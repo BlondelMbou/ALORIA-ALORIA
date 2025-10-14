@@ -3012,6 +3012,22 @@ async def create_contact_message(message_data: ContactMessageCreate):
     
     await db.contact_messages.insert_one(message_dict)
     
+    # Envoi automatique d'e-mail de bienvenue au prospect
+    if EMAIL_SERVICE_AVAILABLE:
+        try:
+            email_sent = await send_prospect_email(message_data.model_dump())
+            if email_sent:
+                logger.info(f"E-mail de bienvenue envoyé à {message_data.email}")
+                # Mettre à jour le message pour indiquer l'envoi d'e-mail
+                await db.contact_messages.update_one(
+                    {"id": message_id},
+                    {"$set": {"welcome_email_sent": True, "welcome_email_sent_at": datetime.now(timezone.utc).isoformat()}}
+                )
+            else:
+                logger.warning(f"Échec envoi e-mail de bienvenue à {message_data.email}")
+        except Exception as e:
+            logger.error(f"Erreur envoi e-mail prospect {message_data.email}: {e}")
+    
     # Notifier les managers du nouveau lead
     managers = await db.users.find({"role": "MANAGER", "is_active": True}).to_list(10)
     for manager in managers:
