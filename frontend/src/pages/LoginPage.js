@@ -83,7 +83,7 @@ export default function LoginPage() {
               <CardContent className="pt-0">
                 <form onSubmit={handleLogin} className="space-y-3 sm:space-y-4">
                   <div>
-                    <Label htmlFor="login-email" className="text-slate-300">Adresse Email</Label>
+                    <Label htmlFor="login-email" className="text-slate-300 text-sm sm:text-base">Adresse Email</Label>
                     <Input
                       id="login-email"
                       type="email"
@@ -92,12 +92,12 @@ export default function LoginPage() {
                       onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
                       placeholder="votre.email@exemple.com"
                       required
-                      className="mt-2 bg-[#0F172A] border-slate-600 text-white placeholder:text-slate-500"
+                      className="mt-1 sm:mt-2 bg-[#0F172A] border-slate-600 text-white placeholder:text-slate-500 h-10 sm:h-11 text-sm sm:text-base touch-manipulation"
                     />
                   </div>
 
                   <div>
-                    <Label htmlFor="login-password" className="text-slate-300">Mot de Passe</Label>
+                    <Label htmlFor="login-password" className="text-slate-300 text-sm sm:text-base">Mot de Passe</Label>
                     <Input
                       id="login-password"
                       type="password"
@@ -106,7 +106,7 @@ export default function LoginPage() {
                       onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
                       placeholder="Entrez votre mot de passe"
                       required
-                      className="mt-2 bg-[#0F172A] border-slate-600 text-white placeholder:text-slate-500"
+                      className="mt-1 sm:mt-2 bg-[#0F172A] border-slate-600 text-white placeholder:text-slate-500 h-10 sm:h-11 text-sm sm:text-base touch-manipulation"
                     />
                   </div>
 
