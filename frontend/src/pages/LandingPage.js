@@ -22,6 +22,7 @@ export default function LandingPage() {
   // Removed form state and employees - now managed by ContactFormWidget component
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showAuthForm, setShowAuthForm] = useState(false);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [authData, setAuthData] = useState({
     email: '',
     password: ''
