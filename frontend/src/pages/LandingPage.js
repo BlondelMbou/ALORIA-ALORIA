@@ -293,36 +293,87 @@ export default function LandingPage() {
         </div>
       </header>
 
-      {/* Mobile Menu */}
-      {showMobileMenu && (
-        <div className="fixed inset-0 z-40 bg-[#0F172A]/95 backdrop-blur-lg lg:hidden">
-          <div className="pt-20 px-4">
-            <nav className="space-y-6">
-              <a href="#services" className="block text-xl text-slate-300 hover:text-orange-500 transition-colors">
-                Services
-              </a>
-              <a href="#pays" className="block text-xl text-slate-300 hover:text-orange-500 transition-colors">
-                Destinations
-              </a>
-              <a href="#processus" className="block text-xl text-slate-300 hover:text-orange-500 transition-colors">
-                Notre Processus
-              </a>
-              <a href="#temoignages" className="block text-xl text-slate-300 hover:text-orange-500 transition-colors">
-                Témoignages
-              </a>
-              <a href="#faq" className="block text-xl text-slate-300 hover:text-orange-500 transition-colors">
-                FAQ
-              </a>
-              <Button 
-                onClick={() => navigate('/login')}
-                className="bg-orange-500 text-white hover:bg-orange-600 w-full"
-              >
-                Connexion
-              </Button>
-            </nav>
+        {/* Mobile Menu Overlay */}
+        {showMobileMenu && (
+          <div className="fixed inset-0 z-40 bg-[#0F172A]/95 backdrop-blur-lg lg:hidden">
+            <div className="pt-20 px-4 sm:px-6">
+              <nav className="space-y-4">
+                <a 
+                  href="#services" 
+                  className="block py-3 px-4 text-lg font-medium text-slate-300 hover:text-orange-500 hover:bg-slate-800/50 rounded-lg transition-all duration-300 touch-manipulation"
+                  onClick={() => setShowMobileMenu(false)}
+                >
+                  <div className="flex items-center">
+                    <div className="w-8 h-8 bg-orange-500/20 rounded-lg flex items-center justify-center mr-3">
+                      <ArrowRight className="w-4 h-4 text-orange-400" />
+                    </div>
+                    Services
+                  </div>
+                </a>
+                <a 
+                  href="#pays" 
+                  className="block py-3 px-4 text-lg font-medium text-slate-300 hover:text-orange-500 hover:bg-slate-800/50 rounded-lg transition-all duration-300 touch-manipulation"
+                  onClick={() => setShowMobileMenu(false)}
+                >
+                  <div className="flex items-center">
+                    <div className="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center mr-3">
+                      <Globe className="w-4 h-4 text-blue-400" />
+                    </div>
+                    Destinations
+                  </div>
+                </a>
+                <a 
+                  href="#processus" 
+                  className="block py-3 px-4 text-lg font-medium text-slate-300 hover:text-orange-500 hover:bg-slate-800/50 rounded-lg transition-all duration-300 touch-manipulation"
+                  onClick={() => setShowMobileMenu(false)}
+                >
+                  <div className="flex items-center">
+                    <div className="w-8 h-8 bg-purple-500/20 rounded-lg flex items-center justify-center mr-3">
+                      <CheckCircle className="w-4 h-4 text-purple-400" />
+                    </div>
+                    Notre Processus
+                  </div>
+                </a>
+                <a 
+                  href="#temoignages" 
+                  className="block py-3 px-4 text-lg font-medium text-slate-300 hover:text-orange-500 hover:bg-slate-800/50 rounded-lg transition-all duration-300 touch-manipulation"
+                  onClick={() => setShowMobileMenu(false)}
+                >
+                  <div className="flex items-center">
+                    <div className="w-8 h-8 bg-green-500/20 rounded-lg flex items-center justify-center mr-3">
+                      <Users className="w-4 h-4 text-green-400" />
+                    </div>
+                    Témoignages
+                  </div>
+                </a>
+                <a 
+                  href="#faq" 
+                  className="block py-3 px-4 text-lg font-medium text-slate-300 hover:text-orange-500 hover:bg-slate-800/50 rounded-lg transition-all duration-300 touch-manipulation"
+                  onClick={() => setShowMobileMenu(false)}
+                >
+                  <div className="flex items-center">
+                    <div className="w-8 h-8 bg-yellow-500/20 rounded-lg flex items-center justify-center mr-3">
+                      <MessageCircle className="w-4 h-4 text-yellow-400" />
+                    </div>
+                    FAQ
+                  </div>
+                </a>
+                
+                {/* Mobile CTA */}
+                <div className="pt-4 border-t border-slate-700">
+                  <a href="#start-application" className="block" onClick={() => setShowMobileMenu(false)}>
+                    <Button 
+                      className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white py-4 text-lg font-semibold shadow-xl shadow-orange-500/25 touch-manipulation"
+                    >
+                      <MousePointer2 className="mr-2 w-5 h-5" />
+                      Commencer Maintenant
+                    </Button>
+                  </a>
+                </div>
+              </nav>
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
       {/* Hero Section - Mobile-First Responsive */}
       <section className="pt-16 sm:pt-20 md:pt-24 pb-12 sm:pb-16 px-4 sm:px-6 lg:px-8 relative overflow-hidden min-h-screen flex items-center">
