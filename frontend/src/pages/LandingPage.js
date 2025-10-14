@@ -294,7 +294,7 @@ export default function LandingPage() {
       </header>
 
       {/* Mobile Menu */}
-      {mobileMenuOpen && (
+      {showMobileMenu && (
         <div className="fixed inset-0 z-40 bg-[#0F172A]/95 backdrop-blur-lg lg:hidden">
           <div className="pt-20 px-4">
             <nav className="space-y-6">
