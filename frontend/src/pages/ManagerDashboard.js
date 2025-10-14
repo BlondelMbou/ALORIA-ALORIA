@@ -460,15 +460,16 @@ export default function ManagerDashboard() {
                 <p className="text-xs text-slate-400">{user.role}</p>
               </div>
               
-              {/* Profile Button */}
+              {/* Profile Button - Responsive */}
               <Dialog open={showPasswordDialog} onOpenChange={setShowPasswordDialog}>
                 <DialogTrigger asChild>
                   <Button
                     variant="outline"
-                    className="border-slate-600 text-slate-300 hover:bg-slate-800 hover:text-white"
+                    className="border-slate-600 text-slate-300 hover:bg-slate-800 hover:text-white text-xs sm:text-sm px-2 sm:px-4 py-1.5 sm:py-2 touch-manipulation"
                   >
-                    <User className="w-4 h-4 mr-2" />
-                    Profil
+                    <User className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                    <span className="hidden xs:inline">Profil</span>
+                    <span className="xs:hidden">👤</span>
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="bg-slate-800 border-slate-600 text-white">
