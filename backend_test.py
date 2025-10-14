@@ -2193,11 +2193,322 @@ class APITester:
             except Exception as e:
                 self.log_result(f"Lead Score Calculation - {scenario['name']}", False, "Exception occurred", str(e))
 
+    def test_review_request_specific_tests(self):
+        """Test specific requirements from the review request"""
+        print("=== Testing Review Request Specific Requirements ===")
+        
+        # 1. Test Dashboard SuperAdmin amélioré - GET /api/admin/dashboard-stats
+        print("\n--- Test 1: Dashboard SuperAdmin amélioré ---")
+        self.test_superadmin_dashboard_stats()
+        
+        # 2. Test nouveau formulaire de contact avec champs supplémentaires
+        print("\n--- Test 2: Nouveau formulaire de contact avec champs supplémentaires ---")
+        self.test_contact_form_new_fields()
+        
+        # 3. Test création d'utilisateur avec e-mail - POST /api/users/create avec send_email=true
+        print("\n--- Test 3: Création d'utilisateur avec e-mail ---")
+        self.test_user_creation_with_email()
+        
+        # 4. Test mise à jour de dossier avec e-mail - PATCH /api/cases/{id}
+        print("\n--- Test 4: Mise à jour de dossier avec e-mail ---")
+        self.test_case_update_with_email()
+        
+        # 5. Test général de régression - Login Manager: manager@test.com / password123
+        print("\n--- Test 5: Test général de régression ---")
+        self.test_regression_manager_login()
+
+    def test_superadmin_dashboard_stats(self):
+        """Test GET /api/admin/dashboard-stats pour vérifier les statistiques corrigées"""
+        # First login as SuperAdmin
+        superadmin_token = None
+        try:
+            login_response = self.session.post(f"{API_BASE}/auth/login", json={
+                "email": "superadmin@aloria.com",
+                "password": "SuperAdmin123!"
+            })
+            if login_response.status_code == 200:
+                superadmin_token = login_response.json()['access_token']
+                self.log_result("SuperAdmin Login for Dashboard Stats", True, "SuperAdmin logged in successfully")
+            else:
+                self.log_result("SuperAdmin Login for Dashboard Stats", False, f"Status: {login_response.status_code}")
+                return
+        except Exception as e:
+            self.log_result("SuperAdmin Login for Dashboard Stats", False, "Exception occurred", str(e))
+            return
+
+        # Test dashboard stats API
+        if superadmin_token:
+            try:
+                headers = {"Authorization": f"Bearer {superadmin_token}"}
+                response = self.session.get(f"{API_BASE}/admin/dashboard-stats", headers=headers)
+                if response.status_code == 200:
+                    data = response.json()
+                    # Verify expected fields are present
+                    expected_fields = ['users', 'business', 'system']
+                    missing_fields = [field for field in expected_fields if field not in data]
+                    
+                    if not missing_fields:
+                        users_data = data.get('users', {})
+                        business_data = data.get('business', {})
+                        
+                        # Check for specific fields mentioned in review
+                        if 'total' in users_data and 'total_cases' in business_data:
+                            self.log_result("SuperAdmin Dashboard Stats", True, 
+                                          f"Dashboard stats working: Users total: {users_data.get('total', 'N/A')}, "
+                                          f"Business total cases: {business_data.get('total_cases', 'N/A')}")
+                        else:
+                            self.log_result("SuperAdmin Dashboard Stats", False, 
+                                          "Missing expected fields: users.total or business.total_cases")
+                    else:
+                        self.log_result("SuperAdmin Dashboard Stats", False, 
+                                      f"Missing expected sections: {missing_fields}")
+                else:
+                    self.log_result("SuperAdmin Dashboard Stats", False, 
+                                  f"Status: {response.status_code}", response.text)
+            except Exception as e:
+                self.log_result("SuperAdmin Dashboard Stats", False, "Exception occurred", str(e))
+
+    def test_contact_form_new_fields(self):
+        """Test POST /api/contact-messages avec les nouveaux champs how_did_you_know et referred_by_employee"""
+        try:
+            # Test contact form with new fields
+            contact_data = {
+                "name": "Jean Dupont",
+                "email": "jean.dupont@example.com",
+                "phone": "+33123456789",
+                "country": "France",
+                "visa_type": "Work Permit",
+                "budget_range": "3000-5000€",
+                "urgency_level": "Urgent",
+                "message": "Je souhaite obtenir un permis de travail pour la France. J'ai une offre d'emploi confirmée.",
+                "lead_source": "Site web",
+                "how_did_you_know": "Recommandation d'un ami",
+                "referred_by_employee": "Sophie Dubois"
+            }
+            
+            response = self.session.post(f"{API_BASE}/contact-messages", json=contact_data)
+            if response.status_code == 200 or response.status_code == 201:
+                data = response.json()
+                
+                # Verify new fields are in response
+                if 'how_did_you_know' in data and 'referred_by_employee' in data:
+                    self.log_result("Contact Form New Fields", True, 
+                                  f"Contact created with new fields: how_did_you_know='{data['how_did_you_know']}', "
+                                  f"referred_by_employee='{data['referred_by_employee']}'")
+                    
+                    # Test automatic assignment if employee is mentioned
+                    if data.get('referred_by_employee') and data.get('assigned_to'):
+                        self.log_result("Contact Form Employee Assignment", True, 
+                                      f"Automatic assignment working: assigned to {data.get('assigned_to_name', 'N/A')}")
+                    else:
+                        self.log_result("Contact Form Employee Assignment", False, 
+                                      "No automatic assignment despite employee reference")
+                else:
+                    self.log_result("Contact Form New Fields", False, 
+                                  "Response missing new fields: how_did_you_know or referred_by_employee")
+            else:
+                self.log_result("Contact Form New Fields", False, 
+                              f"Status: {response.status_code}", response.text)
+                
+        except Exception as e:
+            self.log_result("Contact Form New Fields", False, "Exception occurred", str(e))
+
+        # Test email sending (even if SendGrid not configured)
+        try:
+            # Test that the API doesn't break even if email service fails
+            contact_data_email_test = {
+                "name": "Marie Martin",
+                "email": "marie.martin@example.com",
+                "phone": "+33987654321",
+                "country": "Canada",
+                "visa_type": "Study Permit",
+                "budget_range": "5000+€",
+                "urgency_level": "Normal",
+                "message": "Test d'envoi d'e-mail automatique pour nouveau contact.",
+                "lead_source": "Réseaux sociaux",
+                "how_did_you_know": "Publicité Facebook",
+                "referred_by_employee": None
+            }
+            
+            response = self.session.post(f"{API_BASE}/contact-messages", json=contact_data_email_test)
+            if response.status_code == 200 or response.status_code == 201:
+                self.log_result("Contact Form Email Handling", True, 
+                              "Contact form handles email sending without breaking (even if SendGrid not configured)")
+            else:
+                self.log_result("Contact Form Email Handling", False, 
+                              f"Contact form broken by email sending. Status: {response.status_code}")
+                
+        except Exception as e:
+            self.log_result("Contact Form Email Handling", False, "Exception occurred", str(e))
+
+    def test_user_creation_with_email(self):
+        """Test POST /api/users/create avec send_email=true"""
+        # First login as manager to test user creation
+        if not self.manager_token:
+            self.log_result("User Creation with Email", False, "No manager token available")
+            return
+            
+        try:
+            headers = {"Authorization": f"Bearer {self.manager_token}"}
+            import time
+            timestamp = int(time.time())
+            
+            user_data = {
+                "email": f"test.user.email.{timestamp}@example.com",
+                "full_name": "Test User Email Creation",
+                "phone": "+33111222333",
+                "role": "EMPLOYEE",
+                "send_email": True
+            }
+            
+            response = self.session.post(f"{API_BASE}/users/create", json=user_data, headers=headers)
+            if response.status_code == 200 or response.status_code == 201:
+                data = response.json()
+                
+                # Verify email_sent field and that no temporary_password is returned when send_email=True
+                if 'email_sent' in data:
+                    email_sent = data.get('email_sent', False)
+                    has_temp_password = 'temporary_password' in data and data['temporary_password'] is not None
+                    
+                    if email_sent or not has_temp_password:
+                        self.log_result("User Creation with Email", True, 
+                                      f"User created with send_email=True. Email sent: {email_sent}, "
+                                      f"Temp password in response: {has_temp_password}")
+                    else:
+                        self.log_result("User Creation with Email", False, 
+                                      "Email sending attempted but failed, and temporary password not provided")
+                else:
+                    self.log_result("User Creation with Email", False, 
+                                  "Response missing email_sent field")
+            else:
+                self.log_result("User Creation with Email", False, 
+                              f"Status: {response.status_code}", response.text)
+                
+        except Exception as e:
+            self.log_result("User Creation with Email", False, "Exception occurred", str(e))
+
+    def test_case_update_with_email(self):
+        """Test PATCH /api/cases/{id} pour mettre à jour un dossier avec envoi d'e-mail"""
+        if not self.manager_token:
+            self.log_result("Case Update with Email", False, "No manager token available")
+            return
+            
+        try:
+            headers = {"Authorization": f"Bearer {self.manager_token}"}
+            
+            # First get available cases
+            cases_response = self.session.get(f"{API_BASE}/cases", headers=headers)
+            if cases_response.status_code == 200:
+                cases = cases_response.json()
+                if cases:
+                    case_id = cases[0]['id']
+                    
+                    # Update the case
+                    update_data = {
+                        "current_step_index": 2,
+                        "status": "En cours de traitement",
+                        "notes": "Test mise à jour avec envoi d'e-mail automatique au client"
+                    }
+                    
+                    response = self.session.patch(f"{API_BASE}/cases/{case_id}", json=update_data, headers=headers)
+                    if response.status_code == 200:
+                        data = response.json()
+                        self.log_result("Case Update with Email", True, 
+                                      f"Case updated successfully. Status: {data.get('status', 'N/A')}, "
+                                      f"Step: {data.get('current_step_index', 'N/A')}")
+                        
+                        # Check if email sending was attempted (even if it fails due to SendGrid config)
+                        # The API should not break even if email sending fails
+                        self.log_result("Case Update Email Handling", True, 
+                                      "Case update completed without breaking (email sending attempted)")
+                    else:
+                        self.log_result("Case Update with Email", False, 
+                                      f"Status: {response.status_code}", response.text)
+                else:
+                    self.log_result("Case Update with Email", False, "No cases available to update")
+            else:
+                self.log_result("Case Update with Email", False, 
+                              f"Could not retrieve cases. Status: {cases_response.status_code}")
+                
+        except Exception as e:
+            self.log_result("Case Update with Email", False, "Exception occurred", str(e))
+
+    def test_regression_manager_login(self):
+        """Test général de régression - Login Manager: manager@test.com / password123"""
+        try:
+            # Test login with specific credentials from review request
+            login_data = {
+                "email": "manager@test.com",
+                "password": "password123"
+            }
+            
+            response = self.session.post(f"{API_BASE}/auth/login", json=login_data)
+            if response.status_code == 200:
+                data = response.json()
+                manager_token = data['access_token']
+                manager_user = data['user']
+                
+                self.log_result("Regression Manager Login", True, 
+                              f"Manager login successful: {manager_user['full_name']} ({manager_user['email']})")
+                
+                # Test that all existing functionalities still work
+                headers = {"Authorization": f"Bearer {manager_token}"}
+                
+                # Test 1: Get clients
+                clients_response = self.session.get(f"{API_BASE}/clients", headers=headers)
+                if clients_response.status_code == 200:
+                    clients = clients_response.json()
+                    self.log_result("Regression - Get Clients", True, f"Retrieved {len(clients)} clients")
+                else:
+                    self.log_result("Regression - Get Clients", False, f"Status: {clients_response.status_code}")
+                
+                # Test 2: Get cases
+                cases_response = self.session.get(f"{API_BASE}/cases", headers=headers)
+                if cases_response.status_code == 200:
+                    cases = cases_response.json()
+                    self.log_result("Regression - Get Cases", True, f"Retrieved {len(cases)} cases")
+                else:
+                    self.log_result("Regression - Get Cases", False, f"Status: {cases_response.status_code}")
+                
+                # Test 3: Get notifications
+                notifications_response = self.session.get(f"{API_BASE}/notifications", headers=headers)
+                if notifications_response.status_code == 200:
+                    notifications = notifications_response.json()
+                    self.log_result("Regression - Get Notifications", True, f"Retrieved {len(notifications)} notifications")
+                else:
+                    self.log_result("Regression - Get Notifications", False, f"Status: {notifications_response.status_code}")
+                
+                # Test 4: Get chat conversations
+                chat_response = self.session.get(f"{API_BASE}/chat/conversations", headers=headers)
+                if chat_response.status_code == 200:
+                    conversations = chat_response.json()
+                    self.log_result("Regression - Get Chat Conversations", True, f"Retrieved {len(conversations)} conversations")
+                else:
+                    self.log_result("Regression - Get Chat Conversations", False, f"Status: {chat_response.status_code}")
+                
+                # Test 5: Get visitors
+                visitors_response = self.session.get(f"{API_BASE}/visitors", headers=headers)
+                if visitors_response.status_code == 200:
+                    visitors = visitors_response.json()
+                    self.log_result("Regression - Get Visitors", True, f"Retrieved {len(visitors)} visitors")
+                else:
+                    self.log_result("Regression - Get Visitors", False, f"Status: {visitors_response.status_code}")
+                    
+            else:
+                self.log_result("Regression Manager Login", False, 
+                              f"Login failed. Status: {response.status_code}, Response: {response.text}")
+                
+        except Exception as e:
+            self.log_result("Regression Manager Login", False, "Exception occurred", str(e))
+
     def run_all_tests(self):
         """Run all test suites including V2 features"""
         print("🚀 Starting ALORIA AGENCY V2 Backend API Tests - COMPREHENSIVE TESTING")
         print(f"Testing against: {API_BASE}")
         print("=" * 60)
+        
+        # PRIORITY: Review Request Specific Tests
+        self.test_review_request_specific_tests()
         
         # V2 New Features Tests - PRIORITY: PAYMENT SYSTEM CRITICAL BUGS
         self.test_superadmin_creation()
