@@ -112,14 +112,15 @@ export default function LoginPage() {
 
                   <Button
                     type="submit"
-                    className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg shadow-orange-500/50"
+                    className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg shadow-orange-500/50 h-10 sm:h-11 text-sm sm:text-base touch-manipulation"
                     disabled={loading}
                     data-testid="login-submit-btn"
                   >
                     {loading ? (
                       <span className="flex items-center">
-                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                        Connexion en cours...
+                        <div className="animate-spin rounded-full h-4 w-4 sm:h-5 sm:w-5 border-b-2 border-white mr-2"></div>
+                        <span className="hidden xs:inline">Connexion en cours...</span>
+                        <span className="xs:hidden">Connexion...</span>
                       </span>
                     ) : (
                       'Se Connecter'
