@@ -435,31 +435,37 @@ export default function ContactFormWidget() {
             </div>
           )}
 
-          {/* Submit Button */}
+          {/* Submit Button - Mobile optimized */}
           <Button
             type="submit"
             size="lg"
-            className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-2xl shadow-orange-500/50 hover:shadow-orange-500/70 transition-all duration-300 py-6 text-lg"
+            className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-2xl shadow-orange-500/50 hover:shadow-orange-500/70 transition-all duration-300 py-4 sm:py-6 text-base sm:text-lg font-semibold touch-manipulation"
             disabled={loading}
           >
             {loading ? (
-              <span className="flex items-center">
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-3"></div>
-                Envoi en cours...
+              <span className="flex items-center justify-center">
+                <div className="animate-spin rounded-full h-4 w-4 sm:h-5 sm:w-5 border-b-2 border-white mr-2 sm:mr-3"></div>
+                <span className="text-sm sm:text-base">Envoi en cours...</span>
               </span>
             ) : (
               <>
-                <Send className="mr-2 w-5 h-5" />
-                Envoyer Ma Demande
+                <Send className="mr-2 w-4 h-4 sm:w-5 sm:h-5" />
+                <span className="hidden xs:inline">Envoyer Ma Demande</span>
+                <span className="xs:hidden">Envoyer</span>
               </>
             )}
           </Button>
 
-          {/* Privacy Notice */}
-          <p className="text-center text-sm text-slate-400 mt-4">
-            🔒 Vos informations sont sécurisées et confidentielles.<br />
-            <strong>Réponse garantie sous 24h</strong> par nos experts.
-          </p>
+          {/* Privacy Notice - Mobile responsive */}
+          <div className="text-center text-xs sm:text-sm text-slate-400 mt-4 space-y-1">
+            <p className="flex items-center justify-center">
+              <span className="text-green-400 mr-1">🔒</span>
+              Informations sécurisées et confidentielles
+            </p>
+            <p className="font-semibold text-orange-400">
+              Réponse garantie sous 24h par nos experts
+            </p>
+          </div>
         </form>
       </CardContent>
     </Card>
