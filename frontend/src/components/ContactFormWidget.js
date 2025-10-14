@@ -344,6 +344,56 @@ export default function ContactFormWidget() {
             </div>
           </div>
 
+          {/* Comment avez-vous connu ALORIA AGENCY */}
+          <div>
+            <Label htmlFor="how_did_you_know" className="text-slate-300 font-medium flex items-center">
+              <MessageCircle className="w-4 h-4 mr-2" />
+              Comment avez-vous connu ALORIA AGENCY ? *
+            </Label>
+            <Select
+              value={formData.how_did_you_know}
+              onValueChange={(value) => {
+                setFormData({ ...formData, how_did_you_know: value, referred_by_employee: '' });
+                setShowEmployeeField(value === 'Par une personne');
+              }}
+            >
+              <SelectTrigger className="mt-2 bg-[#0F172A] border-slate-600 text-white focus:border-orange-500">
+                <SelectValue placeholder="Sélectionnez comment vous nous avez connus" />
+              </SelectTrigger>
+              <SelectContent className="bg-[#1E293B] border-slate-600">
+                {knowledgeSources.map((source) => (
+                  <SelectItem 
+                    key={source.value} 
+                    value={source.value} 
+                    className="text-white hover:bg-slate-700"
+                  >
+                    {source.icon} {source.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Champ employé si "Par une personne" est sélectionné */}
+          {showEmployeeField && (
+            <div className="p-4 bg-orange-500/10 border border-orange-500/30 rounded-lg">
+              <Label htmlFor="referred_by_employee" className="text-orange-300 font-medium flex items-center">
+                <User className="w-4 h-4 mr-2" />
+                Nom de l'employé qui vous a recommandé
+              </Label>
+              <Input
+                id="referred_by_employee"
+                value={formData.referred_by_employee}
+                onChange={(e) => setFormData({ ...formData, referred_by_employee: e.target.value })}
+                placeholder="Prénom et nom de l'employé"
+                className="mt-2 bg-[#0F172A] border-orange-500/50 text-white placeholder:text-slate-500 focus:border-orange-500"
+              />
+              <p className="text-xs text-orange-300 mt-2">
+                ℹ️ Cette information nous permettra d'attribuer votre dossier directement à cette personne
+              </p>
+            </div>
+          )}
+
           {/* Message */}
           <div>
             <Label htmlFor="message" className="text-slate-300 font-medium flex items-center">
