@@ -76,12 +76,12 @@ export default function LoginPage() {
           </div>
 
           <Card className="bg-gradient-to-br from-[#1E293B] to-[#334155] border-slate-700">
-            <CardHeader>
-              <CardTitle className="text-white">Bon Retour</CardTitle>
-              <CardDescription className="text-slate-400">Entrez vos identifiants pour accéder à votre compte</CardDescription>
+            <CardHeader className="pb-4 sm:pb-6">
+              <CardTitle className="text-white text-lg sm:text-xl">Bon Retour</CardTitle>
+              <CardDescription className="text-slate-400 text-sm sm:text-base">Entrez vos identifiants pour accéder à votre compte</CardDescription>
             </CardHeader>
-              <CardContent>
-                <form onSubmit={handleLogin} className="space-y-4">
+              <CardContent className="pt-0">
+                <form onSubmit={handleLogin} className="space-y-3 sm:space-y-4">
                   <div>
                     <Label htmlFor="login-email" className="text-slate-300">Adresse Email</Label>
                     <Input
