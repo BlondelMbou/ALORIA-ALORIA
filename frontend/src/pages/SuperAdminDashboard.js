@@ -223,25 +223,25 @@ const SuperAdminDashboard = () => {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
               <StatsCard
                 title="Total Utilisateurs"
-                value={stats.total_users || 0}
+                value={stats.users?.total || 0}
                 icon={<span className="text-2xl">👥</span>}
                 color="text-blue-400"
               />
               <StatsCard
                 title="Managers"
-                value={stats.managers_count || 0}
+                value={stats.users?.managers || 0}
                 icon={<span className="text-2xl">👨‍💼</span>}
                 color="text-green-400"
               />
               <StatsCard
                 title="Employés"
-                value={stats.employees_count || 0}
+                value={stats.users?.employees || 0}
                 icon={<span className="text-2xl">👨‍💻</span>}
                 color="text-yellow-400"
               />
               <StatsCard
                 title="Clients"
-                value={stats.clients_count || 0}
+                value={stats.users?.clients || 0}
                 icon={<span className="text-2xl">👥</span>}
                 color="text-orange-400"
               />
