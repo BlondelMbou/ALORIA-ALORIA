@@ -18,6 +18,13 @@ const SuperAdminDashboard = () => {
 
   useEffect(() => {
     fetchDashboardData();
+    
+    // Auto-refresh toutes les 2 minutes pour SuperAdmin
+    const refreshInterval = setInterval(() => {
+      fetchDashboardData();
+    }, 120000); // 2 minutes
+    
+    return () => clearInterval(refreshInterval);
   }, []);
 
   const fetchDashboardData = async () => {
