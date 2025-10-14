@@ -108,13 +108,18 @@ export default function ContactFormWidget() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!formData.name.trim() || !formData.email.trim() || !formData.message.trim()) {
-      toast.error('Veuillez remplir tous les champs obligatoires');
+    if (!formData.name.trim() || !formData.email.trim() || !formData.message.trim() || !formData.how_did_you_know.trim()) {
+      toast.error('Veuillez remplir tous les champs obligatoires (nom, email, message et comment vous nous avez connus)');
       return;
     }
 
     if (formData.message.length < 10) {
       toast.error('Votre message doit contenir au moins 10 caractères');
+      return;
+    }
+
+    if (formData.how_did_you_know === 'Par une personne' && !formData.referred_by_employee.trim()) {
+      toast.error('Veuillez préciser le nom de l\'employé qui vous a recommandé');
       return;
     }
 
