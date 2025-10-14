@@ -94,6 +94,17 @@ export default function ContactFormWidget() {
     { value: 'Information', label: 'Information générale', icon: '⏰' }
   ];
 
+  const knowledgeSources = [
+    { value: 'Recherche Google', label: 'Recherche Google', icon: '🔍' },
+    { value: 'Réseaux sociaux', label: 'Réseaux sociaux (Facebook, Instagram, LinkedIn)', icon: '📱' },
+    { value: 'Recommandation famille/amis', label: 'Recommandation de famille ou amis', icon: '👥' },
+    { value: 'Par une personne', label: 'Par un employé d\'ALORIA AGENCY', icon: '👤' },
+    { value: 'Publicité en ligne', label: 'Publicité en ligne', icon: '📺' },
+    { value: 'Article de presse', label: 'Article de presse/blog', icon: '📰' },
+    { value: 'Événement/salon', label: 'Événement ou salon', icon: '🏢' },
+    { value: 'Autre', label: 'Autre', icon: '💭' }
+  ];
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     
