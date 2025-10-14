@@ -352,30 +352,33 @@ export default function LandingPage() {
                 </div>
               </div>
 
-              <div className="flex flex-col sm:flex-row gap-4">
-                <a href="#start-application">
+              {/* CTA Buttons - Mobile optimized */}
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full">
+                <a href="#start-application" className="flex-1 sm:flex-none">
                   <Button 
                     size="lg" 
-                    className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white px-8 py-6 text-lg shadow-2xl shadow-orange-500/50 hover:shadow-orange-500/70 transition-all duration-300 hover:scale-105"
+                    className="w-full sm:w-auto bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white px-6 sm:px-8 py-4 sm:py-6 text-base sm:text-lg shadow-2xl shadow-orange-500/50 hover:shadow-orange-500/70 transition-all duration-300 hover:scale-105 touch-manipulation"
                   >
-                    <MousePointer2 className="mr-2 w-5 h-5" />
-                    Commencer Maintenant
+                    <MousePointer2 className="mr-2 w-4 h-4 sm:w-5 sm:h-5" />
+                    <span className="hidden xs:inline">Commencer Maintenant</span>
+                    <span className="xs:hidden">Commencer</span>
                   </Button>
                 </a>
                 <Button 
                   variant="outline"
                   size="lg"
-                  className="border-slate-600 text-slate-300 hover:bg-slate-800 hover:text-white px-8 py-6 text-lg"
+                  className="w-full sm:w-auto border-slate-600 text-slate-300 hover:bg-slate-800 hover:text-white px-6 sm:px-8 py-4 sm:py-6 text-base sm:text-lg touch-manipulation"
                   onClick={() => document.getElementById('services').scrollIntoView({ behavior: 'smooth' })}
                 >
-                  <Eye className="mr-2 w-5 h-5" />
-                  Découvrir Nos Services
+                  <Eye className="mr-2 w-4 h-4 sm:w-5 sm:h-5" />
+                  <span className="hidden xs:inline">Découvrir Nos Services</span>
+                  <span className="xs:hidden">Services</span>
                 </Button>
               </div>
             </div>
 
-            {/* Right Column - Animated Stats */}
-            <div className="grid grid-cols-2 gap-6 animate-fade-in" style={{ animationDelay: '0.3s' }}>
+            {/* Right Column - Animated Stats - Mobile responsive */}
+            <div className="grid grid-cols-2 gap-3 sm:gap-6 mt-8 lg:mt-0 animate-fade-in" style={{ animationDelay: '0.3s' }}>
               <Card className="bg-gradient-to-br from-[#1E293B] to-[#334155] border-slate-700/50 hover:border-orange-500/50 transition-all duration-500 hover:scale-105">
                 <CardContent className="p-6 text-center">
                   <div className="w-16 h-16 bg-gradient-to-r from-orange-500 to-orange-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
