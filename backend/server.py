@@ -22,6 +22,13 @@ import io
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from reportlab.lib.units import inch
+# Import du service d'e-mails
+try:
+    from email_service import send_prospect_email, send_user_welcome_email, send_case_update_email
+    EMAIL_SERVICE_AVAILABLE = True
+except ImportError as e:
+    logger.warning(f"Service d'e-mails non disponible: {e}")
+    EMAIL_SERVICE_AVAILABLE = False
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
