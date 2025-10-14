@@ -149,8 +149,11 @@ export default function ContactFormWidget() {
           budget_range: '',
           urgency_level: 'Normal',
           message: '',
-          lead_source: 'Site web'
+          lead_source: 'Site web',
+          how_did_you_know: '',
+          referred_by_employee: ''
         });
+        setShowEmployeeField(false);
 
       } else {
         const error = await response.json();
