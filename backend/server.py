@@ -2046,6 +2046,17 @@ async def declare_payment(payment_data: PaymentDeclaration, current_user: dict =
                 'payment_method': payment_data.payment_method
             }, room=manager_sid)
     
+    # Notifier aussi tous les SuperAdmin des nouvelles déclarations
+    superadmins = await db.users.find({"role": "SUPERADMIN", "is_active": True}).to_list(10)
+    for superadmin in superadmins:
+        await create_notification(
+            user_id=superadmin["id"],
+            title="💳 Nouvelle déclaration de paiement",
+            message=f"Client: {current_user['full_name']} - Montant: {payment_data.amount} {payment_data.currency} (En attente de validation)",
+            type="admin_payment_declared",
+            related_id=payment_id
+        )
+    
     # Log activité
     await log_user_activity(
         user_id=current_user["id"],
