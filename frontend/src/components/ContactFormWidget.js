@@ -185,12 +185,12 @@ export default function ContactFormWidget() {
       </CardHeader>
       
       <CardContent className="p-4 sm:p-6 lg:p-8">
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Informations personnelles */}
-          <div className="grid md:grid-cols-2 gap-6">
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
+          {/* Informations personnelles - Mobile responsive */}
+          <div className="grid gap-4 sm:gap-6 md:grid-cols-2">
             <div>
-              <Label htmlFor="name" className="text-slate-300 font-medium flex items-center">
-                <User className="w-4 h-4 mr-2" />
+              <Label htmlFor="name" className="text-slate-300 font-medium flex items-center text-sm sm:text-base">
+                <User className="w-4 h-4 mr-2 flex-shrink-0" />
                 Nom Complet *
               </Label>
               <Input
@@ -198,14 +198,14 @@ export default function ContactFormWidget() {
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 placeholder="Votre nom complet"
-                className="mt-2 bg-[#0F172A] border-slate-600 text-white placeholder:text-slate-500 focus:border-orange-500"
+                className="mt-2 bg-[#0F172A] border-slate-600 text-white placeholder:text-slate-500 focus:border-orange-500 text-sm sm:text-base h-11 sm:h-12"
                 required
               />
             </div>
 
             <div>
-              <Label htmlFor="email" className="text-slate-300 font-medium flex items-center">
-                <Mail className="w-4 h-4 mr-2" />
+              <Label htmlFor="email" className="text-slate-300 font-medium flex items-center text-sm sm:text-base">
+                <Mail className="w-4 h-4 mr-2 flex-shrink-0" />
                 Adresse Email *
               </Label>
               <Input
@@ -214,15 +214,15 @@ export default function ContactFormWidget() {
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 placeholder="votre.email@exemple.com"
-                className="mt-2 bg-[#0F172A] border-slate-600 text-white placeholder:text-slate-500 focus:border-orange-500"
+                className="mt-2 bg-[#0F172A] border-slate-600 text-white placeholder:text-slate-500 focus:border-orange-500 text-sm sm:text-base h-11 sm:h-12"
                 required
               />
             </div>
           </div>
 
           <div>
-            <Label htmlFor="phone" className="text-slate-300 font-medium flex items-center">
-              <Phone className="w-4 h-4 mr-2" />
+            <Label htmlFor="phone" className="text-slate-300 font-medium flex items-center text-sm sm:text-base">
+              <Phone className="w-4 h-4 mr-2 flex-shrink-0" />
               Téléphone (Optionnel)
             </Label>
             <Input
@@ -231,7 +231,7 @@ export default function ContactFormWidget() {
               value={formData.phone}
               onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
               placeholder="+33 1 23 45 67 89"
-              className="mt-2 bg-[#0F172A] border-slate-600 text-white placeholder:text-slate-500 focus:border-orange-500"
+              className="mt-2 bg-[#0F172A] border-slate-600 text-white placeholder:text-slate-500 focus:border-orange-500 text-sm sm:text-base h-11 sm:h-12"
             />
           </div>
 
