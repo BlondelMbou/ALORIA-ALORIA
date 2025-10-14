@@ -48,6 +48,7 @@ export default function ClientDashboard() {
 
   useEffect(() => {
     fetchData();
+    fetchPayments(); // Charger l'historique des paiements au démarrage
   }, []);
 
   const fetchData = async () => {
