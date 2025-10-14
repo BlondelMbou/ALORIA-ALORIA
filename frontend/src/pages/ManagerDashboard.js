@@ -439,17 +439,23 @@ export default function ManagerDashboard() {
       {/* Header */}
       <header className="bg-[#1E293B] border-b border-slate-700/50 shadow-lg sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-3">
-              <Globe className="w-8 h-8 text-orange-500" />
+          <div className="flex justify-between items-center h-14 sm:h-16">
+            <div className="flex items-center space-x-2 sm:space-x-3">
+              <Globe className="w-6 h-6 sm:w-8 sm:h-8 text-orange-500" />
               <div>
-                <h1 className="text-xl font-bold text-white">ALORIA AGENCY</h1>
-                <p className="text-sm text-slate-400">Tableau de Bord Gestionnaire</p>
+                <h1 className="text-lg sm:text-xl font-bold text-white">
+                  <span className="hidden sm:inline">ALORIA AGENCY</span>
+                  <span className="sm:hidden">ALORIA</span>
+                </h1>
+                <p className="text-xs sm:text-sm text-slate-400">
+                  <span className="hidden xs:inline">Tableau de Bord Gestionnaire</span>
+                  <span className="xs:hidden">Manager</span>
+                </p>
               </div>
             </div>
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2 sm:space-x-4">
               <NotificationBell currentUser={user} />
-              <div className="text-right">
+              <div className="hidden md:block text-right">
                 <p className="text-sm font-medium text-white">{user.full_name}</p>
                 <p className="text-xs text-slate-400">{user.role}</p>
               </div>
