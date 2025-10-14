@@ -3008,11 +3008,25 @@ async def create_contact_message(message_data: ContactMessageCreate):
     # Notifier les managers du nouveau lead
     managers = await db.users.find({"role": "MANAGER", "is_active": True}).to_list(10)
     for manager in managers:
+        notification_message = f"{message_data.name} ({message_data.country}) - Score: {lead_score}%"
+        if assigned_employee_name:
+            notification_message += f" - Assigné à: {assigned_employee_name}"
+        
         await create_notification(
             user_id=manager["id"],
             title="Nouveau contact prospect",
-            message=f"{message_data.name} ({message_data.country}) - Score: {lead_score}%",
+            message=notification_message,
             type="new_lead",
+            related_id=message_id
+        )
+    
+    # Si un employé est assigné automatiquement, le notifier aussi
+    if assigned_employee_id:
+        await create_notification(
+            user_id=assigned_employee_id,
+            title="🎯 Nouveau prospect vous est assigné",
+            message=f"{message_data.name} vous a été recommandé par {message_data.referred_by_employee}. Score: {lead_score}% - Priorité de contact!",
+            type="assigned_lead",
             related_id=message_id
         )
     
