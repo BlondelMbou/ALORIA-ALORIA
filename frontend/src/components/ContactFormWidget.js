@@ -169,22 +169,22 @@ export default function ContactFormWidget() {
   };
 
   return (
-    <Card className="bg-gradient-to-br from-[#1E293B] to-[#334155] border-slate-700/50 shadow-2xl">
-      <CardHeader>
-        <div className="flex items-center space-x-3 mb-4">
-          <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl flex items-center justify-center">
-            <MessageCircle className="w-6 h-6 text-white" />
+    <Card className="bg-gradient-to-br from-[#1E293B] to-[#334155] border-slate-700/50 shadow-2xl mx-auto max-w-4xl">
+      <CardHeader className="p-4 sm:p-6 lg:p-8">
+        <div className="flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl flex items-center justify-center mx-auto sm:mx-0">
+            <MessageCircle className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
           </div>
-          <div>
-            <CardTitle className="text-2xl text-white">Contactez-Nous</CardTitle>
-            <CardDescription className="text-slate-400">
+          <div className="text-center sm:text-left">
+            <CardTitle className="text-xl sm:text-2xl text-white">Contactez-Nous</CardTitle>
+            <CardDescription className="text-slate-400 text-sm sm:text-base">
               Obtenez une consultation gratuite et personnalisée
             </CardDescription>
           </div>
         </div>
       </CardHeader>
       
-      <CardContent className="p-8">
+      <CardContent className="p-4 sm:p-6 lg:p-8">
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Informations personnelles */}
           <div className="grid md:grid-cols-2 gap-6">
