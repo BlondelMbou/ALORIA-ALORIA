@@ -223,26 +223,45 @@ export default function ClientDashboard() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0F172A] via-[#1E293B] to-[#0F172A]">
-      {/* Header */}
+      {/* Header - Mobile-First Responsive */}
       <header className="bg-[#1E293B] border-b border-slate-700/50 shadow-lg sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-3">
-              <Globe className="w-8 h-8 text-orange-500" />
+          <div className="flex justify-between items-center h-14 sm:h-16">
+            {/* Logo Section - Mobile optimized */}
+            <div className="flex items-center space-x-2 sm:space-x-3">
+              <Globe className="w-6 h-6 sm:w-8 sm:h-8 text-orange-500" />
               <div>
-                <h1 className="text-xl font-bold text-white">ALORIA AGENCY</h1>
-                <p className="text-sm text-slate-400">Mon Profil Client</p>
+                <h1 className="text-lg sm:text-xl font-bold text-white">
+                  <span className="hidden sm:inline">ALORIA AGENCY</span>
+                  <span className="sm:hidden">ALORIA</span>
+                </h1>
+                <p className="text-xs sm:text-sm text-slate-400">
+                  <span className="hidden xs:inline">Mon Profil Client</span>
+                  <span className="xs:hidden">Client</span>
+                </p>
               </div>
             </div>
-            <div className="flex items-center space-x-4">
+
+            {/* Right side - Mobile responsive */}
+            <div className="flex items-center space-x-2 sm:space-x-4">
               <NotificationBell currentUser={user} />
-              <div className="text-right">
+              
+              {/* User info - Hidden on mobile, shown on tablet+ */}
+              <div className="hidden md:block text-right">
                 <p className="text-sm font-medium text-white">{user.full_name}</p>
                 <p className="text-xs text-slate-400">{user.role}</p>
               </div>
-              <Button variant="outline" onClick={logout} data-testid="logout-btn" className="border-slate-600 text-slate-300 hover:bg-slate-800 hover:text-white">
-                <LogOut className="w-4 h-4 mr-2" />
-                Déconnexion
+
+              {/* Logout button - Responsive */}
+              <Button 
+                variant="outline" 
+                onClick={logout} 
+                data-testid="logout-btn" 
+                className="border-slate-600 text-slate-300 hover:bg-slate-800 hover:text-white text-xs sm:text-sm px-2 sm:px-4 py-1.5 sm:py-2 touch-manipulation"
+              >
+                <LogOut className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                <span className="hidden xs:inline">Déconnexion</span>
+                <span className="xs:hidden">Exit</span>
               </Button>
             </div>
           </div>
