@@ -379,43 +379,43 @@ export default function LandingPage() {
 
             {/* Right Column - Animated Stats - Mobile responsive */}
             <div className="grid grid-cols-2 gap-3 sm:gap-6 mt-8 lg:mt-0 animate-fade-in" style={{ animationDelay: '0.3s' }}>
-              <Card className="bg-gradient-to-br from-[#1E293B] to-[#334155] border-slate-700/50 hover:border-orange-500/50 transition-all duration-500 hover:scale-105">
-                <CardContent className="p-6 text-center">
-                  <div className="w-16 h-16 bg-gradient-to-r from-orange-500 to-orange-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <Users className="w-8 h-8 text-white" />
+              <Card className="bg-gradient-to-br from-[#1E293B] to-[#334155] border-slate-700/50 hover:border-orange-500/50 transition-all duration-300">
+                <CardContent className="p-3 sm:p-4 md:p-6 text-center">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl md:rounded-2xl flex items-center justify-center mx-auto mb-2 sm:mb-3 md:mb-4">
+                    <Users className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 text-white" />
                   </div>
-                  <h3 className="text-4xl font-bold text-white mb-2">{animatedNumbers.clients.toLocaleString()}+</h3>
-                  <p className="text-slate-400">Clients Satisfaits</p>
+                  <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-1 sm:mb-2">{animatedNumbers.clients.toLocaleString()}+</h3>
+                  <p className="text-slate-400 text-xs sm:text-sm md:text-base">Clients Satisfaits</p>
                 </CardContent>
               </Card>
               
-              <Card className="bg-gradient-to-br from-[#1E293B] to-[#334155] border-slate-700/50 hover:border-green-500/50 transition-all duration-500 hover:scale-105">
-                <CardContent className="p-6 text-center">
-                  <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-green-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <TrendingUp className="w-8 h-8 text-white" />
+              <Card className="bg-gradient-to-br from-[#1E293B] to-[#334155] border-slate-700/50 hover:border-green-500/50 transition-all duration-300">
+                <CardContent className="p-3 sm:p-4 md:p-6 text-center">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 bg-gradient-to-r from-green-500 to-green-600 rounded-xl md:rounded-2xl flex items-center justify-center mx-auto mb-2 sm:mb-3 md:mb-4">
+                    <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 text-white" />
                   </div>
-                  <h3 className="text-4xl font-bold text-white mb-2">{animatedNumbers.success}%</h3>
-                  <p className="text-slate-400">Taux de Réussite</p>
+                  <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-1 sm:mb-2">{animatedNumbers.success}%</h3>
+                  <p className="text-slate-400 text-xs sm:text-sm md:text-base">Taux de Réussite</p>
                 </CardContent>
               </Card>
               
-              <Card className="bg-gradient-to-br from-[#1E293B] to-[#334155] border-slate-700/50 hover:border-blue-500/50 transition-all duration-500 hover:scale-105">
-                <CardContent className="p-6 text-center">
-                  <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <Globe className="w-8 h-8 text-white" />
+              <Card className="bg-gradient-to-br from-[#1E293B] to-[#334155] border-slate-700/50 hover:border-blue-500/50 transition-all duration-300">
+                <CardContent className="p-3 sm:p-4 md:p-6 text-center">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl md:rounded-2xl flex items-center justify-center mx-auto mb-2 sm:mb-3 md:mb-4">
+                    <Globe className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 text-white" />
                   </div>
-                  <h3 className="text-4xl font-bold text-white mb-2">{animatedNumbers.countries}+</h3>
-                  <p className="text-slate-400">Pays Partenaires</p>
+                  <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-1 sm:mb-2">{animatedNumbers.countries}+</h3>
+                  <p className="text-slate-400 text-xs sm:text-sm md:text-base">Pays Partenaires</p>
                 </CardContent>
               </Card>
               
-              <Card className="bg-gradient-to-br from-[#1E293B] to-[#334155] border-slate-700/50 hover:border-purple-500/50 transition-all duration-500 hover:scale-105">
-                <CardContent className="p-6 text-center">
-                  <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <Calendar className="w-8 h-8 text-white" />
+              <Card className="bg-gradient-to-br from-[#1E293B] to-[#334155] border-slate-700/50 hover:border-purple-500/50 transition-all duration-300">
+                <CardContent className="p-3 sm:p-4 md:p-6 text-center">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl md:rounded-2xl flex items-center justify-center mx-auto mb-2 sm:mb-3 md:mb-4">
+                    <Calendar className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 text-white" />
                   </div>
-                  <h3 className="text-4xl font-bold text-white mb-2">{animatedNumbers.experience}+</h3>
-                  <p className="text-slate-400">Années d'Expérience</p>
+                  <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-1 sm:mb-2">{animatedNumbers.experience}+</h3>
+                  <p className="text-slate-400 text-xs sm:text-sm md:text-base">Années d'Expérience</p>
                 </CardContent>
               </Card>
             </div>
