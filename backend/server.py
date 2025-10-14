@@ -2947,6 +2947,39 @@ async def create_contact_message(message_data: ContactMessageCreate):
     # Calculer le score de lead
     lead_score = calculate_lead_score(message_data.model_dump())
     
+    # Tentative d'attribution automatique si un employé est mentionné
+    assigned_employee_id = None
+    assigned_employee_name = None
+    
+    if message_data.how_did_you_know == "Par une personne" and message_data.referred_by_employee:
+        # Recherche de l'employé par nom (recherche flexible)
+        employee_name_parts = message_data.referred_by_employee.strip().lower().split()
+        if employee_name_parts:
+            # Construire une requête de recherche flexible
+            name_query = {
+                "$and": [
+                    {"role": "EMPLOYEE"},
+                    {"is_active": True},
+                    {
+                        "$or": [
+                            {"full_name": {"$regex": message_data.referred_by_employee, "$options": "i"}},
+                            {
+                                "$and": [
+                                    {"full_name": {"$regex": employee_name_parts[0], "$options": "i"}},
+                                    {"full_name": {"$regex": employee_name_parts[-1], "$options": "i"}} if len(employee_name_parts) > 1 else {}
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+            
+            employee = await db.users.find_one(name_query)
+            if employee:
+                assigned_employee_id = employee["id"]
+                assigned_employee_name = employee["full_name"]
+                logger.info(f"Attribution automatique du prospect {message_data.name} à l'employé {assigned_employee_name}")
+    
     message_dict = {
         "id": message_id,
         "name": message_data.name,
@@ -2957,12 +2990,14 @@ async def create_contact_message(message_data: ContactMessageCreate):
         "budget_range": message_data.budget_range,
         "urgency_level": message_data.urgency_level,
         "message": message_data.message,
-        "status": ContactStatus.NEW,
-        "assigned_to": None,
-        "assigned_to_name": None,
+        "status": ContactStatus.NEW if not assigned_employee_id else ContactStatus.CONTACTED,
+        "assigned_to": assigned_employee_id,
+        "assigned_to_name": assigned_employee_name,
         "lead_source": message_data.lead_source,
         "conversion_probability": lead_score,
-        "notes": "",
+        "notes": f"Attribué automatiquement suite à recommandation de {message_data.referred_by_employee}" if assigned_employee_id else "",
+        "how_did_you_know": message_data.how_did_you_know,
+        "referred_by_employee": message_data.referred_by_employee,
         "follow_up_date": None,
         "created_at": datetime.now(timezone.utc).isoformat(),
         "updated_at": datetime.now(timezone.utc).isoformat()
