@@ -1446,6 +1446,44 @@ async def update_case(case_id: str, update_data: CaseUpdate, current_user: dict 
     updated_case = await db.cases.find_one({"id": case_id}, {"_id": 0})
     updated_case["client_name"] = client_name
     
+    # Envoi automatique d'e-mail de mise à jour au client
+    if EMAIL_SERVICE_AVAILABLE and updated_case:
+        try:
+            # Récupérer les données complètes du client
+            client = await db.users.find_one({"id": updated_case["client_id"]})
+            
+            if client:
+                client_data = {
+                    "full_name": client.get("full_name", "Client"),
+                    "email": client.get("email")
+                }
+                
+                case_data = {
+                    "id": case_id,
+                    "current_step_name": updated_case.get("current_step_name", "En cours"),
+                    "status": updated_case.get("status", "En cours"),
+                    "country": updated_case.get("country", ""),
+                    "visa_type": updated_case.get("visa_type", ""),
+                    "progress_percentage": updated_case.get("progress_percentage", 0),
+                    "manager_name": current_user["full_name"],
+                    "notes": update_data.notes or ""
+                }
+                
+                email_sent = await send_case_update_email(client_data, case_data)
+                
+                if email_sent:
+                    logger.info(f"E-mail de mise à jour envoyé au client {client['email']}")
+                    # Enregistrer l'envoi d'e-mail dans la base
+                    await db.cases.update_one(
+                        {"id": case_id},
+                        {"$set": {"last_update_email_sent": True, "last_update_email_sent_at": datetime.now(timezone.utc).isoformat()}}
+                    )
+                else:
+                    logger.warning(f"Échec envoi e-mail de mise à jour au client {client['email']}")
+            
+        except Exception as e:
+            logger.error(f"Erreur envoi e-mail mise à jour dossier {case_id}: {e}")
+    
     return CaseResponse(**updated_case)
 
 # Messaging
