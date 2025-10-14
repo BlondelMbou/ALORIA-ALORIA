@@ -220,44 +220,68 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0F172A] via-[#1E293B] to-[#0F172A] overflow-hidden">
-      {/* Header Navigation */}
+      {/* Header Navigation - Mobile-First */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-[#0F172A]/95 backdrop-blur-lg border-b border-slate-700/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg flex items-center justify-center">
-                <Globe className="w-6 h-6 text-white" />
+            {/* Logo - Responsive */}
+            <div className="flex items-center space-x-2 sm:space-x-3">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg flex items-center justify-center">
+                <Globe className="w-4 h-4 sm:w-6 sm:h-6 text-white" />
               </div>
-              <span className="text-2xl font-bold bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">
-                ALORIA AGENCY
+              <span className="text-lg sm:text-xl lg:text-2xl font-bold bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">
+                <span className="hidden sm:inline">ALORIA AGENCY</span>
+                <span className="sm:hidden">ALORIA</span>
               </span>
             </div>
             
-            <nav className="hidden lg:flex items-center space-x-8">
-              <a href="#services" className="text-slate-300 hover:text-orange-500 font-medium transition-all duration-300 hover:scale-105">
+            {/* Desktop Navigation */}
+            <nav className="hidden lg:flex items-center space-x-6 xl:space-x-8">
+              <a href="#services" className="text-slate-300 hover:text-orange-500 font-medium transition-all duration-300 hover:scale-105 text-sm xl:text-base">
                 Services
               </a>
-              <a href="#pays" className="text-slate-300 hover:text-orange-500 font-medium transition-all duration-300 hover:scale-105">
+              <a href="#pays" className="text-slate-300 hover:text-orange-500 font-medium transition-all duration-300 hover:scale-105 text-sm xl:text-base">
                 Destinations
               </a>
-              <a href="#processus" className="text-slate-300 hover:text-orange-500 font-medium transition-all duration-300 hover:scale-105">
-                Notre Processus
+              <a href="#processus" className="text-slate-300 hover:text-orange-500 font-medium transition-all duration-300 hover:scale-105 text-sm xl:text-base">
+                Processus
               </a>
-              <a href="#temoignages" className="text-slate-300 hover:text-orange-500 font-medium transition-all duration-300 hover:scale-105">
+              <a href="#temoignages" className="text-slate-300 hover:text-orange-500 font-medium transition-all duration-300 hover:scale-105 text-sm xl:text-base">
                 Témoignages
               </a>
-              <a href="#faq" className="text-slate-300 hover:text-orange-500 font-medium transition-all duration-300 hover:scale-105">
+              <a href="#faq" className="text-slate-300 hover:text-orange-500 font-medium transition-all duration-300 hover:scale-105 text-sm xl:text-base">
                 FAQ
               </a>
               <Button 
                 onClick={() => navigate('/login')}
                 variant="outline"
-                className="border-orange-500 text-orange-500 hover:bg-orange-500 hover:text-white transition-all duration-300"
+                className="border-orange-500 text-orange-500 hover:bg-orange-500 hover:text-white transition-all duration-300 text-sm"
               >
                 <ArrowRight className="w-4 h-4 mr-2" />
                 Connexion
               </Button>
             </nav>
+
+            {/* Mobile Menu Button */}
+            <div className="flex items-center space-x-2 lg:hidden">
+              <Button 
+                onClick={() => navigate('/login')}
+                size="sm"
+                className="bg-orange-500 hover:bg-orange-600 text-white px-3 py-2 text-xs touch-manipulation"
+              >
+                <ArrowRight className="w-3 h-3 mr-1" />
+                <span className="hidden xs:inline">Connexion</span>
+                <span className="xs:hidden">Login</span>
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowMobileMenu(!showMobileMenu)}
+                className="p-2 text-slate-300 hover:text-orange-500 hover:bg-slate-800 touch-manipulation"
+              >
+                {showMobileMenu ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              </Button>
+            </div>
 
             <button 
               className="lg:hidden text-slate-300"
