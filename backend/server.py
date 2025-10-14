@@ -27,7 +27,7 @@ try:
     from email_service import send_prospect_email, send_user_welcome_email, send_case_update_email
     EMAIL_SERVICE_AVAILABLE = True
 except ImportError as e:
-    logger.warning(f"Service d'e-mails non disponible: {e}")
+    print(f"Service d'e-mails non disponible: {e}")
     EMAIL_SERVICE_AVAILABLE = False
 
 ROOT_DIR = Path(__file__).parent
