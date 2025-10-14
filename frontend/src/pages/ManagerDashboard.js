@@ -544,14 +544,15 @@ export default function ManagerDashboard() {
                 </DialogContent>
               </Dialog>
               
-              <Button
-                variant="outline"
-                onClick={logout}
-                data-testid="logout-btn"
-                className="border-slate-600 text-slate-300 hover:bg-slate-800 hover:text-white"
+              {/* Logout Button - Responsive */}
+              <Button 
+                variant="outline" 
+                onClick={logout} 
+                className="border-slate-600 text-slate-300 hover:bg-slate-800 hover:text-white text-xs sm:text-sm px-2 sm:px-4 py-1.5 sm:py-2 touch-manipulation"
               >
-                <LogOut className="w-4 h-4 mr-2" />
-                Déconnexion
+                <LogOut className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                <span className="hidden xs:inline">Déconnexion</span>
+                <span className="xs:hidden">Exit</span>
               </Button>
             </div>
           </div>
