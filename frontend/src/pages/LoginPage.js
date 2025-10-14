@@ -48,24 +48,25 @@ export default function LoginPage() {
   // Registration function removed - hierarchical user creation only
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0F172A] via-[#1E293B] to-[#0F172A] flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen bg-gradient-to-br from-[#0F172A] via-[#1E293B] to-[#0F172A] flex items-center justify-center p-4 sm:p-6 lg:p-8">
+      <div className="w-full max-w-sm sm:max-w-md">
         <Button
           variant="ghost"
           onClick={() => navigate('/')}
-          className="mb-4 text-slate-300 hover:text-white hover:bg-slate-800"
+          className="mb-3 sm:mb-4 text-slate-300 hover:text-white hover:bg-slate-800 text-sm sm:text-base touch-manipulation"
           data-testid="back-to-home-btn"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
-          Retour à l'accueil
+          <span className="hidden xs:inline">Retour à l'accueil</span>
+          <span className="xs:hidden">Retour</span>
         </Button>
 
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center space-x-2 mb-4">
-            <Globe className="w-10 h-10 text-orange-500" />
-            <span className="text-3xl font-bold text-white">ALORIA AGENCY</span>
+        <div className="text-center mb-6 sm:mb-8">
+          <div className="flex items-center justify-center space-x-2 mb-3 sm:mb-4">
+            <Globe className="w-8 h-8 sm:w-10 sm:h-10 text-orange-500" />
+            <span className="text-2xl sm:text-3xl font-bold text-white">ALORIA AGENCY</span>
           </div>
-          <p className="text-slate-300">Accédez à votre tableau de bord d'immigration</p>
+          <p className="text-slate-300 text-sm sm:text-base">Accédez à votre tableau de bord d'immigration</p>
         </div>
 
         <div className="w-full">
