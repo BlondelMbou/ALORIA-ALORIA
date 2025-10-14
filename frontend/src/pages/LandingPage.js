@@ -300,53 +300,55 @@ export default function LandingPage() {
         </div>
       )}
 
-      {/* Hero Section */}
-      <section className="pt-24 pb-16 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-        {/* Animated background elements */}
+      {/* Hero Section - Mobile-First Responsive */}
+      <section className="pt-16 sm:pt-20 md:pt-24 pb-12 sm:pb-16 px-4 sm:px-6 lg:px-8 relative overflow-hidden min-h-screen flex items-center">
+        {/* Animated background elements - Optimized for mobile */}
         <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute -top-40 -right-40 w-80 h-80 bg-orange-500/10 rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+          <div className="absolute -top-20 sm:-top-40 -right-20 sm:-right-40 w-40 sm:w-80 h-40 sm:h-80 bg-orange-500/10 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute -bottom-20 sm:-bottom-40 -left-20 sm:-left-40 w-48 sm:w-96 h-48 sm:h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
         </div>
 
-        <div className="max-w-7xl mx-auto relative">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            {/* Left Column */}
-            <div className="space-y-8 animate-fade-in">
-              <Badge className="bg-orange-500/10 text-orange-400 border-orange-500/30 px-4 py-2">
-                <Zap className="w-4 h-4 mr-2" />
-                Services d'Immigration de Confiance Depuis 2012
+        <div className="max-w-7xl mx-auto relative w-full">
+          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+            {/* Left Column - Mobile optimized */}
+            <div className="space-y-6 sm:space-y-8 text-center lg:text-left animate-fade-in">
+              <Badge className="bg-orange-500/10 text-orange-400 border-orange-500/30 px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm inline-flex items-center">
+                <Zap className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">Services d'Immigration de Confiance Depuis 2012</span>
+                <span className="sm:hidden">Immigration Experts 2012</span>
               </Badge>
               
-              <h1 className="text-5xl lg:text-7xl font-bold text-white leading-tight">
+              <h1 className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-tight">
                 Votre Rêve
-                <span className="block bg-gradient-to-r from-orange-500 via-orange-400 to-yellow-400 bg-clip-text text-transparent mt-2">
+                <span className="block bg-gradient-to-r from-orange-500 via-orange-400 to-yellow-400 bg-clip-text text-transparent mt-1 sm:mt-2">
                   d'Immigration
                 </span>
                 <span className="block text-slate-200">Devient Réalité</span>
               </h1>
               
-              <p className="text-xl lg:text-2xl text-slate-300 leading-relaxed">
+              <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-slate-300 leading-relaxed max-w-2xl mx-auto lg:mx-0">
                 Expertise premium pour vos demandes de visa vers le <span className="text-orange-400 font-semibold">Canada</span> et 
-                la <span className="text-blue-400 font-semibold">France</span>. Nos experts certifiés transforment la complexité 
-                de l'immigration en un processus simple, transparent et efficace.
+                la <span className="text-blue-400 font-semibold">France</span>. 
+                <span className="hidden sm:inline"> Nos experts certifiés transforment la complexité de l'immigration en un processus simple, transparent et efficace.</span>
               </p>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="flex items-center space-x-3 p-3 bg-green-500/10 rounded-lg border border-green-500/20">
-                  <CheckCircle className="w-6 h-6 text-green-400" />
-                  <span className="text-slate-200 font-medium">Suivi Temps Réel</span>
+              {/* Features Grid - Responsive */}
+              <div className="grid grid-cols-1 xs:grid-cols-2 gap-3 sm:gap-4 max-w-lg mx-auto lg:max-w-none lg:mx-0">
+                <div className="flex items-center space-x-2 sm:space-x-3 p-2.5 sm:p-3 bg-green-500/10 rounded-lg border border-green-500/20">
+                  <CheckCircle className="w-4 h-4 sm:w-6 sm:h-6 text-green-400 flex-shrink-0" />
+                  <span className="text-slate-200 font-medium text-sm sm:text-base">Suivi Temps Réel</span>
                 </div>
-                <div className="flex items-center space-x-3 p-3 bg-blue-500/10 rounded-lg border border-blue-500/20">
-                  <Shield className="w-6 h-6 text-blue-400" />
-                  <span className="text-slate-200 font-medium">Experts Certifiés</span>
+                <div className="flex items-center space-x-2 sm:space-x-3 p-2.5 sm:p-3 bg-blue-500/10 rounded-lg border border-blue-500/20">
+                  <Shield className="w-4 h-4 sm:w-6 sm:h-6 text-blue-400 flex-shrink-0" />
+                  <span className="text-slate-200 font-medium text-sm sm:text-base">Experts Certifiés</span>
                 </div>
-                <div className="flex items-center space-x-3 p-3 bg-purple-500/10 rounded-lg border border-purple-500/20">
-                  <Award className="w-6 h-6 text-purple-400" />
-                  <span className="text-slate-200 font-medium">98% Succès</span>
+                <div className="flex items-center space-x-2 sm:space-x-3 p-2.5 sm:p-3 bg-purple-500/10 rounded-lg border border-purple-500/20">
+                  <Award className="w-4 h-4 sm:w-6 sm:h-6 text-purple-400 flex-shrink-0" />
+                  <span className="text-slate-200 font-medium text-sm sm:text-base">98% Succès</span>
                 </div>
-                <div className="flex items-center space-x-3 p-3 bg-orange-500/10 rounded-lg border border-orange-500/20">
-                  <Headphones className="w-6 h-6 text-orange-400" />
-                  <span className="text-slate-200 font-medium">Support 24/7</span>
+                <div className="flex items-center space-x-2 sm:space-x-3 p-2.5 sm:p-3 bg-orange-500/10 rounded-lg border border-orange-500/20">
+                  <Headphones className="w-4 h-4 sm:w-6 sm:h-6 text-orange-400 flex-shrink-0" />
+                  <span className="text-slate-200 font-medium text-sm sm:text-base">Support 24/7</span>
                 </div>
               </div>
 
