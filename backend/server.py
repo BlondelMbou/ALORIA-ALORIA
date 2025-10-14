@@ -1924,21 +1924,32 @@ async def create_user_advanced(user_data: UserCreateRequest, current_user: dict 
         }
     )
     
-    # Envoyer email (simulation pour l'instant, sera implémenté avec un vrai service)
+    # Envoi automatique d'e-mail de bienvenue
     email_sent = False
-    if user_data.send_email:
+    if user_data.send_email and EMAIL_SERVICE_AVAILABLE:
         try:
-            # TODO: Implémenter vraie intégration email
-            await send_welcome_email(
-                email=user_data.email,
-                name=user_data.full_name,
-                role=user_data.role.value,
-                password=temp_password,
-                created_by=current_user["full_name"]
-            )
-            email_sent = True
+            user_email_data = {
+                "full_name": user_data.full_name,
+                "email": user_data.email,
+                "role": user_data.role.value,
+                "login_email": user_data.email,
+                "default_password": temp_password
+            }
+            
+            email_sent = await send_user_welcome_email(user_email_data)
+            
+            if email_sent:
+                logger.info(f"E-mail de bienvenue envoyé à {user_data.email} ({user_data.role.value})")
+                # Enregistrer dans la base que l'e-mail a été envoyé
+                await db.users.update_one(
+                    {"id": user_id},
+                    {"$set": {"welcome_email_sent": True, "welcome_email_sent_at": datetime.now(timezone.utc).isoformat()}}
+                )
+            else:
+                logger.warning(f"Échec envoi e-mail de bienvenue à {user_data.email}")
+                
         except Exception as e:
-            logger.error(f"Échec envoi email: {e}")
+            logger.error(f"Erreur envoi e-mail utilisateur {user_data.email}: {e}")
             email_sent = False
     
     return UserCreateResponse(
