@@ -131,8 +131,9 @@ export default function LoginPage() {
             </Card>
         </div>
 
-        <div className="mt-4 text-center text-sm text-slate-400">
-          <p>Identifiants de démonstration : Utilisez le formulaire d'inscription</p>
+        <div className="mt-3 sm:mt-4 text-center text-xs sm:text-sm text-slate-400">
+          <p className="hidden sm:block">Identifiants de démonstration : Utilisez le formulaire d'inscription</p>
+          <p className="sm:hidden">Identifiants de démo disponibles</p>
         </div>
       </div>
     </div>
