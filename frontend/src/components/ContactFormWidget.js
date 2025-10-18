@@ -297,60 +297,7 @@ export default function ContactFormWidget() {
             </div>
           </div>
 
-          {/* Budget et urgence */}
-          <div className="grid md:grid-cols-2 gap-6">
-            <div>
-              <Label htmlFor="budget_range" className="text-slate-300 font-medium flex items-center">
-                <Euro className="w-4 h-4 mr-2" />
-                Budget Envisagé
-              </Label>
-              <Select
-                value={formData.budget_range}
-                onValueChange={(value) => setFormData({ ...formData, budget_range: value })}
-              >
-                <SelectTrigger className="mt-2 bg-[#0F172A] border-slate-600 text-white focus:border-orange-500">
-                  <SelectValue placeholder="Fourchette budgétaire" />
-                </SelectTrigger>
-                <SelectContent className="bg-[#1E293B] border-slate-600">
-                  {budgetRanges.map((budget) => (
-                    <SelectItem 
-                      key={budget.value} 
-                      value={budget.value} 
-                      className="text-white hover:bg-slate-700"
-                    >
-                      {budget.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <Label htmlFor="urgency_level" className="text-slate-300 font-medium flex items-center">
-                <Clock className="w-4 h-4 mr-2" />
-                Délai Souhaité
-              </Label>
-              <Select
-                value={formData.urgency_level}
-                onValueChange={(value) => setFormData({ ...formData, urgency_level: value })}
-              >
-                <SelectTrigger className="mt-2 bg-[#0F172A] border-slate-600 text-white focus:border-orange-500">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="bg-[#1E293B] border-slate-600">
-                  {urgencyLevels.map((level) => (
-                    <SelectItem 
-                      key={level.value} 
-                      value={level.value} 
-                      className="text-white hover:bg-slate-700"
-                    >
-                      {level.icon} {level.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+          {/* Budget et Délai retirés selon les nouvelles exigences */}
 
           {/* Comment avez-vous connu ALORIA AGENCY */}
           <div>
