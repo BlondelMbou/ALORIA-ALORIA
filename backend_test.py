@@ -2541,12 +2541,18 @@ class APITester:
         # Step 2: SuperAdmin assigns prospect to Employee
         superadmin_token = None
         try:
-            login_response = self.session.post(f"{API_BASE}/auth/login", json={
-                "email": "superadmin@aloria.com",
-                "password": "SuperAdmin123!"
-            })
-            if login_response.status_code == 200:
-                superadmin_token = login_response.json()['access_token']
+            # Try different SuperAdmin credentials
+            for creds in [
+                {"email": "admin@aloria.com", "password": "password"},
+                {"email": "superadmin@aloria.com", "password": "SuperAdmin123!"},
+                {"email": "superadmin@aloria.com", "password": "password"}
+            ]:
+                login_response = self.session.post(f"{API_BASE}/auth/login", json=creds)
+                if login_response.status_code == 200:
+                    user_data = login_response.json()
+                    if user_data['user']['role'] == 'SUPERADMIN':
+                        superadmin_token = user_data['access_token']
+                        break
         except:
             pass
         
