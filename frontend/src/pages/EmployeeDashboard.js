@@ -659,34 +659,34 @@ export default function EmployeeDashboard() {
                       />
                     </div>
                     <div>
-                      <Label htmlFor="client-country">Destination Country *</Label>
+                      <Label htmlFor="client-country" className="text-slate-300 font-medium">Pays de destination *</Label>
                       <Select
                         value={newClientForm.country}
                         onValueChange={(value) => setNewClientForm({ ...newClientForm, country: value, visa_type: '' })}
                       >
-                        <SelectTrigger data-testid="create-client-country-select">
+                        <SelectTrigger className="bg-slate-800 border-slate-600 text-white mt-2" data-testid="create-client-country-select">
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Canada">🇨🇦 Canada</SelectItem>
-                          <SelectItem value="France">🇫🇷 France</SelectItem>
+                        <SelectContent className="bg-slate-800 border-slate-600">
+                          <SelectItem value="Canada" className="text-white hover:bg-slate-700">🇨🇦 Canada</SelectItem>
+                          <SelectItem value="France" className="text-white hover:bg-slate-700">🇫🇷 France</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
                   </div>
 
                   <div>
-                    <Label htmlFor="client-visa-type">Visa Type *</Label>
+                    <Label htmlFor="client-visa-type" className="text-slate-300 font-medium">Type de visa *</Label>
                     <Select
                       value={newClientForm.visa_type}
                       onValueChange={(value) => setNewClientForm({ ...newClientForm, visa_type: value })}
                     >
-                      <SelectTrigger data-testid="create-client-visa-type-select">
-                        <SelectValue placeholder="Select visa type" />
+                      <SelectTrigger className="bg-slate-800 border-slate-600 text-white mt-2" data-testid="create-client-visa-type-select">
+                        <SelectValue placeholder="Sélectionner le type de visa" />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="bg-slate-800 border-slate-600">
                         {visaTypes[newClientForm.country]?.map((type) => (
-                          <SelectItem key={type} value={type}>
+                          <SelectItem key={type} value={type} className="text-white hover:bg-slate-700">
                             {type}
                           </SelectItem>
                         ))}
@@ -695,19 +695,21 @@ export default function EmployeeDashboard() {
                   </div>
 
                   <div>
-                    <Label htmlFor="client-message">Notes (Optional)</Label>
+                    <Label htmlFor="client-message" className="text-slate-300 font-medium">Notes (Optionnel)</Label>
                     <Textarea
                       id="client-message"
                       value={newClientForm.message}
                       onChange={(e) => setNewClientForm({ ...newClientForm, message: e.target.value })}
-                      placeholder="Additional information about the client..."
+                      placeholder="Informations supplémentaires sur le client..."
                       rows={4}
+                      className="bg-slate-800 border-slate-600 text-white placeholder:text-slate-500 mt-2"
                       data-testid="create-client-notes-textarea"
                     />
                   </div>
 
-                  <Button type="submit" className="w-full bg-orange-500 hover:bg-orange-600" data-testid="create-client-submit-btn">
-                    Create Client
+                  <Button type="submit" className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold shadow-lg" data-testid="create-client-submit-btn">
+                    <UserPlus className="w-5 h-5 mr-2" />
+                    Créer le Client
                   </Button>
                 </form>
               </CardContent>
