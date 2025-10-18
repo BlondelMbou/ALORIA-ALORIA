@@ -390,19 +390,19 @@ const SuperAdminDashboard = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
               <StatsCard
                 title="Total Dossiers"
-                value={stats.business?.total_cases || 0}
+                value={displayStats?.business?.total_cases || 0}
                 icon={<span className="text-2xl">📂</span>}
                 color="text-purple-400"
               />
               <StatsCard
                 title="Paiements Confirmés"
-                value={stats.business?.total_payments || 0}
+                value={displayStats?.business?.total_payments || 0}
                 icon={<span className="text-2xl">💰</span>}
                 color="text-green-400"
               />
               <StatsCard
                 title="Connexions (24h)"
-                value={stats.activity?.daily_logins || 0}
+                value={displayStats?.activity?.daily_logins || 0}
                 icon={<span className="text-2xl">⚡</span>}
                 color="text-blue-400"
               />
