@@ -22,6 +22,7 @@ export default function EmployeeDashboard() {
   const { user, logout } = useAuth();
   const [clients, setClients] = useState([]);
   const [cases, setCases] = useState([]);
+  const [visitors, setVisitors] = useState([]);
   const [messages, setMessages] = useState({});
   const [selectedCase, setSelectedCase] = useState(null);
   const [messageText, setMessageText] = useState('');
