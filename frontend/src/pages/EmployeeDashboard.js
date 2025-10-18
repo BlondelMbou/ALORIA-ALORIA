@@ -124,18 +124,28 @@ export default function EmployeeDashboard() {
   };
   
   const handleCreateVisitor = async () => {
+    // Validation des champs requis
+    if (!newVisitor.full_name || !newVisitor.phone_number || !newVisitor.cni_number) {
+      toast.error('Veuillez remplir tous les champs obligatoires');
+      return;
+    }
+
     try {
-      await api.post('/visitors', newVisitor);
+      await api.post('/api/visitors', newVisitor);
       toast.success('Visiteur enregistré avec succès');
       setNewVisitor({
-        name: '',
-        company: '',
+        full_name: '',
+        phone_number: '',
         purpose: 'Consultation initiale',
-        details: ''
+        other_purpose: '',
+        cni_number: ''
       });
       setShowVisitorForm(false);
+      // Recharger la liste des visiteurs
+      fetchData();
     } catch (error) {
-      toast.error('Erreur lors de l\'enregistrement du visiteur');
+      console.error('Erreur enregistrement visiteur:', error);
+      toast.error(error.response?.data?.detail || 'Erreur lors de l\'enregistrement du visiteur');
     }
   };
 
