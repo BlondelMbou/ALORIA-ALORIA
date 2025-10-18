@@ -38,6 +38,34 @@ export default function LandingPage() {
   });
   const [openFAQ, setOpenFAQ] = useState(null);
   const [showContactWidget, setShowContactWidget] = useState(false);
+  const [visibleSections, setVisibleSections] = useState(new Set());
+
+  // Intersection Observer pour animations au scroll
+  useEffect(() => {
+    const observerOptions = {
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.1
+    };
+
+    const observerCallback = (entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          setVisibleSections(prev => new Set([...prev, entry.target.id]));
+        }
+      });
+    };
+
+    const observer = new IntersectionObserver(observerCallback, observerOptions);
+
+    // Observer toutes les sections avec un id
+    const sections = document.querySelectorAll('section[id]');
+    sections.forEach(section => observer.observe(section));
+
+    return () => {
+      sections.forEach(section => observer.unobserve(section));
+    };
+  }, []);
 
   const faqs = [
     {
