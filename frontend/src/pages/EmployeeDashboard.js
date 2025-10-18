@@ -206,31 +206,51 @@ export default function EmployeeDashboard() {
                     </DialogDescription>
                   </DialogHeader>
                   <div className="space-y-4">
+                    {/* Nom complet */}
                     <div>
-                      <Label className="text-slate-300">Nom du visiteur</Label>
+                      <Label className="text-slate-300 font-medium">Nom complet du visiteur *</Label>
                       <Input
-                        value={newVisitor.name}
-                        onChange={(e) => setNewVisitor({...newVisitor, name: e.target.value})}
-                        className="bg-[#0F172A] border-slate-600 text-white"
-                        placeholder="Nom complet"
+                        value={newVisitor.full_name}
+                        onChange={(e) => setNewVisitor({...newVisitor, full_name: e.target.value})}
+                        className="bg-slate-800 border-slate-600 text-white mt-2"
+                        placeholder="Ex: Jean Dupont"
+                        required
                       />
                     </div>
+
+                    {/* Numéro de téléphone */}
                     <div>
-                      <Label className="text-slate-300">Entreprise (optionnel)</Label>
+                      <Label className="text-slate-300 font-medium">Numéro de téléphone *</Label>
                       <Input
-                        value={newVisitor.company}
-                        onChange={(e) => setNewVisitor({...newVisitor, company: e.target.value})}
-                        className="bg-[#0F172A] border-slate-600 text-white"
-                        placeholder="Nom de l'entreprise"
+                        value={newVisitor.phone_number}
+                        onChange={(e) => setNewVisitor({...newVisitor, phone_number: e.target.value})}
+                        className="bg-slate-800 border-slate-600 text-white mt-2"
+                        placeholder="+237 6XX XX XX XX"
+                        type="tel"
+                        required
                       />
                     </div>
+
+                    {/* Numéro de CNI */}
                     <div>
-                      <Label className="text-slate-300">Motif de la visite</Label>
+                      <Label className="text-slate-300 font-medium">Numéro de CNI (Carte Nationale d'Identité) *</Label>
+                      <Input
+                        value={newVisitor.cni_number}
+                        onChange={(e) => setNewVisitor({...newVisitor, cni_number: e.target.value})}
+                        className="bg-slate-800 border-slate-600 text-white mt-2"
+                        placeholder="Ex: 123456789"
+                        required
+                      />
+                    </div>
+
+                    {/* Motif de la visite */}
+                    <div>
+                      <Label className="text-slate-300 font-medium">Motif de la visite *</Label>
                       <Select value={newVisitor.purpose} onValueChange={(value) => setNewVisitor({...newVisitor, purpose: value})}>
-                        <SelectTrigger className="bg-[#0F172A] border-slate-600 text-white">
+                        <SelectTrigger className="bg-slate-800 border-slate-600 text-white mt-2">
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent className="bg-[#1E293B] border-slate-600">
+                        <SelectContent className="bg-slate-800 border-slate-600">
                           {visitorPurposeOptions.map(option => (
                             <SelectItem key={option} value={option} className="text-white hover:bg-slate-700">
                               {option}
@@ -239,14 +259,16 @@ export default function EmployeeDashboard() {
                         </SelectContent>
                       </Select>
                     </div>
+
+                    {/* Précisions si Autre */}
                     {newVisitor.purpose === 'Autre' && (
                       <div>
-                        <Label className="text-slate-300">Précisions</Label>
+                        <Label className="text-slate-300 font-medium">Précisez le motif</Label>
                         <Input
-                          value={newVisitor.details}
-                          onChange={(e) => setNewVisitor({...newVisitor, details: e.target.value})}
-                          className="bg-[#0F172A] border-slate-600 text-white"
-                          placeholder="Veuillez préciser..."
+                          value={newVisitor.other_purpose}
+                          onChange={(e) => setNewVisitor({...newVisitor, other_purpose: e.target.value})}
+                          className="bg-slate-800 border-slate-600 text-white mt-2"
+                          placeholder="Veuillez préciser le motif..."
                         />
                       </div>
                     )}
