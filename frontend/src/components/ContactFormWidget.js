@@ -79,18 +79,7 @@ export default function ContactFormWidget() {
     ]
   };
 
-  const budgetRanges = [
-    { value: '1000-3000€', label: '1 000 - 3 000 €' },
-    { value: '3000-5000€', label: '3 000 - 5 000 €' },
-    { value: '5000+€', label: '5 000 € et plus' },
-    { value: 'À discuter', label: 'À discuter' }
-  ];
-
-  const urgencyLevels = [
-    { value: 'Urgent', label: 'Urgent (< 3 mois)', icon: '🚀' },
-    { value: 'Normal', label: 'Normal (3-6 mois)', icon: '📅' },
-    { value: 'Information', label: 'Information générale', icon: '⏰' }
-  ];
+  // Budget et délai retirés selon les nouvelles exigences
 
   const knowledgeSources = [
     { value: 'Recherche Google', label: 'Recherche Google', icon: '🔍' },
