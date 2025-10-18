@@ -272,7 +272,7 @@ const WithdrawalManager = () => {
                         <p className="text-slate-300 text-sm">{withdrawal.description}</p>
                       </div>
                       <div className="text-right">
-                        <p className="text-red-400 font-bold text-lg">-{withdrawal.amount} €</p>
+                        <p className="text-red-400 font-bold text-lg">-{withdrawal.amount} CFA</p>
                         <Badge 
                           className="bg-red-500/20 text-red-400 mt-1"
                         >
