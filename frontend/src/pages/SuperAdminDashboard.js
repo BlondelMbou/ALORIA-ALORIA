@@ -20,6 +20,27 @@ const SuperAdminDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
 
+  // Calcul dynamique des stats à partir des données locales pour mise à jour en temps réel
+  const calculatedStats = React.useMemo(() => {
+    const managers = users.filter(u => u.role === 'MANAGER').length;
+    const employeesCount = users.filter(u => u.role === 'EMPLOYEE').length;
+    const clientsCount = users.filter(u => u.role === 'CLIENT').length;
+    
+    return {
+      users: {
+        total: users.length,
+        managers: managers,
+        employees: employeesCount,
+        clients: clientsCount
+      },
+      business: stats?.business || {},
+      activity: stats?.activity || {}
+    };
+  }, [users, stats]);
+
+  // Utiliser les stats calculées si disponibles
+  const displayStats = users.length > 0 ? calculatedStats : stats;
+
   useEffect(() => {
     fetchDashboardData();
     
