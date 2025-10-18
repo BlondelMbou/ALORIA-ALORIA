@@ -1293,9 +1293,10 @@ export default function ManagerDashboard() {
                             </Button>
                           </div>
                         </div>
-                      ))
-                    )}
-                  </div>
+                      ))}
+                      </div>
+                    </>
+                  )}
                 </CardContent>
               </Card>
 
