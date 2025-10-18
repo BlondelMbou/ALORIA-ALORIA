@@ -1337,6 +1337,11 @@ export default function ManagerDashboard() {
             <WithdrawalManager />
           </TabsContent>
 
+          {/* Prospects Tab */}
+          <TabsContent value="prospects">
+            <MyProspects />
+          </TabsContent>
+
           {/* CRM Tab */}
           <TabsContent value="crm">
             <ContactCRM />
