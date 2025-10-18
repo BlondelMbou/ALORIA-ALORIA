@@ -23,9 +23,15 @@ export default function ManagerDashboard() {
   const { user, logout } = useContext(AuthContext);
   const [stats, setStats] = useState(null);
   const [clients, setClients] = useState([]);
+  const [filteredClients, setFilteredClients] = useState([]);
   const [cases, setCases] = useState([]);
+  const [filteredCases, setFilteredCases] = useState([]);
   const [employees, setEmployees] = useState([]);
+  const [filteredEmployees, setFilteredEmployees] = useState([]);
   const [visitors, setVisitors] = useState([]);
+  const [filteredVisitors, setFilteredVisitors] = useState([]);
+  const [payments, setPayments] = useState([]);
+  const [filteredPayments, setFilteredPayments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedClient, setSelectedClient] = useState(null);
   const [newVisitor, setNewVisitor] = useState({ 
