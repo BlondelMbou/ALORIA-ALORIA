@@ -24,7 +24,13 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.units import inch
 # Import du service d'e-mails
 try:
-    from email_service import send_prospect_email, send_user_welcome_email, send_case_update_email
+    from email_service import (
+        send_prospect_email, 
+        send_user_welcome_email, 
+        send_case_update_email,
+        send_prospect_assignment_notification,
+        send_consultant_appointment_notification
+    )
     EMAIL_SERVICE_AVAILABLE = True
 except ImportError as e:
     print(f"Service d'e-mails non disponible: {e}")
