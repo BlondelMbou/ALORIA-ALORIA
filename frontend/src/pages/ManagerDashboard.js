@@ -1137,36 +1137,76 @@ export default function ManagerDashboard() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
+                    {/* Nom complet */}
                     <div>
-                      <Label className="text-slate-300">Nom du Visiteur</Label>
+                      <Label className="text-slate-300 font-medium">Nom complet du visiteur *</Label>
                       <Input
-                        value={newVisitor.name}
-                        onChange={(e) => setNewVisitor({ ...newVisitor, name: e.target.value })}
-                        placeholder="Entrer le nom"
-                        className="bg-[#0F172A] border-slate-600 text-white placeholder:text-slate-500"
+                        value={newVisitor.full_name}
+                        onChange={(e) => setNewVisitor({ ...newVisitor, full_name: e.target.value })}
+                        placeholder="Ex: Jean Dupont"
+                        className="bg-slate-800 border-slate-600 text-white placeholder:text-slate-500 mt-2"
                         data-testid="visitor-name-input"
+                        required
                       />
                     </div>
+
+                    {/* Numéro de téléphone */}
                     <div>
-                      <Label className="text-slate-300">Entreprise</Label>
+                      <Label className="text-slate-300 font-medium">Numéro de téléphone *</Label>
                       <Input
-                        value={newVisitor.company}
-                        onChange={(e) => setNewVisitor({ ...newVisitor, company: e.target.value })}
-                        placeholder="Entrer l'entreprise"
-                        className="bg-[#0F172A] border-slate-600 text-white placeholder:text-slate-500"
-                        data-testid="visitor-company-input"
+                        value={newVisitor.phone_number}
+                        onChange={(e) => setNewVisitor({ ...newVisitor, phone_number: e.target.value })}
+                        placeholder="+237 6XX XX XX XX"
+                        type="tel"
+                        className="bg-slate-800 border-slate-600 text-white placeholder:text-slate-500 mt-2"
+                        data-testid="visitor-phone-input"
+                        required
                       />
                     </div>
+
+                    {/* Numéro de CNI */}
                     <div>
-                      <Label className="text-slate-300">Motif</Label>
+                      <Label className="text-slate-300 font-medium">Numéro de CNI *</Label>
                       <Input
-                        value={newVisitor.purpose}
-                        onChange={(e) => setNewVisitor({ ...newVisitor, purpose: e.target.value })}
-                        placeholder="Motif de la visite"
-                        className="bg-[#0F172A] border-slate-600 text-white placeholder:text-slate-500"
-                        data-testid="visitor-purpose-input"
+                        value={newVisitor.cni_number}
+                        onChange={(e) => setNewVisitor({ ...newVisitor, cni_number: e.target.value })}
+                        placeholder="Ex: 123456789"
+                        className="bg-slate-800 border-slate-600 text-white placeholder:text-slate-500 mt-2"
+                        data-testid="visitor-cni-input"
+                        required
                       />
                     </div>
+
+                    {/* Motif */}
+                    <div>
+                      <Label className="text-slate-300 font-medium">Motif de la visite *</Label>
+                      <Select value={newVisitor.purpose} onValueChange={(value) => setNewVisitor({ ...newVisitor, purpose: value })}>
+                        <SelectTrigger className="bg-slate-800 border-slate-600 text-white mt-2">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="bg-slate-800 border-slate-600">
+                          <SelectItem value="Consultation initiale" className="text-white hover:bg-slate-700">Consultation initiale</SelectItem>
+                          <SelectItem value="Remise de documents" className="text-white hover:bg-slate-700">Remise de documents</SelectItem>
+                          <SelectItem value="Mise à jour du dossier" className="text-white hover:bg-slate-700">Mise à jour du dossier</SelectItem>
+                          <SelectItem value="Rendez-vous de suivi" className="text-white hover:bg-slate-700">Rendez-vous de suivi</SelectItem>
+                          <SelectItem value="Autre" className="text-white hover:bg-slate-700">Autre</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Précisions si Autre */}
+                    {newVisitor.purpose === 'Autre' && (
+                      <div>
+                        <Label className="text-slate-300 font-medium">Précisez le motif</Label>
+                        <Input
+                          value={newVisitor.other_purpose}
+                          onChange={(e) => setNewVisitor({ ...newVisitor, other_purpose: e.target.value })}
+                          placeholder="Veuillez préciser..."
+                          className="bg-slate-800 border-slate-600 text-white placeholder:text-slate-500 mt-2"
+                        />
+                      </div>
+                    )}
+
                     <Button onClick={handleAddVisitor} className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg shadow-orange-500/50" data-testid="add-visitor-btn">
                       <Building2 className="w-4 h-4 mr-2" />
                       Enregistrer le Visiteur
