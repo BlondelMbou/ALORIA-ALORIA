@@ -12,6 +12,7 @@ import api from '../utils/api';
 import ContactFormWidget from '../components/ContactFormWidget';
 import CRSCalculator from '../components/CRSCalculator';
 import ImmigrationJourneyAnimation from '../components/ImmigrationJourneyAnimation';
+import ServicesShowcase from '../components/ServicesShowcase';
 import { 
   Globe, ArrowRight, CheckCircle, Users, FileText, Clock, Star, MapPin, 
   Briefcase, GraduationCap, Heart, Shield, Award, TrendingUp, Phone, 
