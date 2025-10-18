@@ -642,7 +642,7 @@ export default function LandingPage() {
       </section>
 
       {/* Process Section */}
-      <section id="processus" className="py-20 bg-gradient-to-b from-[#1E293B]/50 to-transparent">
+      <section id="processus" className={`py-20 bg-gradient-to-b from-[#1E293B]/50 to-transparent transition-all duration-700 ${getSectionClass('processus')}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <Badge className="bg-purple-500/10 text-purple-400 border-purple-500/30 mb-4">
