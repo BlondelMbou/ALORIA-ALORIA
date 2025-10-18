@@ -26,10 +26,14 @@ class AloriaEmailService:
         self.sender_email = os.getenv('SENDER_EMAIL', 'contact@aloria-agency.com')
         self.sender_name = "ALORIA AGENCY"
         
-        if not self.api_key:
-            raise ValueError("SENDGRID_API_KEY est requis dans les variables d'environnement")
-        
-        self.sg = SendGridAPIClient(self.api_key)
+        # Initialiser SendGrid seulement si la clé est valide (pas un placeholder)
+        if self.api_key and not self.api_key.startswith('SG.placeholder'):
+            self.sg = SendGridAPIClient(self.api_key)
+            self.is_configured = True
+        else:
+            self.sg = None
+            self.is_configured = False
+            logger.warning("SendGrid non configuré - les e-mails ne seront pas envoyés")
     
     def _send_email(self, to_email: str, subject: str, html_content: str, plain_content: Optional[str] = None) -> bool:
         """Envoyer un e-mail via SendGrid"""
