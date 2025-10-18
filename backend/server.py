@@ -3394,6 +3394,19 @@ async def assign_prospect_to_consultant(
         }
     )
     
+    # Envoyer email au prospect pour confirmer RDV consultant
+    if EMAIL_SERVICE_AVAILABLE:
+        try:
+            prospect_with_assignee = {
+                **prospect,
+                "assigned_by_name": current_user["full_name"]
+            }
+            email_sent = await send_consultant_appointment_notification(prospect_with_assignee)
+            if email_sent:
+                logger.info(f"Email RDV consultant envoyé à {prospect['email']}")
+        except Exception as e:
+            logger.error(f"Erreur envoi email RDV consultant: {e}")
+    
     return {"message": "Prospect affecté au consultant avec succès", "payment_50k_amount": 50000}
 
 @api_router.patch("/contact-messages/{message_id}/consultant-notes")
