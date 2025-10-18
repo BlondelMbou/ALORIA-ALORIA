@@ -37,6 +37,11 @@ class AloriaEmailService:
     
     def _send_email(self, to_email: str, subject: str, html_content: str, plain_content: Optional[str] = None) -> bool:
         """Envoyer un e-mail via SendGrid"""
+        # Vérifier si SendGrid est configuré
+        if not self.is_configured:
+            logger.warning(f"SendGrid non configuré - e-mail non envoyé à {to_email}")
+            return False
+        
         try:
             from_email = From(self.sender_email, self.sender_name)
             to = To(to_email)
@@ -62,7 +67,7 @@ class AloriaEmailService:
                 
         except Exception as e:
             logger.error(f"Erreur lors de l'envoi d'e-mail à {to_email}: {str(e)}")
-            raise EmailDeliveryError(f"Échec d'envoi e-mail: {str(e)}")
+            return False  # Retourner False au lieu de lever une exception
     
     def send_prospect_welcome_email(self, prospect_data: Dict[str, Any]) -> bool:
         """
