@@ -1235,20 +1235,42 @@ export default function ManagerDashboard() {
                 <CardContent>
                   <div className="space-y-3">
                     {visitors.slice(0, 10).map((visitor) => (
-                      <div key={visitor.id} className="flex items-center justify-between p-3 bg-[#0F172A] border border-slate-700 rounded-lg">
-                        <div>
-                          <p className="font-semibold text-white">{visitor.name}</p>
-                          <p className="text-sm text-slate-400">{visitor.company} - {visitor.purpose}</p>
-                          <p className="text-xs text-slate-500">Arrivée: {new Date(visitor.arrival_time).toLocaleTimeString()}</p>
+                      <div key={visitor.id} className="flex items-center justify-between p-4 bg-[#0F172A] border border-slate-700 rounded-lg hover:border-orange-500/50 transition-all">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            <p className="font-bold text-white text-lg">{visitor.full_name}</p>
+                            <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">
+                              📱 {visitor.phone_number}
+                            </Badge>
+                          </div>
+                          <p className="text-sm text-slate-400 mb-1">
+                            <span className="font-semibold">Motif:</span> {visitor.purpose}
+                            {visitor.other_purpose && ` - ${visitor.other_purpose}`}
+                          </p>
+                          <p className="text-xs text-slate-500 mb-1">
+                            <span className="font-semibold">CNI:</span> {visitor.cni_number}
+                          </p>
+                          <p className="text-xs text-slate-500">
+                            <span className="font-semibold">Arrivée:</span> {new Date(visitor.arrival_time).toLocaleString('fr-FR')}
+                          </p>
+                          {visitor.registered_by && (
+                            <p className="text-xs text-slate-600 mt-1">
+                              Enregistré par: {visitor.registered_by}
+                            </p>
+                          )}
                         </div>
-                        {!visitor.departure_time && (
-                          <Button variant="outline" size="sm" onClick={() => handleCheckoutVisitor(visitor.id)} className="border-slate-600 text-slate-300 hover:bg-slate-800 hover:text-white">
-                            Check Out
-                          </Button>
-                        )}
-                        {visitor.departure_time && (
-                          <Badge variant="secondary" className="bg-slate-700 text-slate-400">Parti</Badge>
-                        )}
+                        <div className="ml-4">
+                          {!visitor.departure_time && (
+                            <Button variant="outline" size="sm" onClick={() => handleCheckoutVisitor(visitor.id)} className="border-slate-600 text-slate-300 hover:bg-orange-500 hover:text-white hover:border-orange-500">
+                              Départ
+                            </Button>
+                          )}
+                          {visitor.departure_time && (
+                            <Badge variant="secondary" className="bg-green-500/20 text-green-400 border-green-500/30">
+                              ✅ Parti
+                            </Badge>
+                          )}
+                        </div>
                       </div>
                     ))}
                   </div>
