@@ -6,13 +6,16 @@ import HierarchicalUserCreation from '../components/HierarchicalUserCreation';
 import BalanceMonitor from '../components/BalanceMonitor';
 import ActivityHistory from '../components/ActivityHistory';
 import ProspectManagement from '../components/ProspectManagement';
+import SearchAndSort from '../components/SearchAndSort';
 import api from '../utils/api';
 
 const SuperAdminDashboard = () => {
   const { user, logout } = useContext(AuthContext);
   const [stats, setStats] = useState({});
   const [users, setUsers] = useState([]);
+  const [filteredUsers, setFilteredUsers] = useState([]);
   const [activities, setActivities] = useState([]);
+  const [filteredActivities, setFilteredActivities] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
