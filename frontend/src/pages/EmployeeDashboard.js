@@ -63,12 +63,14 @@ export default function EmployeeDashboard() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [clientsRes, casesRes] = await Promise.all([
+      const [clientsRes, casesRes, visitorsRes] = await Promise.all([
         clientsAPI.getAll(),
-        casesAPI.getAll()
+        casesAPI.getAll(),
+        visitorsAPI.getAll()
       ]);
       setClients(clientsRes.data);
       setCases(casesRes.data);
+      setVisitors(visitorsRes.data);
     } catch (error) {
       toast.error('Failed to load data');
       console.error(error);
