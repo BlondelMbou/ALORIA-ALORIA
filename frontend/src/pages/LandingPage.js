@@ -814,6 +814,67 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Section Calculateur CRS */}
+      <section id="calculateur-crs" className="py-16 sm:py-20 lg:py-24 bg-gradient-to-b from-[#0F172A] to-[#1E293B]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Header Section */}
+          <div className="text-center mb-12 sm:mb-16">
+            <div className="inline-flex items-center justify-center p-3 bg-orange-500/10 rounded-2xl mb-6">
+              <Calculator className="h-8 w-8 text-orange-500" />
+            </div>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4 sm:mb-6">
+              Vérifiez votre <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-orange-600">Potentiel d'Admissibilité</span>
+            </h2>
+            <p className="text-base sm:text-lg text-slate-400 max-w-3xl mx-auto leading-relaxed px-4">
+              Estimation indicative basée sur le système <strong>Entrée Express du Canada</strong>. 
+              Pour un résultat précis, utilisez l'outil officiel du Canada ou échangez avec nos conseillers ALORIA.
+            </p>
+          </div>
+
+          {/* Calculateur CRS */}
+          <div className="max-w-5xl mx-auto">
+            <CRSCalculator 
+              onOptimizeClick={() => {
+                // Scroll vers le formulaire de contact
+                const contactSection = document.querySelector('#contact-section');
+                if (contactSection) {
+                  contactSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  toast.info('📝 Remplissez le formulaire ci-dessous pour optimiser votre profil avec nos experts !');
+                }
+              }}
+            />
+          </div>
+
+          {/* CTA Section */}
+          <div className="mt-12 text-center">
+            <div className="inline-flex flex-col sm:flex-row gap-4">
+              <Button 
+                size="lg"
+                className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold shadow-xl"
+                onClick={() => window.open('https://www.canada.ca/fr/immigration-refugies-citoyennete/services/immigrer-canada/entree-express/admissibilite/criteres-selection-travailleur-qualifie-federal/grille-selection-six-facteurs.html', '_blank')}
+              >
+                <Globe className="mr-2 h-5 w-5" />
+                Calculateur Officiel Canada
+              </Button>
+              <Button 
+                size="lg"
+                variant="outline"
+                className="border-slate-600 text-white hover:bg-slate-800"
+                onClick={() => {
+                  const contactSection = document.querySelector('#contact-section');
+                  if (contactSection) {
+                    contactSection.scrollIntoView({ behavior: 'smooth' });
+                  }
+                }}
+              >
+                <MessageCircle className="mr-2 h-5 w-5" />
+                Parler à un Conseiller
+              </Button>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Footer */}
       <footer className="bg-[#0F172A] border-t border-slate-700/50 py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
