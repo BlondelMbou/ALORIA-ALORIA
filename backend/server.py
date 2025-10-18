@@ -3568,12 +3568,13 @@ async def convert_prospect_to_client(
     # Envoyer email au nouveau client avec ses identifiants
     if EMAIL_SERVICE_AVAILABLE:
         try:
-            email_sent = await send_user_welcome_email(
-                email=prospect["email"],
-                full_name=prospect["name"],
-                role="CLIENT",
-                temp_password=temp_password
-            )
+            email_sent = await send_user_welcome_email({
+                "email": prospect["email"],
+                "full_name": prospect["name"],
+                "role": "CLIENT",
+                "login_email": prospect["email"],
+                "default_password": temp_password
+            })
             if email_sent:
                 logger.info(f"Email de bienvenue envoyé au nouveau client {prospect['email']}")
         except Exception as e:
