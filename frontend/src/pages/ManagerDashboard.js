@@ -895,8 +895,21 @@ export default function ManagerDashboard() {
                 <CardDescription className="text-slate-400">Voir et gérer vos conseillers en immigration</CardDescription>
               </CardHeader>
               <CardContent>
+                {/* Recherche et Tri */}
+                <SearchAndSort
+                  data={employees}
+                  searchFields={['full_name', 'email', 'phone']}
+                  sortOptions={[
+                    { value: 'full_name', label: 'Nom' },
+                    { value: 'email', label: 'Email' },
+                    { value: 'created_at', label: 'Date d\'ajout' }
+                  ]}
+                  onFilteredDataChange={setFilteredEmployees}
+                  placeholder="Rechercher un employé (nom, email, téléphone)..."
+                />
+
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {employees.map((employee) => {
+                  {filteredEmployees.map((employee) => {
                     const employeeCases = cases.filter(c => {
                       const client = clients.find(cl => cl.id === c.client_id);
                       return client?.assigned_employee_id === employee.id;
