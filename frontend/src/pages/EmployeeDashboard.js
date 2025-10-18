@@ -616,14 +616,36 @@ export default function EmployeeDashboard() {
 
           {/* My Clients */}
           <TabsContent value="clients">
-            <Card>
+            <Card className="bg-gradient-to-br from-[#1E293B] to-[#334155] border-slate-700">
               <CardHeader>
-                <CardTitle>My Client Portfolio</CardTitle>
-                <CardDescription>All clients assigned to you</CardDescription>
+                <CardTitle className="text-white text-2xl">Mes Clients</CardTitle>
+                <CardDescription className="text-slate-400">Tous les clients qui vous sont assignés</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {clients.map((client) => {
+                {clients.length === 0 ? (
+                  <div className="text-center py-12">
+                    <Users className="w-16 h-16 text-slate-600 mx-auto mb-4" />
+                    <p className="text-slate-400 text-lg">Aucun client assigné</p>
+                  </div>
+                ) : (
+                  <>
+                    {/* Recherche et Tri */}
+                    <SearchAndSort
+                      data={clients}
+                      searchFields={['full_name', 'email', 'country', 'visa_type']}
+                      sortOptions={[
+                        { value: 'created_at', label: 'Date de création' },
+                        { value: 'full_name', label: 'Nom' },
+                        { value: 'country', label: 'Pays' },
+                        { value: 'progress_percentage', label: 'Progression' }
+                      ]}
+                      onFilteredDataChange={setFilteredClients}
+                      placeholder="Rechercher un client (nom, email, pays, type de visa)..."
+                    />
+
+                    {/* Liste filtrée */}
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {filteredClients.map((client) => {
                     const clientCase = cases.find(c => c.client_id === client.id);
                     return (
                       <Card key={client.id} className="bg-gradient-to-br from-[#1E293B] to-[#334155] border-2 border-slate-700 hover:border-orange-500 transition-all">
