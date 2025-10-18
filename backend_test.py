@@ -2833,10 +2833,19 @@ class APITester:
             self.log_result("Regression - Company Info Endpoint", False, "Exception occurred", str(e))
 
     def run_all_tests(self):
-        """Run all test suites including V2 features"""
-        print("🚀 Starting ALORIA AGENCY V2 Backend API Tests - COMPREHENSIVE TESTING")
+        """Run all test suites including V4 Prospects Workflow"""
+        print("🚀 Starting ALORIA AGENCY V4 Backend API Tests - PROSPECTS WORKFLOW TESTING")
         print(f"Testing against: {API_BASE}")
         print("=" * 60)
+        
+        # PRIORITY: V4 PROSPECTS WORKFLOW TESTING (as requested in review)
+        print("\n🎯 TESTING NEW PROSPECTS WORKFLOW (V4)")
+        print("=" * 60)
+        self.test_prospects_workflow_complete()
+        self.test_prospects_access_restrictions()
+        self.test_sendgrid_email_service()
+        self.test_existing_endpoints_regression()
+        self.test_prospects_search_and_filtering()
         
         # PRIORITY: Review Request Specific Tests
         self.test_review_request_specific_tests()
