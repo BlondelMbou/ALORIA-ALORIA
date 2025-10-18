@@ -14,8 +14,6 @@ import {
   Phone, 
   Globe, 
   MessageCircle, 
-  Euro,
-  Clock,
   Target,
   CheckCircle
 } from 'lucide-react';
