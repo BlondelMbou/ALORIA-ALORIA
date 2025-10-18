@@ -411,18 +411,22 @@ class LeadSource(str, Enum):
     OTHER = "Autre"
 
 class VisitorCreate(BaseModel):
-    name: str
-    company: Optional[str] = None
-    purpose: VisitorPurpose
-    details: Optional[str] = None  # Pour précisions si "Autre" sélectionné
+    full_name: str  # Nom complet du visiteur
+    phone_number: str  # Numéro de téléphone
+    purpose: VisitorPurpose  # Motif (dropdown)
+    other_purpose: Optional[str] = None  # Précisions si "Autre" sélectionné
+    cni_number: str  # Numéro de CNI (Carte Nationale d'Identité)
 
 class VisitorResponse(BaseModel):
     model_config = ConfigDict(extra="ignore")
     id: str
-    name: str
-    company: Optional[str]
+    full_name: str
+    phone_number: str
     purpose: VisitorPurpose
-    details: Optional[str]
+    other_purpose: Optional[str]
+    cni_number: str
+    registered_by: str  # Nom de l'employé/manager qui a enregistré
+    registered_by_id: str  # ID de l'employé/manager
     arrival_time: str
     departure_time: Optional[str]
     created_at: str
