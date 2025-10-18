@@ -3317,6 +3317,265 @@ async def respond_to_contact_message(
         "sent_to": message["email"]
     }
 
+
+@api_router.patch("/contact-messages/{message_id}/assign-consultant")
+async def assign_prospect_to_consultant(
+    message_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Affecter un prospect au consultant (SuperAdmin) après paiement 50k CFA (Manager/Employee)"""
+    if current_user["role"] not in ["MANAGER", "EMPLOYEE"]:
+        raise HTTPException(status_code=403, detail="Seuls les employés/managers peuvent affecter au consultant")
+    
+    # Vérifier que le prospect existe et est assigné à l'utilisateur courant
+    prospect = await db.contact_messages.find_one({"id": message_id, "assigned_to": current_user["id"]})
+    if not prospect:
+        raise HTTPException(status_code=404, detail="Prospect non trouvé ou non assigné à vous")
+    
+    if prospect["status"] == ContactStatus.PAYMENT_50K:
+        raise HTTPException(status_code=400, detail="Ce prospect est déjà affecté au consultant")
+    
+    # Auto-déclarer le paiement de 50 000 CFA
+    payment_date = datetime.now(timezone.utc).isoformat()
+    
+    result = await db.contact_messages.update_one(
+        {"id": message_id},
+        {
+            "$set": {
+                "status": ContactStatus.PAYMENT_50K,
+                "payment_50k_amount": 50000,
+                "payment_50k_date": payment_date,
+                "updated_at": payment_date
+            }
+        }
+    )
+    
+    if result.modified_count == 0:
+        raise HTTPException(status_code=500, detail="Erreur lors de l'affectation")
+    
+    # Notifier le SuperAdmin
+    superadmins = await db.users.find({"role": "SUPERADMIN", "is_active": True}).to_list(10)
+    for admin in superadmins:
+        await create_notification(
+            user_id=admin["id"],
+            title="💰 Nouveau prospect payé 50k CFA",
+            message=f"{prospect['name']} a payé 50 000 CFA. Consultation requise (assigné par {current_user['full_name']}).",
+            type="payment_50k",
+            related_id=message_id
+        )
+    
+    # Log activity
+    await log_user_activity(
+        user_id=current_user["id"],
+        action="prospect_consultant_assignment",
+        details={
+            "prospect_id": message_id,
+            "prospect_name": prospect["name"],
+            "payment_amount": 50000,
+            "currency": "CFA"
+        }
+    )
+    
+    return {"message": "Prospect affecté au consultant avec succès", "payment_50k_amount": 50000}
+
+@api_router.patch("/contact-messages/{message_id}/consultant-notes")
+async def add_consultant_notes(
+    message_id: str,
+    notes_data: dict,
+    current_user: dict = Depends(get_current_user)
+):
+    """Ajouter des notes consultant sur un prospect (SuperAdmin uniquement)"""
+    if current_user["role"] != "SUPERADMIN":
+        raise HTTPException(status_code=403, detail="Seul le consultant peut ajouter des notes")
+    
+    prospect = await db.contact_messages.find_one({"id": message_id})
+    if not prospect:
+        raise HTTPException(status_code=404, detail="Prospect non trouvé")
+    
+    note_content = notes_data.get("note", "").strip()
+    if not note_content:
+        raise HTTPException(status_code=400, detail="La note ne peut pas être vide")
+    
+    # Créer l'objet note
+    note_entry = {
+        "id": str(uuid.uuid4()),
+        "content": note_content,
+        "created_by": current_user["full_name"],
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    # Ajouter la note à l'historique
+    result = await db.contact_messages.update_one(
+        {"id": message_id},
+        {
+            "$push": {"consultant_notes": note_entry},
+            "$set": {
+                "status": ContactStatus.IN_CONSULTATION,
+                "updated_at": datetime.now(timezone.utc).isoformat()
+            }
+        }
+    )
+    
+    if result.modified_count == 0:
+        raise HTTPException(status_code=500, detail="Erreur lors de l'ajout de la note")
+    
+    # Log activity
+    await log_user_activity(
+        user_id=current_user["id"],
+        action="consultant_note_added",
+        details={
+            "prospect_id": message_id,
+            "prospect_name": prospect["name"],
+            "note_preview": note_content[:100]
+        }
+    )
+    
+    return {"message": "Note ajoutée avec succès", "note_id": note_entry["id"]}
+
+@api_router.post("/contact-messages/{message_id}/convert-to-client")
+async def convert_prospect_to_client(
+    message_id: str,
+    client_data: dict,
+    current_user: dict = Depends(get_current_user)
+):
+    """Convertir un prospect en client (Manager/Employee)"""
+    if current_user["role"] not in ["MANAGER", "EMPLOYEE"]:
+        raise HTTPException(status_code=403, detail="Seuls les employés/managers peuvent convertir les prospects")
+    
+    # Vérifier que le prospect existe et est assigné à l'utilisateur
+    prospect = await db.contact_messages.find_one({"id": message_id, "assigned_to": current_user["id"]})
+    if not prospect:
+        raise HTTPException(status_code=404, detail="Prospect non trouvé ou non assigné à vous")
+    
+    # Récupérer les données du client
+    first_payment = client_data.get("first_payment_amount", 0)
+    country = client_data.get("country", prospect.get("country", ""))
+    visa_type = client_data.get("visa_type", prospect.get("visa_type", ""))
+    
+    if not country or not visa_type:
+        raise HTTPException(status_code=400, detail="Pays et type de visa requis")
+    
+    # Créer l'utilisateur client
+    client_id = str(uuid.uuid4())
+    temp_password = generate_temporary_password()
+    hashed_password = pwd_context.hash(temp_password)
+    
+    user_dict = {
+        "id": client_id,
+        "email": prospect["email"],
+        "full_name": prospect["name"],
+        "phone": prospect.get("phone", ""),
+        "password": hashed_password,
+        "role": "CLIENT",
+        "is_active": True,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.users.insert_one(user_dict)
+    
+    # Créer le dossier client
+    case_id = str(uuid.uuid4())
+    
+    # Récupérer le workflow
+    workflows_data = await db.workflows.find_one({"country": country})
+    if not workflows_data:
+        # Workflow par défaut si non trouvé
+        workflow_steps = WORKFLOWS_CONFIG.get(country, {}).get(visa_type, [])
+    else:
+        workflow_steps = workflows_data.get("workflows", {}).get(visa_type, [])
+    
+    case_dict = {
+        "id": case_id,
+        "client_id": client_id,
+        "client_name": prospect["name"],
+        "client_email": prospect["email"],
+        "assigned_employee_id": current_user["id"],
+        "assigned_employee_name": current_user["full_name"],
+        "country": country,
+        "visa_type": visa_type,
+        "status": "En cours",
+        "current_step_index": 0,
+        "workflow_steps": workflow_steps,
+        "progress_percentage": 0,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "updated_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.cases.insert_one(case_dict)
+    
+    # Si un premier paiement est déclaré, l'enregistrer
+    if first_payment and first_payment > 0:
+        payment_id = str(uuid.uuid4())
+        payment_dict = {
+            "id": payment_id,
+            "user_id": client_id,
+            "client_id": client_id,
+            "amount": first_payment,
+            "currency": "CFA",
+            "payment_method": "Virement bancaire",
+            "description": "Premier versement pour devenir client",
+            "status": "confirmed",
+            "invoice_number": f"ALO-{datetime.now(timezone.utc).strftime('%Y%m%d')}-{uuid.uuid4().hex[:8].upper()}",
+            "created_at": datetime.now(timezone.utc).isoformat(),
+            "confirmed_at": datetime.now(timezone.utc).isoformat(),
+            "confirmed_by": current_user["id"]
+        }
+        await db.payments.insert_one(payment_dict)
+    
+    # Mettre à jour le statut du prospect
+    await db.contact_messages.update_one(
+        {"id": message_id},
+        {
+            "$set": {
+                "status": ContactStatus.CONVERTED_CLIENT,
+                "client_id": client_id,
+                "updated_at": datetime.now(timezone.utc).isoformat()
+            }
+        }
+    )
+    
+    # Envoyer email au nouveau client avec ses identifiants
+    if EMAIL_SERVICE_AVAILABLE:
+        try:
+            email_sent = await send_user_welcome_email(
+                email=prospect["email"],
+                full_name=prospect["name"],
+                role="CLIENT",
+                temp_password=temp_password
+            )
+            if email_sent:
+                logger.info(f"Email de bienvenue envoyé au nouveau client {prospect['email']}")
+        except Exception as e:
+            logger.error(f"Erreur envoi email au client {prospect['email']}: {e}")
+    
+    # Notifier le client (dans l'app)
+    await create_notification(
+        user_id=client_id,
+        title="🎉 Bienvenue chez ALORIA AGENCY!",
+        message=f"Votre dossier d'immigration pour {country} - {visa_type} a été créé. Consultez votre espace client.",
+        type="client_created"
+    )
+    
+    # Log activity
+    await log_user_activity(
+        user_id=current_user["id"],
+        action="prospect_converted_to_client",
+        details={
+            "prospect_id": message_id,
+            "client_id": client_id,
+            "client_name": prospect["name"],
+            "first_payment": first_payment
+        }
+    )
+    
+    return {
+        "message": "Prospect converti en client avec succès",
+        "client_id": client_id,
+        "case_id": case_id,
+        "login_email": prospect["email"],
+        "temporary_password": temp_password
+    }
+
 # Activity Logs
 @api_router.get("/activities", response_model=List[ActivityLogResponse])
 async def get_activity_logs(
