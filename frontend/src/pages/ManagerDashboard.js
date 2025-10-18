@@ -794,7 +794,7 @@ export default function ManagerDashboard() {
                       </tr>
                     </thead>
                     <tbody>
-                      {filteredClients.map((client) => {
+                      {clients.map((client) => {
                         const clientCase = cases.find(c => c.client_id === client.id);
                         return (
                           <tr key={client.id} className="border-b border-slate-700/50 hover:bg-slate-800/30">
