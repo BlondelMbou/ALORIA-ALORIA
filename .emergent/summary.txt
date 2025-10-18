@@ -119,7 +119,7 @@ declare -x base_url="https://demobackend.emergentagent.com"
 declare -x code_server_password="6e3cbf62"
 declare -x integration_proxy_url="https://integrations.emergentagent.com"
 declare -x monitor_polling_interval="1"
-declare -x preview_endpoint="https://immi-portal-app.preview.emergentagent.com"
+declare -x preview_endpoint="https://casemgr-crm.preview.emergentagent.com"
 declare -x run_id="d355f527-51fb-4632-b670-430074a05fdd" for  to resolve import errors.
 -   :
     -   **Importance:** Reusable component for creating users based on hierarchical roles.

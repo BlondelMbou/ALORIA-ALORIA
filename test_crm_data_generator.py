@@ -13,7 +13,7 @@ import time
 from typing import List, Dict
 
 # Configuration
-BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://immi-portal-app.preview.emergentagent.com')
+BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://casemgr-crm.preview.emergentagent.com')
 API_BASE = f"{BACKEND_URL}/api"
 
 class CRMDataGenerator:
