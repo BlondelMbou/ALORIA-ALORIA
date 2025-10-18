@@ -354,6 +354,30 @@ export default function LandingPage() {
                   </div>
                 </a>
                 <a 
+                  href="#calculateur-crs" 
+                  className="block py-3 px-4 text-lg font-medium text-slate-300 hover:text-orange-500 hover:bg-slate-800/50 rounded-lg transition-all duration-300 touch-manipulation"
+                  onClick={() => setShowMobileMenu(false)}
+                >
+                  <div className="flex items-center">
+                    <div className="w-8 h-8 bg-orange-500/20 rounded-lg flex items-center justify-center mr-3">
+                      <Calculator className="w-4 h-4 text-orange-400" />
+                    </div>
+                    Calculateur CRS
+                  </div>
+                </a>
+                <a 
+                  href="#contact-section" 
+                  className="block py-3 px-4 text-lg font-medium text-slate-300 hover:text-orange-500 hover:bg-slate-800/50 rounded-lg transition-all duration-300 touch-manipulation"
+                  onClick={() => setShowMobileMenu(false)}
+                >
+                  <div className="flex items-center">
+                    <div className="w-8 h-8 bg-pink-500/20 rounded-lg flex items-center justify-center mr-3">
+                      <Mail className="w-4 h-4 text-pink-400" />
+                    </div>
+                    Contact
+                  </div>
+                </a>
+                <a 
                   href="#faq" 
                   className="block py-3 px-4 text-lg font-medium text-slate-300 hover:text-orange-500 hover:bg-slate-800/50 rounded-lg transition-all duration-300 touch-manipulation"
                   onClick={() => setShowMobileMenu(false)}
