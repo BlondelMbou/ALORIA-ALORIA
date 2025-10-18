@@ -892,14 +892,18 @@ export default function LandingPage() {
                 Votre partenaire de confiance depuis 2012 pour les services d'immigration premium 
                 vers les destinations les plus prisées au monde.
               </p>
-              <div className="flex space-x-4">
+              <div className="flex items-center gap-2 mb-4 text-orange-500">
+                <MapPin className="w-5 h-5" />
+                <span className="text-slate-300 font-semibold">📍 Douala, Cameroun</span>
+              </div>
+              <div className="flex flex-wrap gap-3">
                 <Button variant="outline" size="sm" className="border-slate-600 text-slate-400 hover:text-white">
                   <Phone className="w-4 h-4 mr-2" />
-                  +33 1 23 45 67 89
+                  +237 6 XX XX XX XX
                 </Button>
                 <Button variant="outline" size="sm" className="border-slate-600 text-slate-400 hover:text-white">
                   <Mail className="w-4 h-4 mr-2" />
-                  Contact
+                  contact@aloria-agency.com
                 </Button>
               </div>
             </div>
