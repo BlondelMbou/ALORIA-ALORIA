@@ -81,12 +81,21 @@ const SuperAdminDashboard = () => {
 
   const UsersTab = () => (
     <div className="bg-slate-700 rounded-lg p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h3 className="text-xl font-bold text-white">Gestion des Utilisateurs</h3>
-        <input
-          type="text"
-          placeholder="Rechercher un utilisateur..."
-          className="px-4 py-2 bg-slate-600 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+      <div className="mb-6">
+        <h3 className="text-xl font-bold text-white mb-4">Gestion des Utilisateurs</h3>
+        
+        {/* Recherche et Tri */}
+        <SearchAndSort
+          data={users}
+          searchFields={['full_name', 'email', 'role']}
+          sortOptions={[
+            { value: 'created_at', label: 'Date de création' },
+            { value: 'full_name', label: 'Nom' },
+            { value: 'role', label: 'Rôle' },
+            { value: 'email', label: 'Email' }
+          ]}
+          onFilteredDataChange={setFilteredUsers}
+          placeholder="Rechercher un utilisateur (nom, email, rôle)..."
         />
       </div>
       
@@ -103,7 +112,7 @@ const SuperAdminDashboard = () => {
             </tr>
           </thead>
           <tbody>
-            {users.map((user) => (
+            {filteredUsers.map((user) => (
               <tr key={user.id} className="border-b border-slate-600/50">
                 <td className="py-4">
                   <div className="flex items-center space-x-3">
