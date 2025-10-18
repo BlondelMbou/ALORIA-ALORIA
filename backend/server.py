@@ -383,12 +383,12 @@ class ExpenseCategory(str, Enum):
     FORMATION = "FORMATION"
 
 class ContactStatus(str, Enum):
-    NEW = "NEW"
-    CONTACTED = "CONTACTED"
-    QUALIFIED = "QUALIFIED"
-    RESPONDED = "RESPONDED"
-    CONVERTED = "CONVERTED"
-    ARCHIVED = "ARCHIVED"
+    NEW = "nouveau"  # Formulaire soumis
+    ASSIGNED_EMPLOYEE = "assigne_employe"  # Assigné à Employé/Manager par SuperAdmin
+    PAYMENT_50K = "paiement_50k"  # Payé 50k CFA, affecté au consultant
+    IN_CONSULTATION = "en_consultation"  # SuperAdmin en contact
+    CONVERTED_CLIENT = "converti_client"  # Devenu client
+    ARCHIVED = "archive"  # Archivé
 
 class UrgencyLevel(str, Enum):
     URGENT = "Urgent"
