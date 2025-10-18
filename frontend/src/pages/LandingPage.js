@@ -945,6 +945,8 @@ export default function LandingPage() {
                 <li><a href="#pays" className="hover:text-orange-500 transition-colors">Destinations</a></li>
                 <li><a href="#processus" className="hover:text-orange-500 transition-colors">Notre Processus</a></li>
                 <li><a href="#temoignages" className="hover:text-orange-500 transition-colors">Témoignages</a></li>
+                <li><a href="#calculateur-crs" className="hover:text-orange-500 transition-colors">Calculateur CRS</a></li>
+                <li><a href="#contact-section" className="hover:text-orange-500 transition-colors">Contact</a></li>
                 <li><a href="#faq" className="hover:text-orange-500 transition-colors">FAQ</a></li>
                 <li><a href="/login" className="hover:text-orange-500 transition-colors">Espace Client</a></li>
               </ul>
