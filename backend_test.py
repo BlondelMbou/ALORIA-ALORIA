@@ -54,10 +54,10 @@ class APITester:
         """Test user registration and login for MANAGER and EMPLOYEE"""
         print("=== Testing Authentication ===")
         
-        # Test Manager Registration
+        # Test Manager Registration - Use review credentials
         manager_data = {
-            "email": "manager@aloria.com",
-            "password": "admin123",
+            "email": "manager@test.com",
+            "password": "password123",
             "full_name": "Test Manager",
             "phone": "+33123456789",
             "role": "MANAGER"
