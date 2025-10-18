@@ -49,9 +49,10 @@ const BalanceMonitor = () => {
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('fr-FR', {
-      style: 'currency',
-      currency: 'EUR'
-    }).format(amount);
+      style: 'decimal',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(amount) + ' CFA';
   };
 
   const getBalanceStatus = () => {
