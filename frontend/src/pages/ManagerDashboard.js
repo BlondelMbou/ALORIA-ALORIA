@@ -428,14 +428,6 @@ export default function ManagerDashboard() {
     }
   };
 
-  const filteredClients = clients.filter(client => {
-    const matchesSearch = client.client_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          client.assigned_employee_name?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCountry = filterCountry === 'all' || client.country === filterCountry;
-    const matchesStatus = filterStatus === 'all' || client.current_status === filterStatus;
-    return matchesSearch && matchesCountry && matchesStatus;
-  });
-
   const getStatusColor = (status) => {
     switch (status.toLowerCase()) {
       case 'new': return 'bg-blue-100 text-blue-700';
