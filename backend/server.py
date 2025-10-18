@@ -420,15 +420,19 @@ class VisitorCreate(BaseModel):
 class VisitorResponse(BaseModel):
     model_config = ConfigDict(extra="ignore")
     id: str
-    full_name: str
-    phone_number: str
-    purpose: VisitorPurpose
-    other_purpose: Optional[str]
-    cni_number: str
-    registered_by: str  # Nom de l'employé/manager qui a enregistré
-    registered_by_id: str  # ID de l'employé/manager
+    # Support ancien ET nouveau format pour rétrocompatibilité
+    full_name: Optional[str] = None
+    name: Optional[str] = None  # Ancien format
+    phone_number: Optional[str] = None
+    company: Optional[str] = None  # Ancien format
+    purpose: str  # Accepter string au lieu de VisitorPurpose enum pour compatibilité
+    other_purpose: Optional[str] = None
+    details: Optional[str] = None  # Ancien format
+    cni_number: Optional[str] = None
+    registered_by: Optional[str] = None
+    registered_by_id: Optional[str] = None
     arrival_time: str
-    departure_time: Optional[str]
+    departure_time: Optional[str] = None
     created_at: str
     
 class ChatMessage(BaseModel):
