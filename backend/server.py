@@ -688,7 +688,7 @@ class ContactMessageResponse(BaseModel):
     lead_source: str
     conversion_probability: int
     notes: str
-    how_did_you_know: str
+    how_did_you_know: Optional[str] = None  # Optionnel pour rétrocompatibilité
     referred_by_employee: Optional[str] = None
     payment_50k_amount: Optional[float] = None
     payment_50k_date: Optional[str] = None
