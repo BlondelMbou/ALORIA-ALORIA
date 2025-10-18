@@ -429,6 +429,7 @@ const SuperAdminDashboard = () => {
         {/* Tab Content */}
         {activeTab === 'users' && <UsersTab />}
         {activeTab === 'activities' && <ActivityHistory />}
+        {activeTab === 'prospects' && <ProspectManagement userRole="SUPERADMIN" />}
         {activeTab === 'users-creation' && <HierarchicalUserCreation onUserCreated={fetchDashboardData} />}
         {activeTab === 'balance' && <BalanceMonitor />}
       </div>
