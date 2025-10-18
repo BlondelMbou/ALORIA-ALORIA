@@ -3837,5 +3837,5 @@ app.add_middleware(
 async def shutdown_db_client():
     client.close()
 
-# Create combined app with Socket.IO (ne PAS écraser app)
-asgi_app = socketio.ASGIApp(sio, other_asgi_app=app)
+# Export l'app FastAPI pour uvicorn (utilisé par supervisor)
+# L'app inclut déjà le router et supporte les WebSockets via python-socketio intégré
