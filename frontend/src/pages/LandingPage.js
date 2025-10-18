@@ -690,7 +690,7 @@ export default function LandingPage() {
       </section>
 
       {/* Testimonials Section */}
-      <section id="temoignages" className="py-20">
+      <section id="temoignages" className={`py-20 transition-all duration-700 ${getSectionClass('temoignages')}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <Badge className="bg-green-500/10 text-green-400 border-green-500/30 mb-4">
