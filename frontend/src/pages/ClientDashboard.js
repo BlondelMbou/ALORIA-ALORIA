@@ -592,6 +592,7 @@ export default function ClientDashboard() {
                           onChange={(e) => setPaymentForm({...paymentForm, currency: e.target.value})}
                           className="w-full px-3 py-2 bg-slate-600 border border-slate-500 text-white rounded-md"
                         >
+                          <option value="CFA">CFA (FCFA)</option>
                           <option value="EUR">EUR (€)</option>
                           <option value="CAD">CAD ($)</option>
                           <option value="USD">USD ($)</option>
