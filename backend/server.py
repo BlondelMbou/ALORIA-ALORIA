@@ -3511,7 +3511,7 @@ async def convert_prospect_to_client(
     workflows_data = await db.workflows.find_one({"country": country})
     if not workflows_data:
         # Workflow par défaut si non trouvé
-        workflow_steps = WORKFLOWS_CONFIG.get(country, {}).get(visa_type, [])
+        workflow_steps = WORKFLOWS.get(country, {}).get(visa_type, [])
     else:
         workflow_steps = workflows_data.get("workflows", {}).get(visa_type, [])
     
