@@ -10,11 +10,12 @@ import { Badge } from '../components/ui/badge';
 import { toast } from 'sonner';
 import api from '../utils/api';
 import ContactFormWidget from '../components/ContactFormWidget';
+import CRSCalculator from '../components/CRSCalculator';
 import { 
   Globe, ArrowRight, CheckCircle, Users, FileText, Clock, Star, MapPin, 
   Briefcase, GraduationCap, Heart, Shield, Award, TrendingUp, Phone, 
   Mail, MessageCircle, ChevronRight, Zap, Target, Eye, Lightbulb,
-  BarChart3, Headphones, BookOpen, Calendar, MousePointer2, Menu, X
+  BarChart3, Headphones, BookOpen, Calendar, MousePointer2, Menu, X, Calculator
 } from 'lucide-react';
 
 export default function LandingPage() {
