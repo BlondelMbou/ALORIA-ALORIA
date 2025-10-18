@@ -3127,19 +3127,22 @@ async def get_contact_messages(
     status: Optional[str] = None,
     current_user: dict = Depends(get_current_user)
 ):
-    """Obtenir les messages de contact (Manager/Employee)"""
-    if current_user["role"] not in ["MANAGER", "EMPLOYEE"]:
+    """Obtenir les messages de contact (SuperAdmin/Manager/Employee)"""
+    if current_user["role"] not in ["SUPERADMIN", "MANAGER", "EMPLOYEE"]:
         raise HTTPException(status_code=403, detail="Accès refusé")
     
     query = {}
     if status:
         query["status"] = status
     
-    # Employee voit seulement les messages qui lui sont assignés
-    if current_user["role"] == "EMPLOYEE":
+    # SUPERADMIN voit TOUS les prospects
+    if current_user["role"] == "SUPERADMIN":
+        pass  # Pas de filtre
+    # MANAGER et EMPLOYEE voient seulement les messages qui leur sont assignés
+    elif current_user["role"] in ["MANAGER", "EMPLOYEE"]:
         query["assigned_to"] = current_user["id"]
     
-    messages = await db.contact_messages.find(query, {"_id": 0}).sort("created_at", -1).to_list(100)
+    messages = await db.contact_messages.find(query, {"_id": 0}).sort("created_at", -1).to_list(200)
     return [ContactMessageResponse(**msg) for msg in messages]
 
 @api_router.patch("/contact-messages/{message_id}/assign")
