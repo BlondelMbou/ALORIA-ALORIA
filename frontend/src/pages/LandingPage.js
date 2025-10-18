@@ -580,6 +580,9 @@ export default function LandingPage() {
                 </CardContent>
               </Card>
             </div>
+            {/* End Stats Grid */}
+            </div>
+            {/* End Right Column */}
           </div>
         </div>
       </section>
