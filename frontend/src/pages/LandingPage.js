@@ -878,7 +878,7 @@ export default function LandingPage() {
       </section>
 
       {/* Section Calculateur CRS */}
-      <section id="calculateur-crs" className="py-16 sm:py-20 lg:py-24 bg-gradient-to-b from-[#0F172A] to-[#1E293B]">
+      <section id="calculateur-crs" className={`py-16 sm:py-20 lg:py-24 bg-gradient-to-b from-[#0F172A] to-[#1E293B] transition-all duration-700 ${getSectionClass('calculateur-crs')}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header Section */}
           <div className="text-center mb-12 sm:mb-16">
