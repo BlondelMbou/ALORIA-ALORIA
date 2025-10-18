@@ -74,16 +74,39 @@ export default function ManagerDashboard() {
   // WebSocket hook
   const { connected } = useSocket(localStorage.getItem('token'));
 
+  // Calcul dynamique des stats à partir des données locales pour mise à jour en temps réel
+  const calculatedStats = React.useMemo(() => {
+    const activeCases = cases.filter(c => 
+      c.status === 'In Progress' || c.status === 'Under Review' || c.status === 'En cours' || c.status === 'En attente'
+    ).length;
+    
+    const completedCases = cases.filter(c => 
+      c.status === 'Approved' || c.status === 'Completed' || c.status === 'Terminé' || c.status === 'Approuvé'
+    ).length;
+    
+    return {
+      total_cases: cases.length,
+      active_cases: activeCases,
+      completed_cases: completedCases,
+      total_clients: clients.length,
+      total_employees: employees.length,
+      total_visitors: visitors.length
+    };
+  }, [cases, clients, employees, visitors]);
+
+  // Utiliser les stats calculées si disponibles, sinon les stats du backend
+  const displayStats = calculatedStats.total_cases > 0 ? calculatedStats : stats;
+
   useEffect(() => {
     fetchData();
     fetchPayments();
     
-    // Auto-refresh des données toutes les 30 minutes (sans perdre le travail en cours)
+    // Auto-refresh des données toutes les 5 minutes pour garder les stats à jour
     const refreshInterval = setInterval(() => {
       // Refresh silencieux sans recharger toute la page
       fetchData();
       fetchPayments();
-    }, 1800000); // 30 minutes
+    }, 300000); // 5 minutes
     
     return () => clearInterval(refreshInterval);
   }, []);
