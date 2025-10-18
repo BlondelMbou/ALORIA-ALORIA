@@ -605,8 +605,8 @@ export default function LandingPage() {
             <div className="mt-12 max-w-4xl mx-auto">
               <div className="relative rounded-2xl overflow-hidden shadow-2xl">
                 <img 
-                  src="https://images.unsplash.com/photo-1560250097-0b93528c311a?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NjZ8MHwxfHNlYXJjaHw0fHxidXNpbmVzcyUyMHByb2Zlc3Npb25hbHxlbnwwfHx8fDE3NjA3ODkyMTV8MA&ixlib=rb-4.1.0&q=85" 
-                  alt="Expert ALORIA AGENCY" 
+                  src="https://images.unsplash.com/photo-1758525588535-cdc30ca71692?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NjZ8MHwxfHNlYXJjaHwyfHxibGFjayUyMHByb2Zlc3Npb25hbCUyMGNvbmZpZGVudHxlbnwwfHx8fDE3NjA3ODk5NDB8MA&ixlib=rb-4.1.0&q=85" 
+                  alt="Expert Camerounais ALORIA AGENCY" 
                   className="w-full h-64 md:h-80 object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-r from-[#0F172A]/60 to-transparent flex items-center">
