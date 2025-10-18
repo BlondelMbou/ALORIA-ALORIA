@@ -125,7 +125,7 @@ export default function ClientDashboard() {
         toast.success('Déclaration de paiement envoyée avec succès !');
         setPaymentForm({
           amount: '',
-          currency: 'EUR',
+          currency: 'CFA',
           description: '',
           payment_method: 'Virement bancaire'
         });
