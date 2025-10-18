@@ -67,6 +67,11 @@ export default function LandingPage() {
     };
   }, []);
 
+  // Helper pour appliquer les classes d'animation
+  const getSectionClass = (sectionId, baseAnimation = 'animate-fade-in-up') => {
+    return visibleSections.has(sectionId) ? baseAnimation : 'opacity-0';
+  };
+
   const faqs = [
     {
       question: "Combien de temps prend le processus d'immigration ?",
