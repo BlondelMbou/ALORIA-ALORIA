@@ -250,6 +250,12 @@ export default function LandingPage() {
               <a href="#temoignages" className="text-slate-300 hover:text-orange-500 font-medium transition-all duration-300 hover:scale-105 text-sm xl:text-base">
                 Témoignages
               </a>
+              <a href="#calculateur-crs" className="text-slate-300 hover:text-orange-500 font-medium transition-all duration-300 hover:scale-105 text-sm xl:text-base">
+                Calculateur
+              </a>
+              <a href="#contact-section" className="text-slate-300 hover:text-orange-500 font-medium transition-all duration-300 hover:scale-105 text-sm xl:text-base">
+                Contact
+              </a>
               <a href="#faq" className="text-slate-300 hover:text-orange-500 font-medium transition-all duration-300 hover:scale-105 text-sm xl:text-base">
                 FAQ
               </a>
