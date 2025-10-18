@@ -73,8 +73,8 @@ class APITester:
             elif response.status_code == 400 and "already registered" in response.text:
                 # User already exists, try login
                 login_response = self.session.post(f"{API_BASE}/auth/login", json={
-                    "email": manager_data["email"],
-                    "password": manager_data["password"]
+                    "email": "manager@test.com",
+                    "password": "password123"
                 })
                 if login_response.status_code == 200:
                     data = login_response.json()
