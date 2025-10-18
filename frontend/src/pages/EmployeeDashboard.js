@@ -551,13 +551,21 @@ export default function EmployeeDashboard() {
                   {clients.map((client) => {
                     const clientCase = cases.find(c => c.client_id === client.id);
                     return (
-                      <Card key={client.id} className="border-2 hover:border-orange-500 transition-all">
+                      <Card key={client.id} className="bg-gradient-to-br from-[#1E293B] to-[#334155] border-2 border-slate-700 hover:border-orange-500 transition-all">
                         <CardContent className="p-4">
-                          <h3 className="font-bold text-lg text-white mb-2">{clientCase?.client_name || 'N/A'}</h3>
+                          <div className="flex items-center gap-2 mb-3">
+                            <div className="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center text-white font-bold">
+                              {(clientCase?.client_name || 'N')[0].toUpperCase()}
+                            </div>
+                            <div className="flex-1">
+                              <h3 className="font-bold text-lg text-white leading-tight">{clientCase?.client_name || 'N/A'}</h3>
+                              <p className="text-xs text-slate-400">{clientCase?.client_email || 'Email N/A'}</p>
+                            </div>
+                          </div>
                           <div className="space-y-2">
                             <div className="flex justify-between text-sm">
-                              <span className="text-slate-400">Country:</span>
-                              <Badge variant="outline">{client.country}</Badge>
+                              <span className="text-slate-400">Pays:</span>
+                              <Badge variant="outline" className="bg-blue-500/10 text-blue-400 border-blue-500/30">{client.country}</Badge>
                             </div>
                             <div className="flex justify-between text-sm">
                               <span className="text-slate-400">Visa Type:</span>
