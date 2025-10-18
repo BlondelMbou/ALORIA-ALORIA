@@ -604,12 +604,17 @@ export default function EmployeeDashboard() {
 
           {/* Create Client */}
           <TabsContent value="create">
-            <Card>
-              <CardHeader>
-                <CardTitle>Create New Client</CardTitle>
-                <CardDescription>Add a new client to your portfolio</CardDescription>
+            <Card className="bg-gradient-to-br from-[#1E293B] to-[#334155] border-slate-700">
+              <CardHeader className="border-b border-slate-700 pb-6">
+                <CardTitle className="text-2xl font-bold text-white flex items-center gap-2">
+                  <UserPlus className="w-6 h-6 text-orange-500" />
+                  Créer un nouveau client
+                </CardTitle>
+                <CardDescription className="text-slate-400 mt-2">
+                  Ajouter un nouveau client à votre portefeuille
+                </CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="pt-6">
                 <form onSubmit={handleCreateClient} className="space-y-6">
                   <div className="grid md:grid-cols-2 gap-6">
                     <div>
