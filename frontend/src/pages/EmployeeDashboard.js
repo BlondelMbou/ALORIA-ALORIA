@@ -568,11 +568,11 @@ export default function EmployeeDashboard() {
                               <Badge variant="outline" className="bg-blue-500/10 text-blue-400 border-blue-500/30">{client.country}</Badge>
                             </div>
                             <div className="flex justify-between text-sm">
-                              <span className="text-slate-400">Visa Type:</span>
+                              <span className="text-slate-400">Type de Visa:</span>
                               <span className="text-white font-medium text-xs">{client.visa_type}</span>
                             </div>
                             <div className="flex justify-between text-sm">
-                              <span className="text-slate-400">Status:</span>
+                              <span className="text-slate-400">Statut:</span>
                               <Badge className={getStatusColor(client.current_status)}>{client.current_status}</Badge>
                             </div>
                             <div>
