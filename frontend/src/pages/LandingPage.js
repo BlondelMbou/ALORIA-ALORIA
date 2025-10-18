@@ -739,7 +739,7 @@ export default function LandingPage() {
       </section>
 
       {/* FAQ Section */}
-      <section id="faq" className="py-20 bg-gradient-to-b from-transparent to-[#1E293B]/50">
+      <section id="faq" className={`py-20 bg-gradient-to-b from-transparent to-[#1E293B]/50 transition-all duration-700 ${getSectionClass('faq')}`}>
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <Badge className="bg-blue-500/10 text-blue-400 border-blue-500/30 mb-4">
