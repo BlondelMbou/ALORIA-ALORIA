@@ -961,8 +961,23 @@ export default function ManagerDashboard() {
                 <CardDescription className="text-slate-400">Vue complète de tous les dossiers d'immigration</CardDescription>
               </CardHeader>
               <CardContent>
+                {/* Recherche et Tri */}
+                <SearchAndSort
+                  data={cases}
+                  searchFields={['client_name', 'country', 'visa_type', 'status']}
+                  sortOptions={[
+                    { value: 'created_at', label: 'Date de création' },
+                    { value: 'client_name', label: 'Nom du client' },
+                    { value: 'country', label: 'Pays' },
+                    { value: 'status', label: 'Statut' },
+                    { value: 'progress_percentage', label: 'Progression' }
+                  ]}
+                  onFilteredDataChange={setFilteredCases}
+                  placeholder="Rechercher un dossier (client, pays, visa, statut)..."
+                />
+
                 <div className="space-y-4">
-                  {cases.map((caseItem) => (
+                  {filteredCases.map((caseItem) => (
                     <div key={caseItem.id} className="bg-[#0F172A] border border-slate-700 rounded-lg p-4 hover:border-orange-500 transition-all">
                       <div className="flex justify-between items-start mb-3">
                         <div>
