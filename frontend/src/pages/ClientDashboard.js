@@ -38,7 +38,7 @@ export default function ClientDashboard() {
   const [payments, setPayments] = useState([]);
   const [paymentForm, setPaymentForm] = useState({
     amount: '',
-    currency: 'EUR',
+    currency: 'CFA',
     description: '',
     payment_method: 'Virement bancaire'
   });
