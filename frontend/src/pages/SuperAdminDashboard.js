@@ -276,9 +276,10 @@ const SuperAdminDashboard = () => {
                   </div>
                 </div>
               </div>
-            ))
-          )}
-        </div>
+            ))}
+            </div>
+          </>
+        )}
         
         {activities.length > 0 && (
           <div className="text-center mt-4">
