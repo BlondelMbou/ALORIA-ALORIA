@@ -2280,6 +2280,39 @@ async def get_client_payment_history(current_user: dict = Depends(get_current_us
     
     return [PaymentDeclarationResponse(**payment) for payment in payments]
 
+@api_router.get("/invoices/{invoice_number}")
+async def download_invoice(invoice_number: str, current_user: dict = Depends(get_current_user)):
+    """Télécharger une facture PDF"""
+    # Vérifier que l'utilisateur a le droit de télécharger cette facture
+    invoice = await db.invoices.find_one({"invoice_number": invoice_number})
+    if not invoice:
+        raise HTTPException(status_code=404, detail="Facture non trouvée")
+    
+    payment = await db.payment_declarations.find_one({"id": invoice["payment_id"]})
+    if not payment:
+        raise HTTPException(status_code=404, detail="Paiement associé non trouvé")
+    
+    # Vérifier les permissions
+    if current_user["role"] == "CLIENT":
+        client = await db.clients.find_one({"user_id": current_user["id"]})
+        if not client or payment["client_id"] != client["id"]:
+            raise HTTPException(status_code=403, detail="Accès refusé à cette facture")
+    elif current_user["role"] not in ["MANAGER", "SUPERADMIN"]:
+        raise HTTPException(status_code=403, detail="Accès refusé")
+    
+    pdf_path = f"/app/backend/invoices/{invoice_number}.pdf"
+    
+    # Vérifier que le fichier existe
+    import os
+    if not os.path.exists(pdf_path):
+        raise HTTPException(status_code=404, detail="Fichier PDF non trouvé")
+    
+    return FileResponse(
+        path=pdf_path,
+        media_type="application/pdf",
+        filename=f"{invoice_number}.pdf"
+    )
+
 @api_router.get("/payments/manager-history", response_model=List[PaymentDeclarationResponse])
 async def get_manager_payment_history(current_user: dict = Depends(get_current_user)):
     """Manager récupère l'historique complet des paiements"""
