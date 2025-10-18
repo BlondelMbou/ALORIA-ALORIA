@@ -16,6 +16,7 @@ import { Globe, LogOut, Users, FileText, MessageCircle, CheckCircle, Clock, Send
 import ChatWidget from '../components/ChatWidget';
 import NotificationBell from '../components/NotificationBell';
 import MyProspects from '../components/MyProspects';
+import SearchAndSort from '../components/SearchAndSort';
 import useSocket from '../hooks/useSocket';
 
 export default function EmployeeDashboard() {
