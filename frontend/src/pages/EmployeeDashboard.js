@@ -38,10 +38,11 @@ export default function EmployeeDashboard() {
   // Visitor registration state
   const [showVisitorForm, setShowVisitorForm] = useState(false);
   const [newVisitor, setNewVisitor] = useState({
-    name: '',
-    company: '',
+    full_name: '',
+    phone_number: '',
     purpose: 'Consultation initiale',
-    details: ''
+    other_purpose: '',
+    cni_number: ''
   });
   
   const [chatUnreadCount, setChatUnreadCount] = useState(0);
