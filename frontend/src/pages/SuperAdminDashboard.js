@@ -226,11 +226,11 @@ const SuperAdminDashboard = () => {
                         {activity.action === 'LOGIN' && 'Connexion au système'}
                         {activity.action === 'CREATE_USER' && `Création d'utilisateur ${activity.details?.role || ''}`}
                         {activity.action === 'CREATE_CLIENT' && 'Création d\'un nouveau client'}
-                        {activity.action === 'PAYMENT_CONFIRMED' && `Paiement confirmé (${activity.details?.amount || 'N/A'}€)`}
-                        {activity.action === 'PAYMENT_DECLARED' && `Paiement déclaré (${activity.details?.amount || 'N/A'}€)`}
+                        {activity.action === 'PAYMENT_CONFIRMED' && `Paiement confirmé (${activity.details?.amount || 'N/A'} CFA)`}
+                        {activity.action === 'PAYMENT_DECLARED' && `Paiement déclaré (${activity.details?.amount || 'N/A'} CFA)`}
                         {activity.action === 'CASE_UPDATED' && 'Mise à jour de dossier'}
                         {activity.action === 'CASE_CREATED' && 'Création de dossier'}
-                        {activity.action === 'WITHDRAWAL_DECLARED' && `Retrait déclaré (${activity.details?.amount || 'N/A'}€)`}
+                        {activity.action === 'WITHDRAWAL_DECLARED' && `Retrait déclaré (${activity.details?.amount || 'N/A'} CFA)`}
                         {activity.action === 'RESPOND_TO_CONTACT' && 'Réponse à un prospect'}
                         {!['LOGIN', 'CREATE_USER', 'CREATE_CLIENT', 'PAYMENT_CONFIRMED', 'PAYMENT_DECLARED', 'CASE_UPDATED', 'CASE_CREATED', 'WITHDRAWAL_DECLARED', 'RESPOND_TO_CONTACT'].includes(activity.action) && activity.action}
                       </p>
