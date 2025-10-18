@@ -731,7 +731,7 @@ export default function LandingPage() {
       </section>
 
       {/* Application Form */}
-      <section id="start-application" className="py-20 bg-gradient-to-b from-[#1E293B]/50 to-[#0F172A]">
+      <section id="contact-section" className="py-20 bg-gradient-to-b from-[#1E293B]/50 to-[#0F172A]">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <Badge className="bg-orange-500/10 text-orange-400 border-orange-500/30 mb-4">
