@@ -3207,6 +3207,18 @@ async def assign_contact_message(
         }
     )
     
+    # Envoyer email de notification à l'assigné
+    if EMAIL_SERVICE_AVAILABLE:
+        try:
+            email_sent = await send_prospect_assignment_notification(
+                prospect_data=prospect,
+                assignee_data=assignee
+            )
+            if email_sent:
+                logger.info(f"Email d'assignment envoyé à {assignee['email']}")
+        except Exception as e:
+            logger.error(f"Erreur envoi email assignment: {e}")
+    
     return {"message": "Prospect assigné avec succès", "assigned_to_name": assignee["full_name"]}
 
 @api_router.patch("/contact-messages/{message_id}/status")
