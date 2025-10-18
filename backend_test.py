@@ -2867,55 +2867,93 @@ class APITester:
         except Exception as e:
             self.log_result("Regression - Company Info Endpoint", False, "Exception occurred", str(e))
 
-    def run_all_tests(self):
-        """Run all test suites including V4 Prospects Workflow"""
-        print("🚀 Starting ALORIA AGENCY V4 Backend API Tests - PROSPECTS WORKFLOW TESTING")
-        print(f"Testing against: {API_BASE}")
-        print("=" * 60)
+    def test_comprehensive_backend_post_fixes(self):
+        """Comprehensive backend testing after critical fixes - as per review request"""
+        print("=== COMPREHENSIVE BACKEND TESTING - POST CRITICAL FIXES ===")
         
-        # PRIORITY: V4 PROSPECTS WORKFLOW TESTING (as requested in review)
-        print("\n🎯 TESTING NEW PROSPECTS WORKFLOW (V4)")
-        print("=" * 60)
-        self.test_prospects_workflow_complete()
-        self.test_prospects_access_restrictions()
-        self.test_sendgrid_email_service()
-        self.test_existing_endpoints_regression()
-        self.test_prospects_search_and_filtering()
+        # HIGH PRIORITY TESTS (as per review request)
+        print("\n🔥 HIGH PRIORITY TESTS")
+        print("-" * 40)
         
-        # PRIORITY: Review Request Specific Tests
-        self.test_review_request_specific_tests()
-        
-        # V2 New Features Tests - PRIORITY: PAYMENT SYSTEM CRITICAL BUGS
+        # 1. Authentication & User Management
+        self.test_user_registration_and_login()
         self.test_superadmin_creation()
         self.test_role_hierarchy_permissions()
-        self.test_payment_system_comprehensive()  # CRITICAL PAYMENT SYSTEM TESTING
-        self.test_superadmin_apis()
-        self.test_search_apis()
-        self.test_visitor_stats()
-        self.test_contact_messages_crm()  # NEW: Contact Messages & CRM System
-        self.test_comprehensive_v2_scenario()
+        self.test_password_change_api()
         
-        # Existing Features Tests
-        self.test_user_registration_and_login()
-        self.test_client_creation_permissions()
+        # 2. Prospect Workflow V4 - Complete 5-step process
+        self.test_prospects_workflow_complete()
+        
+        # 3. Visitor Management with new fields
+        self.test_visitor_stats()
+        
+        # 4. Payment System - Complete workflow
+        self.test_payment_system_comprehensive()
+        
+        # 5. Chat System & WebSocket
+        self.test_chat_apis()
+        
+        print("\n🔶 MEDIUM PRIORITY TESTS")
+        print("-" * 40)
+        
+        # 6. Notification System
         self.test_notification_system()
         self.test_automatic_notifications()
-        self.test_complete_integration()
-        self.test_client_creation_with_password()
-        self.test_password_change_api()
-        self.test_client_credentials_api()
-        self.test_chat_apis()
-        self.test_visitor_management()
-        self.test_workflow_management()
-        self.test_permissions_and_case_management()
-        self.test_complete_scenario()
-        self.test_error_cases_and_validation()
         
-        print("=" * 60)
-        print("🏁 Test Summary")
+        # 7. Case Management
+        self.test_client_creation_permissions()
+        self.test_permissions_and_case_management()
+        self.test_client_credentials_api()
+        self.test_client_creation_with_password()
+        
+        # 8. SuperAdmin Features
+        self.test_superadmin_apis()
+        
+        # 9. Search System
+        self.test_search_apis()
+        
+        # 10. Email Service
+        self.test_sendgrid_email_service()
+        
+        print("\n🔷 ADDITIONAL COMPREHENSIVE TESTS")
+        print("-" * 40)
+        
+        # Contact Messages & CRM
+        self.test_contact_messages_crm()
+        
+        # Workflow management
+        self.test_workflow_management()
+        
+        # Integration scenarios
+        self.test_complete_integration()
+        self.test_complete_scenario()
+        self.test_comprehensive_v2_scenario()
+        
+        # Error handling and edge cases
+        self.test_error_cases_and_validation()
+        self.test_existing_endpoints_regression()
+        self.test_prospects_access_restrictions()
+        self.test_prospects_search_and_filtering()
+        self.test_review_request_specific_tests()
+
+    def run_all_tests(self):
+        """Run comprehensive backend testing as requested in review"""
+        print("🚀 ALORIA AGENCY - COMPREHENSIVE BACKEND TESTING POST-CRITICAL FIXES")
+        print(f"Backend URL: {BACKEND_URL}")
+        print("Testing with credentials: SuperAdmin (superadmin@aloria.com), Manager (manager@test.com)")
+        print("=" * 80)
+        
+        # Run comprehensive testing as per review request
+        self.test_comprehensive_backend_post_fixes()
+        
+        # Print comprehensive summary
+        print("=" * 80)
+        print("🎯 COMPREHENSIVE TEST SUMMARY - POST CRITICAL FIXES")
         print(f"✅ Passed: {self.results['passed']}")
         print(f"❌ Failed: {self.results['failed']}")
-        print(f"📊 Success Rate: {(self.results['passed'] / (self.results['passed'] + self.results['failed']) * 100):.1f}%")
+        total_tests = self.results['passed'] + self.results['failed']
+        success_rate = (self.results['passed'] / total_tests * 100) if total_tests > 0 else 0
+        print(f"📊 Success Rate: {success_rate:.1f}%")
         
         if self.results['errors']:
             print("\n🔍 Failed Tests Details:")
