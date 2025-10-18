@@ -3049,14 +3049,17 @@ async def create_contact_message(message_data: ContactMessageCreate):
         "budget_range": message_data.budget_range,
         "urgency_level": message_data.urgency_level,
         "message": message_data.message,
-        "status": ContactStatus.NEW if not assigned_employee_id else ContactStatus.CONTACTED,
-        "assigned_to": assigned_employee_id,
-        "assigned_to_name": assigned_employee_name,
+        "status": ContactStatus.NEW,  # Toujours "nouveau" au départ
+        "assigned_to": None,  # SuperAdmin assignera plus tard
+        "assigned_to_name": None,
         "lead_source": message_data.lead_source,
         "conversion_probability": lead_score,
-        "notes": f"Attribué automatiquement suite à recommandation de {message_data.referred_by_employee}" if assigned_employee_id else "",
+        "notes": "",
         "how_did_you_know": message_data.how_did_you_know,
         "referred_by_employee": message_data.referred_by_employee,
+        "payment_50k_amount": None,
+        "payment_50k_date": None,
+        "consultant_notes": [],
         "follow_up_date": None,
         "created_at": datetime.now(timezone.utc).isoformat(),
         "updated_at": datetime.now(timezone.utc).isoformat()
