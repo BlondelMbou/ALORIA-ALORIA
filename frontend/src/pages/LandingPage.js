@@ -521,8 +521,8 @@ export default function LandingPage() {
               {/* Professional Image */}
               <div className="relative rounded-2xl overflow-hidden shadow-2xl border-4 border-orange-500/20 hover:border-orange-500/40 transition-all duration-300">
                 <img 
-                  src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NjZ8MHwxfHNlYXJjaHwyfHxidXNpbmVzcyUyMHByb2Zlc3Npb25hbHxlbnwwfHx8fDE3NjA3ODkyMTV8MA&ixlib=rb-4.1.0&q=85" 
-                  alt="Professionnelle ALORIA AGENCY" 
+                  src="https://images.unsplash.com/photo-1758922584983-82ffd5720c6a?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NjZ8MHwxfHNlYXJjaHwxfHxibGFjayUyMHByb2Zlc3Npb25hbCUyMGNvbmZpZGVudHxlbnwwfHx8fDE3NjA3ODk5NDB8MA&ixlib=rb-4.1.0&q=85" 
+                  alt="Professionnelle Camerounaise ALORIA AGENCY" 
                   className="w-full h-64 lg:h-80 object-cover"
                 />
                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-[#0F172A] via-[#0F172A]/80 to-transparent p-6">
