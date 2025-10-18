@@ -22,7 +22,9 @@ import useSocket from '../hooks/useSocket';
 export default function EmployeeDashboard() {
   const { user, logout } = useAuth();
   const [clients, setClients] = useState([]);
+  const [filteredClients, setFilteredClients] = useState([]);
   const [cases, setCases] = useState([]);
+  const [filteredCases, setFilteredCases] = useState([]);
   const [visitors, setVisitors] = useState([]);
   const [filteredVisitors, setFilteredVisitors] = useState([]);
   const [messages, setMessages] = useState({});
