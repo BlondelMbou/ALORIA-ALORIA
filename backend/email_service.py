@@ -700,6 +700,24 @@ class AloriaEmailService:
                     <div class="contact-box">
                         <h3>📞 Contacts</h3>
                         <p><strong>Bureau Douala:</strong> +237 6 XX XX XX XX</p>
+
+
+async def send_prospect_assignment_notification(prospect_data: Dict[str, Any], assignee_data: Dict[str, Any]) -> bool:
+    """Envoi e-mail notification assignment prospect (fonction async pour FastAPI)"""
+    try:
+        return email_service.send_prospect_assignment_email(prospect_data, assignee_data)
+    except Exception as e:
+        logger.error(f"Erreur envoi e-mail assignment prospect: {e}")
+        return False
+
+async def send_consultant_appointment_notification(prospect_data: Dict[str, Any]) -> bool:
+    """Envoi e-mail RDV consultant (fonction async pour FastAPI)"""
+    try:
+        return email_service.send_consultant_appointment_email(prospect_data)
+    except Exception as e:
+        logger.error(f"Erreur envoi e-mail RDV consultant: {e}")
+        return False
+
                         <p><strong>E-mail:</strong> contact@aloria-agency.com</p>
                         <p><strong>Horaires:</strong> Lun-Ven 8h-17h, Sam 9h-13h</p>
                         <p><strong>Adresse:</strong> Douala, Cameroun</p>
