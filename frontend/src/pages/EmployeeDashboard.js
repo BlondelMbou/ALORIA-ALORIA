@@ -386,8 +386,38 @@ export default function EmployeeDashboard() {
 
           {/* My Cases */}
           <TabsContent value="cases">
-            <div className="space-y-4">
-              {cases.map((caseItem) => {
+            <Card className="bg-gradient-to-br from-[#1E293B] to-[#334155] border-slate-700">
+              <CardHeader>
+                <CardTitle className="text-white text-2xl">Mes Dossiers</CardTitle>
+                <CardDescription className="text-slate-400">
+                  Suivez l'évolution des dossiers de vos clients
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {cases.length === 0 ? (
+                  <div className="text-center py-12">
+                    <FileText className="w-16 h-16 text-slate-600 mx-auto mb-4" />
+                    <p className="text-slate-400 text-lg">Aucun dossier assigné</p>
+                  </div>
+                ) : (
+                  <>
+                    {/* Recherche et Tri */}
+                    <SearchAndSort
+                      data={cases}
+                      searchFields={['client_name', 'country', 'visa_type', 'status']}
+                      sortOptions={[
+                        { value: 'created_at', label: 'Date de création' },
+                        { value: 'client_name', label: 'Nom du client' },
+                        { value: 'country', label: 'Pays' },
+                        { value: 'status', label: 'Statut' }
+                      ]}
+                      onFilteredDataChange={setFilteredCases}
+                      placeholder="Rechercher un dossier (client, pays, type de visa, statut)..."
+                    />
+
+                    {/* Liste filtrée */}
+                    <div className="space-y-4">
+                      {filteredCases.map((caseItem) => {
                 const client = clients.find(c => c.id === caseItem.client_id);
                 return (
                   <Card key={caseItem.id} className="hover:shadow-lg transition-all bg-gradient-to-br from-[#1E293B] to-[#334155] border-slate-700">
