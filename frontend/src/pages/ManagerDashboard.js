@@ -1341,10 +1341,6 @@ export default function ManagerDashboard() {
             <MyProspects />
           </TabsContent>
 
-          {/* CRM Tab */}
-          <TabsContent value="crm">
-            <ContactCRM />
-          </TabsContent>
         </Tabs>
 
         {/* Confirmation Dialog */}
