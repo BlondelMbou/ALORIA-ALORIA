@@ -14,6 +14,7 @@ import api from '../utils/api';
 import { Globe, LogOut, Users, FileText, TrendingUp, CheckCircle, Clock, AlertCircle, UserCheck, Building2, Search, Filter, Plus, UserPlus, MessageCircle, User, Lock, Wallet } from 'lucide-react';
 import WithdrawalManager from '../components/WithdrawalManager';
 import ContactCRM from '../components/ContactCRM';
+import MyProspects from '../components/MyProspects';
 import ChatWidget from '../components/ChatWidget';
 import NotificationBell from '../components/NotificationBell';
 import useSocket from '../hooks/useSocket';
