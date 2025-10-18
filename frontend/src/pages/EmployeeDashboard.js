@@ -618,25 +618,27 @@ export default function EmployeeDashboard() {
                 <form onSubmit={handleCreateClient} className="space-y-6">
                   <div className="grid md:grid-cols-2 gap-6">
                     <div>
-                      <Label htmlFor="client-name">Full Name *</Label>
+                      <Label htmlFor="client-name" className="text-slate-300 font-medium">Nom complet *</Label>
                       <Input
                         id="client-name"
                         value={newClientForm.full_name}
                         onChange={(e) => setNewClientForm({ ...newClientForm, full_name: e.target.value })}
-                        placeholder="Client's full name"
+                        placeholder="Nom complet du client"
                         required
+                        className="bg-slate-800 border-slate-600 text-white placeholder:text-slate-500 mt-2"
                         data-testid="create-client-name-input"
                       />
                     </div>
                     <div>
-                      <Label htmlFor="client-email">Email *</Label>
+                      <Label htmlFor="client-email" className="text-slate-300 font-medium">Email *</Label>
                       <Input
                         id="client-email"
                         type="email"
                         value={newClientForm.email}
                         onChange={(e) => setNewClientForm({ ...newClientForm, email: e.target.value })}
-                        placeholder="client@example.com"
+                        placeholder="client@exemple.com"
                         required
+                        className="bg-slate-800 border-slate-600 text-white placeholder:text-slate-500 mt-2"
                         data-testid="create-client-email-input"
                       />
                     </div>
