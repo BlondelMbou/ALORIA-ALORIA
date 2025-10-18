@@ -665,9 +665,10 @@ export default function ManagerDashboard() {
 
         {/* Main Content Tabs */}
         <Tabs defaultValue="clients" className="w-full">
-          <TabsList className="grid w-full grid-cols-7 mb-6 bg-[#1E293B] border border-slate-700">
+          <TabsList className="grid w-full grid-cols-8 mb-6 bg-[#1E293B] border border-slate-700">
             <TabsTrigger value="clients" data-testid="tab-clients" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white text-slate-300">Clients</TabsTrigger>
             <TabsTrigger value="employees" data-testid="tab-employees" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white text-slate-300">Employés</TabsTrigger>
+            <TabsTrigger value="prospects" data-testid="tab-prospects" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white text-slate-300">Prospects</TabsTrigger>
             <TabsTrigger value="cases" data-testid="tab-cases" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white text-slate-300">Dossiers</TabsTrigger>
             <TabsTrigger value="payments" data-testid="tab-payments" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white text-slate-300">Paiements</TabsTrigger>
             <TabsTrigger value="withdrawals" data-testid="tab-withdrawals" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white text-slate-300">Retraits</TabsTrigger>
