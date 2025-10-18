@@ -217,14 +217,28 @@ const SuperAdminDashboard = () => {
           </button>
         </div>
         
-        <div className="space-y-3">
-          {activities.length === 0 ? (
-            <div className="text-center py-8 text-slate-400">
-              <span className="text-4xl mb-2 block">📊</span>
-              <p>Aucune activité récente</p>
-            </div>
-          ) : (
-            activities.map((activity, index) => (
+        {activities.length === 0 ? (
+          <div className="text-center py-8 text-slate-400">
+            <span className="text-4xl mb-2 block">📊</span>
+            <p>Aucune activité récente</p>
+          </div>
+        ) : (
+          <>
+            {/* Recherche et Tri */}
+            <SearchAndSort
+              data={activities}
+              searchFields={['user_name', 'action', 'details']}
+              sortOptions={[
+                { value: 'timestamp', label: 'Date' },
+                { value: 'user_name', label: 'Utilisateur' },
+                { value: 'action', label: 'Action' }
+              ]}
+              onFilteredDataChange={setFilteredActivities}
+              placeholder="Rechercher une activité (utilisateur, action, détails)..."
+            />
+
+            <div className="space-y-3">
+              {filteredActivities.map((activity, index) => (
               <div key={activity.id || index} className="flex items-start space-x-4 p-4 bg-slate-700/50 rounded-lg hover:bg-slate-700/70 transition-colors">
                 <div className={`w-10 h-10 rounded-full flex items-center justify-center ${getActivityColor(activity.action)}`}>
                   <span className="text-lg">{getActivityIcon(activity.action)}</span>
