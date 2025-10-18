@@ -516,8 +516,30 @@ export default function LandingPage() {
               </div>
             </div>
 
-            {/* Right Column - Animated Stats - Mobile responsive */}
-            <div className="grid grid-cols-2 gap-3 sm:gap-6 mt-8 lg:mt-0 animate-fade-in" style={{ animationDelay: '0.3s' }}>
+            {/* Right Column - Hero Image & Stats - Mobile responsive */}
+            <div className="space-y-6 mt-8 lg:mt-0 animate-fade-in" style={{ animationDelay: '0.3s' }}>
+              {/* Professional Image */}
+              <div className="relative rounded-2xl overflow-hidden shadow-2xl border-4 border-orange-500/20 hover:border-orange-500/40 transition-all duration-300">
+                <img 
+                  src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NjZ8MHwxfHNlYXJjaHwyfHxidXNpbmVzcyUyMHByb2Zlc3Npb25hbHxlbnwwfHx8fDE3NjA3ODkyMTV8MA&ixlib=rb-4.1.0&q=85" 
+                  alt="Professionnelle ALORIA AGENCY" 
+                  className="w-full h-64 lg:h-80 object-cover"
+                />
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-[#0F172A] via-[#0F172A]/80 to-transparent p-6">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 bg-orange-500 rounded-full flex items-center justify-center">
+                      <CheckCircle className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <p className="text-white font-bold text-lg">Expertise Professionnelle</p>
+                      <p className="text-slate-300 text-sm">Accompagnement personnalisé</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Stats Grid */}
+              <div className="grid grid-cols-2 gap-3 sm:gap-6">
               <Card className="bg-gradient-to-br from-[#1E293B] to-[#334155] border-slate-700/50 hover:border-orange-500/50 transition-all duration-300">
                 <CardContent className="p-3 sm:p-4 md:p-6 text-center">
                   <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl md:rounded-2xl flex items-center justify-center mx-auto mb-2 sm:mb-3 md:mb-4">
