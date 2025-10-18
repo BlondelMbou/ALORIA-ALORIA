@@ -1153,11 +1153,24 @@ export default function ManagerDashboard() {
 
               <Card className="bg-gradient-to-br from-[#1E293B] to-[#334155] border-slate-700">
                 <CardHeader>
-                  <CardTitle className="text-white">Visiteurs d'Aujourd'hui</CardTitle>
+                  <CardTitle className="text-white">Liste des Visiteurs</CardTitle>
                 </CardHeader>
                 <CardContent>
+                  {/* Recherche et Tri */}
+                  <SearchAndSort
+                    data={visitors}
+                    searchFields={['full_name', 'phone_number', 'purpose', 'cni_number', 'registered_by']}
+                    sortOptions={[
+                      { value: 'arrival_time', label: 'Date d\'arrivée' },
+                      { value: 'full_name', label: 'Nom' },
+                      { value: 'purpose', label: 'Motif' }
+                    ]}
+                    onFilteredDataChange={setFilteredVisitors}
+                    placeholder="Rechercher un visiteur (nom, téléphone, motif, CNI)..."
+                  />
+
                   <div className="space-y-3">
-                    {visitors.slice(0, 10).map((visitor) => (
+                    {filteredVisitors.slice(0, 10).map((visitor) => (
                       <div key={visitor.id} className="flex items-center justify-between p-4 bg-[#0F172A] border border-slate-700 rounded-lg hover:border-orange-500/50 transition-all">
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-2">
