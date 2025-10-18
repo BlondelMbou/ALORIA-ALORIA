@@ -41,9 +41,6 @@ export default function ManagerDashboard() {
     other_purpose: '',
     cni_number: '' 
   });
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterCountry, setFilterCountry] = useState('all');
-  const [filterStatus, setFilterStatus] = useState('all');
   const [showCreateClient, setShowCreateClient] = useState(false);
   const [newClient, setNewClient] = useState({
     email: '',
@@ -54,9 +51,6 @@ export default function ManagerDashboard() {
     message: ''
   });
   const [chatUnreadCount, setChatUnreadCount] = useState(0);
-  const [searchResults, setSearchResults] = useState([]);
-  const [isSearching, setIsSearching] = useState(false);
-  const [activeSearchTab, setActiveSearchTab] = useState('clients');
   const [pendingPayments, setPendingPayments] = useState([]);
   const [paymentHistory, setPaymentHistory] = useState([]);
   const [showPasswordDialog, setShowPasswordDialog] = useState(false);
