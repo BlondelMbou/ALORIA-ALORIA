@@ -2161,7 +2161,7 @@ async def get_pending_payments(current_user: dict = Depends(get_current_user)):
 
 # Fonction pour générer une facture PDF simple
 async def generate_invoice_pdf(payment_id: str, invoice_number: str):
-    """Génère une facture PDF simple pour le paiement confirmé"""
+    """Génère une facture PDF complète pour le paiement confirmé"""
     try:
         payment = await db.payment_declarations.find_one({"id": payment_id})
         if not payment:
@@ -2175,10 +2175,11 @@ async def generate_invoice_pdf(payment_id: str, invoice_number: str):
             "amount": payment["amount"],
             "currency": payment["currency"],
             "description": payment["description"] or "Services d'immigration",
-            "payment_method": payment["payment_method"]
+            "payment_method": payment["payment_method"],
+            "created_at": payment.get("declared_at", datetime.now(timezone.utc).isoformat())
         }
         
-        # Stocker les données de facture (en attendant la génération PDF réelle)
+        # Stocker les données de facture en base
         invoice_record = {
             "id": str(uuid.uuid4()),
             "payment_id": payment_id,
@@ -2189,11 +2190,77 @@ async def generate_invoice_pdf(payment_id: str, invoice_number: str):
         
         await db.invoices.insert_one(invoice_record)
         
-        # TODO: Implémenter génération PDF réelle avec ReportLab ou WeasyPrint
-        logger.info(f"Facture {invoice_number} générée pour le paiement {payment_id}")
+        # Générer le fichier PDF physique
+        pdf_path = f"/app/backend/invoices/{invoice_number}.pdf"
+        
+        # Créer le PDF avec reportlab
+        c = canvas.Canvas(pdf_path, pagesize=letter)
+        width, height = letter
+        
+        # En-tête avec logo et informations entreprise
+        c.setFont("Helvetica-Bold", 24)
+        c.setFillColorRGB(0.96, 0.49, 0.13)  # Orange ALORIA
+        c.drawString(50, height - 50, "ALORIA AGENCY")
+        
+        c.setFillColorRGB(0, 0, 0)  # Noir
+        c.setFont("Helvetica", 10)
+        c.drawString(50, height - 70, "Bureau de Douala, Cameroun")
+        c.drawString(50, height - 85, "Tél: +237 6XX XX XX XX | Email: contact@aloria-agency.com")
+        
+        # Ligne de séparation
+        c.setStrokeColorRGB(0.96, 0.49, 0.13)
+        c.setLineWidth(2)
+        c.line(50, height - 100, width - 50, height - 100)
+        
+        # Titre facture
+        c.setFillColorRGB(0, 0, 0)
+        c.setFont("Helvetica-Bold", 18)
+        c.drawString(50, height - 140, f"FACTURE N° {invoice_number}")
+        
+        c.setFont("Helvetica", 11)
+        c.drawString(50, height - 165, f"Date d'émission: {invoice_data['date']}")
+        
+        # Informations client (encadré)
+        c.setStrokeColorRGB(0.8, 0.8, 0.8)
+        c.setLineWidth(1)
+        c.rect(50, height - 250, width - 100, 60)
+        
+        c.setFont("Helvetica-Bold", 12)
+        c.drawString(60, height - 210, "CLIENT:")
+        c.setFont("Helvetica", 11)
+        c.drawString(60, height - 230, invoice_data['client_name'])
+        
+        # Détails des services (encadré)
+        c.rect(50, height - 380, width - 100, 100)
+        c.setFont("Helvetica-Bold", 12)
+        c.drawString(60, height - 310, "DESCRIPTION DES SERVICES:")
+        c.setFont("Helvetica", 11)
+        c.drawString(60, height - 335, invoice_data['description'])
+        c.drawString(60, height - 355, f"Méthode de paiement: {invoice_data['payment_method']}")
+        
+        # Montant (encadré avec fond orange clair)
+        c.setFillColorRGB(0.96, 0.49, 0.13, alpha=0.1)
+        c.rect(50, height - 460, width - 100, 50, fill=1)
+        
+        c.setFillColorRGB(0, 0, 0)
+        c.setFont("Helvetica-Bold", 16)
+        c.drawString(60, height - 435, f"MONTANT TOTAL: {invoice_data['amount']} {invoice_data['currency']}")
+        
+        # Pied de page
+        c.setFont("Helvetica-Oblique", 10)
+        c.setFillColorRGB(0.5, 0.5, 0.5)
+        c.drawString(50, 80, "Cette facture atteste du paiement des services d'immigration.")
+        c.drawString(50, 65, "Pour toute question, veuillez nous contacter à contact@aloria-agency.com")
+        
+        c.setFont("Helvetica-Bold", 11)
+        c.setFillColorRGB(0.96, 0.49, 0.13)
+        c.drawString(width/2 - 100, 40, "Merci de votre confiance - ALORIA AGENCY")
+        
+        c.save()
+        logger.info(f"✅ Facture PDF {invoice_number} générée avec succès à {pdf_path}")
         
     except Exception as e:
-        logger.error(f"Erreur génération facture: {e}")
+        logger.error(f"❌ Erreur génération facture PDF: {e}", exc_info=True)
 
 @api_router.get("/payments/client-history", response_model=List[PaymentDeclarationResponse])
 async def get_client_payment_history(current_user: dict = Depends(get_current_user)):
