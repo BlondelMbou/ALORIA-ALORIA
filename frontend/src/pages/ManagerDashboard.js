@@ -394,13 +394,26 @@ export default function ManagerDashboard() {
   };
 
   const handleAddVisitor = async () => {
+    // Validation
+    if (!newVisitor.full_name || !newVisitor.phone_number || !newVisitor.cni_number) {
+      toast.error('Veuillez remplir tous les champs obligatoires');
+      return;
+    }
+
     try {
       await visitorsAPI.create(newVisitor);
-      toast.success('Visitor registered successfully');
-      setNewVisitor({ name: '', company: '', purpose: '' });
+      toast.success('Visiteur enregistré avec succès');
+      setNewVisitor({ 
+        full_name: '', 
+        phone_number: '', 
+        purpose: 'Consultation initiale',
+        other_purpose: '',
+        cni_number: '' 
+      });
       fetchData();
     } catch (error) {
-      toast.error('Failed to register visitor');
+      console.error('Erreur enregistrement visiteur:', error);
+      toast.error(error.response?.data?.detail || 'Erreur lors de l\'enregistrement du visiteur');
     }
   };
 
