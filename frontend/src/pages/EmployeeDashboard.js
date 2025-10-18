@@ -690,6 +690,8 @@ export default function EmployeeDashboard() {
                     );
                   })}
                 </div>
+                  </>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
