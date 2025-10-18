@@ -3151,46 +3151,57 @@ async def assign_contact_message(
     assignment_data: dict,
     current_user: dict = Depends(get_current_user)
 ):
-    """Assigner un message de contact à un employé (Manager seulement)"""
-    if current_user["role"] != "MANAGER":
-        raise HTTPException(status_code=403, detail="Seuls les managers peuvent assigner les prospects")
+    """Assigner un prospect à un employé/manager (SuperAdmin seulement)"""
+    if current_user["role"] != "SUPERADMIN":
+        raise HTTPException(status_code=403, detail="Seul le SuperAdmin peut assigner les prospects")
     
     assignee_id = assignment_data.get("assigned_to")
-    if assignee_id:
-        assignee = await db.users.find_one({"id": assignee_id, "role": {"$in": ["MANAGER", "EMPLOYEE"]}})
-        if not assignee:
-            raise HTTPException(status_code=404, detail="Utilisateur assigné non trouvé")
-        assignee_name = assignee["full_name"]
-    else:
-        assignee_name = None
+    if not assignee_id:
+        raise HTTPException(status_code=400, detail="Identifiant de l'assigné requis")
+    
+    assignee = await db.users.find_one({"id": assignee_id, "role": {"$in": ["MANAGER", "EMPLOYEE"]}, "is_active": True})
+    if not assignee:
+        raise HTTPException(status_code=404, detail="Employé/Manager non trouvé")
     
     result = await db.contact_messages.update_one(
         {"id": message_id},
         {
             "$set": {
                 "assigned_to": assignee_id,
-                "assigned_to_name": assignee_name,
-                "status": ContactStatus.CONTACTED if assignee_id else ContactStatus.NEW,
+                "assigned_to_name": assignee["full_name"],
+                "status": ContactStatus.ASSIGNED_EMPLOYEE,
                 "updated_at": datetime.now(timezone.utc).isoformat()
             }
         }
     )
     
     if result.modified_count == 0:
-        raise HTTPException(status_code=404, detail="Message non trouvé")
+        raise HTTPException(status_code=404, detail="Prospect non trouvé")
+    
+    # Récupérer le prospect
+    prospect = await db.contact_messages.find_one({"id": message_id})
     
     # Notifier l'assigné
-    if assignee_id:
-        message = await db.contact_messages.find_one({"id": message_id})
-        await create_notification(
-            user_id=assignee_id,
-            title="Nouveau prospect assigné",
-            message=f"Le prospect {message['name']} vous a été assigné",
-            type="prospect_assigned",
-            related_id=message_id
-        )
+    await create_notification(
+        user_id=assignee_id,
+        title="🎯 Nouveau prospect assigné",
+        message=f"Le prospect {prospect['name']} ({prospect['country']}) vous a été assigné par le consultant.",
+        type="prospect_assigned",
+        related_id=message_id
+    )
     
-    return {"message": "Assignment mis à jour avec succès"}
+    # Log activity
+    await log_user_activity(
+        user_id=current_user["id"],
+        action="prospect_assigned",
+        details={
+            "prospect_id": message_id,
+            "prospect_name": prospect["name"],
+            "assigned_to": assignee["full_name"]
+        }
+    )
+    
+    return {"message": "Prospect assigné avec succès", "assigned_to_name": assignee["full_name"]}
 
 @api_router.patch("/contact-messages/{message_id}/status")
 async def update_contact_message_status(
