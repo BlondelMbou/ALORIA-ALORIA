@@ -510,6 +510,221 @@ class AloriaEmailService:
                 """
             }
 
+
+    def send_prospect_assignment_email(self, prospect_data: Dict[str, Any], assignee_data: Dict[str, Any]) -> bool:
+        """
+        E-mail de notification quand un prospect est assigné à un employé/manager
+        """
+        assignee_name = assignee_data.get('full_name', 'Cher collaborateur')
+        assignee_email = assignee_data.get('email')
+        prospect_name = prospect_data.get('name', 'Prospect')
+        prospect_email = prospect_data.get('email', '')
+        prospect_phone = prospect_data.get('phone', 'Non renseigné')
+        prospect_country = prospect_data.get('country', '')
+        prospect_visa = prospect_data.get('visa_type', '')
+        prospect_message = prospect_data.get('message', '')
+        lead_score = prospect_data.get('conversion_probability', 0)
+        
+        subject = f"🎯 Nouveau prospect assigné: {prospect_name} ({prospect_country})"
+        
+        html_content = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <style>
+                body {{ font-family: 'Arial', sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }}
+                .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+                .header {{ background: linear-gradient(135deg, #1E293B 0%, #334155 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }}
+                .logo {{ font-size: 28px; font-weight: bold; margin-bottom: 10px; }}
+                .content {{ background: #f8fafc; padding: 30px; border-radius: 0 0 10px 10px; }}
+                .highlight {{ background: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0; border-radius: 5px; }}
+                .info-box {{ background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; margin: 15px 0; }}
+                .score-badge {{ display: inline-block; background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); color: white; padding: 8px 15px; border-radius: 20px; font-weight: bold; }}
+                .action-box {{ background: #1E293B; color: white; padding: 20px; border-radius: 8px; margin: 20px 0; }}
+                .btn {{ background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); color: white; padding: 12px 30px; text-decoration: none; border-radius: 25px; display: inline-block; margin: 10px 0; }}
+                .footer {{ text-align: center; margin-top: 30px; padding: 20px; background: #f1f5f9; border-radius: 8px; }}
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <div class="logo">🎯 ALORIA AGENCY</div>
+                    <p>Nouveau prospect à contacter</p>
+                </div>
+                
+                <div class="content">
+                    <h2>Bonjour {assignee_name},</h2>
+                    
+                    <p>Le consultant vous a assigné un nouveau prospect à contacter en priorité :</p>
+                    
+                    <div class="highlight">
+                        <h3>👤 Informations du prospect</h3>
+                        <p><strong>Nom complet:</strong> {prospect_name}</p>
+                        <p><strong>E-mail:</strong> <a href="mailto:{prospect_email}">{prospect_email}</a></p>
+                        <p><strong>Téléphone:</strong> {prospect_phone}</p>
+                        <p><strong>Destination:</strong> {prospect_country}</p>
+                        <p><strong>Type de visa:</strong> {prospect_visa}</p>
+                        <p><strong>Score de conversion:</strong> <span class="score-badge">{lead_score}%</span></p>
+                    </div>
+                    
+                    <div class="info-box">
+                        <h3>💬 Message du prospect</h3>
+                        <p style="font-style: italic; color: #475569;">"{prospect_message}"</p>
+                    </div>
+                    
+                    <div class="action-box">
+                        <h3>🎯 Actions à réaliser</h3>
+                        <ol>
+                            <li><strong>Contacter le prospect</strong> dans les 24h (appel ou e-mail)</li>
+                            <li><strong>Évaluer son profil</strong> et vérifier son éligibilité</li>
+                            <li><strong>Expliquer la procédure</strong> et informer des frais de consultation (50 000 CFA)</li>
+                            <li><strong>Une fois payé</strong>, affecter le prospect au consultant pour rendez-vous approfondi</li>
+                        </ol>
+                    </div>
+                    
+                    <div class="info-box">
+                        <h3>💰 Important - Paiement Consultation</h3>
+                        <p>Avant de programmer un rendez-vous avec le consultant, le prospect doit effectuer un <strong>versement de 50 000 CFA</strong> pour la consultation détaillée.</p>
+                        <p><strong>Ce paiement couvre:</strong></p>
+                        <ul>
+                            <li>Évaluation complète du profil par le consultant</li>
+                            <li>Analyse d'éligibilité approfondie</li>
+                            <li>Plan d'action personnalisé</li>
+                            <li>Réponses à toutes les questions</li>
+                        </ul>
+                    </div>
+                    
+                    <center>
+                        <a href="https://aloria-agency.com/employee-dashboard" class="btn">📋 Voir le prospect</a>
+                    </center>
+                </div>
+                
+                <div class="footer">
+                    <p>Bonne chance avec ce prospect !<br><strong>L'équipe ALORIA AGENCY</strong></p>
+                    <p style="font-size: 12px; color: #64748b;">
+                        Connectez-vous à votre espace pour plus de détails.
+                    </p>
+                </div>
+            </div>
+        </body>
+        </html>
+        """
+        
+        return self._send_email(assignee_email, subject, html_content)
+    
+    def send_consultant_appointment_email(self, prospect_data: Dict[str, Any]) -> bool:
+        """
+        E-mail de notification au prospect quand il est affecté au consultant (RDV programmé)
+        """
+        name = prospect_data.get('name', 'Cher prospect')
+        email = prospect_data.get('email')
+        country = prospect_data.get('country', '')
+        visa_type = prospect_data.get('visa_type', '')
+        assigned_by = prospect_data.get('assigned_by_name', 'Votre conseiller')
+        
+        subject = f"🎉 Rendez-vous programmé avec le consultant ALORIA AGENCY"
+        
+        html_content = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <style>
+                body {{ font-family: 'Arial', sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }}
+                .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+                .header {{ background: linear-gradient(135deg, #1E293B 0%, #334155 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }}
+                .logo {{ font-size: 28px; font-weight: bold; margin-bottom: 10px; }}
+                .content {{ background: #f8fafc; padding: 30px; border-radius: 0 0 10px 10px; }}
+                .highlight {{ background: #dcfce7; border-left: 4px solid #16a34a; padding: 20px; margin: 20px 0; border-radius: 5px; text-align: center; }}
+                .info-box {{ background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; margin: 15px 0; }}
+                .payment-confirmed {{ background: #fef3c7; border: 2px solid #f59e0b; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center; }}
+                .action-list {{ background: #dbeafe; border-left: 4px solid #3b82f6; padding: 15px; border-radius: 5px; margin: 20px 0; }}
+                .contact-box {{ background: #1E293B; color: white; padding: 20px; border-radius: 8px; margin: 20px 0; }}
+                .btn {{ background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); color: white; padding: 12px 30px; text-decoration: none; border-radius: 25px; display: inline-block; margin: 10px 0; }}
+                .footer {{ text-align: center; margin-top: 30px; padding: 20px; background: #f1f5f9; border-radius: 8px; }}
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <div class="logo">🎉 ALORIA AGENCY</div>
+                    <p>Votre consultation est confirmée</p>
+                </div>
+                
+                <div class="content">
+                    <h2>Félicitations {name} !</h2>
+                    
+                    <div class="highlight">
+                        <h2 style="margin: 0; color: #16a34a;">✅ Paiement confirmé</h2>
+                        <p style="margin: 10px 0 0 0; font-size: 18px;">Votre rendez-vous avec notre consultant expert est programmé</p>
+                    </div>
+                    
+                    <p>Nous confirmons la réception de votre paiement de <strong>50 000 CFA</strong> pour la consultation approfondie avec notre consultant spécialisé en immigration.</p>
+                    
+                    <div class="payment-confirmed">
+                        <h3>💰 Montant payé: 50 000 CFA</h3>
+                        <p>Transaction enregistrée le {datetime.now().strftime('%d/%m/%Y à %H:%M')}</p>
+                    </div>
+                    
+                    <div class="info-box">
+                        <h3>📋 Détails de votre projet</h3>
+                        <p><strong>Destination:</strong> {country}</p>
+                        <p><strong>Type de visa:</strong> {visa_type}</p>
+                        <p><strong>Conseiller référent:</strong> {assigned_by}</p>
+                        <p><strong>Statut:</strong> En attente de rendez-vous consultant</p>
+                    </div>
+                    
+                    <div class="action-list">
+                        <h3>🎯 Prochaines étapes</h3>
+                        <ol>
+                            <li><strong>Notre consultant vous contactera</strong> dans les 48h pour fixer un rendez-vous</li>
+                            <li><strong>Consultation approfondie</strong> de votre profil et évaluation complète</li>
+                            <li><strong>Plan d'action personnalisé</strong> avec stratégie d'immigration adaptée</li>
+                            <li><strong>Décision finale</strong> sur votre engagement complet avec ALORIA AGENCY</li>
+                        </ol>
+                    </div>
+                    
+                    <div class="info-box">
+                        <h3>📝 Préparez votre consultation</h3>
+                        <p>Pour maximiser l'efficacité de votre rendez-vous, préparez les documents suivants :</p>
+                        <ul>
+                            <li>CV détaillé à jour</li>
+                            <li>Diplômes et certificats</li>
+                            <li>Attestations de travail</li>
+                            <li>Résultats tests linguistiques (si disponibles)</li>
+                            <li>Passeport valide</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="contact-box">
+                        <h3>📞 Contacts</h3>
+                        <p><strong>Bureau Douala:</strong> +237 6 XX XX XX XX</p>
+                        <p><strong>E-mail:</strong> contact@aloria-agency.com</p>
+                        <p><strong>Horaires:</strong> Lun-Ven 8h-17h, Sam 9h-13h</p>
+                        <p><strong>Adresse:</strong> Douala, Cameroun</p>
+                    </div>
+                    
+                    <center>
+                        <p style="font-size: 16px; color: #475569; margin: 20px 0;">
+                            <strong>Questions ?</strong> N'hésitez pas à nous contacter !
+                        </p>
+                    </center>
+                </div>
+                
+                <div class="footer">
+                    <p>Nous sommes impatients de vous accompagner,<br><strong>L'équipe ALORIA AGENCY</strong></p>
+                    <p style="font-size: 12px; color: #64748b;">
+                        📍 Basés à Douala, Cameroun - Au service des Camerounais vers le monde
+                    </p>
+                </div>
+            </div>
+        </body>
+        </html>
+        """
+        
+        return self._send_email(email, subject, html_content)
+
 # Instance globale du service d'e-mails
 email_service = AloriaEmailService()
 
