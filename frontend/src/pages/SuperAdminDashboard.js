@@ -5,6 +5,7 @@ import NotificationBell from '../components/NotificationBell';
 import HierarchicalUserCreation from '../components/HierarchicalUserCreation';
 import BalanceMonitor from '../components/BalanceMonitor';
 import ActivityHistory from '../components/ActivityHistory';
+import ProspectManagement from '../components/ProspectManagement';
 import api from '../utils/api';
 
 const SuperAdminDashboard = () => {
