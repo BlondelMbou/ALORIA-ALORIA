@@ -577,12 +577,12 @@ export default function EmployeeDashboard() {
                             </div>
                             <div>
                               <div className="flex justify-between text-sm text-slate-400 mb-1">
-                                <span>Progress:</span>
-                                <span>{Math.round(client.progress_percentage)}%</span>
+                                <span>Progression:</span>
+                                <span className="text-orange-400 font-semibold">{Math.round(client.progress_percentage)}%</span>
                               </div>
-                              <div className="w-full bg-slate-700 rounded-full h-2">
+                              <div className="w-full bg-slate-700 rounded-full h-2.5">
                                 <div
-                                  className="bg-orange-500 h-2 rounded-full"
+                                  className="bg-gradient-to-r from-orange-500 to-orange-600 h-2.5 rounded-full transition-all"
                                   style={{ width: `${client.progress_percentage}%` }}
                                 ></div>
                               </div>
