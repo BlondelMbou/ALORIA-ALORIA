@@ -608,7 +608,7 @@ export default function LandingPage() {
       </section>
 
       {/* Countries Section */}
-      <section id="pays" className="py-20">
+      <section id="pays" className={`py-20 transition-all duration-700 ${getSectionClass('pays')}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <Badge className="bg-blue-500/10 text-blue-400 border-blue-500/30 mb-4">
