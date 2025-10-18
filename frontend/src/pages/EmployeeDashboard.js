@@ -658,51 +658,67 @@ export default function EmployeeDashboard() {
                     <p className="text-slate-500 text-sm mt-2">Les visiteurs apparaîtront ici une fois enregistrés</p>
                   </div>
                 ) : (
-                  <div className="space-y-3">
-                    {visitors.map((visitor) => (
-                      <div key={visitor.id} className="flex items-center justify-between p-4 bg-[#0F172A] border border-slate-700 rounded-lg hover:border-orange-500/50 transition-all">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2">
-                            <p className="font-bold text-white text-lg">{visitor.full_name}</p>
-                            <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">
-                              📱 {visitor.phone_number}
-                            </Badge>
-                          </div>
-                          <p className="text-sm text-slate-400 mb-1">
-                            <span className="font-semibold">Motif:</span> {visitor.purpose}
-                            {visitor.other_purpose && ` - ${visitor.other_purpose}`}
-                          </p>
-                          <p className="text-xs text-slate-500 mb-1">
-                            <span className="font-semibold">CNI:</span> {visitor.cni_number}
-                          </p>
-                          <p className="text-xs text-slate-500">
-                            <span className="font-semibold">Arrivée:</span> {new Date(visitor.arrival_time).toLocaleString('fr-FR')}
-                          </p>
-                          {visitor.departure_time && (
+                  <>
+                    {/* Recherche et Tri */}
+                    <SearchAndSort
+                      data={visitors}
+                      searchFields={['full_name', 'phone_number', 'purpose', 'cni_number']}
+                      sortOptions={[
+                        { value: 'arrival_time', label: 'Date d\'arrivée' },
+                        { value: 'full_name', label: 'Nom' },
+                        { value: 'purpose', label: 'Motif' }
+                      ]}
+                      onFilteredDataChange={setFilteredVisitors}
+                      placeholder="Rechercher un visiteur (nom, téléphone, motif, CNI)..."
+                    />
+
+                    {/* Liste filtrée */}
+                    <div className="space-y-3">
+                      {filteredVisitors.map((visitor) => (
+                        <div key={visitor.id} className="flex items-center justify-between p-4 bg-[#0F172A] border border-slate-700 rounded-lg hover:border-orange-500/50 transition-all">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-2">
+                              <p className="font-bold text-white text-lg">{visitor.full_name}</p>
+                              <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">
+                                📱 {visitor.phone_number}
+                              </Badge>
+                            </div>
+                            <p className="text-sm text-slate-400 mb-1">
+                              <span className="font-semibold">Motif:</span> {visitor.purpose}
+                              {visitor.other_purpose && ` - ${visitor.other_purpose}`}
+                            </p>
+                            <p className="text-xs text-slate-500 mb-1">
+                              <span className="font-semibold">CNI:</span> {visitor.cni_number}
+                            </p>
                             <p className="text-xs text-slate-500">
-                              <span className="font-semibold">Départ:</span> {new Date(visitor.departure_time).toLocaleString('fr-FR')}
+                              <span className="font-semibold">Arrivée:</span> {new Date(visitor.arrival_time).toLocaleString('fr-FR')}
                             </p>
-                          )}
-                          {visitor.registered_by && (
-                            <p className="text-xs text-slate-600 mt-1">
-                              Enregistré par: {visitor.registered_by}
-                            </p>
-                          )}
+                            {visitor.departure_time && (
+                              <p className="text-xs text-slate-500">
+                                <span className="font-semibold">Départ:</span> {new Date(visitor.departure_time).toLocaleString('fr-FR')}
+                              </p>
+                            )}
+                            {visitor.registered_by && (
+                              <p className="text-xs text-slate-600 mt-1">
+                                Enregistré par: {visitor.registered_by}
+                              </p>
+                            )}
+                          </div>
+                          <div className="ml-4">
+                            {visitor.departure_time ? (
+                              <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
+                                ✓ Parti
+                              </Badge>
+                            ) : (
+                              <Badge className="bg-orange-500/20 text-orange-400 border-orange-500/30">
+                                ⏰ Présent
+                              </Badge>
+                            )}
+                          </div>
                         </div>
-                        <div className="ml-4">
-                          {visitor.departure_time ? (
-                            <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
-                              ✓ Parti
-                            </Badge>
-                          ) : (
-                            <Badge className="bg-orange-500/20 text-orange-400 border-orange-500/30">
-                              ⏰ Présent
-                            </Badge>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                      ))}
+                    </div>
+                  </>
                 )}
               </CardContent>
             </Card>
