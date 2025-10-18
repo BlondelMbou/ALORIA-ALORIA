@@ -684,6 +684,9 @@ class ContactMessageResponse(BaseModel):
     notes: str
     how_did_you_know: str
     referred_by_employee: Optional[str] = None
+    payment_50k_amount: Optional[float] = None
+    payment_50k_date: Optional[str] = None
+    consultant_notes: Optional[List[Dict[str, Any]]] = []
     created_at: str
     updated_at: str
 
