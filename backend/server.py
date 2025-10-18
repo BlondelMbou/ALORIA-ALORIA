@@ -3837,5 +3837,12 @@ app.add_middleware(
 async def shutdown_db_client():
     client.close()
 
-# Export l'app FastAPI pour uvicorn (utilisé par supervisor)
-# L'app inclut déjà le router et supporte les WebSockets via python-socketio intégré
+# Mount Socket.IO sur un path spécifique pour ne pas écraser les routes API
+# Créer l'app Socket.IO comme app séparée
+socket_app = socketio.ASGIApp(sio)
+
+# Monter socket.io sur /socket.io
+from starlette.routing import Mount
+app.mount("/socket.io", socket_app)
+
+# L'app FastAPI reste l'app principale exportée pour uvicorn
