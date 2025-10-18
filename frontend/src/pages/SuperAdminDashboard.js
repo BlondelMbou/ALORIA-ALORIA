@@ -369,19 +369,19 @@ const SuperAdminDashboard = () => {
               />
               <StatsCard
                 title="Managers"
-                value={stats.users?.managers || 0}
+                value={displayStats?.users?.managers || 0}
                 icon={<span className="text-2xl">👨‍💼</span>}
                 color="text-green-400"
               />
               <StatsCard
                 title="Employés"
-                value={stats.users?.employees || 0}
+                value={displayStats?.users?.employees || 0}
                 icon={<span className="text-2xl">👨‍💻</span>}
                 color="text-yellow-400"
               />
               <StatsCard
                 title="Clients"
-                value={stats.users?.clients || 0}
+                value={displayStats?.users?.clients || 0}
                 icon={<span className="text-2xl">👥</span>}
                 color="text-orange-400"
               />
