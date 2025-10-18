@@ -646,14 +646,15 @@ export default function EmployeeDashboard() {
 
                   <div className="grid md:grid-cols-2 gap-6">
                     <div>
-                      <Label htmlFor="client-phone">Phone *</Label>
+                      <Label htmlFor="client-phone" className="text-slate-300 font-medium">Téléphone *</Label>
                       <Input
                         id="client-phone"
                         type="tel"
                         value={newClientForm.phone}
                         onChange={(e) => setNewClientForm({ ...newClientForm, phone: e.target.value })}
-                        placeholder="+1 234 567 8900"
+                        placeholder="+237 6XX XX XX XX"
                         required
+                        className="bg-slate-800 border-slate-600 text-white placeholder:text-slate-500 mt-2"
                         data-testid="create-client-phone-input"
                       />
                     </div>
