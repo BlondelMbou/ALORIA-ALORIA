@@ -27,7 +27,13 @@ export default function ManagerDashboard() {
   const [visitors, setVisitors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedClient, setSelectedClient] = useState(null);
-  const [newVisitor, setNewVisitor] = useState({ name: '', company: '', purpose: '' });
+  const [newVisitor, setNewVisitor] = useState({ 
+    full_name: '', 
+    phone_number: '', 
+    purpose: 'Consultation initiale',
+    other_purpose: '',
+    cni_number: '' 
+  });
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCountry, setFilterCountry] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
