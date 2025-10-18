@@ -1230,15 +1230,29 @@ export default function ManagerDashboard() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4 max-h-96 overflow-y-auto">
-                    {pendingPayments.length === 0 ? (
-                      <div className="text-center py-8">
-                        <div className="text-4xl mb-3">✅</div>
-                        <p className="text-slate-400">Aucun paiement en attente</p>
-                        <p className="text-slate-500 text-sm">Tous les paiements ont été traités</p>
-                      </div>
-                    ) : (
-                      pendingPayments.map((payment) => (
+                  {pendingPayments.length === 0 ? (
+                    <div className="text-center py-8">
+                      <div className="text-4xl mb-3">✅</div>
+                      <p className="text-slate-400">Aucun paiement en attente</p>
+                      <p className="text-slate-500 text-sm">Tous les paiements ont été traités</p>
+                    </div>
+                  ) : (
+                    <>
+                      {/* Recherche et Tri */}
+                      <SearchAndSort
+                        data={pendingPayments}
+                        searchFields={['client_name', 'payment_method', 'description']}
+                        sortOptions={[
+                          { value: 'declared_at', label: 'Date de déclaration' },
+                          { value: 'client_name', label: 'Nom du client' },
+                          { value: 'amount', label: 'Montant' }
+                        ]}
+                        onFilteredDataChange={setFilteredPayments}
+                        placeholder="Rechercher un paiement (client, méthode, description)..."
+                      />
+
+                      <div className="space-y-4 max-h-96 overflow-y-auto">
+                        {filteredPayments.map((payment) => (
                         <div key={payment.id} className="bg-slate-600 rounded-lg p-4 border border-slate-500">
                           <div className="flex justify-between items-start mb-3">
                             <div>
