@@ -1678,18 +1678,20 @@ async def get_unread_chat_count(current_user: dict = Depends(get_current_user)):
 @api_router.post("/visitors", response_model=VisitorResponse)
 async def create_visitor(visitor_data: VisitorCreate, current_user: dict = Depends(get_current_user)):
     if current_user["role"] not in ["MANAGER", "EMPLOYEE"]:
-        raise HTTPException(status_code=403, detail="Only managers and employees can register visitors")
+        raise HTTPException(status_code=403, detail="Seuls les managers et employés peuvent enregistrer des visiteurs")
     
     visitor_id = str(uuid.uuid4())
     visitor_dict = {
         "id": visitor_id,
-        "name": visitor_data.name,
-        "company": visitor_data.company,
+        "full_name": visitor_data.full_name,
+        "phone_number": visitor_data.phone_number,
         "purpose": visitor_data.purpose.value,
-        "details": visitor_data.details,
+        "other_purpose": visitor_data.other_purpose if visitor_data.purpose == VisitorPurpose.OTHER else None,
+        "cni_number": visitor_data.cni_number,
         "arrival_time": datetime.now(timezone.utc).isoformat(),
         "departure_time": None,
-        "registered_by": current_user["id"],
+        "registered_by": current_user["full_name"],  # Nom de l'employé/manager
+        "registered_by_id": current_user["id"],
         "created_at": datetime.now(timezone.utc).isoformat()
     }
     
