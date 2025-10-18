@@ -489,18 +489,20 @@
 
 ## test_plan:
   current_focus:
-    - "Contact Messages & CRM System testing completed"
-    - "Sequential case progression implementation testing"
-    - "Employee UI color harmonization verification"
-    - "Component auto-update functionality validation"
+    - "Comprehensive Backend Testing - All APIs and integrations"
+    - "Frontend Testing - All dashboards, forms, and workflows"
+    - "Extended Chat System validation"
+    - "Prospect workflow end-to-end testing"
+    - "Email service verification"
+    - "Responsiveness testing"
   stuck_tasks: []
-  test_all: false
+  test_all: true
   test_priority: "high_first"
-  last_test_session: "CONTACT MESSAGES & CRM TESTING - Comprehensive testing of new contact form and CRM system completed successfully. All core functionality working including lead score calculation, message retrieval, assignment system, and data validation."
+  last_test_session: "PREPARING COMPREHENSIVE TESTING - User requested full end-to-end testing of all features after critical backend fixes (Socket.IO mounting, Visitor model compatibility). Ready to test entire application systematically."
 
 ## agent_communication:
     -agent: "main"
-    -message: "🔧 CORRECTION SYSTÈME DE PAIEMENTS - V3.1 EN COURS: L'utilisateur signale des bugs critiques dans le système de paiements. Investigation en cours pour identifier les problèmes spécifiques avec le workflow acceptance/rejet et génération PDF. Le backend semble fonctionnel selon tests précédents mais il y a manifestement des dysfonctionnements côté frontend ou logique."
+    -message: "🚀 COMPREHENSIVE TESTING INITIATED - POST CRITICAL FIXES: After resolving critical backend issues (Socket.IO app mounting fixed, VisitorResponse model made backward-compatible), user has requested comprehensive testing of entire application. Plan: 1) Test all backend APIs (auth, prospects, visitors, payments, chat, notifications, email service) 2) Test all frontend dashboards (SuperAdmin, Manager, Employee, Client) 3) Verify extended chat system 4) Validate prospect workflow end-to-end 5) Test email notifications 6) Check responsiveness across devices. Backend services restarted successfully. Ready to begin systematic testing."
     -agent: "testing"
     -message: "🎉 BACKEND TESTING COMPLETE - ALL SYSTEMS OPERATIONAL! Comprehensive testing of ALORIA AGENCY backend completed with 100% success rate (22/22 tests passed). All core functionalities working: ✅ Authentication (Manager/Employee registration & login) ✅ Client Management (Manager-only creation with auto-assignment) ✅ Case Status Updates (Manager permissions working) ✅ WebSocket Chat System (Real-time messaging with role-based contacts) ✅ Visitor Management (Registration, listing, checkout by Employee/Manager) ✅ Workflow System (Base workflows + custom step addition by Manager) ✅ Permission System (Proper role-based access control) ✅ Error Handling & Validation (401/403/422 responses working correctly). Fixed minor data validation issues during testing. Backend is production-ready for frontend integration."
     -agent: "testing"
