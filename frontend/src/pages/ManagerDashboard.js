@@ -590,7 +590,7 @@ export default function ManagerDashboard() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-slate-400 mb-1">Dossiers Actifs</p>
-                  <p className="text-3xl font-bold text-white">{stats?.active_cases || 0}</p>
+                  <p className="text-3xl font-bold text-white">{displayStats?.active_cases || 0}</p>
                 </div>
                 <div className="w-12 h-12 bg-yellow-500/10 rounded-lg flex items-center justify-center border border-yellow-500/20">
                   <Clock className="w-6 h-6 text-yellow-400" />
