@@ -586,23 +586,9 @@ export default function LandingPage() {
               avec l'expertise de nos consultants certifiés.
             </p>
             
-            {/* Image professionnelle */}
-            <div className="mt-12 max-w-4xl mx-auto">
-              <div className="relative rounded-2xl overflow-hidden shadow-2xl">
-                <img 
-                  src="https://images.unsplash.com/photo-1758525588535-cdc30ca71692?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NjZ8MHwxfHNlYXJjaHwyfHxibGFjayUyMHByb2Zlc3Npb25hbCUyMGNvbmZpZGVudHxlbnwwfHx8fDE3NjA3ODk5NDB8MA&ixlib=rb-4.1.0&q=85" 
-                  alt="Expert Camerounais ALORIA AGENCY" 
-                  className="w-full h-64 md:h-80 object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-r from-[#0F172A]/60 to-transparent flex items-center">
-                  <div className="p-8 md:p-12">
-                    <h3 className="text-3xl md:text-4xl font-bold text-white mb-3">Expertise Certifiée</h3>
-                    <p className="text-slate-200 text-lg max-w-xl">
-                      Nos consultants vous accompagnent à chaque étape de votre projet d'immigration
-                    </p>
-                  </div>
-                </div>
-              </div>
+            {/* Services Showcase Animation */}
+            <div className="mt-12 max-w-6xl mx-auto">
+              <ServicesShowcase />
             </div>
           </div>
 
