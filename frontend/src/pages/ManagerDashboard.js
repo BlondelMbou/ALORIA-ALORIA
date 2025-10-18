@@ -16,6 +16,7 @@ import WithdrawalManager from '../components/WithdrawalManager';
 import MyProspects from '../components/MyProspects';
 import ChatWidget from '../components/ChatWidget';
 import NotificationBell from '../components/NotificationBell';
+import SearchAndSort from '../components/SearchAndSort';
 import useSocket from '../hooks/useSocket';
 
 export default function ManagerDashboard() {
