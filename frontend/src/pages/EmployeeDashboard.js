@@ -134,7 +134,7 @@ export default function EmployeeDashboard() {
     }
 
     try {
-      await api.post('/api/visitors', newVisitor);
+      await visitorsAPI.create(newVisitor);
       toast.success('Visiteur enregistré avec succès');
       setNewVisitor({
         full_name: '',
