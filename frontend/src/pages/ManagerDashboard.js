@@ -780,6 +780,21 @@ export default function ManagerDashboard() {
                 </div>
               </CardHeader>
               <CardContent>
+                {/* Recherche et Tri */}
+                <SearchAndSort
+                  data={clients}
+                  searchFields={['client_name', 'assigned_employee_name', 'country', 'visa_type', 'current_status']}
+                  sortOptions={[
+                    { value: 'created_at', label: 'Date de création' },
+                    { value: 'client_name', label: 'Nom du client' },
+                    { value: 'country', label: 'Pays' },
+                    { value: 'progress_percentage', label: 'Progression' },
+                    { value: 'current_status', label: 'Statut' }
+                  ]}
+                  onFilteredDataChange={setFilteredClients}
+                  placeholder="Rechercher un client (nom, conseiller, pays, visa, statut)..."
+                />
+
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead className="border-b border-slate-700">
@@ -794,7 +809,7 @@ export default function ManagerDashboard() {
                       </tr>
                     </thead>
                     <tbody>
-                      {clients.map((client) => {
+                      {filteredClients.map((client) => {
                         const clientCase = cases.find(c => c.client_id === client.id);
                         return (
                           <tr key={client.id} className="border-b border-slate-700/50 hover:bg-slate-800/30">
