@@ -769,7 +769,7 @@ export default function EmployeeDashboard() {
                           </div>
                           <div className="ml-4">
                             {visitor.departure_time ? (
-                              <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
+                              <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">
                                 ✓ Parti
                               </Badge>
                             ) : (
