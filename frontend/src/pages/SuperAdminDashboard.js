@@ -344,12 +344,7 @@ const SuperAdminDashboard = () => {
       <header className="bg-slate-800 border-b border-slate-700">
         <div className="px-6 py-4 flex justify-between items-center">
           <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center">
-                <span className="text-white font-bold">🔥</span>
-              </div>
-              <span className="text-orange-500 text-xl font-bold">ALORIA AGENCY</span>
-            </div>
+            <AloriaLogo />
             <span className="text-slate-400">SuperAdmin Console</span>
           </div>
           
