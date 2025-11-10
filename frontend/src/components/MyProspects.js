@@ -84,7 +84,7 @@ export default function MyProspects() {
     if (!selectedProspect) return;
 
     try {
-      await api.patch(`/api/contact-messages/${selectedProspect.id}/assign-consultant`);
+      await api.patch(`/contact-messages/${selectedProspect.id}/assign-consultant`);
       toast.success('Prospect affecté au consultant avec succès ! Email de confirmation envoyé.');
       setShowConfirmDialog(false);
       setSelectedProspect(null);
