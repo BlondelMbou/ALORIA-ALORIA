@@ -495,14 +495,14 @@
 
 ## test_plan:
   current_focus:
-    - "Review Request Testing - CONSULTANT role, Prospect workflow, Sequential validation, Emails, SuperAdmin dashboard, Payments & Invoices"
+    - "UI color uniformization verification (EmployeeDashboard)"
+    - "Prospect display verification across all roles (SuperAdmin, Manager, Employee, Consultant)"
+    - "CONSULTANT API endpoint access with /api prefix"
   stuck_tasks:
-    - "CONSULTANT role permissions - SuperAdmin cannot create CONSULTANT users"
-    - "Prospect workflow consultant assignment - status not updating to paiement_50k"
-    - "CONSULTANT access to prospects - 403 error when accessing assigned prospects"
+    - "CONSULTANT access to prospects - 403 error (FIXED - needs testing)"
   test_all: false
-  test_priority: "review_requirements"
-  last_test_session: "REVIEW REQUEST TESTING COMPLETED - 81.8% success rate (18/22 tests passed). Core systems working: Sequential validation, Payment system with PDF generation, SuperAdmin dashboard, Email service integration. Issues identified: CONSULTANT role permissions, prospect workflow gaps, consultant access restrictions."
+  test_priority: "high_first"
+  last_test_session: "UI COLOR + CONSULTANT API FIXES - Fixed EmployeeDashboard green colors to blue/slate for dark theme consistency. Fixed ConsultantDashboard API calls to use /api prefix. Needs testing: 1) Verify UI colors match dark theme across all dashboards 2) Verify prospect lists display correctly for all roles 3) Verify CONSULTANT can now access paid prospects (status=paiement_50k)"
 
 ## agent_communication:
     -agent: "main"
