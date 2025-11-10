@@ -55,7 +55,7 @@ export default function MyProspects() {
   const fetchMyProspects = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/api/contact-messages');
+      const response = await api.get('/contact-messages');
       setProspects(response.data);
     } catch (error) {
       console.error('Erreur lors du chargement des prospects:', error);
