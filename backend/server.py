@@ -199,7 +199,8 @@ def create_access_token(data: dict) -> str:
 # Système de permissions hiérarchiques
 ROLE_HIERARCHY = {
     "SUPERADMIN": 4,
-    "MANAGER": 3, 
+    "MANAGER": 3,
+    "CONSULTANT": 3,  # Même niveau que Manager
     "EMPLOYEE": 2,
     "CLIENT": 1
 }
