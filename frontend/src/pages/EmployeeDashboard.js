@@ -475,7 +475,7 @@ export default function EmployeeDashboard() {
                                       return (
                                         <div key={idx} className="flex items-center space-x-3">
                                           <div className={`w-8 h-8 rounded-full flex items-center justify-center font-semibold text-sm ${
-                                            isCompleted ? 'bg-green-500 text-white' : 
+                                            isCompleted ? 'bg-blue-500 text-white' : 
                                             isCurrent ? 'bg-orange-500 text-white' : 
                                             'bg-[#1E293B] text-slate-400 border border-slate-600'
                                           }`}>
@@ -483,7 +483,7 @@ export default function EmployeeDashboard() {
                                           </div>
                                           <div className="flex-1">
                                             <p className={`font-medium ${
-                                              isCompleted ? 'text-green-400' : 
+                                              isCompleted ? 'text-blue-400' : 
                                               isCurrent ? 'text-orange-400' : 
                                               'text-slate-500'
                                             }`}>
