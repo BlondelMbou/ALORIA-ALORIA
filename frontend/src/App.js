@@ -63,6 +63,14 @@ function AppRoutes() {
         }
       />
       <Route
+        path="/consultant/*"
+        element={
+          <PrivateRoute allowedRoles={['CONSULTANT']}>
+            <ConsultantDashboard />
+          </PrivateRoute>
+        }
+      />
+      <Route
         path="/superadmin/*"
         element={
           <PrivateRoute allowedRoles={['SUPERADMIN']}>
