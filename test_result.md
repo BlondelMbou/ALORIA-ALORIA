@@ -369,11 +369,14 @@
     file: "server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
         -working: true
         -agent: "testing"
         -comment: "🎉 PROSPECTS WORKFLOW V4 - 100% FUNCTIONAL! Complete 5-step prospects workflow tested and working perfectly: ✅ STEP 1: Prospect creation via POST /api/contact-messages (status: nouveau) ✅ STEP 2: SuperAdmin assigns to Employee via PATCH /api/contact-messages/{id}/assign ✅ STEP 3: Employee assigns to consultant (50k CFA payment) via PATCH /api/contact-messages/{id}/assign-consultant ✅ STEP 4: SuperAdmin adds consultant notes via PATCH /api/contact-messages/{id}/consultant-notes (status: en_consultation) ✅ STEP 5: Employee converts to client via POST /api/contact-messages/{id}/convert-to-client (creates CLIENT user + case). All workflow transitions working correctly: nouveau → assigne_employe → paiement_50k → en_consultation → converti_client. Email notifications configured (SendGrid logs show attempts). Access restrictions working: SuperAdmin sees all prospects, Manager/Employee see assigned only, Client denied (403). Fixed backend bug: WORKFLOWS_CONFIG → WORKFLOWS in convert-to-client endpoint. Credentials used: SuperAdmin (superadmin@aloria.com/SuperAdmin123!), Manager (manager@test.com/password123)."
+        -working: true
+        -agent: "main"
+        -comment: "🔧 CONSULTANT API FIX: Fixed missing /api prefix in ConsultantDashboard API calls causing 403 errors. Updated fetchProspects() to call /api/contact-messages instead of /contact-messages, handleAddNote() to use /api/contact-messages/{id}/consultant-notes, and handleConvertToClient() to use /api/contact-messages/{id}/convert-to-client. Backend already has proper CONSULTANT role filtering (line 3262-3263: query['status'] = 'paiement_50k'). Needs testing to verify CONSULTANT can now see paid prospects."
 
 ## frontend:
   - task: "Landing page with contact form France/Canada"
