@@ -262,14 +262,8 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             {/* Logo - Responsive */}
-            <div className="flex items-center space-x-2 sm:space-x-3">
-              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg flex items-center justify-center">
-                <Globe className="w-4 h-4 sm:w-6 sm:h-6 text-white" />
-              </div>
-              <span className="text-lg sm:text-xl lg:text-2xl font-bold bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">
-                <span className="hidden sm:inline">ALORIA AGENCY</span>
-                <span className="sm:hidden">ALORIA</span>
-              </span>
+            <div className="flex items-center">
+              <AloriaLogo className="h-8 sm:h-10" showText={true} />
             </div>
             
             {/* Desktop Navigation */}
