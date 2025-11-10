@@ -13,8 +13,9 @@ import ContactFormWidget from '../components/ContactFormWidget';
 import CRSCalculator from '../components/CRSCalculator';
 import ImmigrationJourneyAnimation from '../components/ImmigrationJourneyAnimation';
 import ServicesShowcase from '../components/ServicesShowcase';
+import AloriaLogo from '../components/AloriaLogo';
 import { 
-  Globe, ArrowRight, CheckCircle, Users, FileText, Clock, Star, MapPin, 
+  ArrowRight, CheckCircle, Users, FileText, Clock, Star, MapPin, 
   Briefcase, GraduationCap, Heart, Shield, Award, TrendingUp, Phone, 
   Mail, MessageCircle, ChevronRight, Zap, Target, Eye, Lightbulb,
   BarChart3, Headphones, BookOpen, Calendar, MousePointer2, Menu, X, Calculator
