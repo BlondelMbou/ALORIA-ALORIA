@@ -7,7 +7,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import { useAuth } from '@/context/AuthContext';
-import { Globe, ArrowLeft } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
+import AloriaLogo from '@/components/AloriaLogo';
 
 export default function LoginPage() {
   const navigate = useNavigate();
