@@ -209,8 +209,8 @@ def can_create_role(creator_role: str, target_role: str) -> bool:
     creator_level = ROLE_HIERARCHY.get(creator_role, 0)
     target_level = ROLE_HIERARCHY.get(target_role, 0)
     
-    # SuperAdmin peut créer Manager
-    if creator_role == "SUPERADMIN" and target_role == "MANAGER":
+    # SuperAdmin peut créer Manager et CONSULTANT
+    if creator_role == "SUPERADMIN" and target_role in ["MANAGER", "CONSULTANT"]:
         return True
     # Manager peut créer Employee et Client  
     elif creator_role == "MANAGER" and target_role in ["EMPLOYEE", "CLIENT"]:
