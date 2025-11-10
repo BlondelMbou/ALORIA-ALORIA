@@ -441,7 +441,7 @@ export default function EmployeeDashboard() {
                                 Voir Détails
                               </Button>
                             </DialogTrigger>
-                            <DialogContent className="max-w-2xl">
+                            <DialogContent className="max-w-2xl bg-[#1E293B] border-slate-700">
                               <DialogHeader>
                                 <DialogTitle className="text-white">Détails du Dossier</DialogTitle>
                                 <DialogDescription className="text-slate-400">
