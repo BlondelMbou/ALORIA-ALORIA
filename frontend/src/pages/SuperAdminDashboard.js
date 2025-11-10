@@ -52,6 +52,19 @@ const SuperAdminDashboard = () => {
     return () => clearInterval(refreshInterval);
   }, []);
 
+  // Initialiser les filtered lists quand les données sont chargées
+  useEffect(() => {
+    if (users.length > 0 && filteredUsers.length === 0) {
+      setFilteredUsers(users);
+    }
+  }, [users]);
+
+  useEffect(() => {
+    if (activities.length > 0 && filteredActivities.length === 0) {
+      setFilteredActivities(activities);
+    }
+  }, [activities]);
+
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
