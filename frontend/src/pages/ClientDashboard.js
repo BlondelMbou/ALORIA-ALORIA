@@ -14,6 +14,7 @@ import { clientsAPI, casesAPI, messagesAPI } from '../utils/api';
 import { Globe, LogOut, CheckCircle, Clock, FileText, MessageCircle, Send, User, Mail, Phone, Calendar, ArrowRight, CheckSquare, Square, Lock, Euro, CreditCard } from 'lucide-react';
 import ChatWidget from '../components/ChatWidget';
 import NotificationBell from '../components/NotificationBell';
+import AloriaLogo from '../components/AloriaLogo';
 import useSocket from '../hooks/useSocket';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
