@@ -953,14 +953,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-4 gap-8">
             <div className="col-span-2">
-              <div className="flex items-center space-x-3 mb-6">
-                <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl flex items-center justify-center">
-                  <Globe className="w-7 h-7 text-white" />
-                </div>
-                <span className="text-3xl font-bold bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">
-                  ALORIA AGENCY
-                </span>
-              </div>
+              <AloriaLogo className="h-10 mb-4" showText={true} />
               <p className="text-slate-400 mb-6 leading-relaxed max-w-md">
                 Votre partenaire de confiance depuis 2012 pour les services d'immigration premium 
                 vers les destinations les plus prisées au monde.
