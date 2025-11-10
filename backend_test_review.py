@@ -300,8 +300,9 @@ class ReviewTester:
                         
                         # Test: Try to jump from step 1 to step 7 directly (should fail)
                         try:
+                            # Use the correct model for progress endpoint
                             update_data = {
-                                "current_step_index": 7,  # Jump to step 7
+                                "step_index": 7,  # Use step_index instead of current_step_index
                                 "status": "Advanced Step",
                                 "notes": "Tentative de saut d'étapes"
                             }
@@ -311,13 +312,13 @@ class ReviewTester:
                                 error_msg = response.json().get('detail', response.text)
                                 if "séquentielle" in error_msg.lower() or "progression" in error_msg.lower():
                                     self.log_result("Sequential Validation (Jump 1→7)", True, 
-                                                  f"Correctly blocked step jumping: {error_msg}")
+                                                  f"✅ Correctly blocked step jumping: {error_msg}")
                                 else:
                                     self.log_result("Sequential Validation (Jump 1→7)", True, 
-                                                  f"Step jumping blocked with error: {error_msg}")
+                                                  f"✅ Step jumping blocked with error: {error_msg}")
                             else:
                                 self.log_result("Sequential Validation (Jump 1→7)", False, 
-                                              f"Expected 400 error, got {response.status_code}. Step jumping should be blocked!")
+                                              f"❌ Expected 400 error, got {response.status_code}. Step jumping should be blocked!")
                         except Exception as e:
                             self.log_result("Sequential Validation (Jump 1→7)", False, "Exception occurred", str(e))
                         
