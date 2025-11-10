@@ -191,20 +191,29 @@ class ReviewTester:
             self.log_result("Step 1: Create Prospect", False, "Exception occurred", str(e))
             return
 
-        # Step 2: SuperAdmin assigns to Manager
-        if self.superadmin_token and prospect_id:
+        # Step 2: SuperAdmin assigns to Manager (need to use user ID, not email)
+        if self.superadmin_token and prospect_id and self.manager_token:
             try:
-                headers = {"Authorization": f"Bearer {self.superadmin_token}"}
-                assign_data = {
-                    "assigned_to": "manager@test.com"  # Assign to manager
-                }
-                response = self.session.patch(f"{API_BASE}/contact-messages/{prospect_id}/assign", 
-                                            json=assign_data, headers=headers)
-                if response.status_code == 200:
-                    data = response.json()
-                    self.log_result("Step 2: SuperAdmin Assigns to Manager", True, f"Status: {data.get('status', 'N/A')}")
+                # First get manager user ID
+                manager_headers = {"Authorization": f"Bearer {self.manager_token}"}
+                me_response = self.session.get(f"{API_BASE}/auth/me", headers=manager_headers)
+                if me_response.status_code == 200:
+                    manager_user = me_response.json()
+                    manager_id = manager_user['id']
+                    
+                    headers = {"Authorization": f"Bearer {self.superadmin_token}"}
+                    assign_data = {
+                        "assigned_to": manager_id  # Use manager ID instead of email
+                    }
+                    response = self.session.patch(f"{API_BASE}/contact-messages/{prospect_id}/assign", 
+                                                json=assign_data, headers=headers)
+                    if response.status_code == 200:
+                        data = response.json()
+                        self.log_result("Step 2: SuperAdmin Assigns to Manager", True, f"Status: {data.get('status', 'N/A')}")
+                    else:
+                        self.log_result("Step 2: SuperAdmin Assigns to Manager", False, f"Status: {response.status_code}", response.text)
                 else:
-                    self.log_result("Step 2: SuperAdmin Assigns to Manager", False, f"Status: {response.status_code}", response.text)
+                    self.log_result("Step 2: SuperAdmin Assigns to Manager", False, "Could not get manager user ID")
             except Exception as e:
                 self.log_result("Step 2: SuperAdmin Assigns to Manager", False, "Exception occurred", str(e))
 
