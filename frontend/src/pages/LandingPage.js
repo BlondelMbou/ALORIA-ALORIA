@@ -11,7 +11,7 @@ import { toast } from 'sonner';
 import api from '../utils/api';
 import ContactFormWidget from '../components/ContactFormWidget';
 import CRSCalculator from '../components/CRSCalculator';
-import ImmigrationJourneyAnimation from '../components/ImmigrationJourneyAnimation';
+import ImmigrationJourneyAnimation from '../components/ImmigrationJourneyAnimationRefined';
 import ServicesShowcase from '../components/ServicesShowcase';
 import AloriaLogo from '../components/AloriaLogo';
 import { 
