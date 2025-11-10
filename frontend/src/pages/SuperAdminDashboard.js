@@ -7,6 +7,7 @@ import BalanceMonitor from '../components/BalanceMonitor';
 import ActivityHistory from '../components/ActivityHistory';
 import ProspectManagement from '../components/ProspectManagement';
 import SearchAndSort from '../components/SearchAndSort';
+import AloriaLogo from '../components/AloriaLogo';
 import api from '../utils/api';
 
 const SuperAdminDashboard = () => {
