@@ -421,7 +421,7 @@
     file: "EmployeeDashboard.js"
     stuck_count: 0
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
         -working: true
         -agent: "testing"
@@ -429,6 +429,9 @@
         -working: true
         -agent: "main"
         -comment: "🎨 UI COLOR HARMONIZATION COMPLETED: Updated EmployeeDashboard color scheme to match consistent 'bleu nuit' theme. Fixed getStatusColor function to use dark theme colors (bg-slate-700/50, bg-orange-500/10 for statuses), harmonized form backgrounds (bg-[#1E293B]), progress bars (bg-slate-700), and message components. All UI elements now consistently follow the dark blue night theme with proper borders and opacity levels."
+        -working: true
+        -agent: "main"
+        -comment: "🎨 UI COLOR REFINEMENT V2: Further uniformized dark theme colors - replaced all green stat card borders with blue (border-l-blue-500), changed completed step indicators from green to blue (bg-blue-500, text-blue-400), updated visitor status badges (green → blue), ensured all DialogContent components have dark backgrounds (bg-[#1E293B] border-slate-700). All UI now consistently uses blue/orange/slate palette for dark theme."
     
   - task: "ClientDashboard with case progression"
     implemented: true
