@@ -78,7 +78,7 @@ export default function ProspectManagement({ userRole }) {
   const fetchProspects = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/api/contact-messages');
+      const response = await api.get('/contact-messages');
       setProspects(response.data);
     } catch (error) {
       console.error('Erreur lors du chargement des prospects:', error);
@@ -90,7 +90,7 @@ export default function ProspectManagement({ userRole }) {
 
   const fetchEmployees = async () => {
     try {
-      const response = await api.get('/api/users');
+      const response = await api.get('/users');
       // Filtrer seulement les employés et managers actifs
       const activeEmployees = response.data.filter(
         user => user.is_active && ['MANAGER', 'EMPLOYEE'].includes(user.role)
