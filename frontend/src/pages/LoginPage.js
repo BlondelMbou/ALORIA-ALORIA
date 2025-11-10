@@ -63,9 +63,8 @@ export default function LoginPage() {
         </Button>
 
         <div className="text-center mb-6 sm:mb-8">
-          <div className="flex items-center justify-center space-x-2 mb-3 sm:mb-4">
-            <Globe className="w-8 h-8 sm:w-10 sm:h-10 text-orange-500" />
-            <span className="text-2xl sm:text-3xl font-bold text-white">ALORIA AGENCY</span>
+          <div className="flex items-center justify-center mb-3 sm:mb-4">
+            <AloriaLogo className="h-12 sm:h-14" showText={true} />
           </div>
           <p className="text-slate-300 text-sm sm:text-base">Accédez à votre tableau de bord d'immigration</p>
         </div>
