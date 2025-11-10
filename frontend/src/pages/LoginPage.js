@@ -36,6 +36,8 @@ export default function LoginPage() {
         navigate('/manager/dashboard');
       } else if (user.role === 'EMPLOYEE') {
         navigate('/employee/dashboard');
+      } else if (user.role === 'CONSULTANT') {
+        navigate('/consultant/dashboard');
       } else if (user.role === 'CLIENT') {
         navigate('/client/dashboard');
       }
