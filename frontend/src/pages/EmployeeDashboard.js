@@ -518,12 +518,12 @@ export default function EmployeeDashboard() {
                                   <MessageCircle className="w-4 h-4" />
                                 </Button>
                               </DialogTrigger>
-                              <DialogContent className="max-w-2xl max-h-[600px]">
+                              <DialogContent className="max-w-2xl max-h-[600px] bg-[#1E293B] border-slate-700">
                                 <DialogHeader>
-                                  <DialogTitle>Messages with {caseItem.client_name}</DialogTitle>
+                                  <DialogTitle className="text-white">Messages with {caseItem.client_name}</DialogTitle>
                                 </DialogHeader>
                                 <div className="space-y-4">
-                                  <div className="h-96 overflow-y-auto border border-slate-200 rounded-lg p-4 space-y-3">
+                                  <div className="h-96 overflow-y-auto bg-slate-800/50 rounded-lg p-4 space-y-3">
                                     {messages[client.id]?.map((msg) => (
                                       <div
                                         key={msg.id}
@@ -546,7 +546,7 @@ export default function EmployeeDashboard() {
                                   </div>
                                   <div className="flex space-x-2">
                                     <Input
-                                      placeholder="Type a message..."
+                                      placeholder="Tapez votre message..."
                                       value={messageText}
                                       onChange={(e) => setMessageText(e.target.value)}
                                       onKeyPress={(e) => {
@@ -554,10 +554,12 @@ export default function EmployeeDashboard() {
                                           handleSendMessage(client.id, client.user_id);
                                         }
                                       }}
+                                      className="bg-slate-800 border-slate-600 text-white placeholder:text-slate-500"
                                       data-testid="message-input"
                                     />
                                     <Button
                                       onClick={() => handleSendMessage(client.id, client.user_id)}
+                                      className="bg-orange-500 hover:bg-orange-600 text-white"
                                       data-testid="send-message-btn"
                                     >
                                       <Send className="w-4 h-4" />
