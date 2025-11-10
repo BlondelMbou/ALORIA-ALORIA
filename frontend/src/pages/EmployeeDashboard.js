@@ -599,7 +599,7 @@ export default function EmployeeDashboard() {
                           <ul className="space-y-1">
                             {caseItem.workflow_steps[caseItem.current_step_index]?.documents?.map((doc, idx) => (
                               <li key={idx} className="text-sm text-slate-400 flex items-center">
-                                <CheckCircle className="w-4 h-4 mr-2 text-green-500" />
+                                <CheckCircle className="w-4 h-4 mr-2 text-blue-400" />
                                 {doc}
                               </li>
                             ))}
