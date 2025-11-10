@@ -30,7 +30,7 @@ export default function ConsultantDashboard() {
   const fetchProspects = async () => {
     try {
       // Récupérer tous les prospects avec statut paiement_50k (affectés au consultant)
-      const response = await api.get('/api/contact-messages');
+      const response = await api.get('/contact-messages');
       const allProspects = response.data;
       
       // Filtrer seulement ceux affectés au consultant (statut paiement_50k)
