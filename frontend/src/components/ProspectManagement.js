@@ -131,7 +131,7 @@ export default function ProspectManagement({ userRole }) {
     }
 
     try {
-      await api.patch(`/api/contact-messages/${selectedProspect.id}/assign`, {
+      await api.patch(`/contact-messages/${selectedProspect.id}/assign`, {
         assigned_to: assigneeId
       });
       toast.success('Prospect assigné avec succès !');
@@ -151,7 +151,7 @@ export default function ProspectManagement({ userRole }) {
     }
 
     try {
-      await api.patch(`/api/contact-messages/${selectedProspect.id}/consultant-notes`, {
+      await api.patch(`/contact-messages/${selectedProspect.id}/consultant-notes`, {
         note: consultantNotes
       });
       toast.success('Note ajoutée avec succès !');
