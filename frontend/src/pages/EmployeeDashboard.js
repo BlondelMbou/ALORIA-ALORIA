@@ -350,14 +350,14 @@ export default function EmployeeDashboard() {
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-[#1E293B] to-[#334155] border-l-4 border-l-green-500 border-slate-700" data-testid="stat-completed-cases">
+          <Card className="bg-gradient-to-br from-[#1E293B] to-[#334155] border-l-4 border-l-blue-500 border-slate-700" data-testid="stat-completed-cases">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-slate-400 mb-1">Terminés</p>
                   <p className="text-3xl font-bold text-white">{myStats.completedCases}</p>
                 </div>
-                <CheckCircle className="w-8 h-8 text-green-400" />
+                <CheckCircle className="w-8 h-8 text-blue-400" />
               </div>
             </CardContent>
           </Card>
