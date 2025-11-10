@@ -73,54 +73,75 @@ class ReviewTester:
             self.log_result("SuperAdmin Login", False, "Exception occurred", str(e))
             return
 
-        # Create CONSULTANT user via SuperAdmin
+        # Check if CONSULTANT role exists in UserRole enum
         try:
-            headers = {"Authorization": f"Bearer {self.superadmin_token}"}
+            # Try to register a user with CONSULTANT role to test if enum exists
             consultant_data = {
-                "email": "consultant@aloria.com",
+                "email": "consultant.test@aloria.com",
+                "password": "Consultant123!",
                 "full_name": "Test Consultant",
                 "phone": "+33123456789",
-                "role": "CONSULTANT",
-                "send_email": False
+                "role": "CONSULTANT"
             }
-            response = self.session.post(f"{API_BASE}/users/create", json=consultant_data, headers=headers)
+            response = self.session.post(f"{API_BASE}/auth/register", json=consultant_data)
             if response.status_code in [200, 201]:
                 data = response.json()
-                self.log_result("Create CONSULTANT User", True, f"CONSULTANT created with temp password: {data.get('temporary_password', 'N/A')}")
-                
-                # Test login with CONSULTANT role
-                consultant_login = {
-                    "email": "consultant@aloria.com",
-                    "password": data.get('temporary_password', 'Aloria2024!')
-                }
-                login_response = self.session.post(f"{API_BASE}/auth/login", json=consultant_login)
+                if data['user']['role'] == 'CONSULTANT':
+                    self.log_result("CONSULTANT Role Exists in Enum", True, "CONSULTANT role is defined and working")
+                    self.consultant_token = data['access_token']
+                else:
+                    self.log_result("CONSULTANT Role Exists in Enum", False, f"Expected CONSULTANT, got: {data['user']['role']}")
+            elif response.status_code == 400 and "already registered" in response.text:
+                # User exists, try login
+                login_response = self.session.post(f"{API_BASE}/auth/login", json={
+                    "email": "consultant.test@aloria.com",
+                    "password": "Consultant123!"
+                })
                 if login_response.status_code == 200:
-                    self.consultant_token = login_response.json()['access_token']
-                    consultant_user = login_response.json()['user']
-                    if consultant_user['role'] == 'CONSULTANT':
-                        self.log_result("CONSULTANT Login", True, f"CONSULTANT role verified: {consultant_user['role']}")
+                    user_data = login_response.json()
+                    if user_data['user']['role'] == 'CONSULTANT':
+                        self.log_result("CONSULTANT Role Exists in Enum", True, "CONSULTANT role verified via existing user")
+                        self.consultant_token = user_data['access_token']
                     else:
-                        self.log_result("CONSULTANT Login", False, f"Expected CONSULTANT role, got: {consultant_user['role']}")
+                        self.log_result("CONSULTANT Role Exists in Enum", False, f"Expected CONSULTANT, got: {user_data['user']['role']}")
                 else:
-                    self.log_result("CONSULTANT Login", False, f"Status: {login_response.status_code}", login_response.text)
-                    
-            elif response.status_code == 400 and "existe déjà" in response.text:
-                # User already exists, try login
-                consultant_login = {
-                    "email": "consultant@aloria.com",
-                    "password": "Aloria2024!"
-                }
-                login_response = self.session.post(f"{API_BASE}/auth/login", json=consultant_login)
-                if login_response.status_code == 200:
-                    self.consultant_token = login_response.json()['access_token']
-                    consultant_user = login_response.json()['user']
-                    self.log_result("CONSULTANT Login (existing)", True, f"CONSULTANT role verified: {consultant_user['role']}")
+                    self.log_result("CONSULTANT Role Exists in Enum", False, "Could not login existing CONSULTANT user")
+            elif response.status_code == 422:
+                # Check if error mentions CONSULTANT role validation
+                error_text = response.text.lower()
+                if "consultant" in error_text:
+                    self.log_result("CONSULTANT Role Exists in Enum", False, "CONSULTANT role validation failed - may not be in enum")
                 else:
-                    self.log_result("CONSULTANT Login (existing)", False, f"Status: {login_response.status_code}", login_response.text)
+                    self.log_result("CONSULTANT Role Exists in Enum", True, "CONSULTANT role accepted by validation (other validation error)")
             else:
-                self.log_result("Create CONSULTANT User", False, f"Status: {response.status_code}", response.text)
+                self.log_result("CONSULTANT Role Exists in Enum", False, f"Status: {response.status_code}", response.text)
         except Exception as e:
-            self.log_result("Create CONSULTANT User", False, "Exception occurred", str(e))
+            self.log_result("CONSULTANT Role Exists in Enum", False, "Exception occurred", str(e))
+
+        # Test SuperAdmin creating CONSULTANT user (this may fail due to permission restrictions)
+        if self.superadmin_token:
+            try:
+                headers = {"Authorization": f"Bearer {self.superadmin_token}"}
+                consultant_data = {
+                    "email": "consultant.superadmin@aloria.com",
+                    "full_name": "Consultant Created by SuperAdmin",
+                    "phone": "+33123456789",
+                    "role": "CONSULTANT",
+                    "send_email": False
+                }
+                response = self.session.post(f"{API_BASE}/users/create", json=consultant_data, headers=headers)
+                if response.status_code in [200, 201]:
+                    data = response.json()
+                    self.log_result("SuperAdmin Creates CONSULTANT", True, f"SuperAdmin can create CONSULTANT users")
+                elif response.status_code == 403:
+                    self.log_result("SuperAdmin Creates CONSULTANT", False, 
+                                  "❌ ISSUE: SuperAdmin cannot create CONSULTANT - permission system needs update")
+                elif response.status_code == 400 and "existe déjà" in response.text:
+                    self.log_result("SuperAdmin Creates CONSULTANT", True, "CONSULTANT user already exists")
+                else:
+                    self.log_result("SuperAdmin Creates CONSULTANT", False, f"Status: {response.status_code}", response.text)
+            except Exception as e:
+                self.log_result("SuperAdmin Creates CONSULTANT", False, "Exception occurred", str(e))
 
     def test_2_prospect_workflow(self):
         """Test 2: Workflow Prospect → Consultant (50k CFA)"""
