@@ -9,15 +9,15 @@ import { Label } from '../components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '../components/ui/dialog';
 import { toast } from 'sonner';
-import { dashboardAPI, clientsAPI, casesAPI, employeesAPI, visitorsAPI } from '../utils/api';
-import api from '../utils/api';
 import { Globe, LogOut, Users, FileText, TrendingUp, CheckCircle, Clock, AlertCircle, UserCheck, Building2, Search, Filter, Plus, UserPlus, MessageCircle, User, Lock, Wallet } from 'lucide-react';
 import WithdrawalManager from '../components/WithdrawalManager';
 import MyProspects from '../components/MyProspects';
 import ChatWidget from '../components/ChatWidget';
 import NotificationBell from '../components/NotificationBell';
 import SearchAndSort from '../components/SearchAndSort';
+import AloriaLogo from '../components/AloriaLogo';
 import useSocket from '../hooks/useSocket';
+import api, { clientsAPI, casesAPI, dashboardAPI, employeesAPI, visitorsAPI } from '../utils/api';
 
 export default function ManagerDashboard() {
   const { user, logout } = useContext(AuthContext);
@@ -35,8 +35,8 @@ export default function ManagerDashboard() {
   const [loading, setLoading] = useState(true);
   const [selectedClient, setSelectedClient] = useState(null);
   const [newVisitor, setNewVisitor] = useState({ 
-    full_name: '', 
-    phone_number: '', 
+    full_name: '',
+    phone_number: '',
     purpose: 'Consultation initiale',
     other_purpose: '',
     cni_number: '' 
@@ -53,23 +53,7 @@ export default function ManagerDashboard() {
   const [chatUnreadCount, setChatUnreadCount] = useState(0);
   const [pendingPayments, setPendingPayments] = useState([]);
   const [paymentHistory, setPaymentHistory] = useState([]);
-  const [showPasswordDialog, setShowPasswordDialog] = useState(false);
-  const [passwordForm, setPasswordForm] = useState({
-    old_password: '',
-    new_password: '',
-    confirm_password: ''
-  });
-  const [confirmationDialog, setConfirmationDialog] = useState({
-    show: false,
-    payment: null,
-    code: '',
-    action: ''
-  });
-  const [rejectionDialog, setRejectionDialog] = useState({
-    show: false,
-    payment: null,
-    reason: ''
-  });
+  const [rejectionDialog, setRejectionDialog] = useState({ show: false, payment: null, reason: '' });
   
   // WebSocket hook
   const { connected } = useSocket(localStorage.getItem('token'));
@@ -177,74 +161,51 @@ export default function ManagerDashboard() {
           },
           body: JSON.stringify({ action: 'CONFIRMED' })
         });
-
-        if (response.ok) {
-          const result = await response.json();
-          if (result.confirmation_code) {
-            // Code généré, demander la confirmation
-            setConfirmationDialog({ 
-              show: true, 
-              payment: result, 
-              code: '', 
-              action: 'CONFIRMED',
-              generatedCode: result.confirmation_code
-            });
-          }
-        } else {
-          throw new Error('Erreur lors de la génération du code de confirmation');
+        
+        if (!response.ok) throw new Error('Failed to confirm payment');
+        
+        const result = await response.json();
+        
+        // Afficher le code à l'utilisateur dans une dialog
+        const userConfirmCode = prompt(`Code de confirmation généré: ${result.confirmation_code}\n\nVeuillez saisir ce code pour valider la confirmation du paiement:`);
+        
+        if (!userConfirmCode) {
+          toast.info('Confirmation annulée');
+          return;
         }
+        
+        // Deuxième étape : confirmer avec le code
+        const confirmResponse = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/payments/${payment.id}/confirm`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          },
+          body: JSON.stringify({ 
+            action: 'CONFIRMED',
+            confirmation_code: userConfirmCode
+          })
+        });
+        
+        if (!confirmResponse.ok) {
+          const errorData = await confirmResponse.json();
+          throw new Error(errorData.detail || 'Code de confirmation incorrect');
+        }
+        
+        toast.success('Paiement confirmé avec succès!');
+        fetchPayments();
       } catch (error) {
-        toast.error(error.message);
-        console.error('Error generating confirmation code:', error);
+        toast.error(error.message || 'Erreur lors de la confirmation');
       }
     }
   };
 
-  const confirmPaymentWithCode = async () => {
-    try {
-      console.log('=== DEBUGGING PAYMENT CONFIRMATION ===');
-      console.log('Payment ID:', confirmationDialog.payment.id);
-      console.log('Confirmation code:', confirmationDialog.code);
-      console.log('Generated code:', confirmationDialog.generatedCode);
-      
-      const requestBody = { 
-        action: 'CONFIRMED',
-        confirmation_code: confirmationDialog.code
-      };
-      console.log('Request body:', requestBody);
-
-      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/payments/${confirmationDialog.payment.id}/confirm`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify(requestBody)
-      });
-
-      console.log('Response status:', response.status);
-      const responseData = await response.json();
-      console.log('Response data:', responseData);
-
-      if (response.ok) {
-        toast.success('Paiement confirmé avec succès ! Facture générée automatiquement.');
-        setConfirmationDialog({ show: false, payment: null, code: '', action: '' });
-        fetchPayments(); // Refresh unique
-      } else {
-        throw new Error(responseData.detail || 'Code de confirmation incorrect');
-      }
-    } catch (error) {
-      toast.error(error.message);
-      console.error('Error confirming payment:', error);
-    }
-  };
-
-  const rejectPaymentWithReason = async () => {
+  const handleRejection = async () => {
     if (!rejectionDialog.reason.trim()) {
-      toast.error('Un motif de rejet est obligatoire');
+      toast.error('Veuillez fournir une raison de rejet');
       return;
     }
-
+    
     try {
       const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/payments/${rejectionDialog.payment.id}/confirm`, {
         method: 'PATCH',
@@ -257,95 +218,23 @@ export default function ManagerDashboard() {
           rejection_reason: rejectionDialog.reason
         })
       });
-
-      if (response.ok) {
-        toast.success('Paiement rejeté. Le client a été notifié.');
-        setRejectionDialog({ show: false, payment: null, reason: '' });
-        fetchPayments(); // Refresh unique
-      } else {
-        throw new Error('Erreur lors du rejet du paiement');
-      }
+      
+      if (!response.ok) throw new Error('Failed to reject payment');
+      
+      toast.success('Paiement rejeté');
+      setRejectionDialog({ show: false, payment: null, reason: '' });
+      fetchPayments();
     } catch (error) {
-      toast.error(error.message);
-      console.error('Error rejecting payment:', error);
+      toast.error('Erreur lors du rejet du paiement');
     }
   };
 
-  const handleChangePassword = async (e) => {
+  const handleCreateClient = async (e) => {
     e.preventDefault();
-    
-    if (passwordForm.new_password !== passwordForm.confirm_password) {
-      toast.error('Les nouveaux mots de passe ne correspondent pas');
-      return;
-    }
-
-    if (passwordForm.new_password.length < 8) {
-      toast.error('Le nouveau mot de passe doit contenir au moins 8 caractères');
-      return;
-    }
-
     try {
-      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/auth/change-password`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({
-          old_password: passwordForm.old_password,
-          new_password: passwordForm.new_password
-        })
-      });
-
-      if (response.ok) {
-        toast.success('Mot de passe modifié avec succès !');
-        setPasswordForm({
-          old_password: '',
-          new_password: '',
-          confirm_password: ''
-        });
-        setShowPasswordDialog(false);
-      } else {
-        const error = await response.json();
-        throw new Error(error.detail || 'Erreur lors du changement de mot de passe');
-      }
-    } catch (error) {
-      toast.error(error.message);
-      console.error('Error changing password:', error);
-    }
-  };
-
-  const handleReassignClient = async (clientId, employeeId) => {
-    try {
-      await clientsAPI.reassign(clientId, employeeId);
-      toast.success('Client reassigned successfully');
-      fetchData(); // Refresh unique
-      setSelectedClient(null);
-    } catch (error) {
-      toast.error('Failed to reassign client');
-    }
-  };
-
-  const handleCreateClient = async () => {
-    try {
-      const response = await clientsAPI.create(newClient);
-      const clientData = response.data;
-      
-      // Show login credentials if new account was created
-      if (clientData.default_password) {
-        toast.success(
-          <div>
-            <p className="font-bold">Client créé avec succès!</p>
-            <p>Email: {clientData.login_email}</p>
-            <p>Mot de passe: {clientData.default_password}</p>
-            <p className="text-xs text-slate-400 mt-1">Le client doit changer ce mot de passe lors de sa première connexion</p>
-          </div>,
-          { duration: 8000 }
-        );
-      } else {
-        toast.success('Client créé avec succès (compte existant utilisé)');
-      }
-      
+      await clientsAPI.create(newClient);
+      toast.success('Client créé avec succès');
+      setShowCreateClient(false);
       setNewClient({
         email: '',
         full_name: '',
@@ -354,45 +243,25 @@ export default function ManagerDashboard() {
         visa_type: '',
         message: ''
       });
-      setShowCreateClient(false);
-      // Refresh uniquement les données sans perdre l'interface
-      fetchData();
+      fetchData(); // Refresh unique
     } catch (error) {
       toast.error('Erreur lors de la création du client');
+      console.error(error);
     }
   };
 
-  const handleShowClientCredentials = async (clientId) => {
+  const handleUpdateCase = async (caseId, updates) => {
     try {
-      const response = await api.get(`/clients/${clientId}/credentials`);
-      const credentials = response.data;
-      
-      toast.info(
-        <div>
-          <p className="font-bold">Informations de connexion client:</p>
-          <p>Email: {credentials.email}</p>
-          <p>Mot de passe par défaut: {credentials.password}</p>
-          <p className="text-xs text-slate-400 mt-1">Le client peut changer son mot de passe dans son profil</p>
-        </div>,
-        { duration: 10000 }
-      );
+      await casesAPI.update(caseId, updates);
+      toast.success('Dossier mis à jour');
+      fetchData(); // Refresh unique
     } catch (error) {
-      toast.error('Erreur lors de la récupération des informations de connexion');
-    }
-  };
-
-  const handleUpdateCase = async (caseId, updateData) => {
-    try {
-      await casesAPI.update(caseId, updateData);
-      toast.success('Dossier mis à jour avec succès');
-      fetchData(); // Refresh data
-    } catch (error) {
-      toast.error('Erreur lors de la mise à jour du dossier');
+      toast.error('Erreur lors de la mise à jour');
+      console.error(error);
     }
   };
 
   const handleAddVisitor = async () => {
-    // Validation
     if (!newVisitor.full_name || !newVisitor.phone_number || !newVisitor.cni_number) {
       toast.error('Veuillez remplir tous les champs obligatoires');
       return;
@@ -401,175 +270,159 @@ export default function ManagerDashboard() {
     try {
       await visitorsAPI.create(newVisitor);
       toast.success('Visiteur enregistré avec succès');
-      setNewVisitor({ 
-        full_name: '', 
-        phone_number: '', 
+      setNewVisitor({
+        full_name: '',
+        phone_number: '',
         purpose: 'Consultation initiale',
         other_purpose: '',
-        cni_number: '' 
+        cni_number: ''
       });
-      fetchData();
+      fetchData(); // Refresh data
     } catch (error) {
-      console.error('Erreur enregistrement visiteur:', error);
-      toast.error(error.response?.data?.detail || 'Erreur lors de l\'enregistrement du visiteur');
+      console.error('Error creating visitor:', error);
+      toast.error('Erreur lors de l\'enregistrement du visiteur');
     }
   };
 
   const handleCheckoutVisitor = async (visitorId) => {
     try {
       await visitorsAPI.checkout(visitorId);
-      toast.success('Visitor checked out');
+      toast.success('Visiteur marqué comme parti');
       fetchData();
     } catch (error) {
-      toast.error('Failed to checkout visitor');
+      console.error('Error checking out visitor:', error);
+      toast.error('Erreur lors du checkout');
     }
   };
 
   const getStatusColor = (status) => {
-    switch (status.toLowerCase()) {
-      case 'new': return 'bg-blue-100 text-blue-700';
-      case 'in progress': return 'bg-yellow-100 text-yellow-700';
-      case 'approved': case 'completed': return 'bg-green-100 text-green-700';
-      case 'rejected': return 'bg-red-100 text-red-700';
-      default: return 'bg-gray-100 text-gray-700';
-    }
+    const colors = {
+      'Nouveau': 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+      'En cours': 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',
+      'En attente': 'bg-purple-500/10 text-purple-400 border-purple-500/20',
+      'Approuvé': 'bg-green-500/10 text-green-400 border-green-500/20',
+      'Terminé': 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+      'In Progress': 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',
+      'Under Review': 'bg-purple-500/10 text-purple-400 border-purple-500/20',
+      'Approved': 'bg-green-500/10 text-green-400 border-green-500/20',
+      'Completed': 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+    };
+    return colors[status] || 'bg-slate-500/10 text-slate-400 border-slate-500/20';
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="flex items-center justify-center h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0F172A] via-[#1E293B] to-[#0F172A]">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
       {/* Header */}
-      <header className="bg-[#1E293B] border-b border-slate-700/50 shadow-lg sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-14 sm:h-16">
-            <div className="flex items-center space-x-2 sm:space-x-3">
-              <Globe className="w-6 h-6 sm:w-8 sm:h-8 text-orange-500" />
+      <Card className="bg-gradient-to-r from-[#0F172A] to-[#1E293B] border-none shadow-2xl rounded-none">
+        <CardContent className="p-4 md:p-6">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <AloriaLogo className="h-10" />
               <div>
-                <h1 className="text-lg sm:text-xl font-bold text-white">
-                  <span className="hidden sm:inline">ALORIA AGENCY</span>
-                  <span className="sm:hidden">ALORIA</span>
+                <h1 className="text-xl md:text-2xl font-bold text-white">
+                  Manager Dashboard
                 </h1>
-                <p className="text-xs sm:text-sm text-slate-400">
-                  <span className="hidden xs:inline">Tableau de Bord Gestionnaire</span>
-                  <span className="xs:hidden">Manager</span>
-                </p>
+                <p className="text-sm text-slate-400 mt-1">Bienvenue, {user?.full_name}</p>
               </div>
             </div>
-            <div className="flex items-center space-x-2 sm:space-x-4">
-              <NotificationBell currentUser={user} />
-              <div className="hidden md:block text-right">
-                <p className="text-sm font-medium text-white">{user.full_name}</p>
-                <p className="text-xs text-slate-400">{user.role}</p>
-              </div>
-              
-              {/* Profile Button - Responsive */}
-              <Dialog open={showPasswordDialog} onOpenChange={setShowPasswordDialog}>
+
+            <div className="flex items-center gap-3">
+              <Dialog>
                 <DialogTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="border-slate-600 text-slate-300 hover:bg-slate-800 hover:text-white text-xs sm:text-sm px-2 sm:px-4 py-1.5 sm:py-2 touch-manipulation"
-                  >
-                    <User className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-                    <span className="hidden xs:inline">Profil</span>
-                    <span className="xs:hidden">👤</span>
+                  <Button className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg shadow-orange-500/50" data-testid="create-client-btn">
+                    <UserPlus className="w-4 h-4 mr-2" />
+                    <span className="hidden sm:inline">Nouveau Client</span>
+                    <span className="sm:hidden">Client</span>
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="bg-slate-800 border-slate-600 text-white">
+                <DialogContent className="bg-[#1E293B] border-slate-700">
                   <DialogHeader>
-                    <DialogTitle className="flex items-center space-x-2">
-                      <Lock className="w-5 h-5 text-orange-500" />
-                      <span>Changer le Mot de Passe</span>
-                    </DialogTitle>
+                    <DialogTitle className="text-white">Créer un Nouveau Client</DialogTitle>
                     <DialogDescription className="text-slate-400">
-                      Modifiez votre mot de passe pour sécuriser votre compte
+                      Remplissez les informations pour créer un nouveau profil client
                     </DialogDescription>
                   </DialogHeader>
-                  
-                  <form onSubmit={handleChangePassword} className="space-y-4">
+                  <form onSubmit={handleCreateClient} className="space-y-4">
                     <div>
-                      <Label htmlFor="old_password" className="text-slate-300">Mot de passe actuel</Label>
+                      <Label className="text-slate-300">Nom Complet</Label>
                       <Input
-                        id="old_password"
-                        type="password"
-                        value={passwordForm.old_password}
-                        onChange={(e) => setPasswordForm({...passwordForm, old_password: e.target.value})}
-                        placeholder="Entrez votre mot de passe actuel"
+                        value={newClient.full_name}
+                        onChange={(e) => setNewClient({ ...newClient, full_name: e.target.value })}
                         required
-                        className="bg-slate-700 border-slate-600 text-white"
+                        className="bg-slate-800 border-slate-600 text-white"
+                        data-testid="client-name-input"
                       />
                     </div>
-                    
                     <div>
-                      <Label htmlFor="new_password" className="text-slate-300">Nouveau mot de passe</Label>
+                      <Label className="text-slate-300">Email</Label>
                       <Input
-                        id="new_password"
-                        type="password"
-                        value={passwordForm.new_password}
-                        onChange={(e) => setPasswordForm({...passwordForm, new_password: e.target.value})}
-                        placeholder="Entrez un nouveau mot de passe (min. 8 caractères)"
+                        type="email"
+                        value={newClient.email}
+                        onChange={(e) => setNewClient({ ...newClient, email: e.target.value })}
                         required
-                        className="bg-slate-700 border-slate-600 text-white"
+                        className="bg-slate-800 border-slate-600 text-white"
+                        data-testid="client-email-input"
                       />
                     </div>
-                    
                     <div>
-                      <Label htmlFor="confirm_password" className="text-slate-300">Confirmer le nouveau mot de passe</Label>
+                      <Label className="text-slate-300">Téléphone</Label>
                       <Input
-                        id="confirm_password"
-                        type="password"
-                        value={passwordForm.confirm_password}
-                        onChange={(e) => setPasswordForm({...passwordForm, confirm_password: e.target.value})}
-                        placeholder="Confirmez votre nouveau mot de passe"
-                        required
-                        className="bg-slate-700 border-slate-600 text-white"
+                        value={newClient.phone}
+                        onChange={(e) => setNewClient({ ...newClient, phone: e.target.value })}
+                        className="bg-slate-800 border-slate-600 text-white"
+                        data-testid="client-phone-input"
                       />
                     </div>
-                    
-                    <div className="flex justify-end space-x-3 pt-4">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => setShowPasswordDialog(false)}
-                        className="border-slate-600 text-slate-300"
-                      >
-                        Annuler
-                      </Button>
-                      <Button
-                        type="submit"
-                        className="bg-orange-600 hover:bg-orange-700 text-white"
-                      >
-                        <Lock className="w-4 h-4 mr-2" />
-                        Modifier
-                      </Button>
+                    <div>
+                      <Label className="text-slate-300">Pays de Destination</Label>
+                      <Select value={newClient.country} onValueChange={(value) => setNewClient({ ...newClient, country: value })}>
+                        <SelectTrigger className="bg-slate-800 border-slate-600 text-white" data-testid="client-country-select">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="bg-[#1E293B] border-slate-600">
+                          <SelectItem value="Canada" className="text-white hover:bg-slate-700">Canada</SelectItem>
+                          <SelectItem value="France" className="text-white hover:bg-slate-700">France</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
+                    <div>
+                      <Label className="text-slate-300">Type de Visa</Label>
+                      <Input
+                        value={newClient.visa_type}
+                        onChange={(e) => setNewClient({ ...newClient, visa_type: e.target.value })}
+                        className="bg-slate-800 border-slate-600 text-white"
+                        data-testid="client-visa-input"
+                      />
+                    </div>
+                    <Button type="submit" className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white" data-testid="submit-client-btn">
+                      Créer le Client
+                    </Button>
                   </form>
                 </DialogContent>
               </Dialog>
-              
-              {/* Logout Button - Responsive */}
+              <NotificationBell />
               <Button 
-                variant="outline" 
-                onClick={logout} 
-                className="border-slate-600 text-slate-300 hover:bg-slate-800 hover:text-white text-xs sm:text-sm px-2 sm:px-4 py-1.5 sm:py-2 touch-manipulation"
+                onClick={logout}
+                className="bg-slate-700 hover:bg-slate-600 text-white"
               >
-                <LogOut className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-                <span className="hidden xs:inline">Déconnexion</span>
-                <span className="xs:hidden">Exit</span>
+                <LogOut className="w-4 h-4 mr-2" />
+                Déconnexion
               </Button>
             </div>
           </div>
-        </div>
-      </header>
+        </CardContent>
+      </Card>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* KPI Cards */}
+      {/* Stats Cards */}
+      <div className="p-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <Card className="bg-gradient-to-br from-[#1E293B] to-[#334155] border-l-4 border-l-blue-500 border-slate-700" data-testid="kpi-total-cases">
             <CardContent className="p-6">
@@ -628,179 +481,23 @@ export default function ManagerDashboard() {
           </Card>
         </div>
 
-        {/* Cases by Country */}
-        <div className="grid md:grid-cols-2 gap-6 mb-8">
-          <Card className="bg-gradient-to-br from-[#1E293B] to-[#334155] border-slate-700">
-            <CardHeader>
-              <CardTitle className="text-white">Dossiers par Pays</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {stats?.cases_by_country && Object.entries(stats.cases_by_country).map(([country, count]) => (
-                  <div key={country} className="flex items-center justify-between">
-                    <span className="text-slate-300 font-medium">{country}</span>
-                    <div className="flex items-center space-x-3">
-                      <div className="w-32 bg-slate-700 rounded-full h-2">
-                        <div
-                          className="bg-orange-500 h-2 rounded-full"
-                          style={{ width: `${(count / stats.total_cases) * 100}%` }}
-                        ></div>
-                      </div>
-                      <span className="text-white font-semibold w-8 text-right">{count}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-gradient-to-br from-[#1E293B] to-[#334155] border-slate-700">
-            <CardHeader>
-              <CardTitle className="text-white">Dossiers par Statut</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {stats?.cases_by_status && Object.entries(stats.cases_by_status).map(([status, count]) => (
-                  <div key={status} className="flex items-center justify-between">
-                    <Badge className={getStatusColor(status)}>{status}</Badge>
-                    <span className="text-white font-semibold">{count}</span>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Main Content Tabs */}
-        <Tabs defaultValue="clients" className="w-full">
-          <TabsList className="grid w-full grid-cols-7 mb-6 bg-[#1E293B] border border-slate-700">
-            <TabsTrigger value="clients" data-testid="tab-clients" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white text-slate-300">Clients</TabsTrigger>
-            <TabsTrigger value="employees" data-testid="tab-employees" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white text-slate-300">Employés</TabsTrigger>
-            <TabsTrigger value="prospects" data-testid="tab-prospects" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white text-slate-300">Prospects</TabsTrigger>
-            <TabsTrigger value="cases" data-testid="tab-cases" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white text-slate-300">Dossiers</TabsTrigger>
-            <TabsTrigger value="payments" data-testid="tab-payments" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white text-slate-300">Paiements</TabsTrigger>
-            <TabsTrigger value="withdrawals" data-testid="tab-withdrawals" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white text-slate-300">Retraits</TabsTrigger>
-            <TabsTrigger value="visitors" data-testid="tab-visitors" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white text-slate-300">Visiteurs</TabsTrigger>
+        {/* Tabs */}
+        <Tabs defaultValue="clients" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-2 md:grid-cols-6 gap-2 bg-[#1E293B] border border-slate-700 p-2">
+            <TabsTrigger value="clients" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-orange-600 data-[state=active]:text-white text-slate-300">Clients</TabsTrigger>
+            <TabsTrigger value="employees" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-orange-600 data-[state=active]:text-white text-slate-300">Équipe</TabsTrigger>
+            <TabsTrigger value="cases" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-orange-600 data-[state=active]:text-white text-slate-300">Dossiers</TabsTrigger>
+            <TabsTrigger value="visitors" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-orange-600 data-[state=active]:text-white text-slate-300">Visiteurs</TabsTrigger>
+            <TabsTrigger value="prospects" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-orange-600 data-[state=active]:text-white text-slate-300">Prospects</TabsTrigger>
+            <TabsTrigger value="payments" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-orange-600 data-[state=active]:text-white text-slate-300">Paiements</TabsTrigger>
           </TabsList>
 
           {/* Clients Tab */}
           <TabsContent value="clients">
             <Card className="bg-gradient-to-br from-[#1E293B] to-[#334155] border-slate-700">
               <CardHeader>
-                <div className="flex justify-between items-center">
-                  <div>
-                    <CardTitle className="text-white">Tous les Clients</CardTitle>
-                    <CardDescription className="text-slate-400">Gérer et surveiller les dossiers clients</CardDescription>
-                  </div>
-                  <div className="flex space-x-2">
-                    <Dialog open={showCreateClient} onOpenChange={setShowCreateClient}>
-                      <DialogTrigger asChild>
-                        <Button className="bg-orange-500 hover:bg-orange-600 text-white">
-                          <UserPlus className="w-4 h-4 mr-2" />
-                          Nouveau Client
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent className="bg-[#1E293B] border-slate-700 max-w-lg">
-                        <DialogHeader>
-                          <DialogTitle className="text-white">Créer un Nouveau Client</DialogTitle>
-                          <DialogDescription className="text-slate-400">
-                            Remplissez les informations du client pour créer son dossier
-                          </DialogDescription>
-                        </DialogHeader>
-                        <div className="space-y-4">
-                          <div>
-                            <Label className="text-slate-300">Nom Complet</Label>
-                            <Input
-                              value={newClient.full_name}
-                              onChange={(e) => setNewClient({...newClient, full_name: e.target.value})}
-                              className="bg-[#0F172A] border-slate-600 text-white"
-                              placeholder="Nom complet du client"
-                            />
-                          </div>
-                          <div>
-                            <Label className="text-slate-300">Email</Label>
-                            <Input
-                              type="email"
-                              value={newClient.email}
-                              onChange={(e) => setNewClient({...newClient, email: e.target.value})}
-                              className="bg-[#0F172A] border-slate-600 text-white"
-                              placeholder="email@example.com"
-                            />
-                          </div>
-                          <div>
-                            <Label className="text-slate-300">Téléphone</Label>
-                            <Input
-                              value={newClient.phone}
-                              onChange={(e) => setNewClient({...newClient, phone: e.target.value})}
-                              className="bg-[#0F172A] border-slate-600 text-white"
-                              placeholder="+33 1 23 45 67 89"
-                            />
-                          </div>
-                          <div>
-                            <Label className="text-slate-300">Pays de Destination</Label>
-                            <Select value={newClient.country} onValueChange={(value) => setNewClient({...newClient, country: value})}>
-                              <SelectTrigger className="bg-[#0F172A] border-slate-600 text-white">
-                                <SelectValue placeholder="Sélectionner un pays" />
-                              </SelectTrigger>
-                              <SelectContent className="bg-[#1E293B] border-slate-600">
-                                <SelectItem value="Canada" className="text-white hover:bg-slate-700">Canada</SelectItem>
-                                <SelectItem value="France" className="text-white hover:bg-slate-700">France</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div>
-                            <Label className="text-slate-300">Type de Visa</Label>
-                            <Select value={newClient.visa_type} onValueChange={(value) => setNewClient({...newClient, visa_type: value})}>
-                              <SelectTrigger className="bg-[#0F172A] border-slate-600 text-white">
-                                <SelectValue placeholder="Sélectionner le type de visa" />
-                              </SelectTrigger>
-                              <SelectContent className="bg-[#1E293B] border-slate-600">
-                                {newClient.country === 'Canada' && (
-                                  <>
-                                    <SelectItem value="Work Permit" className="text-white hover:bg-slate-700">Permis de Travail</SelectItem>
-                                    <SelectItem value="Study Permit" className="text-white hover:bg-slate-700">Permis d'Études</SelectItem>
-                                    <SelectItem value="Permanent Residence (Express Entry)" className="text-white hover:bg-slate-700">Résidence Permanente</SelectItem>
-                                  </>
-                                )}
-                                {newClient.country === 'France' && (
-                                  <>
-                                    <SelectItem value="Work Permit (Talent Permit)" className="text-white hover:bg-slate-700">Permis Talent</SelectItem>
-                                    <SelectItem value="Student Visa" className="text-white hover:bg-slate-700">Visa Étudiant</SelectItem>
-                                    <SelectItem value="Family Reunification" className="text-white hover:bg-slate-700">Regroupement Familial</SelectItem>
-                                  </>
-                                )}
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div>
-                            <Label className="text-slate-300">Message Initial (Optionnel)</Label>
-                            <Input
-                              value={newClient.message}
-                              onChange={(e) => setNewClient({...newClient, message: e.target.value})}
-                              className="bg-[#0F172A] border-slate-600 text-white"
-                              placeholder="Note ou demande spécifique..."
-                            />
-                          </div>
-                          <div className="flex space-x-2">
-                            <Button 
-                              onClick={handleCreateClient}
-                              className="flex-1 bg-orange-500 hover:bg-orange-600 text-white"
-                            >
-                              Créer le Client
-                            </Button>
-                            <Button 
-                              variant="outline" 
-                              onClick={() => setShowCreateClient(false)}
-                              className="border-slate-600 text-slate-300 hover:bg-slate-800"
-                            >
-                              Annuler
-                            </Button>
-                          </div>
-                        </div>
-                      </DialogContent>
-                    </Dialog>
-                  </div>
-                </div>
+                <CardTitle className="text-white">Liste des Clients</CardTitle>
+                <CardDescription className="text-slate-400">Gérer et suivre tous vos clients</CardDescription>
               </CardHeader>
               <CardContent>
                 {/* Recherche et Tri */}
@@ -840,65 +537,31 @@ export default function ManagerDashboard() {
                             <td className="py-3 px-4">
                               <Badge variant="outline" className="border-slate-600 text-slate-300">{client.country}</Badge>
                             </td>
-                            <td className="py-3 px-4 text-sm text-slate-300">{client.visa_type}</td>
+                            <td className="py-3 px-4 text-slate-300">{client.visa_type}</td>
                             <td className="py-3 px-4">
-                              <Badge className={getStatusColor(client.current_status)}>
-                                {client.current_status}
-                              </Badge>
+                              <Badge className={getStatusColor(client.current_status)}>{client.current_status}</Badge>
                             </td>
                             <td className="py-3 px-4">
-                              <div className="flex items-center space-x-2">
-                                <div className="w-20 bg-slate-700 rounded-full h-2">
-                                  <div
-                                    className="bg-orange-500 h-2 rounded-full"
-                                    style={{ width: `${client.progress_percentage}%` }}
-                                  ></div>
+                              <div className="flex items-center gap-2">
+                                <div className="flex-1 bg-slate-700 rounded-full h-2 overflow-hidden">
+                                  <div 
+                                    className="bg-gradient-to-r from-orange-500 to-orange-600 h-full transition-all" 
+                                    style={{ width: `${client.progress_percentage || 0}%` }}
+                                  />
                                 </div>
-                                <span className="text-xs text-slate-400">{Math.round(client.progress_percentage)}%</span>
+                                <span className="text-xs text-slate-400">{client.progress_percentage || 0}%</span>
                               </div>
                             </td>
-                            <td className="py-3 px-4 text-sm text-slate-300">{client.assigned_employee_name || 'Non assigné'}</td>
+                            <td className="py-3 px-4 text-slate-400 text-sm">{client.assigned_employee_name || 'Non assigné'}</td>
                             <td className="py-3 px-4">
-                              <div className="flex space-x-2">
-                                <Button 
-                                  variant="outline" 
-                                  size="sm" 
-                                  onClick={() => handleShowClientCredentials(client.id)}
-                                  className="border-slate-600 text-slate-300 hover:bg-slate-800 hover:text-white"
-                                >
-                                  Login Info
-                                </Button>
-                                <Dialog>
-                                  <DialogTrigger asChild>
-                                    <Button variant="outline" size="sm" onClick={() => setSelectedClient(client)} className="border-slate-600 text-slate-300 hover:bg-slate-800 hover:text-white">
-                                      Réassigner
-                                    </Button>
-                                  </DialogTrigger>
-                                <DialogContent className="bg-[#1E293B] border-slate-700">
-                                  <DialogHeader>
-                                    <DialogTitle className="text-white">Réassigner le Client</DialogTitle>
-                                    <DialogDescription className="text-slate-400">
-                                      Sélectionner un nouveau conseiller pour {clientCase?.client_name}
-                                    </DialogDescription>
-                                  </DialogHeader>
-                                  <div className="space-y-4">
-                                    <Label className="text-slate-300">Sélectionner l'Employé</Label>
-                                    <Select onValueChange={(value) => handleReassignClient(client.id, value)}>
-                                      <SelectTrigger className="bg-[#0F172A] border-slate-600 text-white">
-                                        <SelectValue placeholder="Choisir un employé" />
-                                      </SelectTrigger>
-                                      <SelectContent className="bg-[#1E293B] border-slate-600">
-                                        {employees.map((emp) => (
-                                          <SelectItem key={emp.id} value={emp.id} className="text-white hover:bg-slate-700">
-                                            {emp.full_name}
-                                          </SelectItem>
-                                        ))}
-                                      </SelectContent>
-                                    </Select>
-                                  </div>
-                                </DialogContent>
-                              </Dialog>
-                              </div>
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                className="border-slate-600 text-slate-300 hover:bg-slate-800 hover:text-white"
+                                onClick={() => setSelectedClient(client)}
+                              >
+                                Détails
+                              </Button>
                             </td>
                           </tr>
                         );
@@ -1056,7 +719,6 @@ export default function ManagerDashboard() {
                                       <SelectItem value="En attente" className="text-white hover:bg-slate-700">En attente</SelectItem>
                                       <SelectItem value="Approuvé" className="text-white hover:bg-slate-700">Approuvé</SelectItem>
                                       <SelectItem value="Terminé" className="text-white hover:bg-slate-700">Terminé</SelectItem>
-                                      <SelectItem value="Rejeté" className="text-white hover:bg-slate-700">Rejeté</SelectItem>
                                     </SelectContent>
                                   </Select>
                                 </div>
@@ -1065,21 +727,31 @@ export default function ManagerDashboard() {
                           </Dialog>
                         </div>
                       </div>
+                      
+                      {/* Progress Bar */}
                       <div className="mb-3">
-                        <div className="flex justify-between text-sm text-slate-400 mb-1">
+                        <div className="flex items-center justify-between text-xs text-slate-400 mb-1">
                           <span>Étape {caseItem.current_step_index + 1} sur {caseItem.workflow_steps.length}</span>
-                          <span>{Math.round(((caseItem.current_step_index + 1) / caseItem.workflow_steps.length) * 100)}%</span>
+                          <span>{Math.round((caseItem.current_step_index + 1) / caseItem.workflow_steps.length * 100)}%</span>
                         </div>
-                        <div className="w-full bg-slate-700 rounded-full h-2">
-                          <div
-                            className="bg-orange-500 h-2 rounded-full transition-all"
+                        <div className="w-full bg-slate-700 rounded-full h-2 overflow-hidden">
+                          <div 
+                            className="bg-gradient-to-r from-orange-500 to-orange-600 h-full transition-all"
                             style={{ width: `${((caseItem.current_step_index + 1) / caseItem.workflow_steps.length) * 100}%` }}
-                          ></div>
+                          />
                         </div>
                       </div>
-                      <p className="text-sm text-slate-300">
-                        <strong>Étape Actuelle:</strong> {caseItem.workflow_steps[caseItem.current_step_index]?.title || 'N/A'}
-                      </p>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                        <div>
+                          <span className="text-slate-500 font-medium">Étape actuelle:</span>
+                          <p className="text-slate-300">{caseItem.workflow_steps[caseItem.current_step_index]?.title}</p>
+                        </div>
+                        <div>
+                          <span className="text-slate-500 font-medium">Créé le:</span>
+                          <p className="text-slate-300">{new Date(caseItem.created_at).toLocaleDateString('fr-FR')}</p>
+                        </div>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -1143,24 +815,24 @@ export default function ManagerDashboard() {
                         <SelectTrigger className="bg-slate-800 border-slate-600 text-white mt-2">
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent className="bg-slate-800 border-slate-600">
+                        <SelectContent className="bg-[#1E293B] border-slate-600">
                           <SelectItem value="Consultation initiale" className="text-white hover:bg-slate-700">Consultation initiale</SelectItem>
-                          <SelectItem value="Remise de documents" className="text-white hover:bg-slate-700">Remise de documents</SelectItem>
-                          <SelectItem value="Mise à jour du dossier" className="text-white hover:bg-slate-700">Mise à jour du dossier</SelectItem>
-                          <SelectItem value="Rendez-vous de suivi" className="text-white hover:bg-slate-700">Rendez-vous de suivi</SelectItem>
+                          <SelectItem value="Suivi de dossier" className="text-white hover:bg-slate-700">Suivi de dossier</SelectItem>
+                          <SelectItem value="Dépôt de documents" className="text-white hover:bg-slate-700">Dépôt de documents</SelectItem>
+                          <SelectItem value="Rendez-vous" className="text-white hover:bg-slate-700">Rendez-vous</SelectItem>
                           <SelectItem value="Autre" className="text-white hover:bg-slate-700">Autre</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
 
-                    {/* Précisions si Autre */}
+                    {/* Other purpose (conditional) */}
                     {newVisitor.purpose === 'Autre' && (
                       <div>
                         <Label className="text-slate-300 font-medium">Précisez le motif</Label>
                         <Input
                           value={newVisitor.other_purpose}
                           onChange={(e) => setNewVisitor({ ...newVisitor, other_purpose: e.target.value })}
-                          placeholder="Veuillez préciser..."
+                          placeholder="Décrivez le motif de la visite"
                           className="bg-slate-800 border-slate-600 text-white placeholder:text-slate-500 mt-2"
                         />
                       </div>
@@ -1225,8 +897,8 @@ export default function ManagerDashboard() {
                             </Button>
                           )}
                           {visitor.departure_time && (
-                            <Badge variant="secondary" className="bg-green-500/20 text-green-400 border-green-500/30">
-                              ✅ Parti
+                            <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
+                              ✓ Parti
                             </Badge>
                           )}
                         </div>
@@ -1236,6 +908,11 @@ export default function ManagerDashboard() {
                 </CardContent>
               </Card>
             </div>
+          </TabsContent>
+
+          {/* Prospects Tab */}
+          <TabsContent value="prospects">
+            <MyProspects />
           </TabsContent>
 
           {/* Payments Tab */}
@@ -1276,30 +953,39 @@ export default function ManagerDashboard() {
 
                       <div className="space-y-4 max-h-96 overflow-y-auto">
                         {filteredPayments.map((payment) => (
-                        <div key={payment.id} className="bg-slate-600 rounded-lg p-4 border border-slate-500">
-                          <div className="flex justify-between items-start mb-3">
+                        <div key={payment.id} className="bg-slate-600 rounded-lg p-4 border border-slate-500 space-y-3">
+                          <div className="flex justify-between items-start">
                             <div>
-                              <p className="text-white font-bold text-lg">
+                              <p className="text-white font-semibold text-lg">
                                 {payment.amount} {payment.currency}
                               </p>
-                              <p className="text-slate-300 font-medium">{payment.client_name}</p>
-                              <p className="text-slate-400 text-sm">{payment.payment_method}</p>
+                              <p className="text-slate-300 text-sm">{payment.client_name}</p>
                             </div>
-                            <Badge className="bg-yellow-500/20 text-yellow-400">
-                              En attente
+                            <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30">
+                              ⏳ En attente
                             </Badge>
                           </div>
                           
-                          {payment.description && (
-                            <p className="text-slate-300 text-sm mb-3 italic">"{payment.description}"</p>
-                          )}
-                          
-                          <div className="flex items-center justify-between text-xs text-slate-500 mb-4">
-                            <span>Déclaré le: {new Date(payment.created_at).toLocaleDateString('fr-FR')}</span>
-                            <span>Client ID: {payment.client_id}</span>
+                          <div className="space-y-1 text-sm">
+                            <p className="text-slate-400">
+                              <span className="font-medium text-slate-300">Méthode:</span> {payment.payment_method}
+                            </p>
+                            {payment.reference && (
+                              <p className="text-slate-400">
+                                <span className="font-medium text-slate-300">Référence:</span> {payment.reference}
+                              </p>
+                            )}
+                            {payment.description && (
+                              <p className="text-slate-400">
+                                <span className="font-medium text-slate-300">Description:</span> {payment.description}
+                              </p>
+                            )}
+                            <p className="text-slate-400">
+                              <span className="font-medium text-slate-300">Déclaré le:</span> {new Date(payment.declared_at).toLocaleDateString('fr-FR')}
+                            </p>
                           </div>
 
-                          <div className="flex space-x-2">
+                          <div className="flex gap-2">
                             <Button
                               onClick={() => handlePaymentAction(payment, 'CONFIRMED')}
                               className="flex-1 bg-green-600 hover:bg-green-700 text-white"
@@ -1327,11 +1013,11 @@ export default function ManagerDashboard() {
               <Card className="bg-gradient-to-br from-[#1E293B] to-[#334155] border-slate-700">
                 <CardHeader>
                   <CardTitle className="text-white flex items-center space-x-2">
-                    <span className="text-orange-500">📋</span>
+                    <span className="text-green-500">📋</span>
                     <span>Historique des Paiements</span>
                   </CardTitle>
                   <CardDescription className="text-slate-400">
-                    Tous les paiements confirmés et rejetés
+                    Paiements confirmés ou rejetés
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -1352,30 +1038,22 @@ export default function ManagerDashboard() {
                               </p>
                               <p className="text-slate-300 text-sm">{payment.client_name}</p>
                             </div>
-                            <div className="text-right">
-                              <Badge 
-                                className={`mb-1 ${
-                                  payment.status === 'CONFIRMED' 
-                                    ? 'bg-green-500/20 text-green-400' 
-                                    : 'bg-red-500/20 text-red-400'
-                                }`}
-                              >
-                                {payment.status === 'CONFIRMED' ? 'Confirmé' : 'Rejeté'}
-                              </Badge>
-                              {payment.invoice_number && (
-                                <p className="text-xs text-slate-400">
-                                  {payment.invoice_number}
-                                </p>
-                              )}
-                            </div>
+                            <Badge className={
+                              payment.status === 'confirmed' 
+                                ? 'bg-green-500/20 text-green-400 border-green-500/30'
+                                : 'bg-red-500/20 text-red-400 border-red-500/30'
+                            }>
+                              {payment.status === 'confirmed' ? '✅ Confirmé' : '❌ Rejeté'}
+                            </Badge>
                           </div>
-                          
-                          <div className="flex justify-between text-xs text-slate-500">
-                            <span>Déclaré: {new Date(payment.created_at).toLocaleDateString('fr-FR')}</span>
-                            {payment.confirmation_date && (
-                              <span>Traité: {new Date(payment.confirmation_date).toLocaleDateString('fr-FR')}</span>
-                            )}
-                          </div>
+                          <p className="text-xs text-slate-400">
+                            {new Date(payment.confirmed_at || payment.declared_at).toLocaleString('fr-FR')}
+                          </p>
+                          {payment.invoice_number && (
+                            <p className="text-xs text-slate-400 mt-1">
+                              <span className="font-medium">Facture:</span> {payment.invoice_number}
+                            </p>
+                          )}
                         </div>
                       ))
                     )}
@@ -1384,113 +1062,51 @@ export default function ManagerDashboard() {
               </Card>
             </div>
           </TabsContent>
-
-          {/* Withdrawals Tab */}
-          <TabsContent value="withdrawals">
-            <WithdrawalManager />
-          </TabsContent>
-
-          {/* Prospects Tab */}
-          <TabsContent value="prospects">
-            <MyProspects />
-          </TabsContent>
-
         </Tabs>
-
-        {/* Confirmation Dialog */}
-        {confirmationDialog.show && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-slate-800 rounded-lg p-6 w-full max-w-md mx-4 border border-slate-600">
-              <h3 className="text-lg font-bold text-white mb-4">Code de Confirmation</h3>
-              <div className="space-y-4">
-                <div className="bg-orange-500/10 border border-orange-500/20 rounded-lg p-4">
-                  <p className="text-orange-400 text-sm mb-2">Code généré :</p>
-                  <p className="text-2xl font-mono font-bold text-orange-400 text-center tracking-widest">
-                    {confirmationDialog.generatedCode}
-                  </p>
-                </div>
-                
-                <div>
-                  <Label className="text-slate-300">Saisissez le code pour confirmer :</Label>
-                  <Input
-                    type="text"
-                    value={confirmationDialog.code}
-                    onChange={(e) => setConfirmationDialog({
-                      ...confirmationDialog, 
-                      code: e.target.value.toUpperCase()
-                    })}
-                    placeholder="Entrez le code"
-                    className="bg-slate-700 border-slate-600 text-white text-center text-lg font-mono tracking-widest"
-                    maxLength={4}
-                  />
-                </div>
-                
-                <div className="flex space-x-3">
-                  <Button
-                    onClick={() => setConfirmationDialog({ show: false, payment: null, code: '', action: '' })}
-                    variant="outline"
-                    className="flex-1 border-slate-600 text-slate-300"
-                  >
-                    Annuler
-                  </Button>
-                  <Button
-                    onClick={confirmPaymentWithCode}
-                    disabled={confirmationDialog.code !== confirmationDialog.generatedCode}
-                    className="flex-1 bg-green-600 hover:bg-green-700 text-white"
-                  >
-                    Confirmer Paiement
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Rejection Dialog */}
-        {rejectionDialog.show && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-slate-800 rounded-lg p-6 w-full max-w-md mx-4 border border-slate-600">
-              <h3 className="text-lg font-bold text-white mb-4">Motif de Rejet</h3>
-              <div className="space-y-4">
-                <div>
-                  <Label className="text-slate-300">Motif du rejet (obligatoire) :</Label>
-                  <textarea
-                    value={rejectionDialog.reason}
-                    onChange={(e) => setRejectionDialog({...rejectionDialog, reason: e.target.value})}
-                    placeholder="Expliquez pourquoi ce paiement est rejeté..."
-                    rows={4}
-                    className="w-full px-3 py-2 bg-slate-700 border border-slate-600 text-white rounded-md resize-none"
-                    required
-                  />
-                </div>
-                
-                <div className="flex space-x-3">
-                  <Button
-                    onClick={() => setRejectionDialog({ show: false, payment: null, reason: '' })}
-                    variant="outline"
-                    className="flex-1 border-slate-600 text-slate-300"
-                  >
-                    Annuler
-                  </Button>
-                  <Button
-                    onClick={rejectPaymentWithReason}
-                    disabled={!rejectionDialog.reason.trim()}
-                    className="flex-1 bg-red-600 hover:bg-red-700 text-white"
-                  >
-                    Rejeter Paiement
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Chat Widget */}
-      <ChatWidget 
-        currentUser={user} 
-        onUnreadCountChange={setChatUnreadCount}
-      />
+      <ChatWidget userRole="MANAGER" />
+
+      {/* Rejection Dialog */}
+      {rejectionDialog.show && (
+        <Dialog open={rejectionDialog.show} onOpenChange={(open) => setRejectionDialog({ ...rejectionDialog, show: open })}>
+          <DialogContent className="bg-[#1E293B] border-slate-700">
+            <DialogHeader>
+              <DialogTitle className="text-white">Rejeter le Paiement</DialogTitle>
+              <DialogDescription className="text-slate-400">
+                Veuillez indiquer la raison du rejet
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label className="text-slate-300">Raison du rejet *</Label>
+                <Input
+                  value={rejectionDialog.reason}
+                  onChange={(e) => setRejectionDialog({ ...rejectionDialog, reason: e.target.value })}
+                  placeholder="Ex: Montant incorrect, preuve de paiement invalide..."
+                  className="bg-slate-800 border-slate-600 text-white mt-2"
+                />
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  onClick={handleRejection}
+                  className="flex-1 bg-red-600 hover:bg-red-700 text-white"
+                >
+                  Confirmer le Rejet
+                </Button>
+                <Button
+                  onClick={() => setRejectionDialog({ show: false, payment: null, reason: '' })}
+                  variant="outline"
+                  className="flex-1 border-slate-600 text-slate-300 hover:bg-slate-800"
+                >
+                  Annuler
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }
