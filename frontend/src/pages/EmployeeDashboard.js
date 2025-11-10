@@ -201,11 +201,11 @@ export default function EmployeeDashboard() {
       <header className="bg-[#1E293B] border-b border-slate-700/50 shadow-lg sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-3">
-              <Globe className="w-8 h-8 text-orange-500" />
-              <div>
-                <h1 className="text-xl font-bold text-white">ALORIA AGENCY</h1>
-                <p className="text-sm text-slate-400">Tableau de Bord Employé</p>
+            <div className="flex items-center space-x-4">
+              <AloriaLogo className="h-10" />
+              <div className="text-left">
+                <h1 className="text-xl font-bold text-white">Employee Dashboard</h1>
+                <p className="text-xs text-slate-400 mt-0.5">Bienvenue, {user?.full_name}</p>
               </div>
             </div>
             <div className="flex items-center space-x-4">
