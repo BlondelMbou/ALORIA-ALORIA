@@ -72,7 +72,7 @@ export default function ConsultantDashboard() {
     }
 
     try {
-      await api.post(`/api/contact-messages/${prospectId}/convert-to-client`);
+      await api.post(`/contact-messages/${prospectId}/convert-to-client`);
       toast.success('Prospect converti en client avec succès !');
       fetchProspects();
     } catch (error) {
