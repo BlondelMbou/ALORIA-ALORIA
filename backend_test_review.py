@@ -512,55 +512,76 @@ class ReviewTester:
                             self.log_result("Step 2: Manager Views Pending", False, 
                                           f"Status: {pending_response.status_code}")
                         
-                        # Step 3: Manager confirms payment with code
+                        # Step 3a: Manager generates confirmation code
                         confirm_data = {
                             "action": "CONFIRMED"
                         }
                         confirm_response = self.session.patch(f"{API_BASE}/payments/{payment_id}/confirm", 
                                                             json=confirm_data, headers=headers)
                         if confirm_response.status_code == 200:
-                            confirmed_payment = confirm_response.json()
-                            invoice_number = confirmed_payment.get('invoice_number')
-                            if invoice_number:
-                                self.log_result("Step 3: Manager Confirms Payment", True, 
-                                              f"Payment confirmed, Invoice: {invoice_number}")
+                            first_response = confirm_response.json()
+                            confirmation_code = first_response.get('confirmation_code')
+                            if confirmation_code:
+                                self.log_result("Step 3a: Generate Confirmation Code", True, 
+                                              f"Confirmation code generated: {confirmation_code}")
                                 
-                                # Step 4: Check PDF generation
-                                pdf_response = self.session.get(f"{API_BASE}/invoices/{invoice_number}", 
-                                                              headers=headers)
-                                if pdf_response.status_code == 200:
-                                    if pdf_response.headers.get('content-type') == 'application/pdf':
-                                        self.log_result("Step 4: PDF Invoice Generation", True, 
-                                                      f"PDF invoice generated and downloadable: {invoice_number}")
+                                # Step 3b: Manager confirms with code
+                                confirm_with_code = {
+                                    "action": "CONFIRMED",
+                                    "confirmation_code": confirmation_code
+                                }
+                                final_confirm_response = self.session.patch(f"{API_BASE}/payments/{payment_id}/confirm", 
+                                                                          json=confirm_with_code, headers=headers)
+                                if final_confirm_response.status_code == 200:
+                                    confirmed_payment = final_confirm_response.json()
+                                    invoice_number = confirmed_payment.get('invoice_number')
+                                    if invoice_number:
+                                        self.log_result("Step 3b: Manager Confirms with Code", True, 
+                                                      f"Payment confirmed with code, Invoice: {invoice_number}")
+                                        
+                                        # Step 4: Check PDF generation
+                                        pdf_response = self.session.get(f"{API_BASE}/invoices/{invoice_number}", 
+                                                                      headers=headers)
+                                        if pdf_response.status_code == 200:
+                                            content_type = pdf_response.headers.get('content-type', '')
+                                            if 'pdf' in content_type.lower():
+                                                self.log_result("Step 4: PDF Invoice Generation", True, 
+                                                              f"✅ PDF invoice generated: {invoice_number}")
+                                            else:
+                                                self.log_result("Step 4: PDF Invoice Generation", False, 
+                                                              f"Response content-type: {content_type}")
+                                        else:
+                                            self.log_result("Step 4: PDF Invoice Generation", False, 
+                                                          f"PDF download failed: {pdf_response.status_code}")
+                                        
+                                        # Step 5: Check payment history
+                                        history_response = self.session.get(f"{API_BASE}/payments/history", headers=headers)
+                                        if history_response.status_code == 200:
+                                            history = history_response.json()
+                                            confirmed_payment_in_history = any(
+                                                p['id'] == payment_id and p['status'] == 'confirmed' 
+                                                for p in history
+                                            )
+                                            if confirmed_payment_in_history:
+                                                self.log_result("Step 5: Payment History", True, 
+                                                              f"✅ Confirmed payment in history ({len(history)} total)")
+                                            else:
+                                                self.log_result("Step 5: Payment History", False, 
+                                                              "Confirmed payment not found in history")
+                                        else:
+                                            self.log_result("Step 5: Payment History", False, 
+                                                          f"History retrieval failed: {history_response.status_code}")
                                     else:
-                                        self.log_result("Step 4: PDF Invoice Generation", False, 
-                                                      "Response is not a PDF file")
+                                        self.log_result("Step 3b: Manager Confirms with Code", False, 
+                                                      "Payment confirmed but no invoice number generated")
                                 else:
-                                    self.log_result("Step 4: PDF Invoice Generation", False, 
-                                                  f"PDF download failed: {pdf_response.status_code}")
-                                
-                                # Step 5: Check payment history
-                                history_response = self.session.get(f"{API_BASE}/payments/history", headers=headers)
-                                if history_response.status_code == 200:
-                                    history = history_response.json()
-                                    confirmed_payment_in_history = any(
-                                        p['id'] == payment_id and p['status'] == 'confirmed' 
-                                        for p in history
-                                    )
-                                    if confirmed_payment_in_history:
-                                        self.log_result("Step 5: Payment History", True, 
-                                                      f"Confirmed payment appears in history ({len(history)} total)")
-                                    else:
-                                        self.log_result("Step 5: Payment History", False, 
-                                                      "Confirmed payment not found in history")
-                                else:
-                                    self.log_result("Step 5: Payment History", False, 
-                                                  f"History retrieval failed: {history_response.status_code}")
+                                    self.log_result("Step 3b: Manager Confirms with Code", False, 
+                                                  f"Status: {final_confirm_response.status_code}", final_confirm_response.text)
                             else:
-                                self.log_result("Step 3: Manager Confirms Payment", False, 
-                                              "Payment confirmed but no invoice number generated")
+                                self.log_result("Step 3a: Generate Confirmation Code", False, 
+                                              "No confirmation code in response")
                         else:
-                            self.log_result("Step 3: Manager Confirms Payment", False, 
+                            self.log_result("Step 3a: Generate Confirmation Code", False, 
                                           f"Status: {confirm_response.status_code}", confirm_response.text)
                     else:
                         self.log_result("Step 1: Client Declares Payment", False, 
