@@ -258,16 +258,17 @@ class ConsultantTester:
                 self.log_result("CLIENT Denied Access", False, "Exception occurred", str(e))
 
     def test_consultant_specific_endpoints(self):
-        """Test consultant-specific endpoints"""
+        """Test consultant-specific endpoints with correct role permissions"""
         print("=== Testing Consultant-Specific Endpoints ===")
         
-        if not self.consultant_token:
-            self.log_result("CONSULTANT Specific Endpoints", False, "No CONSULTANT token available")
+        # First, get prospects to find one with paiement_50k status
+        if not self.superadmin_token:
+            self.log_result("CONSULTANT Specific Endpoints", False, "No SUPERADMIN token available for notes test")
             return
 
-        # First, get prospects to find one with paiement_50k status
         try:
-            headers = {"Authorization": f"Bearer {self.consultant_token}"}
+            # Use SUPERADMIN to get all prospects
+            headers = {"Authorization": f"Bearer {self.superadmin_token}"}
             response = self.session.get(f"{API_BASE}/contact-messages", headers=headers)
             
             if response.status_code == 200:
@@ -282,44 +283,76 @@ class ConsultantTester:
                 if paid_prospect:
                     prospect_id = paid_prospect['id']
                     
-                    # Test PATCH /api/contact-messages/{id}/consultant-notes
+                    # Test PATCH /api/contact-messages/{id}/consultant-notes (SUPERADMIN role required)
                     try:
                         notes_data = {
-                            "notes": "Test consultation notes from CONSULTANT role",
-                            "consultation_date": "2024-01-15",
-                            "recommendations": "Client needs to prepare additional documents"
+                            "note": "Test consultation notes from SUPERADMIN role for consultant workflow"
                         }
                         notes_response = self.session.patch(f"{API_BASE}/contact-messages/{prospect_id}/consultant-notes", 
                                                           json=notes_data, headers=headers)
                         if notes_response.status_code == 200:
-                            self.log_result("CONSULTANT Add Notes", True, 
-                                          f"CONSULTANT successfully added notes to prospect {prospect_id}")
+                            self.log_result("SUPERADMIN Add Consultant Notes", True, 
+                                          f"SUPERADMIN successfully added consultant notes to prospect {prospect_id}")
                         else:
-                            self.log_result("CONSULTANT Add Notes", False, 
+                            self.log_result("SUPERADMIN Add Consultant Notes", False, 
                                           f"Status: {notes_response.status_code}", notes_response.text)
                     except Exception as e:
-                        self.log_result("CONSULTANT Add Notes", False, "Exception occurred", str(e))
+                        self.log_result("SUPERADMIN Add Consultant Notes", False, "Exception occurred", str(e))
 
-                    # Test POST /api/contact-messages/{id}/convert-to-client
-                    try:
-                        convert_response = self.session.post(f"{API_BASE}/contact-messages/{prospect_id}/convert-to-client", 
-                                                           headers=headers)
-                        if convert_response.status_code == 200:
-                            self.log_result("CONSULTANT Convert to Client", True, 
-                                          f"CONSULTANT successfully converted prospect {prospect_id} to client")
-                        else:
-                            self.log_result("CONSULTANT Convert to Client", False, 
-                                          f"Status: {convert_response.status_code}", convert_response.text)
-                    except Exception as e:
-                        self.log_result("CONSULTANT Convert to Client", False, "Exception occurred", str(e))
+                    # Test POST /api/contact-messages/{id}/convert-to-client (EMPLOYEE role required)
+                    if self.employee_token:
+                        try:
+                            employee_headers = {"Authorization": f"Bearer {self.employee_token}"}
+                            
+                            # First check if prospect is assigned to employee
+                            if paid_prospect.get('assigned_to') == None:
+                                # Assign prospect to employee first
+                                assign_data = {"assigned_to": "employee_id"}  # This would need actual employee ID
+                                assign_response = self.session.patch(f"{API_BASE}/contact-messages/{prospect_id}/assign", 
+                                                                   json=assign_data, headers=headers)
+                                if assign_response.status_code != 200:
+                                    self.log_result("Assign Prospect to Employee for Conversion", False, 
+                                                  f"Could not assign prospect: {assign_response.status_code}")
+                            
+                            convert_data = {
+                                "country": paid_prospect.get('country', 'France'),
+                                "visa_type": paid_prospect.get('visa_type', 'Work Permit'),
+                                "first_payment_amount": 1000
+                            }
+                            convert_response = self.session.post(f"{API_BASE}/contact-messages/{prospect_id}/convert-to-client", 
+                                                               json=convert_data, headers=employee_headers)
+                            if convert_response.status_code == 200:
+                                self.log_result("EMPLOYEE Convert Prospect to Client", True, 
+                                              f"EMPLOYEE successfully converted prospect {prospect_id} to client")
+                            else:
+                                self.log_result("EMPLOYEE Convert Prospect to Client", False, 
+                                              f"Status: {convert_response.status_code}", convert_response.text)
+                        except Exception as e:
+                            self.log_result("EMPLOYEE Convert Prospect to Client", False, "Exception occurred", str(e))
+                    
+                    # Test CONSULTANT role cannot add notes (should get 403)
+                    if self.consultant_token:
+                        try:
+                            consultant_headers = {"Authorization": f"Bearer {self.consultant_token}"}
+                            notes_data = {"note": "CONSULTANT should not be able to add notes"}
+                            notes_response = self.session.patch(f"{API_BASE}/contact-messages/{prospect_id}/consultant-notes", 
+                                                              json=notes_data, headers=consultant_headers)
+                            if notes_response.status_code == 403:
+                                self.log_result("CONSULTANT Cannot Add Notes (Expected)", True, 
+                                              "CONSULTANT correctly denied permission to add notes (403)")
+                            else:
+                                self.log_result("CONSULTANT Cannot Add Notes (Expected)", False, 
+                                              f"CONSULTANT should get 403, got {notes_response.status_code}")
+                        except Exception as e:
+                            self.log_result("CONSULTANT Cannot Add Notes (Expected)", False, "Exception occurred", str(e))
                 else:
-                    self.log_result("Find Paid Prospect for CONSULTANT Tests", False, 
+                    self.log_result("Find Paid Prospect for Endpoint Tests", False, 
                                   "No prospects with status='paiement_50k' found for testing")
             else:
-                self.log_result("Get Prospects for CONSULTANT Tests", False, 
+                self.log_result("Get Prospects for Endpoint Tests", False, 
                               f"Status: {response.status_code}", response.text)
         except Exception as e:
-            self.log_result("Get Prospects for CONSULTANT Tests", False, "Exception occurred", str(e))
+            self.log_result("Get Prospects for Endpoint Tests", False, "Exception occurred", str(e))
 
     def create_test_prospect_data(self):
         """Create test prospect data if needed"""
