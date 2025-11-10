@@ -3247,8 +3247,8 @@ async def get_contact_messages(
     status: Optional[str] = None,
     current_user: dict = Depends(get_current_user)
 ):
-    """Obtenir les messages de contact (SuperAdmin/Manager/Employee)"""
-    if current_user["role"] not in ["SUPERADMIN", "MANAGER", "EMPLOYEE"]:
+    """Obtenir les messages de contact (SuperAdmin/Manager/Employee/Consultant)"""
+    if current_user["role"] not in ["SUPERADMIN", "MANAGER", "EMPLOYEE", "CONSULTANT"]:
         raise HTTPException(status_code=403, detail="Accès refusé")
     
     query = {}
@@ -3258,6 +3258,9 @@ async def get_contact_messages(
     # SUPERADMIN voit TOUS les prospects
     if current_user["role"] == "SUPERADMIN":
         pass  # Pas de filtre
+    # CONSULTANT voit seulement les prospects avec statut paiement_50k
+    elif current_user["role"] == "CONSULTANT":
+        query["status"] = "paiement_50k"
     # MANAGER et EMPLOYEE voient seulement les messages qui leur sont assignés
     elif current_user["role"] in ["MANAGER", "EMPLOYEE"]:
         query["assigned_to"] = current_user["id"]
