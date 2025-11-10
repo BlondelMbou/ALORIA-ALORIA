@@ -367,6 +367,7 @@ class UserRole(str, Enum):
     SUPERADMIN = "SUPERADMIN"
     MANAGER = "MANAGER"
     EMPLOYEE = "EMPLOYEE" 
+    CONSULTANT = "CONSULTANT"
     CLIENT = "CLIENT"
 
 class VisitorPurpose(str, Enum):
