@@ -52,7 +52,7 @@ export default function ConsultantDashboard() {
     }
 
     try {
-      await api.patch(`/contact-messages/${selectedProspect.id}/consultant-notes`, {
+      await api.patch(`/api/contact-messages/${selectedProspect.id}/consultant-notes`, {
         note: consultantNotes
       });
       
