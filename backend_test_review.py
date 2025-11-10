@@ -325,25 +325,19 @@ class ReviewTester:
                         # Test: Try sequential progression (1→2, should work)
                         try:
                             update_data = {
-                                "current_step_index": 1,  # Move to next step
+                                "step_index": 1,  # Move to next step (use step_index)
                                 "status": "Step 2",
                                 "notes": "Progression séquentielle normale"
                             }
                             response = self.session.patch(f"{API_BASE}/cases/{case_id}/progress", 
                                                         json=update_data, headers=headers)
                             if response.status_code == 200:
-                                self.log_result("Sequential Validation (1→2)", True, "Sequential progression allowed correctly")
+                                self.log_result("Sequential Validation (0→1)", True, "✅ Sequential progression allowed correctly")
                             else:
-                                # Try regular case update endpoint
-                                response = self.session.patch(f"{API_BASE}/cases/{case_id}", 
-                                                            json=update_data, headers=headers)
-                                if response.status_code == 200:
-                                    self.log_result("Sequential Validation (1→2)", True, "Sequential progression allowed via case update")
-                                else:
-                                    self.log_result("Sequential Validation (1→2)", False, 
-                                                  f"Sequential progression failed: {response.status_code}")
+                                self.log_result("Sequential Validation (0→1)", False, 
+                                              f"❌ Sequential progression failed: {response.status_code} - {response.text}")
                         except Exception as e:
-                            self.log_result("Sequential Validation (1→2)", False, "Exception occurred", str(e))
+                            self.log_result("Sequential Validation (0→1)", False, "Exception occurred", str(e))
                     else:
                         self.log_result("Sequential Validation Setup", False, "Could not find case for test client")
                 else:
