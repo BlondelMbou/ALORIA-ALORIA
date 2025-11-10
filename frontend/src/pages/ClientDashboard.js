@@ -229,17 +229,11 @@ export default function ClientDashboard() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-14 sm:h-16">
             {/* Logo Section - Mobile optimized */}
-            <div className="flex items-center space-x-2 sm:space-x-3">
-              <Globe className="w-6 h-6 sm:w-8 sm:h-8 text-orange-500" />
+            <div className="flex items-center gap-3">
+              <AloriaLogo className="h-10" />
               <div>
-                <h1 className="text-lg sm:text-xl font-bold text-white">
-                  <span className="hidden sm:inline">ALORIA AGENCY</span>
-                  <span className="sm:hidden">ALORIA</span>
-                </h1>
-                <p className="text-xs sm:text-sm text-slate-400">
-                  <span className="hidden xs:inline">Mon Profil Client</span>
-                  <span className="xs:hidden">Client</span>
-                </p>
+                <h1 className="text-lg sm:text-xl font-bold text-white">Espace Client</h1>
+                <p className="text-xs sm:text-sm text-slate-400">{user?.full_name}</p>
               </div>
             </div>
 
