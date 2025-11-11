@@ -400,11 +400,13 @@ class CriticalFixesTester:
                 if clients:
                     client_id = clients[0]['id']
                     
-                    # Get list of employees to reassign to
-                    users_response = self.session.get(f"{API_BASE}/admin/users", headers=headers)
-                    if users_response.status_code == 200:
-                        users = users_response.json()
-                        employees = [user for user in users if user.get('role') == 'EMPLOYEE']
+                    # Get list of employees to reassign to - use SuperAdmin token for this
+                    if self.superadmin_token:
+                        superadmin_headers = {"Authorization": f"Bearer {self.superadmin_token}"}
+                        users_response = self.session.get(f"{API_BASE}/admin/users", headers=superadmin_headers)
+                        if users_response.status_code == 200:
+                            users = users_response.json()
+                            employees = [user for user in users if user.get('role') == 'EMPLOYEE']
                         
                         if employees:
                             new_employee_id = employees[0]['id']
