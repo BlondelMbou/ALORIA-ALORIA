@@ -3555,6 +3555,139 @@ class APITester:
             except Exception as e:
                 self.log_result("TEST 4: Notifications SuperAdmin", False, f"Exception: {str(e)}")
 
+    def test_superadmin_activities_diagnostic(self):
+        """DIAGNOSTIC TEST: SuperAdmin Activities - Verify why no activities show"""
+        print("=== DIAGNOSTIC: SUPERADMIN ACTIVITIES VERIFICATION ===")
+        
+        if 'superadmin' not in self.tokens:
+            self.log_result("SuperAdmin Activities Diagnostic", False, "No SuperAdmin token available")
+            return
+
+        headers = {"Authorization": f"Bearer {self.tokens['superadmin']}"}
+
+        # TEST 1: Direct API call to activities endpoint
+        try:
+            response = self.session.get(f"{API_BASE}/admin/activities", headers=headers)
+            if response.status_code == 200:
+                activities = response.json()
+                activity_count = len(activities)
+                self.log_result("TEST 1: GET /api/admin/activities", True, f"Retrieved {activity_count} activities")
+                
+                # Show sample activities if any exist
+                if activity_count > 0:
+                    print("   📋 SAMPLE ACTIVITIES (first 3):")
+                    for i, activity in enumerate(activities[:3]):
+                        print(f"      {i+1}. {activity.get('user_name', 'Unknown')} - {activity.get('action', 'Unknown')} - {activity.get('timestamp', 'No timestamp')}")
+                else:
+                    print("   ⚠️  NO ACTIVITIES FOUND - This explains why SuperAdmin sees empty activities tab")
+            else:
+                self.log_result("TEST 1: GET /api/admin/activities", False, f"Status: {response.status_code}", response.text)
+        except Exception as e:
+            self.log_result("TEST 1: GET /api/admin/activities", False, "Exception occurred", str(e))
+
+        # TEST 2: Create test activity by performing Manager actions
+        print("\n   🔄 CREATING TEST ACTIVITIES...")
+        if 'manager' in self.tokens:
+            try:
+                # Login as manager to generate activity
+                manager_headers = {"Authorization": f"Bearer {self.tokens['manager']}"}
+                
+                # Action 1: View dashboard (should log activity)
+                dashboard_response = self.session.get(f"{API_BASE}/cases", headers=manager_headers)
+                if dashboard_response.status_code == 200:
+                    print("      ✓ Manager viewed cases (should create activity)")
+                
+                # Action 2: View clients (should log activity)
+                clients_response = self.session.get(f"{API_BASE}/clients", headers=manager_headers)
+                if clients_response.status_code == 200:
+                    print("      ✓ Manager viewed clients (should create activity)")
+                
+                # Wait a moment for activities to be logged
+                import time
+                time.sleep(2)
+                
+                # Check activities again
+                response = self.session.get(f"{API_BASE}/admin/activities", headers=headers)
+                if response.status_code == 200:
+                    new_activities = response.json()
+                    new_count = len(new_activities)
+                    self.log_result("TEST 2: Activities after Manager actions", True, f"Now {new_count} activities (should be more than before)")
+                    
+                    # Show latest activities
+                    if new_count > 0:
+                        print("   📋 LATEST ACTIVITIES (last 3):")
+                        for i, activity in enumerate(new_activities[-3:]):
+                            print(f"      {i+1}. {activity.get('user_name', 'Unknown')} - {activity.get('action', 'Unknown')} - {activity.get('timestamp', 'No timestamp')}")
+                else:
+                    self.log_result("TEST 2: Activities after Manager actions", False, f"Status: {response.status_code}")
+                    
+            except Exception as e:
+                self.log_result("TEST 2: Create test activities", False, "Exception occurred", str(e))
+
+        # TEST 3: Verify log_user_activity function by creating explicit activity
+        print("\n   🧪 TESTING ACTIVITY LOGGING FUNCTION...")
+        if 'manager' in self.tokens:
+            try:
+                # Create a client to trigger activity logging
+                manager_headers = {"Authorization": f"Bearer {self.tokens['manager']}"}
+                timestamp = int(time.time())
+                client_data = {
+                    "email": f"activity.test.{timestamp}@example.com",
+                    "full_name": "Activity Test Client",
+                    "phone": "+33123456789",
+                    "country": "France",
+                    "visa_type": "Work Permit (Talent Permit)",
+                    "message": "Client created to test activity logging"
+                }
+                
+                # Get activities count before
+                before_response = self.session.get(f"{API_BASE}/admin/activities", headers=headers)
+                before_count = len(before_response.json()) if before_response.status_code == 200 else 0
+                
+                # Create client (should trigger activity log)
+                create_response = self.session.post(f"{API_BASE}/clients", json=client_data, headers=manager_headers)
+                if create_response.status_code in [200, 201]:
+                    print("      ✓ Client created successfully")
+                    
+                    # Wait for activity to be logged
+                    time.sleep(2)
+                    
+                    # Check activities count after
+                    after_response = self.session.get(f"{API_BASE}/admin/activities", headers=headers)
+                    after_count = len(after_response.json()) if after_response.status_code == 200 else 0
+                    
+                    if after_count > before_count:
+                        self.log_result("TEST 3: Activity logging function", True, f"Activity logged: {before_count} → {after_count}")
+                    else:
+                        self.log_result("TEST 3: Activity logging function", False, f"No new activity logged: {before_count} → {after_count}")
+                else:
+                    self.log_result("TEST 3: Activity logging function", False, f"Client creation failed: {create_response.status_code}")
+                    
+            except Exception as e:
+                self.log_result("TEST 3: Activity logging function", False, "Exception occurred", str(e))
+
+        # FINAL SUMMARY
+        print("\n   📊 DIAGNOSTIC SUMMARY:")
+        final_response = self.session.get(f"{API_BASE}/admin/activities", headers=headers)
+        if final_response.status_code == 200:
+            final_activities = final_response.json()
+            final_count = len(final_activities)
+            print(f"      📈 TOTAL ACTIVITIES FOUND: {final_count}")
+            
+            if final_count == 0:
+                print("      🚨 ROOT CAUSE: No activities in database - log_user_activity function may not be working")
+                print("      💡 RECOMMENDATION: Check backend logs for activity logging errors")
+            else:
+                print("      ✅ Activities exist - frontend may have display issue")
+                print("      💡 RECOMMENDATION: Check frontend SuperAdmin activities component")
+                
+                # Show structure of activities for debugging
+                if final_count > 0:
+                    sample_activity = final_activities[0]
+                    print(f"      🔍 ACTIVITY STRUCTURE: {list(sample_activity.keys())}")
+        else:
+            print(f"      ❌ Cannot retrieve activities: {final_response.status_code}")
+
     def run_all_tests(self):
         """Run all tests in sequence - PRODUCTION READY EXHAUSTIVE TESTING"""
         print("🚀 ALORIA AGENCY - BACKEND TESTING EXHAUSTIF - PRODUCTION READY")
@@ -3564,6 +3697,9 @@ class APITester:
         
         # Authentication setup
         self.authenticate_all_roles()
+        
+        # SPECIAL DIAGNOSTIC: SuperAdmin Activities Issue (from review request)
+        self.test_superadmin_activities_diagnostic()
         
         # NEW: Test Consultation Payment Workflow (from review request)
         self.test_consultation_payment_workflow()
