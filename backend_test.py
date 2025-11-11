@@ -173,10 +173,11 @@ class APITester:
                                             json=notes_data, headers=headers)
                 if response.status_code == 200:
                     data = response.json()
-                    if data.get('status') == 'en_consultation':
-                        self.log_result("1.4 Consultant Notes", True, f"Status changed to 'en_consultation'")
+                    # Check if notes were added
+                    if data.get('consultant_notes') and len(data['consultant_notes']) > 0:
+                        self.log_result("1.4 Consultant Notes", True, f"Notes added successfully")
                     else:
-                        self.log_result("1.4 Consultant Notes", False, f"Expected 'en_consultation', got '{data.get('status')}'")
+                        self.log_result("1.4 Consultant Notes", False, f"Notes not added. Response: {data}")
                 else:
                     self.log_result("1.4 Consultant Notes", False, f"Status: {response.status_code}", response.text)
             except Exception as e:
