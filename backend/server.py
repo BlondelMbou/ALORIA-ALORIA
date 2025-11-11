@@ -1272,6 +1272,28 @@ async def create_client(client_data: ClientCreate, current_user: dict = Depends(
         if employee:
             assigned_employee_name = employee["full_name"]
     
+    # Log activity to user_activities collection (for SuperAdmin monitoring)
+    try:
+        activity = {
+            "id": str(uuid.uuid4()),
+            "user_id": current_user["id"],
+            "user_name": current_user["full_name"],
+            "user_role": current_user["role"],
+            "action": "client_created",
+            "details": {
+                "client_id": client_id,
+                "client_name": client_data.full_name,
+                "client_email": client_data.email,
+                "country": client_data.country,
+                "visa_type": client_data.visa_type
+            },
+            "ip_address": None,
+            "timestamp": datetime.now(timezone.utc).isoformat()
+        }
+        await db.user_activities.insert_one(activity)
+    except Exception as e:
+        logger.error(f"Erreur lors de l'enregistrement de l'activité client_created: {e}")
+
     return ClientResponse(
         id=client_id,
         user_id=user_id,
