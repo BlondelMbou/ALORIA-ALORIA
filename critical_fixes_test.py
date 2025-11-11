@@ -409,14 +409,10 @@ class CriticalFixesTester:
                         if employees:
                             new_employee_id = employees[0]['id']
                             
-                            # Test PATCH /api/clients/{client_id}/reassign
-                            reassign_data = {
-                                "new_employee_id": new_employee_id
-                            }
-                            
+                            # Test PATCH /api/clients/{client_id}/reassign - new_employee_id is path parameter
                             reassign_response = self.session.patch(
                                 f"{API_BASE}/clients/{client_id}/reassign",
-                                json=reassign_data,
+                                params={"new_employee_id": new_employee_id},
                                 headers=headers
                             )
                             
