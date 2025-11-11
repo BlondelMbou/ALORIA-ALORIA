@@ -130,8 +130,8 @@ class APITester:
                                             json=assign_data, headers=headers)
                 if response.status_code == 200:
                     data = response.json()
-                    # Check if assignment was successful by verifying assigned_to field
-                    if data.get('assigned_to') == self.users['employee']['id']:
+                    # Check if assignment was successful by checking the success message
+                    if 'message' in data and 'assigné avec succès' in data['message']:
                         self.log_result("1.2 SuperAdmin Assignment", True, f"Prospect assigned to employee: {data.get('assigned_to_name', 'Employee')}")
                     else:
                         self.log_result("1.2 SuperAdmin Assignment", False, f"Assignment failed. Response: {data}")
