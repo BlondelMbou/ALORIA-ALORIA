@@ -434,8 +434,10 @@ class CriticalFixesTester:
                                 self.log_result("Client Reassignment", False, f"Status: {reassign_response.status_code}", reassign_response.text)
                         else:
                             self.log_result("Client Reassignment", False, "No employees found for reassignment")
+                        else:
+                            self.log_result("Client Reassignment", False, f"Could not get users list: {users_response.status_code}")
                     else:
-                        self.log_result("Client Reassignment", False, f"Could not get users list: {users_response.status_code}")
+                        self.log_result("Client Reassignment", False, "No SuperAdmin token available to get employee list")
                 else:
                     self.log_result("Client Reassignment", False, "No clients found for reassignment test")
             else:
