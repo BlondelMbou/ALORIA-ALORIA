@@ -1160,18 +1160,18 @@ export default function ManagerDashboard() {
                 <>
                   <div>
                     <Label className="text-slate-300">Nouvel Employé * ({employees.length} disponibles)</Label>
-                    <Select key={`reassign-${employees.length}`} value={reassignDialog.newEmployeeId} onValueChange={(value) => setReassignDialog({ ...reassignDialog, newEmployeeId: value })}>
-                      <SelectTrigger className="bg-slate-800 border-slate-600 text-white mt-2">
-                        <SelectValue placeholder="Choisir un employé" />
-                      </SelectTrigger>
-                      <SelectContent className="bg-slate-800 border-slate-600 max-h-[300px] overflow-y-auto">
-                        {employees.map((emp) => (
-                          <SelectItem key={emp.id} value={emp.id} className="text-white hover:bg-slate-700">
-                            {emp.full_name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <select
+                      value={reassignDialog.newEmployeeId}
+                      onChange={(e) => setReassignDialog({ ...reassignDialog, newEmployeeId: e.target.value })}
+                      className="w-full mt-2 px-3 py-2 bg-slate-800 border border-slate-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    >
+                      <option value="">Choisir un employé</option>
+                      {employees.map((emp) => (
+                        <option key={emp.id} value={emp.id}>
+                          {emp.full_name}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                   <div className="flex gap-2">
                     <Button
