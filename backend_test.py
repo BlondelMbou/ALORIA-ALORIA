@@ -3371,9 +3371,10 @@ class APITester:
                 return
         
         # TEST 1: Assignation Consultant avec Paiement (CRITIQUE)
-        if 'manager' in self.tokens:
+        # Use Employee token since the prospect was assigned to employee
+        if 'employee' in self.tokens:
             try:
-                headers = {"Authorization": f"Bearer {self.tokens['manager']}"}
+                headers = {"Authorization": f"Bearer {self.tokens['employee']}"}
                 payment_data = {
                     "payment_method": "Mobile Money",
                     "transaction_reference": "MTN-TEST-123456"
