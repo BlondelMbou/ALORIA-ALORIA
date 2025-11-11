@@ -99,6 +99,21 @@ export default function MyProspects() {
     }
   };
 
+  const handleConvertToClient = async (prospect) => {
+    if (!window.confirm(`Convertir "${prospect.name}" en client ? Cette action créera un compte client et un dossier.`)) {
+      return;
+    }
+
+    try {
+      await api.post(`/contact-messages/${prospect.id}/convert-to-client`);
+      toast.success('Prospect converti en client avec succès !');
+      fetchMyProspects();
+    } catch (error) {
+      console.error('Erreur conversion:', error);
+      toast.error(error.response?.data?.detail || 'Erreur lors de la conversion en client');
+    }
+  };
+
   const openConfirmDialog = (prospect) => {
     setSelectedProspect(prospect);
     setShowConfirmDialog(true);
