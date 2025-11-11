@@ -130,7 +130,7 @@ const SuperAdminDashboard = () => {
             { value: 'role', label: 'Rôle' },
             { value: 'email', label: 'Email' }
           ]}
-          onFilteredDataChange={setFilteredUsers}
+          onFilteredDataChange={handleFilteredUsersChange}
           placeholder="Rechercher un utilisateur (nom, email, rôle)..."
         />
       </div>
