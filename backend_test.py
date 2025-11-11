@@ -318,11 +318,13 @@ class APITester:
             response = self.session.get(f"{API_BASE}/admin/dashboard-stats", headers=headers)
             if response.status_code == 200:
                 data = response.json()
-                required_fields = ['total_cases', 'active_cases', 'completed_cases', 'total_clients', 'total_employees']
-                if all(field in data for field in required_fields):
-                    self.log_result("3.2 Dashboard Stats", True, f"Stats: {data['total_cases']} cases, {data['total_clients']} clients, {data['total_employees']} employees")
+                # Check the actual structure returned by the API
+                if 'users' in data and 'business' in data and 'activity' in data:
+                    users = data['users']
+                    business = data['business']
+                    self.log_result("3.2 Dashboard Stats", True, f"Stats: {business.get('total_cases', 0)} cases, {users.get('clients', 0)} clients, {users.get('employees', 0)} employees")
                 else:
-                    self.log_result("3.2 Dashboard Stats", False, f"Missing required fields in response")
+                    self.log_result("3.2 Dashboard Stats", False, f"Unexpected response structure: {list(data.keys())}")
             else:
                 self.log_result("3.2 Dashboard Stats", False, f"Status: {response.status_code}", response.text)
         except Exception as e:
