@@ -36,6 +36,8 @@ export default function MyProspects() {
   const [searchTerm, setSearchTerm] = useState('');
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [selectedProspect, setSelectedProspect] = useState(null);
+  const [paymentMethod, setPaymentMethod] = useState('Cash');
+  const [transactionRef, setTransactionRef] = useState('');
 
   const statusLabels = {
     'assigne_employe': { label: 'À Contacter', color: 'bg-purple-500', icon: '📞' },
