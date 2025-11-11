@@ -3312,31 +3312,50 @@ class APITester:
         self.test_review_request_specific_tests()
 
     def run_all_tests(self):
-        """Run comprehensive backend testing as requested in review"""
-        print("🚀 ALORIA AGENCY - COMPREHENSIVE BACKEND TESTING POST-CRITICAL FIXES")
-        print(f"Backend URL: {BACKEND_URL}")
-        print("Testing with credentials: SuperAdmin (superadmin@aloria.com), Manager (manager@test.com)")
+        """Run all tests in sequence - PRODUCTION READY EXHAUSTIVE TESTING"""
+        print("🚀 ALORIA AGENCY - BACKEND TESTING EXHAUSTIF - PRODUCTION READY")
+        print(f"Backend URL: {API_BASE}")
+        print("Testing ALL critical functionalities for production deployment")
         print("=" * 80)
         
-        # Run comprehensive testing as per review request
-        self.test_comprehensive_backend_post_fixes()
+        # Authentication setup
+        self.authenticate_all_roles()
+        
+        # Run priority tests in order
+        self.test_priority_1_prospect_workflow()
+        self.test_priority_2_manager_employee_actions()
+        self.test_priority_3_superadmin_operations()
+        self.test_priority_4_role_based_prospect_access()
+        self.test_priority_5_payment_workflow()
+        self.test_priority_6_withdrawal_manager()
         
         # Print comprehensive summary
         print("=" * 80)
-        print("🎯 COMPREHENSIVE TEST SUMMARY - POST CRITICAL FIXES")
+        print("🎯 PRODUCTION READINESS TEST SUMMARY")
         print(f"✅ Passed: {self.results['passed']}")
         print(f"❌ Failed: {self.results['failed']}")
         total_tests = self.results['passed'] + self.results['failed']
         success_rate = (self.results['passed'] / total_tests * 100) if total_tests > 0 else 0
         print(f"📊 Success Rate: {success_rate:.1f}%")
         
-        if self.results['errors']:
-            print("\n🔍 Failed Tests Details:")
-            for error in self.results['errors']:
-                print(f"  • {error['test']}: {error['message']}")
-                if error['error']:
-                    print(f"    Error: {error['error'][:200]}...")
+        # Production readiness assessment
+        if success_rate >= 95:
+            print("🟢 PRODUCTION READY - Excellent success rate")
+        elif success_rate >= 85:
+            print("🟡 MOSTLY READY - Minor issues to address")
+        else:
+            print("🔴 NOT READY - Critical issues need fixing")
         
+        if self.results['errors']:
+            print(f"\n🔍 FAILED TESTS ({len(self.results['errors'])}):")
+            for i, error in enumerate(self.results['errors'], 1):
+                print(f"   {i}. {error['test']}")
+                if error['message']:
+                    print(f"      → {error['message']}")
+                if error['error']:
+                    print(f"      → Error: {error['error'][:100]}...")
+        
+        print("=" * 80)
         return self.results['failed'] == 0
 
 if __name__ == "__main__":
