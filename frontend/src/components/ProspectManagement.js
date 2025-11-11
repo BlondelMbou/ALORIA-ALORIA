@@ -90,7 +90,7 @@ export default function ProspectManagement({ userRole }) {
 
   const fetchEmployees = async () => {
     try {
-      const response = await api.get('/users');
+      const response = await api.get('/admin/users');
       // Filtrer seulement les employés et managers actifs
       const activeEmployees = response.data.filter(
         user => user.is_active && ['MANAGER', 'EMPLOYEE'].includes(user.role)
@@ -98,6 +98,7 @@ export default function ProspectManagement({ userRole }) {
       setEmployees(activeEmployees);
     } catch (error) {
       console.error('Erreur lors du chargement des employés:', error);
+      toast.error('Erreur lors du chargement de la liste des employés');
     }
   };
 
