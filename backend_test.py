@@ -173,9 +173,9 @@ class APITester:
                                             json=notes_data, headers=headers)
                 if response.status_code == 200:
                     data = response.json()
-                    # Check if notes were added
-                    if data.get('consultant_notes') and len(data['consultant_notes']) > 0:
-                        self.log_result("1.4 Consultant Notes", True, f"Notes added successfully")
+                    # Check if notes were added by checking success message
+                    if 'message' in data and 'Note ajoutée avec succès' in data['message']:
+                        self.log_result("1.4 Consultant Notes", True, f"Notes added successfully, Note ID: {data.get('note_id')}")
                     else:
                         self.log_result("1.4 Consultant Notes", False, f"Notes not added. Response: {data}")
                 else:
