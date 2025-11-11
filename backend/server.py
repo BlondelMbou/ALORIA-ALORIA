@@ -3453,9 +3453,14 @@ async def respond_to_contact_message(
     }
 
 
+class ConsultantPaymentRequest(BaseModel):
+    payment_method: str = "Cash"  # Cash, Mobile Money, Virement
+    transaction_reference: Optional[str] = None
+
 @api_router.patch("/contact-messages/{message_id}/assign-consultant")
 async def assign_prospect_to_consultant(
     message_id: str,
+    payment_data: ConsultantPaymentRequest,
     current_user: dict = Depends(get_current_user)
 ):
     """Affecter un prospect au consultant (SuperAdmin) après paiement 50k CFA (Manager/Employee)"""
@@ -3470,17 +3475,41 @@ async def assign_prospect_to_consultant(
     if prospect["status"] == ContactStatus.PAYMENT_50K:
         raise HTTPException(status_code=400, detail="Ce prospect est déjà affecté au consultant")
     
-    # Auto-déclarer le paiement de 50 000 CFA
-    payment_date = datetime.now(timezone.utc).isoformat()
+    # Créer un enregistrement de paiement consultation dans la collection payments
+    payment_id = str(uuid.uuid4())
+    payment_date = datetime.now(timezone.utc)
+    payment_doc = {
+        "id": payment_id,
+        "invoice_number": f"CONS-{datetime.now().strftime('%Y%m%d')}-{payment_id[:8].upper()}",
+        "type": "consultation",  # Type spécial pour paiement consultation
+        "amount": 50000,
+        "currency": "CFA",
+        "payment_method": payment_data.payment_method,
+        "transaction_reference": payment_data.transaction_reference,
+        "status": "CONFIRMED",  # Automatiquement confirmé par Manager/Employee
+        "prospect_id": message_id,
+        "prospect_name": prospect["name"],
+        "prospect_email": prospect["email"],
+        "confirmed_by": current_user["id"],
+        "confirmed_by_name": current_user["full_name"],
+        "confirmed_at": payment_date.isoformat(),
+        "created_at": payment_date.isoformat(),
+        "updated_at": payment_date.isoformat()
+    }
     
+    await db.payments.insert_one(payment_doc)
+    
+    # Mettre à jour le prospect
     result = await db.contact_messages.update_one(
         {"id": message_id},
         {
             "$set": {
                 "status": ContactStatus.PAYMENT_50K,
                 "payment_50k_amount": 50000,
-                "payment_50k_date": payment_date,
-                "updated_at": payment_date
+                "payment_50k_date": payment_date.isoformat(),
+                "payment_50k_id": payment_id,  # Lien vers le paiement
+                "payment_50k_method": payment_data.payment_method,
+                "updated_at": payment_date.isoformat()
             }
         }
     )
@@ -3493,20 +3522,22 @@ async def assign_prospect_to_consultant(
     for admin in superadmins:
         await create_notification(
             user_id=admin["id"],
-            title="💰 Nouveau prospect payé 50k CFA",
-            message=f"{prospect['name']} a payé 50 000 CFA. Consultation requise (assigné par {current_user['full_name']}).",
-            type="payment_50k",
+            title="💰 Paiement Consultation 50,000 CFA",
+            message=f"{prospect['name']} a payé 50,000 CFA pour consultation. Méthode: {payment_data.payment_method}. Confirmé par {current_user['full_name']}.",
+            type="payment_consultation",
             related_id=message_id
         )
     
     # Log activity
     await log_user_activity(
         user_id=current_user["id"],
-        action="prospect_consultant_assignment",
+        action="consultation_payment_confirmed",
         details={
             "prospect_id": message_id,
             "prospect_name": prospect["name"],
             "payment_amount": 50000,
+            "payment_method": payment_data.payment_method,
+            "payment_id": payment_id,
             "currency": "CFA"
         }
     )
@@ -3524,7 +3555,12 @@ async def assign_prospect_to_consultant(
         except Exception as e:
             logger.error(f"Erreur envoi email RDV consultant: {e}")
     
-    return {"message": "Prospect affecté au consultant avec succès", "payment_50k_amount": 50000}
+    return {
+        "message": "Prospect affecté au consultant avec succès",
+        "payment_50k_amount": 50000,
+        "payment_id": payment_id,
+        "invoice_number": payment_doc["invoice_number"]
+    }
 
 @api_router.patch("/contact-messages/{message_id}/consultant-notes")
 async def add_consultant_notes(
