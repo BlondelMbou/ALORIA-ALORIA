@@ -54,6 +54,7 @@ export default function ManagerDashboard() {
   const [pendingPayments, setPendingPayments] = useState([]);
   const [paymentHistory, setPaymentHistory] = useState([]);
   const [rejectionDialog, setRejectionDialog] = useState({ show: false, payment: null, reason: '' });
+  const [reassignDialog, setReassignDialog] = useState({ show: false, client: null, newEmployeeId: '' });
   
   // WebSocket hook
   const { connected } = useSocket(localStorage.getItem('token'));
