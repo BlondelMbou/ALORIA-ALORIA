@@ -54,14 +54,8 @@ const SuperAdminDashboard = () => {
     return () => clearInterval(refreshInterval);
   }, []);
 
-  // Initialiser les filtered lists quand les données sont chargées (une seule fois)
-  useEffect(() => {
-    setFilteredUsers(users);
-  }, [users]);
-
-  useEffect(() => {
-    setFilteredActivities(activities);
-  }, [activities]);
+  // NOTE: Pas besoin d'initialiser filteredUsers/filteredActivities ici
+  // car SearchAndSort le fait automatiquement via son useEffect
 
   const fetchDashboardData = async () => {
     try {
