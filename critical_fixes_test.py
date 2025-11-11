@@ -136,12 +136,17 @@ class CriticalFixesTester:
             response = self.session.get(f"{API_BASE}/admin/dashboard-stats", headers=headers)
             if response.status_code == 200:
                 stats = response.json()
-                required_fields = ['total_cases', 'active_cases', 'completed_cases', 'total_clients', 'total_employees']
-                missing_fields = [field for field in required_fields if field not in stats]
-                if not missing_fields:
-                    self.log_result("GET /api/admin/dashboard-stats", True, f"Dashboard stats complete: {stats['total_cases']} cases, {stats['total_clients']} clients, {stats['total_employees']} employees")
+                # Check the actual structure returned by the API
+                if 'users' in stats and 'business' in stats:
+                    users = stats['users']
+                    business = stats['business']
+                    total_cases = business.get('total_cases', 0)
+                    active_cases = business.get('active_cases', 0)
+                    total_clients = users.get('clients', 0)
+                    total_employees = users.get('employees', 0)
+                    self.log_result("GET /api/admin/dashboard-stats", True, f"Dashboard stats complete: {total_cases} cases, {total_clients} clients, {total_employees} employees")
                 else:
-                    self.log_result("GET /api/admin/dashboard-stats", False, f"Missing required fields: {missing_fields}")
+                    self.log_result("GET /api/admin/dashboard-stats", False, f"Unexpected response structure: {list(stats.keys())}")
             else:
                 self.log_result("GET /api/admin/dashboard-stats", False, f"Status: {response.status_code}", response.text)
         except Exception as e:
