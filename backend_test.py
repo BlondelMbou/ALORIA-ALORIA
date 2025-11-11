@@ -1,8 +1,13 @@
 #!/usr/bin/env python3
 """
-ALORIA AGENCY Backend API Testing Suite
-Tests all backend functionalities including authentication, client management, 
-chat system, visitor management, and workflow customization.
+ALORIA AGENCY Backend API Testing Suite - PRODUCTION READY EXHAUSTIVE TESTING
+Tests ALL backend functionalities for production deployment including:
+- Complete prospect workflow (nouveau → assigne_employe → paiement_50k → en_consultation → converti_client)
+- Manager/Employee actions (client reassignment, visitor management)
+- SuperAdmin operations (user creation, dashboard stats, activities)
+- Role-based prospect access for all roles
+- Payment workflow (declaration, confirmation with PDF generation)
+- Withdrawal manager system
 """
 
 import requests
@@ -10,10 +15,19 @@ import json
 import os
 from datetime import datetime
 import sys
+import time
 
 # Get backend URL from environment
 BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://immigration-hub-2.preview.emergentagent.com')
 API_BASE = f"{BACKEND_URL}/api"
+
+# Test credentials from review request
+TEST_CREDENTIALS = {
+    'superadmin': {'email': 'superadmin@aloria.com', 'password': 'SuperAdmin123!'},
+    'manager': {'email': 'manager@test.com', 'password': 'password123'},
+    'employee': {'email': 'employee@aloria.com', 'password': 'emp123'},
+    'consultant': {'email': 'consultant@aloria.com', 'password': 'consultant123'}
+}
 
 class APITester:
     def __init__(self):
