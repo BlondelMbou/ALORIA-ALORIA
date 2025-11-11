@@ -65,9 +65,13 @@ export default function ProspectManagement({ userRole }) {
   };
 
   useEffect(() => {
+    console.log('🚀 ProspectManagement useEffect triggered, userRole:', userRole);
     fetchProspects();
     if (userRole === 'SUPERADMIN') {
+      console.log('👤 UserRole is SUPERADMIN, fetching employees...');
       fetchEmployees();
+    } else {
+      console.log('⚠️ UserRole is NOT SUPERADMIN:', userRole);
     }
   }, [userRole]);
 
