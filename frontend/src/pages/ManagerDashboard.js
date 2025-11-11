@@ -1152,36 +1152,45 @@ export default function ManagerDashboard() {
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
-              <div>
-                <Label className="text-slate-300">Nouvel Employé *</Label>
-                <Select value={reassignDialog.newEmployeeId} onValueChange={(value) => setReassignDialog({ ...reassignDialog, newEmployeeId: value })}>
-                  <SelectTrigger className="bg-slate-800 border-slate-600 text-white mt-2">
-                    <SelectValue placeholder="Choisir un employé" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-slate-800 border-slate-600">
-                    {employees.map((emp) => (
-                      <SelectItem key={emp.id} value={emp.id} className="text-white hover:bg-slate-700">
-                        {emp.full_name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex gap-2">
-                <Button
-                  onClick={handleReassignClient}
-                  className="flex-1 bg-orange-500 hover:bg-orange-600 text-white"
-                >
-                  Réassigner
-                </Button>
-                <Button
-                  onClick={() => setReassignDialog({ show: false, client: null, newEmployeeId: '' })}
-                  variant="outline"
-                  className="flex-1 border-slate-600 text-slate-300 hover:bg-slate-800"
-                >
-                  Annuler
-                </Button>
-              </div>
+              {employees.length === 0 ? (
+                <div className="text-center py-4">
+                  <p className="text-slate-400">Chargement de la liste des employés...</p>
+                </div>
+              ) : (
+                <>
+                  <div>
+                    <Label className="text-slate-300">Nouvel Employé * ({employees.length} disponibles)</Label>
+                    <Select value={reassignDialog.newEmployeeId} onValueChange={(value) => setReassignDialog({ ...reassignDialog, newEmployeeId: value })}>
+                      <SelectTrigger className="bg-slate-800 border-slate-600 text-white mt-2">
+                        <SelectValue placeholder="Choisir un employé" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-slate-800 border-slate-600">
+                        {employees.map((emp) => (
+                          <SelectItem key={emp.id} value={emp.id} className="text-white hover:bg-slate-700">
+                            {emp.full_name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={handleReassignClient}
+                      className="flex-1 bg-orange-500 hover:bg-orange-600 text-white"
+                      disabled={!reassignDialog.newEmployeeId}
+                    >
+                      Réassigner
+                    </Button>
+                    <Button
+                      onClick={() => setReassignDialog({ show: false, client: null, newEmployeeId: '' })}
+                      variant="outline"
+                      className="flex-1 border-slate-600 text-slate-300 hover:bg-slate-800"
+                    >
+                      Annuler
+                    </Button>
+                  </div>
+                </>
+              )}
             </div>
           </DialogContent>
         </Dialog>
