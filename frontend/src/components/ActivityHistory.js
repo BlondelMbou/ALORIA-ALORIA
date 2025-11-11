@@ -37,7 +37,7 @@ const ActivityHistory = () => {
       if (filters.action) params.append('action', filters.action);
       params.append('limit', filters.limit.toString());
       
-      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/activities?${params}`, {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/admin/activities?${params}`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
