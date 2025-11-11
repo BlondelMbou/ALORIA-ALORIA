@@ -3117,6 +3117,27 @@ async def get_client_payment_history(current_user: dict = Depends(get_current_us
     
     return [PaymentDeclarationResponse(**p) for p in payments]
 
+@api_router.get("/payments/consultations")
+async def get_consultation_payments(current_user: dict = Depends(get_current_user)):
+    """Obtenir tous les paiements de consultation (50k CFA) - SuperAdmin uniquement"""
+    if current_user["role"] != "SUPERADMIN":
+        raise HTTPException(status_code=403, detail="Accès réservé aux SuperAdmin")
+    
+    # Récupérer tous les paiements de type consultation
+    consultation_payments = await db.payments.find(
+        {"type": "consultation"}, {"_id": 0}
+    ).sort("created_at", -1).to_list(1000)
+    
+    # Calculer le total
+    total_amount = sum(p.get("amount", 0) for p in consultation_payments)
+    
+    return {
+        "payments": consultation_payments,
+        "total_count": len(consultation_payments),
+        "total_amount": total_amount,
+        "currency": "CFA"
+    }
+
 # Contact Messages & CRM
 @api_router.post("/contact-messages", response_model=ContactMessageResponse)
 async def create_contact_message(message_data: ContactMessageCreate):
