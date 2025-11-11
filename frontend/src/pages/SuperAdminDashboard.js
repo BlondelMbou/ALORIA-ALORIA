@@ -21,6 +21,15 @@ const SuperAdminDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
 
+  // useCallback pour stabiliser les fonctions de callback
+  const handleFilteredUsersChange = React.useCallback((data) => {
+    setFilteredUsers(data);
+  }, []);
+
+  const handleFilteredActivitiesChange = React.useCallback((data) => {
+    setFilteredActivities(data);
+  }, []);
+
   // Calcul dynamique des stats à partir des données locales pour mise à jour en temps réel
   const calculatedStats = React.useMemo(() => {
     const managers = users.filter(u => u.role === 'MANAGER').length;
