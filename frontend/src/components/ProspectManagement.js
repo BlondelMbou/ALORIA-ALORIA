@@ -383,27 +383,36 @@ export default function ProspectManagement({ userRole }) {
                             </DialogDescription>
                           </DialogHeader>
                           <div className="space-y-4 mt-4">
-                            <div>
-                              <Label htmlFor="assignee" className="text-slate-300">Employé/Manager</Label>
-                              <Select value={assigneeId} onValueChange={setAssigneeId}>
-                                <SelectTrigger className="bg-slate-800 border-slate-600 text-white mt-2">
-                                  <SelectValue placeholder="Sélectionner..." />
-                                </SelectTrigger>
-                                <SelectContent className="bg-slate-800 border-slate-600">
-                                  {employees.map((emp) => (
-                                    <SelectItem key={emp.id} value={emp.id} className="text-white">
-                                      {emp.full_name} ({emp.role})
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            </div>
-                            <Button 
-                              onClick={handleAssignProspect}
-                              className="w-full bg-orange-500 hover:bg-orange-600"
-                            >
-                              Confirmer l'assignation
-                            </Button>
+                            {employees.length === 0 ? (
+                              <div className="text-center py-4">
+                                <p className="text-slate-400">Chargement de la liste des employés...</p>
+                              </div>
+                            ) : (
+                              <>
+                                <div>
+                                  <Label htmlFor="assignee" className="text-slate-300">Employé/Manager ({employees.length} disponibles)</Label>
+                                  <Select value={assigneeId} onValueChange={setAssigneeId}>
+                                    <SelectTrigger className="bg-slate-800 border-slate-600 text-white mt-2">
+                                      <SelectValue placeholder="Sélectionner..." />
+                                    </SelectTrigger>
+                                    <SelectContent className="bg-slate-800 border-slate-600">
+                                      {employees.map((emp) => (
+                                        <SelectItem key={emp.id} value={emp.id} className="text-white hover:bg-slate-700">
+                                          {emp.full_name} ({emp.role})
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                                <Button 
+                                  onClick={handleAssignProspect}
+                                  className="w-full bg-orange-500 hover:bg-orange-600"
+                                  disabled={!assigneeId}
+                                >
+                                  Confirmer l'assignation
+                                </Button>
+                              </>
+                            )}
                           </div>
                         </DialogContent>
                       </Dialog>
