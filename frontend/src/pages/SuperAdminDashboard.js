@@ -413,6 +413,23 @@ const SuperAdminDashboard = () => {
                 color="text-blue-400"
               />
             </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+              <StatsCard
+                title="Paiements Consultation"
+                value={displayStats?.consultations?.total_count || 0}
+                subtitle={`${(displayStats?.consultations?.total_amount || 0).toLocaleString()} CFA`}
+                icon={<span className="text-2xl">💼</span>}
+                color="text-orange-400"
+              />
+              <StatsCard
+                title="Revenus Consultations"
+                value={`${(displayStats?.consultations?.total_amount || 0).toLocaleString()} CFA`}
+                subtitle={`${displayStats?.consultations?.total_count || 0} paiements`}
+                icon={<span className="text-2xl">💵</span>}
+                color="text-emerald-400"
+              />
+            </div>
           </>
         )}
 
