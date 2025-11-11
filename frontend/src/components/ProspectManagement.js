@@ -90,14 +90,23 @@ export default function ProspectManagement({ userRole }) {
 
   const fetchEmployees = async () => {
     try {
+      console.log('🔍 Fetching employees from /admin/users...');
       const response = await api.get('/admin/users');
+      console.log('📊 API Response:', response.data);
+      
       // Filtrer seulement les employés et managers actifs
       const activeEmployees = response.data.filter(
         user => user.is_active && ['MANAGER', 'EMPLOYEE'].includes(user.role)
       );
+      
+      console.log(`✅ Found ${activeEmployees.length} active employees/managers`);
       setEmployees(activeEmployees);
+      
+      if (activeEmployees.length === 0) {
+        toast.warning('Aucun employé ou manager actif trouvé');
+      }
     } catch (error) {
-      console.error('Erreur lors du chargement des employés:', error);
+      console.error('❌ Erreur lors du chargement des employés:', error);
       toast.error('Erreur lors du chargement de la liste des employés');
     }
   };
