@@ -105,22 +105,18 @@ export default function SearchAndSort({
         {/* Sélecteur de tri */}
         {sortOptions.length > 0 && (
           <div className="flex gap-2 items-center">
-            <Select value={sortBy} onValueChange={setSortBy}>
-              <SelectTrigger className="w-[180px] bg-slate-800 border-slate-600 text-white">
-                <SelectValue placeholder="Trier par..." />
-              </SelectTrigger>
-              <SelectContent className="bg-slate-800 border-slate-600">
-                {sortOptions.map(option => (
-                  <SelectItem 
-                    key={option.value} 
-                    value={option.value}
-                    className="text-white hover:bg-slate-700"
-                  >
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="w-[180px] px-3 py-2 bg-slate-800 border border-slate-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+            >
+              <option value="">Trier par...</option>
+              {sortOptions.map(option => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
 
             {/* Bouton ordre de tri */}
             <Button
