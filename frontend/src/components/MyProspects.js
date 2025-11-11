@@ -360,6 +360,31 @@ export default function MyProspects() {
                 </p>
               </div>
 
+              <div className="space-y-3">
+                <div>
+                  <Label className="text-slate-300">Méthode de paiement *</Label>
+                  <select
+                    value={paymentMethod}
+                    onChange={(e) => setPaymentMethod(e.target.value)}
+                    className="w-full mt-2 px-3 py-2 bg-slate-800 border border-slate-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  >
+                    <option value="Cash">Cash (Espèces)</option>
+                    <option value="Mobile Money">Mobile Money</option>
+                    <option value="Virement">Virement Bancaire</option>
+                  </select>
+                </div>
+
+                <div>
+                  <Label className="text-slate-300">Référence transaction (optionnelle)</Label>
+                  <Input
+                    value={transactionRef}
+                    onChange={(e) => setTransactionRef(e.target.value)}
+                    placeholder="Ex: MTN-123456789 ou N° de reçu"
+                    className="mt-2 bg-slate-800 border-slate-600 text-white"
+                  />
+                </div>
+              </div>
+
               <div className="flex gap-3">
                 <Button 
                   variant="outline"
