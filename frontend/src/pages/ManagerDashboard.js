@@ -1140,6 +1140,52 @@ export default function ManagerDashboard() {
           </DialogContent>
         </Dialog>
       )}
+
+      {/* Reassign Client Dialog */}
+      {reassignDialog.show && (
+        <Dialog open={reassignDialog.show} onOpenChange={(open) => setReassignDialog({ ...reassignDialog, show: open })}>
+          <DialogContent className="bg-[#1E293B] border-slate-700">
+            <DialogHeader>
+              <DialogTitle className="text-white">Réassigner le Client</DialogTitle>
+              <DialogDescription className="text-slate-400">
+                Sélectionnez le nouvel employé pour {reassignDialog.client?.client_name}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label className="text-slate-300">Nouvel Employé *</Label>
+                <Select value={reassignDialog.newEmployeeId} onValueChange={(value) => setReassignDialog({ ...reassignDialog, newEmployeeId: value })}>
+                  <SelectTrigger className="bg-slate-800 border-slate-600 text-white mt-2">
+                    <SelectValue placeholder="Choisir un employé" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-800 border-slate-600">
+                    {employees.map((emp) => (
+                      <SelectItem key={emp.id} value={emp.id} className="text-white hover:bg-slate-700">
+                        {emp.full_name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  onClick={handleReassignClient}
+                  className="flex-1 bg-orange-500 hover:bg-orange-600 text-white"
+                >
+                  Réassigner
+                </Button>
+                <Button
+                  onClick={() => setReassignDialog({ show: false, client: null, newEmployeeId: '' })}
+                  variant="outline"
+                  className="flex-1 border-slate-600 text-slate-300 hover:bg-slate-800"
+                >
+                  Annuler
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }
