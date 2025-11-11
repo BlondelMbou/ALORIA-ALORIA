@@ -345,6 +345,158 @@ class APITester:
         except Exception as e:
             self.log_result("3.4 Activities Log", False, "Exception occurred", str(e))
 
+    def test_priority_4_role_based_prospect_access(self):
+        """PRIORITY 4: Test role-based prospect access"""
+        print("=== PRIORITY 4: ROLE-BASED PROSPECT ACCESS ===")
+        
+        # Test each role's access to prospects
+        role_expectations = {
+            'superadmin': 'sees ALL prospects',
+            'manager': 'sees assigned prospects only',
+            'employee': 'sees assigned prospects only', 
+            'consultant': 'sees only paiement_50k status',
+            'client': 'should get 403'
+        }
+        
+        for role, expectation in role_expectations.items():
+            if role in self.tokens:
+                try:
+                    headers = {"Authorization": f"Bearer {self.tokens[role]}"}
+                    response = self.session.get(f"{API_BASE}/contact-messages", headers=headers)
+                    
+                    if role == 'client':
+                        if response.status_code == 403:
+                            self.log_result(f"4.{list(role_expectations.keys()).index(role)+1} {role.upper()} Access", True, "Correctly denied access (403)")
+                        else:
+                            self.log_result(f"4.{list(role_expectations.keys()).index(role)+1} {role.upper()} Access", False, f"Expected 403, got {response.status_code}")
+                    else:
+                        if response.status_code == 200:
+                            prospects = response.json()
+                            if role == 'consultant':
+                                # Check if all prospects have paiement_50k status
+                                paiement_50k_count = sum(1 for p in prospects if p.get('status') == 'paiement_50k')
+                                self.log_result(f"4.{list(role_expectations.keys()).index(role)+1} {role.upper()} Access", True, f"Sees {paiement_50k_count} prospects with paiement_50k status")
+                            else:
+                                self.log_result(f"4.{list(role_expectations.keys()).index(role)+1} {role.upper()} Access", True, f"Retrieved {len(prospects)} prospects")
+                        else:
+                            self.log_result(f"4.{list(role_expectations.keys()).index(role)+1} {role.upper()} Access", False, f"Status: {response.status_code}", response.text)
+                except Exception as e:
+                    self.log_result(f"4.{list(role_expectations.keys()).index(role)+1} {role.upper()} Access", False, "Exception occurred", str(e))
+
+    def test_priority_5_payment_workflow(self):
+        """PRIORITY 5: Test payment workflow"""
+        print("=== PRIORITY 5: PAYMENT WORKFLOW ===")
+        
+        # Step 1: Client declares payment
+        if self.test_client_id:
+            # First login as client
+            try:
+                client_login = self.session.post(f"{API_BASE}/auth/login", json={
+                    "email": "jb.kouassi@example.com",
+                    "password": "Aloria2024!"
+                })
+                if client_login.status_code == 200:
+                    client_token = client_login.json()['access_token']
+                    
+                    # Declare payment
+                    headers = {"Authorization": f"Bearer {client_token}"}
+                    payment_data = {
+                        "amount": 2500.00,
+                        "currency": "EUR",
+                        "description": "Paiement pour services d'immigration - Permis de travail France",
+                        "payment_method": "Virement bancaire"
+                    }
+                    response = self.session.post(f"{API_BASE}/payments", json=payment_data, headers=headers)
+                    if response.status_code in [200, 201]:
+                        data = response.json()
+                        self.test_payment_id = data['id']
+                        if data.get('status') == 'pending':
+                            self.log_result("5.1 Payment Declaration", True, f"Payment declared with status 'pending', ID: {self.test_payment_id}")
+                        else:
+                            self.log_result("5.1 Payment Declaration", False, f"Expected status 'pending', got '{data.get('status')}'")
+                    else:
+                        self.log_result("5.1 Payment Declaration", False, f"Status: {response.status_code}", response.text)
+                else:
+                    self.log_result("5.1 Payment Declaration", False, "Could not login as client")
+            except Exception as e:
+                self.log_result("5.1 Payment Declaration", False, "Exception occurred", str(e))
+
+        # Step 2: Manager confirms payment
+        if 'manager' in self.tokens and self.test_payment_id:
+            try:
+                headers = {"Authorization": f"Bearer {self.tokens['manager']}"}
+                
+                # First generate confirmation code
+                response = self.session.post(f"{API_BASE}/payments/{self.test_payment_id}/generate-code", headers=headers)
+                if response.status_code == 200:
+                    code_data = response.json()
+                    confirmation_code = code_data.get('confirmation_code')
+                    
+                    if confirmation_code:
+                        # Now confirm with the code
+                        confirm_data = {
+                            "action": "CONFIRMED",
+                            "confirmation_code": confirmation_code
+                        }
+                        confirm_response = self.session.patch(f"{API_BASE}/payments/{self.test_payment_id}/confirm", 
+                                                            json=confirm_data, headers=headers)
+                        if confirm_response.status_code == 200:
+                            confirm_result = confirm_response.json()
+                            if confirm_result.get('status') == 'confirmed' and confirm_result.get('invoice_number'):
+                                self.log_result("5.2 Payment Confirmation", True, f"Payment confirmed, Invoice: {confirm_result['invoice_number']}")
+                            else:
+                                self.log_result("5.2 Payment Confirmation", False, f"Status: {confirm_result.get('status')}, Invoice: {confirm_result.get('invoice_number')}")
+                        else:
+                            self.log_result("5.2 Payment Confirmation", False, f"Confirm Status: {confirm_response.status_code}", confirm_response.text)
+                    else:
+                        self.log_result("5.2 Payment Confirmation", False, "No confirmation code generated")
+                else:
+                    self.log_result("5.2 Payment Confirmation", False, f"Code Gen Status: {response.status_code}", response.text)
+            except Exception as e:
+                self.log_result("5.2 Payment Confirmation", False, "Exception occurred", str(e))
+
+    def test_priority_6_withdrawal_manager(self):
+        """PRIORITY 6: Test withdrawal manager"""
+        print("=== PRIORITY 6: WITHDRAWAL MANAGER ===")
+        
+        # Step 1: Manager requests withdrawal
+        if 'manager' in self.tokens:
+            try:
+                headers = {"Authorization": f"Bearer {self.tokens['manager']}"}
+                withdrawal_data = {
+                    "amount": 500.00,
+                    "category": "BUREAUX",
+                    "subcategory": "Loyer",
+                    "description": "Paiement loyer bureau mensuel - Janvier 2025"
+                }
+                response = self.session.post(f"{API_BASE}/withdrawals", json=withdrawal_data, headers=headers)
+                if response.status_code in [200, 201]:
+                    data = response.json()
+                    self.test_withdrawal_id = data['id']
+                    self.log_result("6.1 Withdrawal Request", True, f"Withdrawal requested, ID: {self.test_withdrawal_id}")
+                else:
+                    self.log_result("6.1 Withdrawal Request", False, f"Status: {response.status_code}", response.text)
+            except Exception as e:
+                self.log_result("6.1 Withdrawal Request", False, "Exception occurred", str(e))
+
+        # Step 2: SuperAdmin approves withdrawal
+        if 'superadmin' in self.tokens and self.test_withdrawal_id:
+            try:
+                headers = {"Authorization": f"Bearer {self.tokens['superadmin']}"}
+                approval_data = {"action": "approve", "notes": "Retrait approuvé - dépense justifiée"}
+                response = self.session.patch(f"{API_BASE}/withdrawals/{self.test_withdrawal_id}/approve", 
+                                            json=approval_data, headers=headers)
+                if response.status_code == 200:
+                    data = response.json()
+                    if data.get('status') == 'approved':
+                        self.log_result("6.2 SuperAdmin Approval", True, "Withdrawal approved by SuperAdmin")
+                    else:
+                        self.log_result("6.2 SuperAdmin Approval", False, f"Expected 'approved', got '{data.get('status')}'")
+                else:
+                    self.log_result("6.2 SuperAdmin Approval", False, f"Status: {response.status_code}", response.text)
+            except Exception as e:
+                self.log_result("6.2 SuperAdmin Approval", False, "Exception occurred", str(e))
+
     def test_client_creation_permissions(self):
         """Test client creation - CORRECTED: Both managers and employees can create clients"""
         print("=== Testing Client Creation Permissions (CORRECTED) ===")
