@@ -389,59 +389,65 @@ class CriticalFixesTester:
             self.log_result("Client Reassignment", False, "No Manager token available")
             return
 
+        if not self.superadmin_token:
+            self.log_result("Client Reassignment", False, "No SuperAdmin token available to get employee list")
+            return
+
         headers = {"Authorization": f"Bearer {self.manager_token}"}
+        superadmin_headers = {"Authorization": f"Bearer {self.superadmin_token}"}
         
         try:
             # First, get list of clients
             clients_response = self.session.get(f"{API_BASE}/clients", headers=headers)
-            if clients_response.status_code == 200:
-                clients = clients_response.json()
-                
-                if clients:
-                    client_id = clients[0]['id']
-                    
-                    # Get list of employees to reassign to - use SuperAdmin token for this
-                    if self.superadmin_token:
-                        superadmin_headers = {"Authorization": f"Bearer {self.superadmin_token}"}
-                        users_response = self.session.get(f"{API_BASE}/admin/users", headers=superadmin_headers)
-                        if users_response.status_code == 200:
-                            users = users_response.json()
-                            employees = [user for user in users if user.get('role') == 'EMPLOYEE']
-                        
-                        if employees:
-                            new_employee_id = employees[0]['id']
-                            
-                            # Test PATCH /api/clients/{client_id}/reassign - new_employee_id is path parameter
-                            reassign_response = self.session.patch(
-                                f"{API_BASE}/clients/{client_id}/reassign",
-                                params={"new_employee_id": new_employee_id},
-                                headers=headers
-                            )
-                            
-                            if reassign_response.status_code == 200:
-                                data = reassign_response.json()
-                                self.log_result("Client Reassignment", True, f"Client successfully reassigned to employee {new_employee_id}")
-                                
-                                # Verify the reassignment
-                                verify_response = self.session.get(f"{API_BASE}/clients/{client_id}", headers=headers)
-                                if verify_response.status_code == 200:
-                                    updated_client = verify_response.json()
-                                    if updated_client.get('assigned_employee_id') == new_employee_id:
-                                        self.log_result("Client Reassignment Verification", True, "Client assignment updated correctly")
-                                    else:
-                                        self.log_result("Client Reassignment Verification", False, f"Assignment not updated: {updated_client.get('assigned_employee_id')} != {new_employee_id}")
-                            else:
-                                self.log_result("Client Reassignment", False, f"Status: {reassign_response.status_code}", reassign_response.text)
-                        else:
-                            self.log_result("Client Reassignment", False, "No employees found for reassignment")
-                    else:
-                        self.log_result("Client Reassignment", False, f"Could not get users list: {users_response.status_code}")
-                else:
-                    self.log_result("Client Reassignment", False, "No SuperAdmin token available to get employee list")
-                else:
-                    self.log_result("Client Reassignment", False, "No clients found for reassignment test")
-            else:
+            if clients_response.status_code != 200:
                 self.log_result("Client Reassignment", False, f"Could not get clients list: {clients_response.status_code}")
+                return
+                
+            clients = clients_response.json()
+            if not clients:
+                self.log_result("Client Reassignment", False, "No clients found for reassignment test")
+                return
+                
+            client_id = clients[0]['id']
+            
+            # Get list of employees to reassign to
+            users_response = self.session.get(f"{API_BASE}/admin/users", headers=superadmin_headers)
+            if users_response.status_code != 200:
+                self.log_result("Client Reassignment", False, f"Could not get users list: {users_response.status_code}")
+                return
+                
+            users = users_response.json()
+            employees = [user for user in users if user.get('role') == 'EMPLOYEE']
+            
+            if not employees:
+                self.log_result("Client Reassignment", False, "No employees found for reassignment")
+                return
+                
+            new_employee_id = employees[0]['id']
+            
+            # Test PATCH /api/clients/{client_id}/reassign - new_employee_id is path parameter
+            reassign_response = self.session.patch(
+                f"{API_BASE}/clients/{client_id}/reassign",
+                params={"new_employee_id": new_employee_id},
+                headers=headers
+            )
+            
+            if reassign_response.status_code == 200:
+                self.log_result("Client Reassignment", True, f"Client successfully reassigned to employee {new_employee_id}")
+                
+                # Verify the reassignment
+                verify_response = self.session.get(f"{API_BASE}/clients/{client_id}", headers=headers)
+                if verify_response.status_code == 200:
+                    updated_client = verify_response.json()
+                    if updated_client.get('assigned_employee_id') == new_employee_id:
+                        self.log_result("Client Reassignment Verification", True, "Client assignment updated correctly")
+                    else:
+                        self.log_result("Client Reassignment Verification", False, f"Assignment not updated: {updated_client.get('assigned_employee_id')} != {new_employee_id}")
+                else:
+                    self.log_result("Client Reassignment Verification", False, f"Could not verify reassignment: {verify_response.status_code}")
+            else:
+                self.log_result("Client Reassignment", False, f"Status: {reassign_response.status_code}", reassign_response.text)
+                
         except Exception as e:
             self.log_result("Client Reassignment", False, "Exception occurred", str(e))
 
