@@ -32,12 +32,15 @@ TEST_CREDENTIALS = {
 class APITester:
     def __init__(self):
         self.session = requests.Session()
-        self.manager_token = None
-        self.employee_token = None
-        self.manager_user = None
-        self.employee_user = None
+        # Store tokens for all roles
+        self.tokens = {}
+        self.users = {}
+        # Test data storage
+        self.test_prospect_id = None
         self.test_client_id = None
         self.test_visitor_id = None
+        self.test_payment_id = None
+        self.test_withdrawal_id = None
         self.results = {
             'passed': 0,
             'failed': 0,
