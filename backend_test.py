@@ -165,7 +165,7 @@ class APITester:
             try:
                 headers = {"Authorization": f"Bearer {self.tokens['superadmin']}"}
                 notes_data = {
-                    "notes": "Consultation effectuée avec le prospect. Profil très intéressant, diplômes validés, expérience pertinente. Recommande de procéder à la conversion en client."
+                    "note": "Consultation effectuée avec le prospect. Profil très intéressant, diplômes validés, expérience pertinente. Recommande de procéder à la conversion en client."
                 }
                 response = self.session.patch(f"{API_BASE}/contact-messages/{self.test_prospect_id}/consultant-notes", 
                                             json=notes_data, headers=headers)
@@ -184,8 +184,13 @@ class APITester:
         if 'employee' in self.tokens:
             try:
                 headers = {"Authorization": f"Bearer {self.tokens['employee']}"}
+                client_conversion_data = {
+                    "first_payment_amount": 1500,
+                    "country": "France",
+                    "visa_type": "Work Permit (Talent Permit)"
+                }
                 response = self.session.post(f"{API_BASE}/contact-messages/{self.test_prospect_id}/convert-to-client", 
-                                           headers=headers)
+                                           json=client_conversion_data, headers=headers)
                 if response.status_code == 200:
                     data = response.json()
                     if data.get('status') == 'converti_client' and 'client_id' in data and 'user_id' in data:
