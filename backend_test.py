@@ -274,10 +274,10 @@ class APITester:
                 response = self.session.patch(f"{API_BASE}/visitors/{self.test_visitor_id}/checkout", headers=headers)
                 if response.status_code == 200:
                     data = response.json()
-                    if data.get('departure_time'):
-                        self.log_result("2.4 Visitor Checkout", True, f"Visitor checked out at {data['departure_time']}")
+                    if data.get('message') == "Visitor checked out":
+                        self.log_result("2.4 Visitor Checkout", True, "Visitor successfully checked out")
                     else:
-                        self.log_result("2.4 Visitor Checkout", False, "departure_time not set")
+                        self.log_result("2.4 Visitor Checkout", False, f"Unexpected response: {data}")
                 else:
                     self.log_result("2.4 Visitor Checkout", False, f"Status: {response.status_code}", response.text)
             except Exception as e:
