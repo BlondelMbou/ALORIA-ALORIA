@@ -2020,19 +2020,33 @@ async def create_user_advanced(user_data: UserCreateRequest, current_user: dict 
 async def log_user_activity(user_id: str, action: str, details: dict = None, ip_address: str = None):
     """Enregistre l'activité utilisateur pour le monitoring"""
     try:
-        user = await db.users.find_one({"id": user_id})
-        if user:
-            activity = {
-                "id": str(uuid.uuid4()),
-                "user_id": user_id,
-                "user_name": user["full_name"],
-                "user_role": user["role"],
-                "action": action,
-                "details": details or {},
-                "ip_address": ip_address,
-                "timestamp": datetime.now(timezone.utc).isoformat()
-            }
-            await db.user_activities.insert_one(activity)
+        # Handle special user IDs
+        if user_id == "system":
+            user_name = "System"
+            user_role = "SYSTEM"
+        elif user_id == "public":
+            user_name = "Visiteur Public"
+            user_role = "PUBLIC"
+        else:
+            user = await db.users.find_one({"id": user_id})
+            if user:
+                user_name = user["full_name"]
+                user_role = user["role"]
+            else:
+                user_name = "Unknown User"
+                user_role = "UNKNOWN"
+        
+        activity = {
+            "id": str(uuid.uuid4()),
+            "user_id": user_id,
+            "user_name": user_name,
+            "user_role": user_role,
+            "action": action,
+            "details": details or {},
+            "ip_address": ip_address,
+            "timestamp": datetime.now(timezone.utc).isoformat()
+        }
+        await db.user_activities.insert_one(activity)
     except Exception as e:
         logger.error(f"Erreur lors de l'enregistrement de l'activité: {e}")
 
