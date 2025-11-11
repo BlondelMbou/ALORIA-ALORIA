@@ -130,10 +130,11 @@ class APITester:
                                             json=assign_data, headers=headers)
                 if response.status_code == 200:
                     data = response.json()
-                    if data.get('status') == 'assigne_employe':
-                        self.log_result("1.2 SuperAdmin Assignment", True, f"Status changed to 'assigne_employe'")
+                    # Check if assignment was successful by verifying assigned_to field
+                    if data.get('assigned_to') == self.users['employee']['id']:
+                        self.log_result("1.2 SuperAdmin Assignment", True, f"Prospect assigned to employee: {data.get('assigned_to_name', 'Employee')}")
                     else:
-                        self.log_result("1.2 SuperAdmin Assignment", False, f"Expected 'assigne_employe', got '{data.get('status')}'")
+                        self.log_result("1.2 SuperAdmin Assignment", False, f"Assignment failed. Response: {data}")
                 else:
                     self.log_result("1.2 SuperAdmin Assignment", False, f"Status: {response.status_code}", response.text)
             except Exception as e:
