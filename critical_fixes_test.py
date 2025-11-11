@@ -306,9 +306,15 @@ class CriticalFixesTester:
                     if suitable_prospect:
                         prospect_id = suitable_prospect['id']
                         
-                        # Test conversion with MANAGER role
+                        # Test conversion with MANAGER role - need to provide client_data
+                        client_data = {
+                            "country": suitable_prospect.get('country', 'France'),
+                            "visa_type": suitable_prospect.get('visa_type', 'Work Permit'),
+                            "first_payment_amount": 0
+                        }
                         convert_response = self.session.post(
                             f"{API_BASE}/contact-messages/{prospect_id}/convert-to-client",
+                            json=client_data,
                             headers=headers
                         )
                         
