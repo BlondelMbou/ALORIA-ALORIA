@@ -572,14 +572,24 @@ export default function ManagerDashboard() {
                             </td>
                             <td className="py-3 px-4 text-slate-400 text-sm">{client.assigned_employee_name || 'Non assigné'}</td>
                             <td className="py-3 px-4">
-                              <Button 
-                                variant="outline" 
-                                size="sm"
-                                className="border-slate-600 text-slate-300 hover:bg-slate-800 hover:text-white"
-                                onClick={() => setSelectedClient(client)}
-                              >
-                                Détails
-                              </Button>
+                              <div className="flex gap-2">
+                                <Button 
+                                  variant="outline" 
+                                  size="sm"
+                                  className="border-slate-600 text-slate-300 hover:bg-slate-800 hover:text-white"
+                                  onClick={() => setSelectedClient(client)}
+                                >
+                                  Détails
+                                </Button>
+                                <Button 
+                                  variant="outline" 
+                                  size="sm"
+                                  className="border-orange-600 text-orange-400 hover:bg-orange-800 hover:text-white"
+                                  onClick={() => setReassignDialog({ show: true, client, newEmployeeId: '' })}
+                                >
+                                  Réassigner
+                                </Button>
+                              </div>
                             </td>
                           </tr>
                         );
