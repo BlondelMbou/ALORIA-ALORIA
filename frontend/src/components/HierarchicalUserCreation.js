@@ -26,6 +26,7 @@ const HierarchicalUserCreation = ({ onUserCreated }) => {
       case 'SUPERADMIN':
         return [
           { value: 'MANAGER', label: 'Manager', description: 'Gère les employés et clients' },
+          { value: 'CONSULTANT', label: 'Consultant', description: 'Consultation prospects payants' },
           { value: 'EMPLOYEE', label: 'Employé', description: 'Gère les clients assignés' }
         ];
       case 'MANAGER':
@@ -37,6 +38,8 @@ const HierarchicalUserCreation = ({ onUserCreated }) => {
         return [
           { value: 'CLIENT', label: 'Client', description: 'Accès au suivi de dossier' }
         ];
+      case 'CONSULTANT':
+        return []; // Consultant ne peut créer personne
       default:
         return [];
     }
