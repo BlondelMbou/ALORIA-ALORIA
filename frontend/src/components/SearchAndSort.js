@@ -70,10 +70,12 @@ export default function SearchAndSort({
 
   // Appliquer les filtres et le tri
   React.useEffect(() => {
+    if (!onFilteredDataChange) return;
+    
     let filtered = filterData(data, searchTerm);
     let sorted = sortData(filtered, sortBy, sortOrder);
     onFilteredDataChange(sorted);
-  }, [data, searchTerm, sortBy, sortOrder]);
+  }, [data, searchTerm, sortBy, sortOrder]); // onFilteredDataChange NOT in deps to avoid infinite loop
 
   const toggleSortOrder = () => {
     setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
