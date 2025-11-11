@@ -46,6 +46,10 @@ export default function MyProspects() {
 
   useEffect(() => {
     fetchMyProspects();
+    
+    // Auto-refresh toutes les 30 secondes pour mettre à jour les statuts
+    const interval = setInterval(fetchMyProspects, 30000);
+    return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
