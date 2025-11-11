@@ -3564,6 +3564,9 @@ class APITester:
         # Authentication setup
         self.authenticate_all_roles()
         
+        # NEW: Test Consultation Payment Workflow (from review request)
+        self.test_consultation_payment_workflow()
+        
         # Run priority tests in order
         self.test_priority_1_prospect_workflow()
         self.test_priority_2_manager_employee_actions()
