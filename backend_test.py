@@ -3322,6 +3322,238 @@ class APITester:
         self.test_prospects_search_and_filtering()
         self.test_review_request_specific_tests()
 
+    def test_consultation_payment_workflow(self):
+        """TEST BACKEND - PAIEMENT CONSULTATION 50K CFA - As requested in review"""
+        print("=== TEST BACKEND - PAIEMENT CONSULTATION 50K CFA ===")
+        
+        # First, create a prospect and assign to employee to test the workflow
+        prospect_data = {
+            "name": "Marie Kouadio",
+            "email": "marie.kouadio@example.com",
+            "phone": "+225070123456",
+            "country": "France",
+            "visa_type": "Work Permit (Talent Permit)",
+            "budget_range": "5000+€",
+            "urgency_level": "Urgent",
+            "message": "Je souhaite obtenir un permis de travail en France. J'ai une offre d'emploi confirmée et besoin d'aide urgente pour les démarches.",
+            "lead_source": "Référencement",
+            "how_did_you_know": "Recommandé par un collègue"
+        }
+        
+        # Create prospect
+        try:
+            response = self.session.post(f"{API_BASE}/contact-messages", json=prospect_data)
+            if response.status_code in [200, 201]:
+                prospect = response.json()
+                test_prospect_id = prospect['id']
+                self.log_result("Setup: Create Test Prospect", True, f"Prospect created: {test_prospect_id}")
+            else:
+                self.log_result("Setup: Create Test Prospect", False, f"Status: {response.status_code}")
+                return
+        except Exception as e:
+            self.log_result("Setup: Create Test Prospect", False, f"Exception: {str(e)}")
+            return
+        
+        # Assign prospect to employee (SuperAdmin action)
+        if 'superadmin' in self.tokens and 'employee' in self.users:
+            try:
+                headers = {"Authorization": f"Bearer {self.tokens['superadmin']}"}
+                assign_data = {"assigned_to": self.users['employee']['id']}
+                response = self.session.patch(f"{API_BASE}/contact-messages/{test_prospect_id}/assign", 
+                                            json=assign_data, headers=headers)
+                if response.status_code == 200:
+                    self.log_result("Setup: Assign to Employee", True, "Prospect assigned to employee")
+                else:
+                    self.log_result("Setup: Assign to Employee", False, f"Status: {response.status_code}")
+                    return
+            except Exception as e:
+                self.log_result("Setup: Assign to Employee", False, f"Exception: {str(e)}")
+                return
+        
+        # TEST 1: Assignation Consultant avec Paiement (CRITIQUE)
+        if 'manager' in self.tokens:
+            try:
+                headers = {"Authorization": f"Bearer {self.tokens['manager']}"}
+                payment_data = {
+                    "payment_method": "Mobile Money",
+                    "transaction_reference": "MTN-TEST-123456"
+                }
+                response = self.session.patch(f"{API_BASE}/contact-messages/{test_prospect_id}/assign-consultant", 
+                                            json=payment_data, headers=headers)
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    # Verify all required fields
+                    success_checks = []
+                    
+                    # Check payment amount
+                    if data.get('payment_50k_amount') == 50000:
+                        success_checks.append("✓ payment_50k_amount = 50000")
+                    else:
+                        success_checks.append(f"✗ payment_50k_amount = {data.get('payment_50k_amount')}")
+                    
+                    # Check payment ID
+                    if data.get('payment_id'):
+                        success_checks.append(f"✓ payment_50k_id created: {data.get('payment_id')}")
+                        test_payment_id = data.get('payment_id')
+                    else:
+                        success_checks.append("✗ payment_50k_id not created")
+                    
+                    # Check invoice number
+                    if data.get('invoice_number'):
+                        success_checks.append(f"✓ Invoice number: {data.get('invoice_number')}")
+                    else:
+                        success_checks.append("✗ Invoice number not generated")
+                    
+                    # Verify prospect status changed to 'paiement_50k'
+                    prospect_check = self.session.get(f"{API_BASE}/contact-messages", headers=headers)
+                    if prospect_check.status_code == 200:
+                        prospects = prospect_check.json()
+                        updated_prospect = next((p for p in prospects if p['id'] == test_prospect_id), None)
+                        if updated_prospect and updated_prospect.get('status') == 'paiement_50k':
+                            success_checks.append("✓ Status changed to 'paiement_50k'")
+                        else:
+                            success_checks.append(f"✗ Status is '{updated_prospect.get('status') if updated_prospect else 'not found'}'")
+                    
+                    # Check if payment record exists in payments collection
+                    if 'superadmin' in self.tokens:
+                        admin_headers = {"Authorization": f"Bearer {self.tokens['superadmin']}"}
+                        payments_response = self.session.get(f"{API_BASE}/payments/consultations", headers=admin_headers)
+                        if payments_response.status_code == 200:
+                            payments_data = payments_response.json()
+                            consultation_payments = payments_data.get('payments', [])
+                            matching_payment = next((p for p in consultation_payments if p.get('prospect_id') == test_prospect_id), None)
+                            if matching_payment and matching_payment.get('type') == 'consultation':
+                                success_checks.append("✓ Payment record in 'payments' collection with type='consultation'")
+                            else:
+                                success_checks.append("✗ Payment record not found in payments collection")
+                    
+                    self.log_result("TEST 1: Assignation Consultant avec Paiement", True, 
+                                  f"All checks: {'; '.join(success_checks)}")
+                else:
+                    self.log_result("TEST 1: Assignation Consultant avec Paiement", False, 
+                                  f"Status: {response.status_code}, Response: {response.text}")
+            except Exception as e:
+                self.log_result("TEST 1: Assignation Consultant avec Paiement", False, f"Exception: {str(e)}")
+        
+        # TEST 2: Récupération Paiements Consultation (SuperAdmin)
+        if 'superadmin' in self.tokens:
+            try:
+                headers = {"Authorization": f"Bearer {self.tokens['superadmin']}"}
+                response = self.session.get(f"{API_BASE}/payments/consultations", headers=headers)
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    success_checks = []
+                    
+                    # Check structure
+                    if 'payments' in data:
+                        success_checks.append(f"✓ Payments list: {len(data['payments'])} consultations")
+                    else:
+                        success_checks.append("✗ No 'payments' field in response")
+                    
+                    if data.get('total_count') is not None:
+                        success_checks.append(f"✓ Total count: {data['total_count']}")
+                    else:
+                        success_checks.append("✗ No 'total_count' field")
+                    
+                    if data.get('total_amount') is not None:
+                        success_checks.append(f"✓ Total amount: {data['total_amount']}")
+                    else:
+                        success_checks.append("✗ No 'total_amount' field")
+                    
+                    if data.get('currency') == 'CFA':
+                        success_checks.append("✓ Currency = 'CFA'")
+                    else:
+                        success_checks.append(f"✗ Currency = '{data.get('currency')}'")
+                    
+                    self.log_result("TEST 2: Récupération Paiements Consultation", True, 
+                                  f"All checks: {'; '.join(success_checks)}")
+                else:
+                    self.log_result("TEST 2: Récupération Paiements Consultation", False, 
+                                  f"Status: {response.status_code}, Response: {response.text}")
+            except Exception as e:
+                self.log_result("TEST 2: Récupération Paiements Consultation", False, f"Exception: {str(e)}")
+        
+        # TEST 3: Dashboard Stats avec Consultations
+        if 'superadmin' in self.tokens:
+            try:
+                headers = {"Authorization": f"Bearer {self.tokens['superadmin']}"}
+                response = self.session.get(f"{API_BASE}/admin/dashboard-stats", headers=headers)
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    success_checks = []
+                    
+                    # Check consultations section
+                    if 'consultations' in data:
+                        consultations = data['consultations']
+                        success_checks.append("✓ 'consultations' section exists")
+                        
+                        if consultations.get('total_count') is not None:
+                            success_checks.append(f"✓ total_count: {consultations['total_count']}")
+                        else:
+                            success_checks.append("✗ No 'total_count' in consultations")
+                        
+                        if consultations.get('total_amount') is not None:
+                            success_checks.append(f"✓ total_amount: {consultations['total_amount']}")
+                        else:
+                            success_checks.append("✗ No 'total_amount' in consultations")
+                        
+                        if consultations.get('currency') == 'CFA':
+                            success_checks.append("✓ currency = 'CFA'")
+                        else:
+                            success_checks.append(f"✗ currency = '{consultations.get('currency')}'")
+                    else:
+                        success_checks.append("✗ No 'consultations' section in dashboard stats")
+                    
+                    self.log_result("TEST 3: Dashboard Stats avec Consultations", True, 
+                                  f"All checks: {'; '.join(success_checks)}")
+                else:
+                    self.log_result("TEST 3: Dashboard Stats avec Consultations", False, 
+                                  f"Status: {response.status_code}, Response: {response.text}")
+            except Exception as e:
+                self.log_result("TEST 3: Dashboard Stats avec Consultations", False, f"Exception: {str(e)}")
+        
+        # TEST 4: Notifications SuperAdmin
+        if 'superadmin' in self.tokens:
+            try:
+                headers = {"Authorization": f"Bearer {self.tokens['superadmin']}"}
+                response = self.session.get(f"{API_BASE}/notifications", headers=headers)
+                
+                if response.status_code == 200:
+                    notifications = response.json()
+                    success_checks = []
+                    
+                    # Look for payment consultation notifications
+                    consultation_notifications = [n for n in notifications if n.get('type') == 'payment_consultation']
+                    
+                    if consultation_notifications:
+                        success_checks.append(f"✓ Found {len(consultation_notifications)} payment_consultation notifications")
+                        
+                        # Check the most recent one
+                        latest_notif = consultation_notifications[0]
+                        if "💰 Paiement Consultation 50,000 CFA" in latest_notif.get('title', ''):
+                            success_checks.append("✓ Correct notification title")
+                        else:
+                            success_checks.append(f"✗ Title: '{latest_notif.get('title')}'")
+                        
+                        message = latest_notif.get('message', '')
+                        if 'Mobile Money' in message and 'Marie Kouadio' in message:
+                            success_checks.append("✓ Notification contains prospect name and payment method")
+                        else:
+                            success_checks.append(f"✗ Message content: '{message}'")
+                    else:
+                        success_checks.append("✗ No payment_consultation notifications found")
+                    
+                    self.log_result("TEST 4: Notifications SuperAdmin", True, 
+                                  f"All checks: {'; '.join(success_checks)}")
+                else:
+                    self.log_result("TEST 4: Notifications SuperAdmin", False, 
+                                  f"Status: {response.status_code}, Response: {response.text}")
+            except Exception as e:
+                self.log_result("TEST 4: Notifications SuperAdmin", False, f"Exception: {str(e)}")
+
     def run_all_tests(self):
         """Run all tests in sequence - PRODUCTION READY EXHAUSTIVE TESTING"""
         print("🚀 ALORIA AGENCY - BACKEND TESTING EXHAUSTIF - PRODUCTION READY")
