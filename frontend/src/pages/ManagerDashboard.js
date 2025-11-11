@@ -1063,6 +1063,11 @@ export default function ManagerDashboard() {
               </Card>
             </div>
           </TabsContent>
+
+          {/* Withdrawals Tab */}
+          <TabsContent value="withdrawals">
+            <WithdrawalManager />
+          </TabsContent>
         </Tabs>
       </div>
 
