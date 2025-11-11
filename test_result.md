@@ -381,6 +381,18 @@
         -agent: "testing"
         -comment: "🎯 CONSULTANT ROLE TESTING COMPLETE - 84.6% SUCCESS! Comprehensive testing of CONSULTANT role prospect access completed with EXCELLENT RESULTS. ✅ CONSULTANT API ACCESS: CONSULTANT can now access GET /api/contact-messages without 403 errors - /api prefix fix successful! ✅ ROLE-BASED FILTERING: Perfect prospect filtering verified - CONSULTANT sees only 1 prospect with status='paiement_50k' as expected, SUPERADMIN sees ALL 24 prospects, MANAGER/EMPLOYEE see assigned prospects only, CLIENT correctly denied (403). ✅ BACKEND PERMISSIONS: Consultant-notes endpoint correctly requires SUPERADMIN role (not CONSULTANT), convert-to-client requires EMPLOYEE/MANAGER with proper assignment. ✅ SECURITY VALIDATION: CONSULTANT correctly denied permission to add notes (403 as expected). ✅ CREDENTIALS TESTED: All review credentials working - SuperAdmin (superadmin@aloria.com/SuperAdmin123!), Manager (manager@test.com/password123). The main issue from review request is RESOLVED - CONSULTANT role can now access prospects with proper filtering!"
 
+  - task: "Consultation Payment Workflow 50K CFA"
+    implemented: true
+    working: true
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: true
+        -agent: "testing"
+        -comment: "🎯 CONSULTATION PAYMENT WORKFLOW TESTING COMPLETE - 100% SUCCESS! Comprehensive testing of ALORIA AGENCY consultation payment workflow (50K CFA) completed with PERFECT RESULTS as requested in review. ✅ TEST 1 - ASSIGNATION CONSULTANT AVEC PAIEMENT: Employee successfully assigns prospect to consultant with Mobile Money payment (MTN-TEST-123456). All verifications passed: payment_50k_amount = 50000, payment_50k_id created, invoice number generated (CONS-20251111-6E104D8F), status changed to 'paiement_50k', payment record created in 'payments' collection with type='consultation'. ✅ TEST 2 - RÉCUPÉRATION PAIEMENTS CONSULTATION: SuperAdmin can retrieve all consultation payments via GET /api/payments/consultations with proper structure (payments list, total_count, total_amount, currency='CFA'). ✅ TEST 3 - DASHBOARD STATS AVEC CONSULTATIONS: SuperAdmin dashboard stats include 'consultations' section with accurate totals and CFA currency. ✅ TEST 4 - NOTIFICATIONS SUPERADMIN: SuperAdmin receives payment_consultation notifications with correct title '💰 Paiement Consultation 50,000 CFA' and detailed message. ALL SUCCESS CRITERIA FROM REVIEW REQUEST MET 100%!"
+
 ## frontend:
   - task: "Landing page with contact form France/Canada"
     implemented: true
