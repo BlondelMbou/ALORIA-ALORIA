@@ -67,77 +67,283 @@ class APITester:
             })
         print()
 
-    def test_user_registration_and_login(self):
-        """Test user registration and login for MANAGER and EMPLOYEE"""
-        print("=== Testing Authentication ===")
+    def authenticate_all_roles(self):
+        """Authenticate all test users with review credentials"""
+        print("=== PRIORITY 0: Authentication Setup ===")
         
-        # Test Manager Registration - Use review credentials
-        manager_data = {
-            "email": "manager@test.com",
-            "password": "password123",
-            "full_name": "Test Manager",
-            "phone": "+33123456789",
-            "role": "MANAGER"
-        }
-        
-        try:
-            response = self.session.post(f"{API_BASE}/auth/register", json=manager_data)
-            if response.status_code == 201 or response.status_code == 200:
-                data = response.json()
-                self.manager_token = data['access_token']
-                self.manager_user = data['user']
-                self.log_result("Manager Registration", True, f"Manager created with ID: {self.manager_user['id']}")
-            elif response.status_code == 400 and "already registered" in response.text:
-                # User already exists, try login
-                login_response = self.session.post(f"{API_BASE}/auth/login", json={
-                    "email": "manager@test.com",
-                    "password": "password123"
-                })
-                if login_response.status_code == 200:
-                    data = login_response.json()
-                    self.manager_token = data['access_token']
-                    self.manager_user = data['user']
-                    self.log_result("Manager Login (existing user)", True, f"Manager logged in with ID: {self.manager_user['id']}")
+        for role, credentials in TEST_CREDENTIALS.items():
+            try:
+                # Try login first
+                response = self.session.post(f"{API_BASE}/auth/login", json=credentials)
+                if response.status_code == 200:
+                    data = response.json()
+                    self.tokens[role] = data['access_token']
+                    self.users[role] = data['user']
+                    self.log_result(f"{role.upper()} Login", True, f"Logged in as {credentials['email']}")
                 else:
-                    self.log_result("Manager Login", False, "Failed to login existing manager", login_response.text)
-            else:
-                self.log_result("Manager Registration", False, f"Status: {response.status_code}", response.text)
-        except Exception as e:
-            self.log_result("Manager Registration", False, "Exception occurred", str(e))
+                    self.log_result(f"{role.upper()} Login", False, f"Status: {response.status_code}", response.text)
+            except Exception as e:
+                self.log_result(f"{role.upper()} Login", False, "Exception occurred", str(e))
 
-        # Test Employee Registration
-        employee_data = {
-            "email": "employee@aloria.com",
-            "password": "emp123",
-            "full_name": "Test Employee",
-            "phone": "+33987654321",
-            "role": "EMPLOYEE"
+    def test_priority_1_prospect_workflow(self):
+        """PRIORITY 1: Test complete prospect workflow (nouveau → converti_client)"""
+        print("=== PRIORITY 1: PROSPECT WORKFLOW COMPLET ===")
+        
+        # Step 1: Create new prospect
+        prospect_data = {
+            "name": "Jean-Baptiste Kouassi",
+            "email": "jb.kouassi@example.com",
+            "phone": "+225070123456",
+            "country": "France",
+            "visa_type": "Work Permit (Talent Permit)",
+            "budget_range": "5000+€",
+            "urgency_level": "Urgent",
+            "message": "Je souhaite obtenir un permis de travail en France pour rejoindre mon employeur. J'ai déjà une offre d'emploi confirmée et tous mes diplômes sont prêts. C'est urgent car je dois commencer le travail dans 2 mois.",
+            "lead_source": "Référencement",
+            "how_did_you_know": "Recommandé par un ami qui a utilisé vos services"
         }
         
         try:
-            response = self.session.post(f"{API_BASE}/auth/register", json=employee_data)
-            if response.status_code == 201 or response.status_code == 200:
+            response = self.session.post(f"{API_BASE}/contact-messages", json=prospect_data)
+            if response.status_code in [200, 201]:
                 data = response.json()
-                self.employee_token = data['access_token']
-                self.employee_user = data['user']
-                self.log_result("Employee Registration", True, f"Employee created with ID: {self.employee_user['id']}")
-            elif response.status_code == 400 and "already registered" in response.text:
-                # User already exists, try login
-                login_response = self.session.post(f"{API_BASE}/auth/login", json={
-                    "email": employee_data["email"],
-                    "password": employee_data["password"]
-                })
-                if login_response.status_code == 200:
-                    data = login_response.json()
-                    self.employee_token = data['access_token']
-                    self.employee_user = data['user']
-                    self.log_result("Employee Login (existing user)", True, f"Employee logged in with ID: {self.employee_user['id']}")
+                self.test_prospect_id = data['id']
+                if data.get('status') == 'nouveau':
+                    self.log_result("1.1 Prospect Creation", True, f"Prospect created with status 'nouveau', ID: {self.test_prospect_id}")
                 else:
-                    self.log_result("Employee Login", False, "Failed to login existing employee", login_response.text)
+                    self.log_result("1.1 Prospect Creation", False, f"Expected status 'nouveau', got '{data.get('status')}'")
             else:
-                self.log_result("Employee Registration", False, f"Status: {response.status_code}", response.text)
+                self.log_result("1.1 Prospect Creation", False, f"Status: {response.status_code}", response.text)
         except Exception as e:
-            self.log_result("Employee Registration", False, "Exception occurred", str(e))
+            self.log_result("1.1 Prospect Creation", False, "Exception occurred", str(e))
+            return
+
+        if not self.test_prospect_id:
+            return
+
+        # Step 2: SuperAdmin assigns to Employee
+        if 'superadmin' in self.tokens and 'employee' in self.users:
+            try:
+                headers = {"Authorization": f"Bearer {self.tokens['superadmin']}"}
+                assign_data = {"assigned_to": self.users['employee']['id']}
+                response = self.session.patch(f"{API_BASE}/contact-messages/{self.test_prospect_id}/assign", 
+                                            json=assign_data, headers=headers)
+                if response.status_code == 200:
+                    data = response.json()
+                    if data.get('status') == 'assigne_employe':
+                        self.log_result("1.2 SuperAdmin Assignment", True, f"Status changed to 'assigne_employe'")
+                    else:
+                        self.log_result("1.2 SuperAdmin Assignment", False, f"Expected 'assigne_employe', got '{data.get('status')}'")
+                else:
+                    self.log_result("1.2 SuperAdmin Assignment", False, f"Status: {response.status_code}", response.text)
+            except Exception as e:
+                self.log_result("1.2 SuperAdmin Assignment", False, "Exception occurred", str(e))
+
+        # Step 3: Employee assigns to consultant with 50k payment
+        if 'employee' in self.tokens:
+            try:
+                headers = {"Authorization": f"Bearer {self.tokens['employee']}"}
+                consultant_data = {
+                    "consultant_id": self.users.get('consultant', {}).get('id', 'consultant-id'),
+                    "payment_amount": 50000
+                }
+                response = self.session.patch(f"{API_BASE}/contact-messages/{self.test_prospect_id}/assign-consultant", 
+                                            json=consultant_data, headers=headers)
+                if response.status_code == 200:
+                    data = response.json()
+                    if data.get('status') == 'paiement_50k' and data.get('payment_50k_amount') == 50000:
+                        self.log_result("1.3 Consultant Assignment + 50k Payment", True, f"Status: 'paiement_50k', Amount: 50000 CFA")
+                    else:
+                        self.log_result("1.3 Consultant Assignment + 50k Payment", False, f"Status: {data.get('status')}, Amount: {data.get('payment_50k_amount')}")
+                else:
+                    self.log_result("1.3 Consultant Assignment + 50k Payment", False, f"Status: {response.status_code}", response.text)
+            except Exception as e:
+                self.log_result("1.3 Consultant Assignment + 50k Payment", False, "Exception occurred", str(e))
+
+        # Step 4: SuperAdmin adds consultant notes
+        if 'superadmin' in self.tokens:
+            try:
+                headers = {"Authorization": f"Bearer {self.tokens['superadmin']}"}
+                notes_data = {
+                    "notes": "Consultation effectuée avec le prospect. Profil très intéressant, diplômes validés, expérience pertinente. Recommande de procéder à la conversion en client."
+                }
+                response = self.session.patch(f"{API_BASE}/contact-messages/{self.test_prospect_id}/consultant-notes", 
+                                            json=notes_data, headers=headers)
+                if response.status_code == 200:
+                    data = response.json()
+                    if data.get('status') == 'en_consultation':
+                        self.log_result("1.4 Consultant Notes", True, f"Status changed to 'en_consultation'")
+                    else:
+                        self.log_result("1.4 Consultant Notes", False, f"Expected 'en_consultation', got '{data.get('status')}'")
+                else:
+                    self.log_result("1.4 Consultant Notes", False, f"Status: {response.status_code}", response.text)
+            except Exception as e:
+                self.log_result("1.4 Consultant Notes", False, "Exception occurred", str(e))
+
+        # Step 5: Employee converts to client
+        if 'employee' in self.tokens:
+            try:
+                headers = {"Authorization": f"Bearer {self.tokens['employee']}"}
+                response = self.session.post(f"{API_BASE}/contact-messages/{self.test_prospect_id}/convert-to-client", 
+                                           headers=headers)
+                if response.status_code == 200:
+                    data = response.json()
+                    if data.get('status') == 'converti_client' and 'client_id' in data and 'user_id' in data:
+                        self.test_client_id = data['client_id']
+                        self.log_result("1.5 Client Conversion", True, f"Status: 'converti_client', Client ID: {self.test_client_id}")
+                    else:
+                        self.log_result("1.5 Client Conversion", False, f"Status: {data.get('status')}, Missing client_id or user_id")
+                else:
+                    self.log_result("1.5 Client Conversion", False, f"Status: {response.status_code}", response.text)
+            except Exception as e:
+                self.log_result("1.5 Client Conversion", False, "Exception occurred", str(e))
+
+    def test_priority_2_manager_employee_actions(self):
+        """PRIORITY 2: Test Manager/Employee actions"""
+        print("=== PRIORITY 2: MANAGER/EMPLOYEE ACTIONS ===")
+        
+        # Test Client Reassignment
+        if 'manager' in self.tokens and self.test_client_id and 'employee' in self.users:
+            try:
+                headers = {"Authorization": f"Bearer {self.tokens['manager']}"}
+                reassign_data = {"new_employee_id": self.users['employee']['id']}
+                response = self.session.patch(f"{API_BASE}/clients/{self.test_client_id}/reassign", 
+                                            json=reassign_data, headers=headers)
+                if response.status_code == 200:
+                    data = response.json()
+                    if data.get('assigned_employee_id') == self.users['employee']['id']:
+                        self.log_result("2.1 Client Reassignment", True, f"Client reassigned to employee {self.users['employee']['full_name']}")
+                    else:
+                        self.log_result("2.1 Client Reassignment", False, f"Assignment not updated correctly")
+                else:
+                    self.log_result("2.1 Client Reassignment", False, f"Status: {response.status_code}", response.text)
+            except Exception as e:
+                self.log_result("2.1 Client Reassignment", False, "Exception occurred", str(e))
+
+        # Test Visitor Creation by Manager
+        if 'manager' in self.tokens:
+            try:
+                headers = {"Authorization": f"Bearer {self.tokens['manager']}"}
+                visitor_data = {
+                    "full_name": "Amadou Diallo",
+                    "phone_number": "+225070987654",
+                    "purpose": "Consultation initiale",
+                    "cni_number": "CI2024123456"
+                }
+                response = self.session.post(f"{API_BASE}/visitors", json=visitor_data, headers=headers)
+                if response.status_code in [200, 201]:
+                    data = response.json()
+                    self.test_visitor_id = data['id']
+                    self.log_result("2.2 Manager Visitor Creation", True, f"Visitor created with ID: {self.test_visitor_id}")
+                else:
+                    self.log_result("2.2 Manager Visitor Creation", False, f"Status: {response.status_code}", response.text)
+            except Exception as e:
+                self.log_result("2.2 Manager Visitor Creation", False, "Exception occurred", str(e))
+
+        # Test Visitor Creation by Employee
+        if 'employee' in self.tokens:
+            try:
+                headers = {"Authorization": f"Bearer {self.tokens['employee']}"}
+                visitor_data = {
+                    "full_name": "Fatou Traoré",
+                    "phone_number": "+225070555666",
+                    "purpose": "Remise de documents",
+                    "cni_number": "CI2024789012"
+                }
+                response = self.session.post(f"{API_BASE}/visitors", json=visitor_data, headers=headers)
+                if response.status_code in [200, 201]:
+                    self.log_result("2.3 Employee Visitor Creation", True, "Employee can create visitors")
+                else:
+                    self.log_result("2.3 Employee Visitor Creation", False, f"Status: {response.status_code}", response.text)
+            except Exception as e:
+                self.log_result("2.3 Employee Visitor Creation", False, "Exception occurred", str(e))
+
+        # Test Visitor Checkout
+        if 'manager' in self.tokens and self.test_visitor_id:
+            try:
+                headers = {"Authorization": f"Bearer {self.tokens['manager']}"}
+                response = self.session.patch(f"{API_BASE}/visitors/{self.test_visitor_id}/checkout", headers=headers)
+                if response.status_code == 200:
+                    data = response.json()
+                    if data.get('departure_time'):
+                        self.log_result("2.4 Visitor Checkout", True, f"Visitor checked out at {data['departure_time']}")
+                    else:
+                        self.log_result("2.4 Visitor Checkout", False, "departure_time not set")
+                else:
+                    self.log_result("2.4 Visitor Checkout", False, f"Status: {response.status_code}", response.text)
+            except Exception as e:
+                self.log_result("2.4 Visitor Checkout", False, "Exception occurred", str(e))
+
+    def test_priority_3_superadmin_operations(self):
+        """PRIORITY 3: Test SuperAdmin operations"""
+        print("=== PRIORITY 3: SUPERADMIN OPERATIONS ===")
+        
+        if 'superadmin' not in self.tokens:
+            self.log_result("SuperAdmin Operations", False, "No SuperAdmin token available")
+            return
+
+        headers = {"Authorization": f"Bearer {self.tokens['superadmin']}"}
+
+        # Test User Creation - ALL Roles
+        roles_to_create = ['MANAGER', 'EMPLOYEE', 'CONSULTANT']
+        for role in roles_to_create:
+            try:
+                timestamp = int(time.time())
+                user_data = {
+                    "email": f"test.{role.lower()}.{timestamp}@aloria.com",
+                    "full_name": f"Test {role.title()} User",
+                    "phone": f"+33{timestamp % 1000000000}",
+                    "role": role,
+                    "send_email": False
+                }
+                response = self.session.post(f"{API_BASE}/users/create", json=user_data, headers=headers)
+                if response.status_code in [200, 201]:
+                    data = response.json()
+                    if data.get('temporary_password'):
+                        self.log_result(f"3.1 SuperAdmin Creates {role}", True, f"User created with temp password: {data['temporary_password']}")
+                    else:
+                        self.log_result(f"3.1 SuperAdmin Creates {role}", False, "No temporary password in response")
+                else:
+                    self.log_result(f"3.1 SuperAdmin Creates {role}", False, f"Status: {response.status_code}", response.text)
+            except Exception as e:
+                self.log_result(f"3.1 SuperAdmin Creates {role}", False, "Exception occurred", str(e))
+
+        # Test Dashboard Stats
+        try:
+            response = self.session.get(f"{API_BASE}/admin/dashboard-stats", headers=headers)
+            if response.status_code == 200:
+                data = response.json()
+                required_fields = ['total_cases', 'active_cases', 'completed_cases', 'total_clients', 'total_employees']
+                if all(field in data for field in required_fields):
+                    self.log_result("3.2 Dashboard Stats", True, f"Stats: {data['total_cases']} cases, {data['total_clients']} clients, {data['total_employees']} employees")
+                else:
+                    self.log_result("3.2 Dashboard Stats", False, f"Missing required fields in response")
+            else:
+                self.log_result("3.2 Dashboard Stats", False, f"Status: {response.status_code}", response.text)
+        except Exception as e:
+            self.log_result("3.2 Dashboard Stats", False, "Exception occurred", str(e))
+
+        # Test Users List
+        try:
+            response = self.session.get(f"{API_BASE}/admin/users", headers=headers)
+            if response.status_code == 200:
+                users = response.json()
+                self.log_result("3.3 Users List", True, f"Retrieved {len(users)} users")
+            else:
+                self.log_result("3.3 Users List", False, f"Status: {response.status_code}", response.text)
+        except Exception as e:
+            self.log_result("3.3 Users List", False, "Exception occurred", str(e))
+
+        # Test Activities
+        try:
+            response = self.session.get(f"{API_BASE}/admin/activities", headers=headers)
+            if response.status_code == 200:
+                activities = response.json()
+                self.log_result("3.4 Activities Log", True, f"Retrieved {len(activities)} activities")
+            else:
+                self.log_result("3.4 Activities Log", False, f"Status: {response.status_code}", response.text)
+        except Exception as e:
+            self.log_result("3.4 Activities Log", False, "Exception occurred", str(e))
 
     def test_client_creation_permissions(self):
         """Test client creation - CORRECTED: Both managers and employees can create clients"""
