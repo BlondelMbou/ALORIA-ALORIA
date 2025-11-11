@@ -35,6 +35,7 @@ const SuperAdminDashboard = () => {
         clients: clientsCount
       },
       business: stats?.business || {},
+      consultations: stats?.consultations || { total_count: 0, total_amount: 0, currency: 'CFA' },
       activity: stats?.activity || {}
     };
   }, [users, stats]);
