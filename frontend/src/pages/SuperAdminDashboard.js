@@ -77,6 +77,9 @@ const SuperAdminDashboard = () => {
       
       setStats(statsRes.data);
       setUsers(usersRes.data);
+      
+      console.log('📊 Activities loaded:', activitiesRes.data.length, 'activities');
+      console.log('📊 First 3 activities:', activitiesRes.data.slice(0, 3));
       setActivities(activitiesRes.data);
     } catch (error) {
       toast.error('Erreur lors du chargement des données');
