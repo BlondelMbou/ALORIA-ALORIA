@@ -68,14 +68,19 @@ export default function SearchAndSort({
     });
   };
 
-  // Appliquer les filtres et le tri
-  React.useEffect(() => {
-    if (!onFilteredDataChange) return;
-    
+  // Appliquer les filtres et le tri avec useMemo pour éviter les boucles infinies
+  const filteredAndSortedData = React.useMemo(() => {
     let filtered = filterData(data, searchTerm);
     let sorted = sortData(filtered, sortBy, sortOrder);
-    onFilteredDataChange(sorted);
-  }, [data, searchTerm, sortBy, sortOrder]); // onFilteredDataChange NOT in deps to avoid infinite loop
+    return sorted;
+  }, [data, searchTerm, sortBy, sortOrder]);
+
+  // Notifier le parent seulement quand les données changent vraiment
+  React.useEffect(() => {
+    if (onFilteredDataChange) {
+      onFilteredDataChange(filteredAndSortedData);
+    }
+  }, [filteredAndSortedData]);
 
   const toggleSortOrder = () => {
     setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
