@@ -90,10 +90,16 @@ export default function MyProspects() {
     if (!selectedProspect) return;
 
     try {
-      await api.patch(`/contact-messages/${selectedProspect.id}/assign-consultant`);
-      toast.success('Prospect affecté au consultant avec succès ! Email de confirmation envoyé.');
+      const response = await api.patch(`/contact-messages/${selectedProspect.id}/assign-consultant`, {
+        payment_method: paymentMethod,
+        transaction_reference: transactionRef || null
+      });
+      
+      toast.success(`Paiement de 50,000 CFA enregistré ! Facture: ${response.data.invoice_number}`);
       setShowConfirmDialog(false);
       setSelectedProspect(null);
+      setPaymentMethod('Cash');
+      setTransactionRef('');
       fetchMyProspects();
     } catch (error) {
       console.error('Erreur lors de l\'affectation:', error);
