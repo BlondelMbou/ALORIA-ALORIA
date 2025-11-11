@@ -269,7 +269,7 @@ const SuperAdminDashboard = () => {
                 { value: 'user_name', label: 'Utilisateur' },
                 { value: 'action', label: 'Action' }
               ]}
-              onFilteredDataChange={setFilteredActivities}
+              onFilteredDataChange={handleFilteredActivitiesChange}
               placeholder="Rechercher une activité (utilisateur, action, détails)..."
             />
 
