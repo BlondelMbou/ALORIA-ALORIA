@@ -196,10 +196,10 @@ class APITester:
                                            json=client_conversion_data, headers=headers)
                 if response.status_code == 200:
                     data = response.json()
-                    # Check if client was created
-                    if 'client_id' in data and 'user_id' in data:
+                    # Check if client was created by checking success message and client_id
+                    if 'message' in data and 'converti en client avec succès' in data['message'] and 'client_id' in data:
                         self.test_client_id = data['client_id']
-                        self.log_result("1.5 Client Conversion", True, f"Client created with ID: {self.test_client_id}")
+                        self.log_result("1.5 Client Conversion", True, f"Client created with ID: {self.test_client_id}, Login: {data.get('login_email')}")
                     else:
                         self.log_result("1.5 Client Conversion", False, f"Client creation failed. Response: {data}")
                 else:
