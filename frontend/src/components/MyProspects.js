@@ -266,16 +266,36 @@ export default function MyProspects() {
                     )}
 
                     {prospect.status === 'paiement_50k' && (
-                      <Badge className="bg-green-500/20 text-green-400 justify-center py-2">
-                        <CheckCircle className="w-4 h-4 mr-2" />
-                        Avec le consultant
-                      </Badge>
+                      <>
+                        <Badge className="bg-green-500/20 text-green-400 justify-center py-2 mb-2">
+                          <CheckCircle className="w-4 h-4 mr-2" />
+                          Chez le consultant
+                        </Badge>
+                        <Button 
+                          size="sm"
+                          className="bg-blue-500 hover:bg-blue-600"
+                          onClick={() => handleConvertToClient(prospect)}
+                        >
+                          <UserPlus className="w-4 h-4 mr-2" />
+                          Convertir en Client
+                        </Button>
+                      </>
                     )}
 
                     {prospect.status === 'en_consultation' && (
-                      <Badge className="bg-orange-500/20 text-orange-400 justify-center py-2">
-                        💬 En consultation
-                      </Badge>
+                      <>
+                        <Badge className="bg-orange-500/20 text-orange-400 justify-center py-2 mb-2">
+                          💬 En consultation
+                        </Badge>
+                        <Button 
+                          size="sm"
+                          className="bg-blue-500 hover:bg-blue-600"
+                          onClick={() => handleConvertToClient(prospect)}
+                        >
+                          <UserPlus className="w-4 h-4 mr-2" />
+                          Convertir en Client
+                        </Button>
+                      </>
                     )}
 
                     {prospect.status === 'converti_client' && (
