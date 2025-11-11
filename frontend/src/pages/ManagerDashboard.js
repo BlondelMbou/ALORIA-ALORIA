@@ -1160,11 +1160,11 @@ export default function ManagerDashboard() {
                 <>
                   <div>
                     <Label className="text-slate-300">Nouvel Employé * ({employees.length} disponibles)</Label>
-                    <Select value={reassignDialog.newEmployeeId} onValueChange={(value) => setReassignDialog({ ...reassignDialog, newEmployeeId: value })}>
+                    <Select key={`reassign-${employees.length}`} value={reassignDialog.newEmployeeId} onValueChange={(value) => setReassignDialog({ ...reassignDialog, newEmployeeId: value })}>
                       <SelectTrigger className="bg-slate-800 border-slate-600 text-white mt-2">
                         <SelectValue placeholder="Choisir un employé" />
                       </SelectTrigger>
-                      <SelectContent className="bg-slate-800 border-slate-600">
+                      <SelectContent className="bg-slate-800 border-slate-600 max-h-[300px] overflow-y-auto">
                         {employees.map((emp) => (
                           <SelectItem key={emp.id} value={emp.id} className="text-white hover:bg-slate-700">
                             {emp.full_name}
