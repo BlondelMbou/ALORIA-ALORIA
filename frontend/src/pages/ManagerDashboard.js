@@ -483,13 +483,14 @@ export default function ManagerDashboard() {
 
         {/* Tabs */}
         <Tabs defaultValue="clients" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 md:grid-cols-6 gap-2 bg-[#1E293B] border border-slate-700 p-2">
+          <TabsList className="grid w-full grid-cols-2 md:grid-cols-7 gap-2 bg-[#1E293B] border border-slate-700 p-2">
             <TabsTrigger value="clients" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-orange-600 data-[state=active]:text-white text-slate-300">Clients</TabsTrigger>
             <TabsTrigger value="employees" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-orange-600 data-[state=active]:text-white text-slate-300">Équipe</TabsTrigger>
             <TabsTrigger value="cases" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-orange-600 data-[state=active]:text-white text-slate-300">Dossiers</TabsTrigger>
             <TabsTrigger value="visitors" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-orange-600 data-[state=active]:text-white text-slate-300">Visiteurs</TabsTrigger>
             <TabsTrigger value="prospects" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-orange-600 data-[state=active]:text-white text-slate-300">Prospects</TabsTrigger>
             <TabsTrigger value="payments" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-orange-600 data-[state=active]:text-white text-slate-300">Paiements</TabsTrigger>
+            <TabsTrigger value="withdrawals" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-orange-600 data-[state=active]:text-white text-slate-300">Retraits</TabsTrigger>
           </TabsList>
 
           {/* Clients Tab */}
