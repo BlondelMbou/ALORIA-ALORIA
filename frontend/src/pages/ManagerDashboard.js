@@ -230,6 +230,22 @@ export default function ManagerDashboard() {
     }
   };
 
+  const handleReassignClient = async () => {
+    if (!reassignDialog.newEmployeeId) {
+      toast.error('Veuillez sélectionner un employé');
+      return;
+    }
+
+    try {
+      await clientsAPI.reassign(reassignDialog.client.id, reassignDialog.newEmployeeId);
+      toast.success('Client réassigné avec succès');
+      setReassignDialog({ show: false, client: null, newEmployeeId: '' });
+      fetchData();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Erreur lors de la réassignation');
+    }
+  };
+
   const handleCreateClient = async (e) => {
     e.preventDefault();
     try {
