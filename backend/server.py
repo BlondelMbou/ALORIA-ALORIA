@@ -2426,6 +2426,11 @@ async def get_admin_dashboard_stats(current_user: dict = Depends(get_current_use
     total_payments = await db.payment_declarations.count_documents({})
     pending_payments = await db.payment_declarations.count_documents({"status": "pending"})
     
+    # Paiements consultation (50k CFA)
+    consultation_payments_list = await db.payments.find({"type": "consultation"}).to_list(1000)
+    consultation_count = len(consultation_payments_list)
+    consultation_total = sum(p.get("amount", 0) for p in consultation_payments_list)
+    
     # Activités récentes
     recent_activities = await db.user_activities.find(
         {}, {"_id": 0}
@@ -2450,6 +2455,11 @@ async def get_admin_dashboard_stats(current_user: dict = Depends(get_current_use
             "active_cases": active_cases,
             "total_payments": total_payments,
             "pending_payments": pending_payments
+        },
+        "consultations": {
+            "total_count": consultation_count,
+            "total_amount": consultation_total,
+            "currency": "CFA"
         },
         "activity": {
             "daily_logins": daily_logins,
