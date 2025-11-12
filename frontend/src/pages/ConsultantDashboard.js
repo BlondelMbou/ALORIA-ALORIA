@@ -19,6 +19,8 @@ export default function ConsultantDashboard() {
   const [loading, setLoading] = useState(true);
   const [selectedProspect, setSelectedProspect] = useState(null);
   const [consultantNotes, setConsultantNotes] = useState('');
+  const [isPotentialClient, setIsPotentialClient] = useState(false);
+  const [potentialLevel, setPotentialLevel] = useState('NON');
 
   useEffect(() => {
     fetchProspects();
