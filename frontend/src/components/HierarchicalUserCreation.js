@@ -309,6 +309,100 @@ const HierarchicalUserCreation = ({ onUserCreated }) => {
         )}
       </CardContent>
     </Card>
+
+    {/* Dialog des identifiants */}
+    <Dialog open={showCredentialsDialog} onOpenChange={setShowCredentialsDialog}>
+      <DialogContent className="bg-[#1E293B] border-slate-700 max-w-md">
+        <DialogHeader>
+          <DialogTitle className="text-white flex items-center gap-2">
+            <CheckCircle className="w-6 h-6 text-green-500" />
+            Utilisateur Créé!
+          </DialogTitle>
+        </DialogHeader>
+        
+        {newUserCredentials && (
+          <div className="space-y-4 mt-4">
+            <div className="bg-green-500/10 border border-green-500/30 p-4 rounded-lg">
+              <p className="text-green-400 text-sm font-semibold mb-2">
+                ✅ L'utilisateur a été créé avec succès
+              </p>
+              <p className="text-slate-400 text-xs">
+                Veuillez noter ces identifiants et les transmettre de manière sécurisée
+              </p>
+            </div>
+
+            <div className="bg-slate-800 p-4 rounded-lg space-y-3">
+              <div>
+                <p className="text-slate-400 text-xs mb-1">Nom complet</p>
+                <p className="text-white font-semibold">{newUserCredentials.full_name}</p>
+              </div>
+              
+              <div>
+                <p className="text-slate-400 text-xs mb-1">Rôle</p>
+                <Badge className="bg-blue-500">{newUserCredentials.role}</Badge>
+              </div>
+
+              <div>
+                <p className="text-slate-400 text-xs mb-1">📧 Email de connexion</p>
+                <div className="flex items-center gap-2">
+                  <code className="text-white bg-slate-900 px-3 py-2 rounded flex-1 font-mono text-sm">
+                    {newUserCredentials.email}
+                  </code>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="border-slate-600"
+                    onClick={() => {
+                      navigator.clipboard.writeText(newUserCredentials.email);
+                      toast.success('Email copié!');
+                    }}
+                  >
+                    <Copy className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+
+              <div>
+                <p className="text-slate-400 text-xs mb-1">🔑 Mot de passe temporaire</p>
+                <div className="flex items-center gap-2">
+                  <code className="text-orange-400 bg-slate-900 px-3 py-2 rounded flex-1 font-mono text-sm font-bold">
+                    {newUserCredentials.password}
+                  </code>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="border-slate-600"
+                    onClick={() => {
+                      navigator.clipboard.writeText(newUserCredentials.password);
+                      toast.success('Mot de passe copié!');
+                    }}
+                  >
+                    <Copy className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-orange-500/10 border border-orange-500/30 p-3 rounded-lg">
+              <p className="text-orange-400 text-xs">
+                ⚠️ <strong>Important:</strong> Ces identifiants ne seront plus affichés. Assurez-vous de les sauvegarder maintenant.
+              </p>
+            </div>
+
+            <Button 
+              className="w-full bg-blue-500 hover:bg-blue-600"
+              onClick={() => {
+                setShowCredentialsDialog(false);
+                setNewUserCredentials(null);
+              }}
+            >
+              J'ai noté les identifiants
+            </Button>
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
+  </div>
   );
 };
 
