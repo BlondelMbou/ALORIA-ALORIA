@@ -299,19 +299,64 @@ export default function ConsultantDashboard() {
                                 </DialogDescription>
                               </DialogHeader>
                               <div className="space-y-4">
-                                <Textarea
-                                  value={consultantNotes}
-                                  onChange={(e) => setConsultantNotes(e.target.value)}
-                                  placeholder="Saisissez vos observations, recommandations, plan d'action..."
-                                  rows={6}
-                                  className="bg-slate-800 border-slate-600 text-white"
-                                />
+                                <div>
+                                  <Label className="text-slate-300">Notes de Consultation *</Label>
+                                  <Textarea
+                                    value={consultantNotes}
+                                    onChange={(e) => setConsultantNotes(e.target.value)}
+                                    placeholder="Observations, recommandations, plan d'action..."
+                                    rows={6}
+                                    className="mt-2 bg-slate-800 border-slate-600 text-white"
+                                  />
+                                </div>
+
+                                <div className="bg-slate-800/50 p-4 rounded-lg border border-slate-700 space-y-3">
+                                  <Label className="text-slate-300 font-semibold">Évaluation du Potentiel</Label>
+                                  
+                                  <div className="flex items-center space-x-2">
+                                    <input
+                                      type="checkbox"
+                                      id="isPotential"
+                                      checked={isPotentialClient}
+                                      onChange={(e) => {
+                                        setIsPotentialClient(e.target.checked);
+                                        if (!e.target.checked) setPotentialLevel('NON');
+                                      }}
+                                      className="w-4 h-4 text-green-600 bg-slate-700 border-slate-600 rounded focus:ring-green-500"
+                                    />
+                                    <label htmlFor="isPotential" className="text-slate-300">
+                                      ✅ Prospect identifié comme potentiel client
+                                    </label>
+                                  </div>
+
+                                  <div>
+                                    <Label className="text-slate-300">Niveau de Potentiel</Label>
+                                    <select
+                                      value={potentialLevel}
+                                      onChange={(e) => setPotentialLevel(e.target.value)}
+                                      className="w-full mt-2 px-3 py-2 bg-slate-800 border border-slate-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-green-500"
+                                    >
+                                      <option value="NON">❌ NON - Pas intéressé</option>
+                                      <option value="PEUT-ÊTRE">⚠️ PEUT-ÊTRE - Hésitant</option>
+                                      <option value="OUI">✅ OUI - Très intéressé</option>
+                                    </select>
+                                  </div>
+
+                                  {isPotentialClient && potentialLevel === 'OUI' && (
+                                    <div className="bg-green-500/10 border border-green-500/30 p-3 rounded-md">
+                                      <p className="text-green-400 text-sm font-semibold">
+                                        🎯 Manager/Employee sera notifié et devra contacter le prospect sous 48h
+                                      </p>
+                                    </div>
+                                  )}
+                                </div>
+
                                 <Button 
                                   onClick={handleAddNote}
                                   className="w-full bg-blue-600 hover:bg-blue-700 text-white"
                                 >
                                   <Send className="w-4 h-4 mr-2" />
-                                  Enregistrer la Note
+                                  Enregistrer la Consultation
                                 </Button>
                               </div>
                             </DialogContent>
