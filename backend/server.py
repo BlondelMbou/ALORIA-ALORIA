@@ -574,82 +574,82 @@ class DashboardStats(BaseModel):
     cases_by_country: Dict[str, int]
     cases_by_status: Dict[str, int]
 
-# Workflow Templates
+# Modèles de Processus d'Immigration
 WORKFLOWS = {
     "Canada": {
-        "Work Permit": [
-            {"title": "Initial Consultation & Eligibility Check", "description": "Assess eligibility for Canadian work permit", "documents": ["Valid passport", "Educational credentials", "Resume/CV", "Job offer letter"], "duration": "3-5 days"},
-            {"title": "Document Collection", "description": "Gather all required documents", "documents": ["Job offer (LMIA or LMIA-exempt)", "Educational credentials (ECA if required)", "Language test results (IELTS/CELPIP/TEF)", "Proof of work experience", "Police clearance certificate"], "duration": "2-4 weeks"},
-            {"title": "IRCC Account Creation", "description": "Create secure IRCC online account", "documents": ["Valid email address", "Security questions"], "duration": "1 day"},
-            {"title": "Application Form Completion", "description": "Complete IMM forms accurately", "documents": ["IMM 1295 - Work Permit Application", "IMM 5707 - Family Information", "IMM 5645 - Family Information (if applicable)"], "duration": "3-7 days"},
-            {"title": "Fee Payment", "description": "Pay IRCC processing fees online", "documents": ["Work permit fee: CAD $155", "Biometrics fee: CAD $85", "Payment receipt"], "duration": "1 day"},
-            {"title": "Application Submission", "description": "Submit complete application via IRCC portal", "documents": ["All completed forms", "Supporting documents", "Payment confirmation"], "duration": "1 day"},
-            {"title": "Biometrics Appointment", "description": "Provide fingerprints and photo at VAC", "documents": ["Biometrics instruction letter", "Valid passport", "Appointment confirmation"], "duration": "1-3 weeks"},
-            {"title": "Application Processing", "description": "IRCC reviews application", "documents": ["Additional documents if requested", "Medical exam (if requested)"], "duration": "8-12 weeks"},
-            {"title": "Decision Received", "description": "Receive approval or refusal notification", "documents": ["Port of Entry Letter of Introduction", "Visa (if from visa-required country)"], "duration": "1-2 days"},
-            {"title": "Work Permit Issued", "description": "Receive work permit at port of entry", "documents": ["Work permit document", "Confirmation of work authorization"], "duration": "Upon arrival"}
+        "Permis de travail": [
+            {"title": "Consultation initiale et vérification de l'admissibilité", "description": "Évaluer l'admissibilité au permis de travail canadien", "documents": ["Passeport valide", "Diplômes et attestations d'études", "CV détaillé", "Lettre d'offre d'emploi"], "duration": "3-5 jours"},
+            {"title": "Collecte des documents", "description": "Rassembler tous les documents requis", "documents": ["Offre d'emploi (EIMT ou dispensée d'EIMT)", "Diplômes (ÉDE si requis)", "Résultats de tests linguistiques (IELTS/CELPIP/TEF)", "Preuve d'expérience professionnelle", "Certificat de police"], "duration": "2-4 semaines"},
+            {"title": "Création du compte IRCC", "description": "Créer un compte en ligne sécurisé sur IRCC", "documents": ["Adresse courriel valide", "Questions de sécurité"], "duration": "1 jour"},
+            {"title": "Remplissage des formulaires", "description": "Compléter avec précision les formulaires IMM", "documents": ["IMM 1295 - Demande de permis de travail", "IMM 5707 - Renseignements sur la famille", "IMM 5645 - Renseignements sur la famille (si applicable)"], "duration": "3-7 jours"},
+            {"title": "Paiement des frais", "description": "Payer les frais de traitement IRCC en ligne", "documents": ["Frais de permis de travail : 155 $ CAD", "Frais de biométrie : 85 $ CAD", "Reçu de paiement"], "duration": "1 jour"},
+            {"title": "Soumission de la demande", "description": "Soumettre la demande complète via le portail IRCC", "documents": ["Tous les formulaires remplis", "Documents justificatifs", "Confirmation de paiement"], "duration": "1 jour"},
+            {"title": "Rendez-vous biométrique", "description": "Fournir les empreintes digitales et la photo au CAV", "documents": ["Lettre d'instructions pour la biométrie", "Passeport valide", "Confirmation de rendez-vous"], "duration": "1-3 semaines"},
+            {"title": "Traitement de la demande", "description": "IRCC examine la demande", "documents": ["Documents additionnels si demandés", "Examen médical (si requis)"], "duration": "8-12 semaines"},
+            {"title": "Décision reçue", "description": "Recevoir la notification d'approbation ou de refus", "documents": ["Lettre d'introduction au point d'entrée", "Visa (si pays nécessitant un visa)"], "duration": "1-2 jours"},
+            {"title": "Délivrance du permis de travail", "description": "Recevoir le permis de travail au point d'entrée", "documents": ["Document de permis de travail", "Confirmation d'autorisation de travail"], "duration": "À l'arrivée"}
         ],
-        "Study Permit": [
-            {"title": "Initial Consultation", "description": "Assess study goals and eligibility", "documents": ["Valid passport", "Academic transcripts", "English/French test scores"], "duration": "1-3 days"},
-            {"title": "Letter of Acceptance from DLI", "description": "Obtain acceptance from Designated Learning Institution", "documents": ["Letter of Acceptance", "Proof of tuition payment"], "duration": "Varies by institution"},
-            {"title": "PAL/TAL Attestation Letter", "description": "Obtain Provincial/Territorial Attestation Letter", "documents": ["PAL/TAL from province", "DLI confirmation"], "duration": "2-6 weeks"},
-            {"title": "Financial Documentation", "description": "Prove sufficient funds for studies", "documents": ["Bank statements (CAD $10,000 + tuition)", "GIC certificate", "Sponsor's financial proof"], "duration": "1-2 weeks"},
-            {"title": "IRCC Account & Application", "description": "Create account and complete study permit application", "documents": ["IMM 1294", "Letter of explanation", "Study plan"], "duration": "3-5 days"},
-            {"title": "Biometrics & Medical Exam", "description": "Complete biometrics and medical if required", "documents": ["Biometrics receipt", "Medical exam results (IMM 1017)"], "duration": "2-4 weeks"},
-            {"title": "Application Processing", "description": "IRCC processes study permit", "documents": ["Additional documents if requested"], "duration": "4-12 weeks"},
-            {"title": "Study Permit Decision", "description": "Receive approval or refusal", "documents": ["Port of Entry Letter", "Visa (if required)"], "duration": "1-2 days"},
-            {"title": "Travel to Canada", "description": "Enter Canada and receive study permit", "documents": ["Valid passport", "POE letter", "Letter of acceptance"], "duration": "Upon arrival"},
-            {"title": "Study Permit Received", "description": "Study permit issued at port of entry", "documents": ["Study permit document"], "duration": "Immediate"}
+        "Permis d'études": [
+            {"title": "Consultation initiale", "description": "Évaluer les objectifs d'études et l'admissibilité", "documents": ["Passeport valide", "Relevés de notes académiques", "Résultats de tests d'anglais/français"], "duration": "1-3 jours"},
+            {"title": "Lettre d'acceptation d'un EED", "description": "Obtenir l'acceptation d'un établissement d'enseignement désigné", "documents": ["Lettre d'acceptation", "Preuve de paiement des frais de scolarité"], "duration": "Varie selon l'établissement"},
+            {"title": "Lettre d'attestation PAL/TAL", "description": "Obtenir la lettre d'attestation provinciale/territoriale", "documents": ["PAL/TAL de la province", "Confirmation de l'EED"], "duration": "2-6 semaines"},
+            {"title": "Documentation financière", "description": "Prouver les fonds suffisants pour les études", "documents": ["Relevés bancaires (10 000 $ CAD + frais de scolarité)", "Certificat CPG", "Preuve financière du répondant"], "duration": "1-2 semaines"},
+            {"title": "Compte IRCC et demande", "description": "Créer un compte et compléter la demande de permis d'études", "documents": ["IMM 1294", "Lettre d'explication", "Plan d'études"], "duration": "3-5 jours"},
+            {"title": "Biométrie et examen médical", "description": "Compléter la biométrie et l'examen médical si requis", "documents": ["Reçu de biométrie", "Résultats d'examen médical (IMM 1017)"], "duration": "2-4 semaines"},
+            {"title": "Traitement de la demande", "description": "IRCC traite le permis d'études", "documents": ["Documents additionnels si demandés"], "duration": "4-12 semaines"},
+            {"title": "Décision sur le permis d'études", "description": "Recevoir l'approbation ou le refus", "documents": ["Lettre de point d'entrée", "Visa (si requis)"], "duration": "1-2 jours"},
+            {"title": "Voyage au Canada", "description": "Entrer au Canada et recevoir le permis d'études", "documents": ["Passeport valide", "Lettre POE", "Lettre d'acceptation"], "duration": "À l'arrivée"},
+            {"title": "Réception du permis d'études", "description": "Permis d'études délivré au point d'entrée", "documents": ["Document de permis d'études"], "duration": "Immédiat"}
         ],
-        "Permanent Residence (Express Entry)": [
-            {"title": "Eligibility Assessment", "description": "Determine Express Entry program eligibility", "documents": ["Language test results", "Educational credentials", "Work experience proof"], "duration": "1-2 weeks"},
-            {"title": "Express Entry Profile Creation", "description": "Create Express Entry profile and enter pool", "documents": ["ECA report", "Language test results", "Proof of funds"], "duration": "3-5 days"},
-            {"title": "Invitation to Apply (ITA)", "description": "Receive ITA if CRS score is high enough", "documents": ["ITA notification"], "duration": "Varies (pool draws every 2 weeks)"},
-            {"title": "Document Preparation", "description": "Gather all supporting documents", "documents": ["Police certificates", "Medical exams", "Birth certificates", "Reference letters"], "duration": "3-6 weeks"},
-            {"title": "PR Application Submission", "description": "Submit complete PR application within 60 days", "documents": ["All forms and supporting documents", "Payment of fees ($1,365 CAD)"], "duration": "Within 60 days of ITA"},
-            {"title": "Biometrics", "description": "Provide biometrics at VAC", "documents": ["Biometrics instruction letter"], "duration": "1-2 weeks"},
-            {"title": "Application Processing", "description": "IRCC processes PR application", "documents": ["Additional documents if requested"], "duration": "6 months (standard processing)"},
-            {"title": "Confirmation of PR (COPR)", "description": "Receive COPR and PR visa", "documents": ["COPR document", "PR visa in passport"], "duration": "1-2 weeks after approval"},
-            {"title": "Landing in Canada", "description": "Complete landing formalities at port of entry", "documents": ["COPR", "Valid passport"], "duration": "Upon arrival"},
-            {"title": "PR Card Application", "description": "Receive PR card by mail", "documents": ["PR card", "Canadian address confirmation"], "duration": "4-6 weeks"}
+        "Résidence permanente (Entrée express)": [
+            {"title": "Évaluation de l'admissibilité", "description": "Déterminer l'admissibilité au programme Entrée express", "documents": ["Résultats de tests linguistiques", "Diplômes et attestations", "Preuve d'expérience professionnelle"], "duration": "1-2 semaines"},
+            {"title": "Création du profil Entrée express", "description": "Créer le profil Entrée express et entrer dans le bassin", "documents": ["Rapport d'ÉDE", "Résultats de tests linguistiques", "Preuve de fonds"], "duration": "3-5 jours"},
+            {"title": "Invitation à présenter une demande (IPD)", "description": "Recevoir une IPD si le score CRS est suffisant", "documents": ["Notification d'IPD"], "duration": "Variable (tirages aux 2 semaines)"},
+            {"title": "Préparation des documents", "description": "Rassembler tous les documents justificatifs", "documents": ["Certificats de police", "Examens médicaux", "Actes de naissance", "Lettres de référence"], "duration": "3-6 semaines"},
+            {"title": "Soumission de la demande de RP", "description": "Soumettre la demande complète de RP dans les 60 jours", "documents": ["Tous les formulaires et documents justificatifs", "Paiement des frais (1 365 $ CAD)"], "duration": "Dans les 60 jours de l'IPD"},
+            {"title": "Biométrie", "description": "Fournir les données biométriques au CAV", "documents": ["Lettre d'instructions pour la biométrie"], "duration": "1-2 semaines"},
+            {"title": "Traitement de la demande", "description": "IRCC traite la demande de RP", "documents": ["Documents additionnels si demandés"], "duration": "6 mois (traitement standard)"},
+            {"title": "Confirmation de résidence permanente (CRP)", "description": "Recevoir la CRP et le visa de RP", "documents": ["Document de CRP", "Visa de RP dans le passeport"], "duration": "1-2 semaines après approbation"},
+            {"title": "Établissement au Canada", "description": "Compléter les formalités d'établissement au point d'entrée", "documents": ["CRP", "Passeport valide"], "duration": "À l'arrivée"},
+            {"title": "Demande de carte de RP", "description": "Recevoir la carte de RP par courrier", "documents": ["Carte de RP", "Confirmation d'adresse canadienne"], "duration": "4-6 semaines"}
         ]
     },
     "France": {
-        "Work Permit (Talent Permit)": [
-            {"title": "Initial Consultation", "description": "Assess eligibility for French Talent Permit", "documents": ["Valid passport", "CV/Resume", "Educational qualifications"], "duration": "2-3 days"},
-            {"title": "Employment Contract", "description": "Secure job offer from French employer", "documents": ["Employment contract", "Job description", "Salary details (minimum €53,836/year)"], "duration": "Varies"},
-            {"title": "Work Authorization (if required)", "description": "Employer obtains work authorization", "documents": ["DIRECCTE approval", "Proof of job posting (3 weeks)"], "duration": "2-4 weeks"},
-            {"title": "Document Preparation", "description": "Gather documents for visa application", "documents": ["Passport (valid 3+ months)", "Photos (3.5 x 4.5 cm)", "Proof of accommodation in France", "Health insurance", "Proof of financial means"], "duration": "1-2 weeks"},
-            {"title": "France-Visas Application", "description": "Complete online application on France-Visas", "documents": ["Online application form", "Supporting documents upload"], "duration": "1-2 days"},
-            {"title": "Consulate Appointment", "description": "Attend visa interview and biometrics", "documents": ["Appointment confirmation", "Original documents", "Visa fee (€99)"], "duration": "1-3 weeks wait"},
-            {"title": "VLS-TS Visa Issuance", "description": "Receive long-stay visa", "documents": ["Passport with visa", "OFII form"], "duration": "2-8 weeks"},
-            {"title": "Entry to France", "description": "Enter France within visa validity", "documents": ["Valid passport with visa", "Supporting documents"], "duration": "Within 3 months of visa issue"},
-            {"title": "OFII Validation", "description": "Validate visa online within 3 months", "documents": ["OFII validation (€200-250)", "Medical exam appointment", "Civic integration session"], "duration": "2-4 weeks"},
-            {"title": "Carte de Séjour (Residence Permit)", "description": "Receive multi-year residence permit", "documents": ["Talent Permit card (valid up to 4 years)", "OFII stamp"], "duration": "After OFII validation"}
+        "Permis de travail (Passeport Talent)": [
+            {"title": "Consultation initiale", "description": "Évaluer l'admissibilité au Passeport Talent français", "documents": ["Passeport valide", "CV détaillé", "Qualifications académiques"], "duration": "2-3 jours"},
+            {"title": "Contrat de travail", "description": "Obtenir une offre d'emploi d'un employeur français", "documents": ["Contrat de travail", "Description du poste", "Détails du salaire (minimum 53 836 €/an)"], "duration": "Variable"},
+            {"title": "Autorisation de travail (si requise)", "description": "L'employeur obtient l'autorisation de travail", "documents": ["Approbation DIRECCTE", "Preuve de publication d'offre (3 semaines)"], "duration": "2-4 semaines"},
+            {"title": "Préparation des documents", "description": "Rassembler les documents pour la demande de visa", "documents": ["Passeport (valide 3+ mois)", "Photos (3,5 x 4,5 cm)", "Justificatif d'hébergement en France", "Assurance santé", "Justificatif de ressources financières"], "duration": "1-2 semaines"},
+            {"title": "Demande France-Visas", "description": "Compléter la demande en ligne sur France-Visas", "documents": ["Formulaire de demande en ligne", "Téléversement des documents justificatifs"], "duration": "1-2 jours"},
+            {"title": "Rendez-vous consulaire", "description": "Assister à l'entretien visa et à la biométrie", "documents": ["Confirmation de rendez-vous", "Documents originaux", "Frais de visa (99 €)"], "duration": "1-3 semaines d'attente"},
+            {"title": "Délivrance du visa VLS-TS", "description": "Recevoir le visa de long séjour", "documents": ["Passeport avec visa", "Formulaire OFII"], "duration": "2-8 semaines"},
+            {"title": "Entrée en France", "description": "Entrer en France dans la validité du visa", "documents": ["Passeport valide avec visa", "Documents justificatifs"], "duration": "Dans les 3 mois de délivrance du visa"},
+            {"title": "Validation OFII", "description": "Valider le visa en ligne dans les 3 mois", "documents": ["Validation OFII (200-250 €)", "Rendez-vous examen médical", "Session d'intégration civique"], "duration": "2-4 semaines"},
+            {"title": "Carte de séjour (Titre de séjour)", "description": "Recevoir le titre de séjour pluriannuel", "documents": ["Carte Passeport Talent (valide jusqu'à 4 ans)", "Tampon OFII"], "duration": "Après validation OFII"}
         ],
-        "Student Visa": [
-            {"title": "Initial Consultation", "description": "Assess study plans and program eligibility", "documents": ["Valid passport", "Academic transcripts"], "duration": "1-2 days"},
-            {"title": "University Acceptance", "description": "Obtain acceptance from French institution", "documents": ["Letter of acceptance/enrollment", "Proof of registration fees payment"], "duration": "Varies by institution"},
-            {"title": "Campus France Registration", "description": "Complete Campus France procedure (if required)", "documents": ["Campus France interview", "Academic documents", "Language proficiency proof"], "duration": "2-6 weeks"},
-            {"title": "Financial Proof", "description": "Demonstrate sufficient funds", "documents": ["Bank statements (€615/month)", "Scholarship letter", "Sponsor's guarantee"], "duration": "1-2 weeks"},
-            {"title": "Accommodation Proof", "description": "Secure housing in France", "documents": ["Lease agreement", "University housing confirmation", "Host attestation"], "duration": "1-3 weeks"},
-            {"title": "VLS-TS Application", "description": "Apply for long-stay student visa", "documents": ["France-Visas form", "Acceptance letter", "Proof of funds", "Health insurance"], "duration": "1-2 days"},
-            {"title": "Consulate Appointment", "description": "Attend visa interview", "documents": ["All original documents", "Visa fee (€50 for students)", "Biometrics"], "duration": "2-4 weeks wait"},
-            {"title": "Student Visa Issuance", "description": "Receive student VLS-TS", "documents": ["Passport with visa"], "duration": "2-4 weeks"},
-            {"title": "Arrival & OFII Validation", "description": "Enter France and validate visa online", "documents": ["OFII validation fee (€60)", "Medical exam (if required)"], "duration": "Within 3 months of arrival"},
-            {"title": "Student Residence Permit", "description": "Receive student residence permit", "documents": ["Student carte de séjour"], "duration": "After OFII validation"}
+        "Visa étudiant": [
+            {"title": "Consultation initiale", "description": "Évaluer les plans d'études et l'admissibilité au programme", "documents": ["Passeport valide", "Relevés de notes académiques"], "duration": "1-2 jours"},
+            {"title": "Acceptation universitaire", "description": "Obtenir l'acceptation d'un établissement français", "documents": ["Lettre d'acceptation/inscription", "Preuve de paiement des frais d'inscription"], "duration": "Variable selon l'établissement"},
+            {"title": "Inscription Campus France", "description": "Compléter la procédure Campus France (si requise)", "documents": ["Entretien Campus France", "Documents académiques", "Preuve de compétence linguistique"], "duration": "2-6 semaines"},
+            {"title": "Justificatif financier", "description": "Démontrer les ressources financières suffisantes", "documents": ["Relevés bancaires (615 €/mois)", "Lettre de bourse", "Attestation de prise en charge"], "duration": "1-2 semaines"},
+            {"title": "Justificatif de logement", "description": "Sécuriser un hébergement en France", "documents": ["Contrat de bail", "Confirmation de logement universitaire", "Attestation d'hébergement"], "duration": "1-3 semaines"},
+            {"title": "Demande VLS-TS", "description": "Demander le visa de long séjour étudiant", "documents": ["Formulaire France-Visas", "Lettre d'acceptation", "Justificatif de ressources", "Assurance santé"], "duration": "1-2 jours"},
+            {"title": "Rendez-vous consulaire", "description": "Assister à l'entretien visa", "documents": ["Tous les documents originaux", "Frais de visa (50 € pour étudiants)", "Biométrie"], "duration": "2-4 semaines d'attente"},
+            {"title": "Délivrance du visa étudiant", "description": "Recevoir le VLS-TS étudiant", "documents": ["Passeport avec visa"], "duration": "2-4 semaines"},
+            {"title": "Arrivée et validation OFII", "description": "Entrer en France et valider le visa en ligne", "documents": ["Frais de validation OFII (60 €)", "Examen médical (si requis)"], "duration": "Dans les 3 mois de l'arrivée"},
+            {"title": "Titre de séjour étudiant", "description": "Recevoir le titre de séjour étudiant", "documents": ["Carte de séjour étudiant"], "duration": "Après validation OFII"}
         ],
-        "Family Reunification": [
-            {"title": "Eligibility Check", "description": "Verify sponsor's eligibility and residence status", "documents": ["Sponsor's residence permit", "Proof of residence duration (18+ months)", "Family relationship proof"], "duration": "1-2 days"},
-            {"title": "Financial Requirements", "description": "Demonstrate sufficient income", "documents": ["Tax statements", "Pay slips (stable income)", "Proof of income above minimum threshold"], "duration": "1-2 weeks"},
-            {"title": "Accommodation Proof", "description": "Prove adequate housing", "documents": ["Lease or property deed", "Utility bills", "Housing certificate from mayor"], "duration": "1-2 weeks"},
-            {"title": "OFII Application Submission", "description": "Submit family reunification request to OFII", "documents": ["CERFA form 11436*05", "All supporting documents", "Application fee (€225)"], "duration": "1 day"},
-            {"title": "OFII Review", "description": "OFII reviews application and conducts home visit", "documents": ["Home inspection report", "Additional documents if requested"], "duration": "6-12 months"},
-            {"title": "Prefecture Decision", "description": "Prefecture issues decision on application", "documents": ["Approval or refusal notification"], "duration": "After OFII approval"},
-            {"title": "Visa Application (if approved)", "description": "Family members apply for visa", "documents": ["Approval certificate", "Passport", "Civil documents"], "duration": "2-4 weeks"},
-            {"title": "Entry to France", "description": "Family members enter France with visa", "documents": ["Valid visa", "Supporting documents"], "duration": "Within visa validity"},
-            {"title": "Residence Permit Application", "description": "Apply for residence permit at prefecture", "documents": ["All visa documents", "Photos", "OFII validation"], "duration": "2-3 months"},
-            {"title": "Family Residence Permit Issued", "description": "Receive 'Vie Privée et Familiale' permit", "documents": ["Residence permit (valid 1 year, renewable)"], "duration": "After prefecture approval"}
+        "Regroupement familial": [
+            {"title": "Vérification de l'admissibilité", "description": "Vérifier l'admissibilité du répondant et son statut de résident", "documents": ["Titre de séjour du répondant", "Preuve de durée de résidence (18+ mois)", "Preuve de lien familial"], "duration": "1-2 jours"},
+            {"title": "Conditions de ressources", "description": "Démontrer des revenus suffisants", "documents": ["Avis d'imposition", "Bulletins de salaire (revenus stables)", "Justificatif de revenus au-dessus du seuil minimum"], "duration": "1-2 semaines"},
+            {"title": "Justificatif de logement", "description": "Prouver un logement adéquat", "documents": ["Bail ou titre de propriété", "Factures de services publics", "Attestation de logement du maire"], "duration": "1-2 semaines"},
+            {"title": "Dépôt de la demande OFII", "description": "Soumettre la demande de regroupement familial à l'OFII", "documents": ["Formulaire CERFA 11436*05", "Tous les documents justificatifs", "Frais de demande (225 €)"], "duration": "1 jour"},
+            {"title": "Examen OFII", "description": "L'OFII examine la demande et effectue une visite à domicile", "documents": ["Rapport de visite à domicile", "Documents additionnels si demandés"], "duration": "6-12 mois"},
+            {"title": "Décision de la préfecture", "description": "La préfecture émet une décision sur la demande", "documents": ["Notification d'approbation ou de refus"], "duration": "Après approbation OFII"},
+            {"title": "Demande de visa (si approuvée)", "description": "Les membres de la famille demandent le visa", "documents": ["Certificat d'approbation", "Passeport", "Documents d'état civil"], "duration": "2-4 semaines"},
+            {"title": "Entrée en France", "description": "Les membres de la famille entrent en France avec le visa", "documents": ["Visa valide", "Documents justificatifs"], "duration": "Dans la validité du visa"},
+            {"title": "Demande de titre de séjour", "description": "Demander le titre de séjour à la préfecture", "documents": ["Tous les documents de visa", "Photos", "Validation OFII"], "duration": "2-3 mois"},
+            {"title": "Délivrance du titre de séjour familial", "description": "Recevoir le titre 'Vie Privée et Familiale'", "documents": ["Titre de séjour (valide 1 an, renouvelable)"], "duration": "Après approbation de la préfecture"}
         ]
     }
 }
