@@ -3699,6 +3699,53 @@ async def add_consultant_notes(
         "potential_level": notes_data.potential_level
     }
 
+@api_router.get("/contact-messages/check-48h-alerts")
+async def check_48h_consultation_alerts(current_user: dict = Depends(get_current_user)):
+    """Vérifier prospects potentiels non convertis depuis >48h et envoyer notifications"""
+    if current_user["role"] not in ["SUPERADMIN", "MANAGER", "EMPLOYEE"]:
+        raise HTTPException(status_code=403, detail="Accès non autorisé")
+    
+    # Calculer timestamp 48h avant maintenant
+    now = datetime.now(timezone.utc)
+    hours_48_ago = now - timedelta(hours=48)
+    
+    # Chercher prospects potentiels (consultation terminée il y a >48h, non convertis)
+    query = {
+        "status": ContactStatus.IN_CONSULTATION,
+        "is_potential_client": True,
+        "potential_level": "OUI",
+        "consultation_completed_at": {"$lt": hours_48_ago.isoformat()}
+    }
+    
+    # Filtrer par assignation si pas SuperAdmin
+    if current_user["role"] != "SUPERADMIN":
+        query["assigned_to"] = current_user["id"]
+    
+    prospects_needing_followup = await db.contact_messages.find(query).to_list(100)
+    
+    alerts_sent = 0
+    for prospect in prospects_needing_followup:
+        # Créer notification rappel
+        await create_notification(
+            user_id=prospect["assigned_to"],
+            title="⏰ RAPPEL URGENT - 48H Dépassées",
+            message=f"🚨 {prospect['name']} : Prospect potentiel client non converti depuis 48h. Action requise !",
+            type="urgent_followup_48h",
+            related_id=prospect["id"]
+        )
+        alerts_sent += 1
+        
+        # Marquer qu'alerte 48h a été envoyée
+        await db.contact_messages.update_one(
+            {"id": prospect["id"]},
+            {"$set": {"alert_48h_sent": True, "alert_48h_sent_at": now.isoformat()}}
+        )
+    
+    return {
+        "message": f"{alerts_sent} alertes envoyées",
+        "prospects_needing_action": len(prospects_needing_followup)
+    }
+
 @api_router.post("/contact-messages/{message_id}/convert-to-client")
 async def convert_prospect_to_client(
     message_id: str,
