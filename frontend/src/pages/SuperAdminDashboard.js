@@ -201,7 +201,11 @@ const SuperAdminDashboard = () => {
                       Impersonner
                     </button>
                     <button
-                      onClick={() => setSelectedUser(user)}
+                      onClick={() => {
+                        setSelectedUser(user);
+                        setShowUserDetails(true);
+                        setUserTempPassword(user.temporary_password || null);
+                      }}
                       className="px-3 py-1 bg-slate-600 hover:bg-slate-500 text-white text-sm rounded transition-colors"
                     >
                       Voir
