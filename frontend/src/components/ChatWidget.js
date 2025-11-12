@@ -164,7 +164,7 @@ const ChatWidget = ({ currentUser, onUnreadCountChange }) => {
                     <Users size={16} />
                   </button>
                   <button
-                    onClick={() => setActiveConversation(null)}
+                    onClick={() => setActiveConversationId(null)}
                     className="hover:bg-slate-700 text-slate-300 hover:text-white p-1 rounded transition-colors"
                   >
                     ←
