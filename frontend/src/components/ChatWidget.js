@@ -199,38 +199,43 @@ const ChatWidget = ({ currentUser, onUnreadCountChange }) => {
             ) : activeConversation ? (
               /* Messages View */
               <>
-                <div className="flex-1 overflow-y-auto p-4 space-y-3">
+                <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-[#0F172A]">
                   {loading ? (
-                    <div className="text-center text-slate-400">Chargement...</div>
+                    <div className="text-center text-slate-400 py-8">Chargement...</div>
                   ) : messages.length === 0 ? (
-                    <div className="text-center text-slate-400">Aucun message</div>
+                    <div className="text-center text-slate-400 py-8">
+                      <MessageCircle className="mx-auto mb-2 opacity-50" size={32} />
+                      <p>Aucun message</p>
+                    </div>
                   ) : (
                     messages.map((message) => (
                       <div
                         key={message.id}
-                        className={`flex ${message.sender_id === currentUser.id ? 'justify-end' : 'justify-start'}`}
+                        className={`flex ${message.sender_id === currentUser.id ? 'justify-end' : 'justify-start'} mb-4`}
                       >
-                        <div
-                          className={`max-w-[80%] rounded-lg p-3 ${
-                            message.sender_id === currentUser.id
-                              ? 'bg-orange-500 text-white'
-                              : 'bg-slate-700/70 text-slate-100 border border-slate-600'
-                          }`}
-                        >
+                        <div className={`flex flex-col ${message.sender_id === currentUser.id ? 'items-end' : 'items-start'} max-w-[75%]`}>
                           {message.sender_id !== currentUser.id && (
-                            <p className="text-xs opacity-70 mb-1">{message.sender_name}</p>
+                            <span className="text-xs text-slate-400 mb-1 px-1">{message.sender_name}</span>
                           )}
-                          <p>{message.message}</p>
-                          <div className="flex items-center justify-between mt-1">
-                            <span className="text-xs opacity-70">
+                          <div
+                            className={`rounded-2xl px-4 py-2.5 break-words ${
+                              message.sender_id === currentUser.id
+                                ? 'bg-orange-500 text-white rounded-br-sm'
+                                : 'bg-slate-700/80 text-slate-100 border border-slate-600/50 rounded-bl-sm'
+                            }`}
+                          >
+                            <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.message}</p>
+                          </div>
+                          <div className={`flex items-center gap-1 mt-1 px-1 ${message.sender_id === currentUser.id ? 'flex-row-reverse' : 'flex-row'}`}>
+                            <span className="text-[10px] text-slate-500">
                               {formatDistanceToNow(new Date(message.timestamp), { 
                                 addSuffix: true, 
                                 locale: fr 
                               })}
                             </span>
                             {message.sender_id === currentUser.id && (
-                              <span className="text-xs">
-                                {message.read_status ? <CheckCheck size={12} /> : <Check size={12} />}
+                              <span className="text-slate-400">
+                                {message.read_status ? <CheckCheck size={14} /> : <Check size={14} />}
                               </span>
                             )}
                           </div>
@@ -241,25 +246,42 @@ const ChatWidget = ({ currentUser, onUnreadCountChange }) => {
                   <div ref={messagesEndRef} />
                 </div>
                 
-                {/* Message Input */}
-                <div className="border-t border-slate-600 p-4 bg-[#0F172A]">
-                  <div className="flex space-x-3">
-                    <input
-                      type="text"
-                      value={newMessage}
-                      onChange={(e) => setNewMessage(e.target.value)}
-                      onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
-                      placeholder="Tapez votre message..."
-                      className="flex-1 bg-[#1E293B] text-white border border-slate-600 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 placeholder:text-slate-400"
-                    />
+                {/* Message Input - Modern Design */}
+                <div className="border-t border-slate-700 p-3 bg-[#1E293B]">
+                  <div className="flex items-end gap-2">
+                    <div className="flex-1 bg-[#0F172A] rounded-2xl border border-slate-600 focus-within:border-orange-500 focus-within:ring-1 focus-within:ring-orange-500 transition-all">
+                      <textarea
+                        value={newMessage}
+                        onChange={(e) => setNewMessage(e.target.value)}
+                        onKeyPress={(e) => {
+                          if (e.key === 'Enter' && !e.shiftKey) {
+                            e.preventDefault();
+                            sendMessage();
+                          }
+                        }}
+                        placeholder="Écrivez un message..."
+                        rows="1"
+                        className="w-full bg-transparent text-white px-4 py-3 focus:outline-none placeholder:text-slate-500 resize-none max-h-32 overflow-y-auto"
+                        style={{
+                          minHeight: '44px',
+                          maxHeight: '128px'
+                        }}
+                        onInput={(e) => {
+                          e.target.style.height = 'auto';
+                          e.target.style.height = Math.min(e.target.scrollHeight, 128) + 'px';
+                        }}
+                      />
+                    </div>
                     <button
                       onClick={sendMessage}
                       disabled={!newMessage.trim()}
-                      className="bg-orange-500 hover:bg-orange-600 disabled:bg-slate-700 disabled:text-slate-400 text-white rounded-lg px-4 py-3 transition-all duration-200 flex items-center justify-center min-w-[48px]"
+                      className="bg-orange-500 hover:bg-orange-600 disabled:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-full p-3 transition-all duration-200 flex items-center justify-center shadow-lg hover:shadow-xl disabled:shadow-none"
+                      title="Envoyer (Entrée)"
                     >
-                      <Send size={18} />
+                      <Send size={20} />
                     </button>
                   </div>
+                  <p className="text-[10px] text-slate-500 mt-1.5 px-1">Appuyez sur Entrée pour envoyer, Shift+Entrée pour nouvelle ligne</p>
                 </div>
               </>
             ) : (
