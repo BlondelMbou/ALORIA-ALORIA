@@ -69,6 +69,9 @@ sio = socketio.AsyncServer(
 app = FastAPI()
 api_router = APIRouter(prefix="/api")
 
+# Initialize Scheduler for automated tasks
+scheduler = AsyncIOScheduler()
+
 # Mount Socket.IO
 socket_app = socketio.ASGIApp(sio)
 
