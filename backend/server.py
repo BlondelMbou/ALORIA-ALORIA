@@ -1632,6 +1632,36 @@ async def send_chat_message(message_data: ChatMessageCreate, current_user: dict 
     if not receiver:
         raise HTTPException(status_code=404, detail="Receiver not found")
     
+    # Vérifier les permissions de communication
+    can_communicate = False
+    
+    if current_user["role"] == "MANAGER":
+        # Manager peut communiquer avec tous les EMPLOYEES et CLIENTS
+        can_communicate = receiver["role"] in ["EMPLOYEE", "CLIENT"]
+        
+    elif current_user["role"] == "EMPLOYEE":
+        # Employee peut communiquer avec MANAGER et ses CLIENTS assignés
+        if receiver["role"] == "MANAGER":
+            can_communicate = True
+        elif receiver["role"] == "CLIENT":
+            # Vérifier si le client est assigné à cet employé
+            client_record = await db.clients.find_one({"user_id": receiver["id"]})
+            if client_record and client_record.get("assigned_employee_id") == current_user["id"]:
+                can_communicate = True
+                
+    elif current_user["role"] == "CLIENT":
+        # Client peut communiquer avec son EMPLOYEE assigné et les MANAGERS
+        if receiver["role"] == "MANAGER":
+            can_communicate = True
+        elif receiver["role"] == "EMPLOYEE":
+            # Vérifier si cet employé est assigné au client
+            client_record = await db.clients.find_one({"user_id": current_user["id"]})
+            if client_record and client_record.get("assigned_employee_id") == receiver["id"]:
+                can_communicate = True
+    
+    if not can_communicate:
+        raise HTTPException(status_code=403, detail="Vous n'êtes pas autorisé à communiquer avec cet utilisateur")
+    
     # Create message
     message_id = str(uuid.uuid4())
     message_dict = {
