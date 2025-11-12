@@ -1073,7 +1073,15 @@ export default function LandingPage() {
               
               <div 
                 className="flex items-center space-x-3 p-3 bg-slate-800/50 rounded-lg hover:bg-slate-800/70 cursor-pointer transition-all"
-                onClick={() => document.getElementById('start-application').scrollIntoView({ behavior: 'smooth' })}
+                onClick={() => {
+                  const contactSection = document.querySelector('#contact-section');
+                  if (contactSection) {
+                    contactSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    toast.success('📝 Remplissez le formulaire pour votre évaluation gratuite !');
+                  } else {
+                    toast.error('Section contact non trouvée');
+                  }
+                }}
               >
                 <div className="w-10 h-10 bg-gradient-to-r from-orange-500 to-orange-600 rounded-full flex items-center justify-center">
                   <MessageCircle className="w-5 h-5 text-white" />
