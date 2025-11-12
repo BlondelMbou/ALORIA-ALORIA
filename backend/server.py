@@ -3600,46 +3600,84 @@ async def assign_prospect_to_consultant(
         "invoice_number": payment_doc["invoice_number"]
     }
 
+class ConsultantNotesRequest(BaseModel):
+    note: str
+    is_potential_client: bool = False
+    potential_level: str = "NON"  # OUI, NON, PEUT-ÊTRE
+
 @api_router.patch("/contact-messages/{message_id}/consultant-notes")
 async def add_consultant_notes(
     message_id: str,
-    notes_data: dict,
+    notes_data: ConsultantNotesRequest,
     current_user: dict = Depends(get_current_user)
 ):
-    """Ajouter des notes consultant sur un prospect (SuperAdmin uniquement)"""
-    if current_user["role"] != "SUPERADMIN":
+    """Ajouter des notes consultant sur un prospect avec évaluation potentiel client"""
+    if current_user["role"] not in ["SUPERADMIN", "CONSULTANT"]:
         raise HTTPException(status_code=403, detail="Seul le consultant peut ajouter des notes")
     
     prospect = await db.contact_messages.find_one({"id": message_id})
     if not prospect:
         raise HTTPException(status_code=404, detail="Prospect non trouvé")
     
-    note_content = notes_data.get("note", "").strip()
-    if not note_content:
+    if not notes_data.note.strip():
         raise HTTPException(status_code=400, detail="La note ne peut pas être vide")
     
     # Créer l'objet note
     note_entry = {
         "id": str(uuid.uuid4()),
-        "content": note_content,
+        "content": notes_data.note,
         "created_by": current_user["full_name"],
         "created_at": datetime.now(timezone.utc).isoformat()
     }
     
     # Ajouter la note à l'historique
+    update_data = {
+        "$push": {"consultant_notes": note_entry},
+        "$set": {
+            "status": ContactStatus.IN_CONSULTATION,
+            "is_potential_client": notes_data.is_potential_client,
+            "potential_level": notes_data.potential_level,
+            "consultation_completed_at": datetime.now(timezone.utc).isoformat(),
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }
+    }
+    
     result = await db.contact_messages.update_one(
         {"id": message_id},
-        {
-            "$push": {"consultant_notes": note_entry},
-            "$set": {
-                "status": ContactStatus.IN_CONSULTATION,
-                "updated_at": datetime.now(timezone.utc).isoformat()
-            }
-        }
+        update_data
     )
     
     if result.modified_count == 0:
         raise HTTPException(status_code=500, detail="Erreur lors de l'ajout de la note")
+    
+    # Notifier Manager/Employee qui a assigné le prospect
+    if prospect.get("assigned_to"):
+        assignee = await db.users.find_one({"id": prospect["assigned_to"]})
+        if assignee:
+            notification_title = "✅ Consultation Terminée"
+            
+            if notes_data.is_potential_client and notes_data.potential_level == "OUI":
+                notification_msg = f"🎯 POTENTIEL CLIENT - {prospect['name']} : Consultation terminée. Prospect très intéressé ! Contactez sous 48h."
+                notification_type = "consultation_potential_client"
+            elif notes_data.potential_level == "PEUT-ÊTRE":
+                notification_msg = f"⚠️ {prospect['name']} : Consultation terminée. Prospect hésitant, suivi recommandé."
+                notification_type = "consultation_maybe"
+            else:
+                notification_msg = f"ℹ️ {prospect['name']} : Consultation terminée. Prospect non qualifié pour le moment."
+                notification_type = "consultation_not_qualified"
+            
+            await create_notification(
+                user_id=assignee["id"],
+                title=notification_title,
+                message=notification_msg,
+                type=notification_type,
+                related_id=message_id
+            )
+            
+            # Envoyer email si potentiel client
+            if notes_data.is_potential_client and notes_data.potential_level == "OUI":
+                # TODO: Implémenter email notification
+                logger.info(f"Email notification needed for {assignee['email']} about potential client {prospect['name']}")
     
     # Log activity
     await log_user_activity(
@@ -3648,11 +3686,18 @@ async def add_consultant_notes(
         details={
             "prospect_id": message_id,
             "prospect_name": prospect["name"],
-            "note_preview": note_content[:100]
+            "is_potential_client": notes_data.is_potential_client,
+            "potential_level": notes_data.potential_level,
+            "note_preview": notes_data.note[:100]
         }
     )
     
-    return {"message": "Note ajoutée avec succès", "note_id": note_entry["id"]}
+    return {
+        "message": "Note ajoutée avec succès",
+        "note_id": note_entry["id"],
+        "is_potential_client": notes_data.is_potential_client,
+        "potential_level": notes_data.potential_level
+    }
 
 @api_router.post("/contact-messages/{message_id}/convert-to-client")
 async def convert_prospect_to_client(
