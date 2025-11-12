@@ -110,6 +110,34 @@ export default function ClientDashboard() {
     }
   };
 
+  const downloadInvoice = async (paymentId, invoiceNumber) => {
+    try {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/payments/${paymentId}/invoice`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Facture_${invoiceNumber || paymentId}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        toast.success('Facture téléchargée!');
+      } else {
+        toast.error('Impossible de télécharger la facture');
+      }
+    } catch (error) {
+      console.error('Error downloading invoice:', error);
+      toast.error('Erreur lors du téléchargement');
+    }
+  };
+
   const handlePaymentDeclaration = async (e) => {
     e.preventDefault();
     try {
