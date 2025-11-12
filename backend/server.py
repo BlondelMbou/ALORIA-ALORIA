@@ -3190,6 +3190,59 @@ async def get_consultation_payments(current_user: dict = Depends(get_current_use
         "currency": "CFA"
     }
 
+@api_router.get("/payments/{payment_id}/invoice")
+async def download_invoice(payment_id: str, current_user: dict = Depends(get_current_user)):
+    """Télécharger la facture PDF pour un paiement"""
+    from fastapi.responses import StreamingResponse
+    from invoice_generator import generate_invoice_pdf
+    
+    # Récupérer le paiement
+    payment = await db.payments.find_one({"id": payment_id}, {"_id": 0})
+    if not payment:
+        raise HTTPException(status_code=404, detail="Paiement non trouvé")
+    
+    # Vérifier les permissions
+    client_id = payment.get("client_id") or payment.get("user_id")
+    
+    if current_user["role"] == "CLIENT":
+        # Le client peut télécharger ses propres factures
+        if client_id != current_user["id"]:
+            raise HTTPException(status_code=403, detail="Accès non autorisé")
+    elif current_user["role"] == "EMPLOYEE":
+        # L'employé peut télécharger les factures de ses clients
+        client_record = await db.clients.find_one({"user_id": client_id})
+        if not client_record or client_record.get("assigned_employee_id") != current_user["id"]:
+            raise HTTPException(status_code=403, detail="Accès non autorisé")
+    elif current_user["role"] not in ["MANAGER", "SUPERADMIN"]:
+        raise HTTPException(status_code=403, detail="Accès non autorisé")
+    
+    # Récupérer les informations du client
+    client_user = await db.users.find_one({"id": client_id}, {"_id": 0})
+    if not client_user:
+        client_data = {
+            "full_name": "Client",
+            "email": payment.get("user_email", "N/A"),
+            "phone": "N/A"
+        }
+    else:
+        client_data = {
+            "full_name": client_user.get("full_name", "N/A"),
+            "email": client_user.get("email", "N/A"),
+            "phone": client_user.get("phone", "N/A")
+        }
+    
+    # Générer le PDF
+    pdf_buffer = generate_invoice_pdf(payment, client_data)
+    
+    # Retourner le PDF
+    return StreamingResponse(
+        pdf_buffer,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": f"attachment; filename=Facture_{payment.get('invoice_number', payment_id)}.pdf"
+        }
+    )
+
 # Contact Messages & CRM
 @api_router.post("/contact-messages", response_model=ContactMessageResponse)
 async def create_contact_message(message_data: ContactMessageCreate):
