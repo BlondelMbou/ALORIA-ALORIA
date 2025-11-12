@@ -267,16 +267,11 @@ export default function MyProspects() {
                           <DollarSign className="w-4 h-4 mr-2" />
                           Affecter au Consultant
                         </Button>
-                        <Button 
-                          size="sm"
-                          className="bg-blue-500 hover:bg-blue-600"
-                          onClick={() => handleConvertToClient(prospect)}
-                        >
-                          <UserPlus className="w-4 h-4 mr-2" />
-                          Convertir en Client
-                        </Button>
                         <p className="text-xs text-slate-400 text-center mt-1">
-                          Paiement: 50 000 CFA pour consultant
+                          💡 Paiement requis: 50 000 CFA pour consultation
+                        </p>
+                        <p className="text-xs text-orange-400 text-center">
+                          ⚠️ Conversion client possible APRÈS consultation
                         </p>
                       </>
                     )}
