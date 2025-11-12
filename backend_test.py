@@ -3688,6 +3688,254 @@ class APITester:
         else:
             print(f"      ❌ Cannot retrieve activities: {final_response.status_code}")
 
+    def test_chat_permissions_comprehensive(self):
+        """PRIORITY 7: Test chat permissions according to review request"""
+        print("=== PRIORITY 7: CHAT PERMISSIONS & COMMUNICATION TESTING ===")
+        
+        # First, we need to ensure we have a client with an assigned employee
+        # Let's create a client and assign them to the employee
+        if 'manager' in self.tokens and 'employee' in self.users:
+            try:
+                headers = {"Authorization": f"Bearer {self.tokens['manager']}"}
+                client_data = {
+                    "email": "test.client.chat@example.com",
+                    "full_name": "Client Test Chat",
+                    "phone": "+33123456789",
+                    "country": "France",
+                    "visa_type": "Work Permit (Talent Permit)",
+                    "message": "Test client for chat permissions"
+                }
+                response = self.session.post(f"{API_BASE}/clients", json=client_data, headers=headers)
+                if response.status_code in [200, 201]:
+                    client_data_response = response.json()
+                    self.test_client_id = client_data_response['id']
+                    assigned_employee_id = client_data_response.get('assigned_employee_id')
+                    
+                    # Try to login as this client
+                    client_login = self.session.post(f"{API_BASE}/auth/login", json={
+                        "email": "test.client.chat@example.com",
+                        "password": "Aloria2024!"
+                    })
+                    if client_login.status_code == 200:
+                        self.tokens['test_client'] = client_login.json()['access_token']
+                        self.users['test_client'] = client_login.json()['user']
+                        self.log_result("7.0 Test Client Setup", True, f"Test client created and logged in, assigned to employee: {assigned_employee_id}")
+                    else:
+                        self.log_result("7.0 Test Client Setup", False, f"Could not login as test client: {client_login.status_code}")
+                else:
+                    self.log_result("7.0 Test Client Setup", False, f"Could not create test client: {response.status_code}")
+            except Exception as e:
+                self.log_result("7.0 Test Client Setup", False, "Exception occurred", str(e))
+
+        # Test 1: Verify CLIENT has access to assigned employee in contacts
+        if 'test_client' in self.tokens:
+            try:
+                headers = {"Authorization": f"Bearer {self.tokens['test_client']}"}
+                response = self.session.get(f"{API_BASE}/users/available-contacts", headers=headers)
+                if response.status_code == 200:
+                    contacts = response.json()
+                    # Check if assigned employee is in contacts
+                    employee_found = False
+                    manager_found = False
+                    for contact in contacts:
+                        if contact['role'] == 'EMPLOYEE':
+                            employee_found = True
+                        if contact['role'] == 'MANAGER':
+                            manager_found = True
+                    
+                    if employee_found and manager_found:
+                        self.log_result("7.1 Client Available Contacts", True, f"Client can see {len(contacts)} contacts (employee + managers)")
+                    else:
+                        self.log_result("7.1 Client Available Contacts", False, f"Client missing expected contacts. Employee: {employee_found}, Manager: {manager_found}")
+                else:
+                    self.log_result("7.1 Client Available Contacts", False, f"Status: {response.status_code}", response.text)
+            except Exception as e:
+                self.log_result("7.1 Client Available Contacts", False, "Exception occurred", str(e))
+
+        # Test 2: Verify CLIENT can send message to assigned employee
+        if 'test_client' in self.tokens and 'employee' in self.users:
+            try:
+                headers = {"Authorization": f"Bearer {self.tokens['test_client']}"}
+                message_data = {
+                    "receiver_id": self.users['employee']['id'],
+                    "message": "Test message from client to assigned employee"
+                }
+                response = self.session.post(f"{API_BASE}/chat/send", json=message_data, headers=headers)
+                if response.status_code == 200:
+                    self.log_result("7.2 Client Send Message to Assigned Employee", True, "Client can send message to assigned employee")
+                else:
+                    self.log_result("7.2 Client Send Message to Assigned Employee", False, f"Status: {response.status_code}", response.text)
+            except Exception as e:
+                self.log_result("7.2 Client Send Message to Assigned Employee", False, "Exception occurred", str(e))
+
+        # Test 3: Verify EMPLOYEE can see assigned clients in contacts
+        if 'employee' in self.tokens:
+            try:
+                headers = {"Authorization": f"Bearer {self.tokens['employee']}"}
+                response = self.session.get(f"{API_BASE}/users/available-contacts", headers=headers)
+                if response.status_code == 200:
+                    contacts = response.json()
+                    # Check if assigned clients are in contacts
+                    client_found = False
+                    manager_found = False
+                    for contact in contacts:
+                        if contact['role'] == 'CLIENT':
+                            client_found = True
+                        if contact['role'] == 'MANAGER':
+                            manager_found = True
+                    
+                    if client_found and manager_found:
+                        self.log_result("7.3 Employee Available Contacts", True, f"Employee can see {len(contacts)} contacts (assigned clients + managers)")
+                    else:
+                        self.log_result("7.3 Employee Available Contacts", False, f"Employee missing expected contacts. Client: {client_found}, Manager: {manager_found}")
+                else:
+                    self.log_result("7.3 Employee Available Contacts", False, f"Status: {response.status_code}", response.text)
+            except Exception as e:
+                self.log_result("7.3 Employee Available Contacts", False, "Exception occurred", str(e))
+
+        # Test 4: Verify EMPLOYEE can send message to assigned client
+        if 'employee' in self.tokens and 'test_client' in self.users:
+            try:
+                headers = {"Authorization": f"Bearer {self.tokens['employee']}"}
+                message_data = {
+                    "receiver_id": self.users['test_client']['id'],
+                    "message": "Test message from employee to assigned client"
+                }
+                response = self.session.post(f"{API_BASE}/chat/send", json=message_data, headers=headers)
+                if response.status_code == 200:
+                    self.log_result("7.4 Employee Send Message to Assigned Client", True, "Employee can send message to assigned client")
+                else:
+                    self.log_result("7.4 Employee Send Message to Assigned Client", False, f"Status: {response.status_code}", response.text)
+            except Exception as e:
+                self.log_result("7.4 Employee Send Message to Assigned Client", False, "Exception occurred", str(e))
+
+        # Test 5: Verify MANAGER can communicate with everyone
+        if 'manager' in self.tokens:
+            try:
+                headers = {"Authorization": f"Bearer {self.tokens['manager']}"}
+                response = self.session.get(f"{API_BASE}/users/available-contacts", headers=headers)
+                if response.status_code == 200:
+                    contacts = response.json()
+                    # Manager should see all employees and clients
+                    employee_count = sum(1 for c in contacts if c['role'] == 'EMPLOYEE')
+                    client_count = sum(1 for c in contacts if c['role'] == 'CLIENT')
+                    
+                    if employee_count > 0 and client_count > 0:
+                        self.log_result("7.5 Manager Available Contacts", True, f"Manager can contact {len(contacts)} users ({employee_count} employees, {client_count} clients)")
+                    else:
+                        self.log_result("7.5 Manager Available Contacts", False, f"Manager missing contacts. Employees: {employee_count}, Clients: {client_count}")
+                else:
+                    self.log_result("7.5 Manager Available Contacts", False, f"Status: {response.status_code}", response.text)
+            except Exception as e:
+                self.log_result("7.5 Manager Available Contacts", False, "Exception occurred", str(e))
+
+        # Test 6: Verify restrictions - Client tries to send message to non-assigned employee (should fail)
+        # First, create another employee to test with
+        if 'manager' in self.tokens:
+            try:
+                headers = {"Authorization": f"Bearer {self.tokens['manager']}"}
+                # Create another employee
+                timestamp = int(time.time())
+                employee_data = {
+                    "email": f"test.employee2.{timestamp}@aloria.com",
+                    "full_name": "Test Employee 2",
+                    "phone": f"+33{timestamp % 1000000000}",
+                    "role": "EMPLOYEE",
+                    "send_email": False
+                }
+                response = self.session.post(f"{API_BASE}/users/create", json=employee_data, headers=headers)
+                if response.status_code in [200, 201]:
+                    employee2_data = response.json()
+                    employee2_id = employee2_data['id']
+                    
+                    # Now test client trying to message non-assigned employee
+                    if 'test_client' in self.tokens:
+                        client_headers = {"Authorization": f"Bearer {self.tokens['test_client']}"}
+                        message_data = {
+                            "receiver_id": employee2_id,
+                            "message": "This message should be blocked"
+                        }
+                        message_response = self.session.post(f"{API_BASE}/chat/send", json=message_data, headers=client_headers)
+                        if message_response.status_code == 403:
+                            self.log_result("7.6 Client to Non-Assigned Employee (should fail)", True, "Client correctly blocked from messaging non-assigned employee")
+                        else:
+                            self.log_result("7.6 Client to Non-Assigned Employee (should fail)", False, f"Expected 403, got {message_response.status_code}")
+                else:
+                    self.log_result("7.6 Client to Non-Assigned Employee (should fail)", False, "Could not create test employee 2")
+            except Exception as e:
+                self.log_result("7.6 Client to Non-Assigned Employee (should fail)", False, "Exception occurred", str(e))
+
+        # Test 7: Verify restrictions - Employee tries to send message to non-assigned client (should fail)
+        # Create another client not assigned to our test employee
+        if 'manager' in self.tokens:
+            try:
+                headers = {"Authorization": f"Bearer {self.tokens['manager']}"}
+                timestamp = int(time.time())
+                client_data = {
+                    "email": f"unassigned.client.{timestamp}@example.com",
+                    "full_name": "Unassigned Client",
+                    "phone": f"+33{timestamp % 1000000000}",
+                    "country": "Canada",
+                    "visa_type": "Study Permit",
+                    "message": "Test unassigned client"
+                }
+                response = self.session.post(f"{API_BASE}/clients", json=client_data, headers=headers)
+                if response.status_code in [200, 201]:
+                    unassigned_client_data = response.json()
+                    unassigned_client_user_id = unassigned_client_data['user_id']
+                    
+                    # Test employee trying to message unassigned client
+                    if 'employee' in self.tokens:
+                        employee_headers = {"Authorization": f"Bearer {self.tokens['employee']}"}
+                        message_data = {
+                            "receiver_id": unassigned_client_user_id,
+                            "message": "This message should be blocked"
+                        }
+                        message_response = self.session.post(f"{API_BASE}/chat/send", json=message_data, headers=employee_headers)
+                        if message_response.status_code == 403:
+                            self.log_result("7.7 Employee to Non-Assigned Client (should fail)", True, "Employee correctly blocked from messaging non-assigned client")
+                        else:
+                            self.log_result("7.7 Employee to Non-Assigned Client (should fail)", False, f"Expected 403, got {message_response.status_code}")
+                else:
+                    self.log_result("7.7 Employee to Non-Assigned Client (should fail)", False, "Could not create unassigned client")
+            except Exception as e:
+                self.log_result("7.7 Employee to Non-Assigned Client (should fail)", False, "Exception occurred", str(e))
+
+        # Test 8: Verify restrictions - Client tries to send message to another client (should fail)
+        if 'test_client' in self.tokens and 'manager' in self.tokens:
+            try:
+                # Create another client
+                headers = {"Authorization": f"Bearer {self.tokens['manager']}"}
+                timestamp = int(time.time())
+                client_data = {
+                    "email": f"another.client.{timestamp}@example.com",
+                    "full_name": "Another Client",
+                    "phone": f"+33{timestamp % 1000000000}",
+                    "country": "France",
+                    "visa_type": "Student Visa",
+                    "message": "Another test client"
+                }
+                response = self.session.post(f"{API_BASE}/clients", json=client_data, headers=headers)
+                if response.status_code in [200, 201]:
+                    another_client_data = response.json()
+                    another_client_user_id = another_client_data['user_id']
+                    
+                    # Test client trying to message another client
+                    client_headers = {"Authorization": f"Bearer {self.tokens['test_client']}"}
+                    message_data = {
+                        "receiver_id": another_client_user_id,
+                        "message": "This message should be blocked"
+                    }
+                    message_response = self.session.post(f"{API_BASE}/chat/send", json=message_data, headers=client_headers)
+                    if message_response.status_code == 403:
+                        self.log_result("7.8 Client to Another Client (should fail)", True, "Client correctly blocked from messaging another client")
+                    else:
+                        self.log_result("7.8 Client to Another Client (should fail)", False, f"Expected 403, got {message_response.status_code}")
+                else:
+                    self.log_result("7.8 Client to Another Client (should fail)", False, "Could not create another client")
+            except Exception as e:
+                self.log_result("7.8 Client to Another Client (should fail)", False, "Exception occurred", str(e))
+
     def run_all_tests(self):
         """Run all tests in sequence - PRODUCTION READY EXHAUSTIVE TESTING"""
         print("🚀 ALORIA AGENCY - BACKEND TESTING EXHAUSTIF - PRODUCTION READY")
