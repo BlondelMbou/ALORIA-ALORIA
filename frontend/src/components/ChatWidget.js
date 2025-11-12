@@ -106,13 +106,7 @@ const ChatWidget = ({ currentUser, onUnreadCountChange }) => {
   };
 
   const startConversation = (contact) => {
-    const conversation = {
-      participant_id: contact.id,
-      participant_name: contact.full_name,
-      participant_role: contact.role
-    };
-    
-    setActiveConversation(conversation);
+    setActiveConversationId(contact.id);
     setShowContactList(false);
     loadMessages(contact.id);
   };
