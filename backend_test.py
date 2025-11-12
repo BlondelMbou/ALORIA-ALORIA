@@ -3697,8 +3697,10 @@ class APITester:
         if 'manager' in self.tokens and 'employee' in self.users:
             try:
                 headers = {"Authorization": f"Bearer {self.tokens['manager']}"}
+                # Use unique email to avoid conflicts
+                timestamp = int(time.time())
                 client_data = {
-                    "email": "test.client.chat@example.com",
+                    "email": f"test.client.chat.{timestamp}@example.com",
                     "full_name": "Client Test Chat",
                     "phone": "+33123456789",
                     "country": "France",
