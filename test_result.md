@@ -539,6 +539,7 @@
     - "Payment workflow - PARTIALLY TESTED ⚠️"
     - "Withdrawal manager - COMPLETED ✅"
     - "Consultation Payment Workflow 50K CFA - COMPLETED ✅"
+    - "Chat Permissions & Communication System - COMPLETED ✅"
   stuck_tasks: 
     - "SuperAdmin cannot create EMPLOYEE users (permission system bug)"
     - "Client reassignment API parameter format issue"
