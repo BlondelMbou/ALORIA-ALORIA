@@ -54,12 +54,20 @@ export default function ConsultantDashboard() {
     }
 
     try {
-      await api.patch(`/contact-messages/${selectedProspect.id}/consultant-notes`, {
-        note: consultantNotes
+      const response = await api.patch(`/contact-messages/${selectedProspect.id}/consultant-notes`, {
+        note: consultantNotes,
+        is_potential_client: isPotentialClient,
+        potential_level: potentialLevel
       });
       
-      toast.success('Note ajoutée avec succès');
+      const clientStatus = isPotentialClient && potentialLevel === 'OUI' 
+        ? '🎯 Potentiel client identifié!' 
+        : 'Note de consultation enregistrée';
+      
+      toast.success(`${clientStatus} Manager/Employee notifié.`);
       setConsultantNotes('');
+      setIsPotentialClient(false);
+      setPotentialLevel('NON');
       setSelectedProspect(null);
       fetchProspects();
     } catch (error) {
