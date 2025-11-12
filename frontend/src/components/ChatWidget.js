@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { MessageCircle, X, Send, Users, Clock, Check, CheckCheck } from 'lucide-react';
 import api from '../utils/api';
 import { formatDistanceToNow } from 'date-fns';
@@ -7,13 +7,20 @@ import { fr } from 'date-fns/locale';
 const ChatWidget = ({ currentUser, onUnreadCountChange }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [conversations, setConversations] = useState([]);
-  const [activeConversation, setActiveConversation] = useState(null);
+  const [activeConversationId, setActiveConversationId] = useState(null);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [contacts, setContacts] = useState([]);
   const [showContactList, setShowContactList] = useState(false);
   const messagesEndRef = useRef(null);
+  
+  // Memoize active conversation to prevent re-renders
+  const activeConversation = useMemo(() => {
+    if (!activeConversationId) return null;
+    return conversations.find(conv => conv.participant_id === activeConversationId) || 
+           { participant_id: activeConversationId };
+  }, [activeConversationId, conversations]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
