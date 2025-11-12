@@ -96,7 +96,7 @@ const ChatWidget = ({ currentUser, onUnreadCountChange }) => {
       
       // Update only the specific conversation in the list (without full reload)
       setConversations(prev => prev.map(conv => 
-        conv.participant_id === activeConversation.participant_id
+        conv.participant_id === activeConversationId
           ? { ...conv, last_message: newMessage, last_message_time: response.data.timestamp }
           : conv
       ));
