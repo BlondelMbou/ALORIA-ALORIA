@@ -3693,7 +3693,7 @@ class APITester:
         print("=== PRIORITY 7: CHAT PERMISSIONS & COMMUNICATION TESTING ===")
         
         # First, we need to ensure we have a client with an assigned employee
-        # Let's create a client and assign them to the employee
+        # Let's create a client and assign them to our test employee
         if 'manager' in self.tokens and 'employee' in self.users:
             try:
                 headers = {"Authorization": f"Bearer {self.tokens['manager']}"}
@@ -3709,7 +3709,15 @@ class APITester:
                 if response.status_code in [200, 201]:
                     client_data_response = response.json()
                     self.test_client_id = client_data_response['id']
-                    assigned_employee_id = client_data_response.get('assigned_employee_id')
+                    initial_assigned_employee_id = client_data_response.get('assigned_employee_id')
+                    
+                    # Reassign client to our test employee (load balancing might assign to different employee)
+                    reassign_url = f"{API_BASE}/clients/{self.test_client_id}/reassign?new_employee_id={self.users['employee']['id']}"
+                    reassign_response = self.session.patch(reassign_url, headers=headers)
+                    if reassign_response.status_code == 200:
+                        assigned_employee_id = self.users['employee']['id']
+                    else:
+                        assigned_employee_id = initial_assigned_employee_id
                     
                     # Try to login as this client
                     client_login = self.session.post(f"{API_BASE}/auth/login", json={
