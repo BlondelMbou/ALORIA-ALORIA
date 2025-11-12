@@ -310,8 +310,13 @@ const ChatWidget = ({ currentUser, onUnreadCountChange }) => {
                     <button
                       key={conversation.participant_id}
                       onClick={() => {
-                        setActiveConversation(conversation);
+                        setActiveConversation({
+                          participant_id: conversation.participant_id,
+                          participant_name: conversation.participant_name,
+                          participant_role: conversation.participant_role
+                        });
                         loadMessages(conversation.participant_id);
+                        setShowContactList(false);
                       }}
                       className="w-full text-left p-3 hover:bg-slate-700/50 rounded-lg mb-2 relative border border-transparent hover:border-slate-600 transition-all duration-200"
                     >
