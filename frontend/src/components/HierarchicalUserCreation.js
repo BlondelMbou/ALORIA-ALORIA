@@ -166,6 +166,7 @@ const HierarchicalUserCreation = ({ onUserCreated }) => {
   }
 
   return (
+    <>
     <Card className="bg-slate-700 border-slate-600">
       <CardHeader>
         <CardTitle className="text-white flex items-center space-x-2">
