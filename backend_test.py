@@ -3723,7 +3723,7 @@ class APITester:
                     
                     # Try to login as this client
                     client_login = self.session.post(f"{API_BASE}/auth/login", json={
-                        "email": "test.client.chat@example.com",
+                        "email": f"test.client.chat.{timestamp}@example.com",
                         "password": "Aloria2024!"
                     })
                     if client_login.status_code == 200:
