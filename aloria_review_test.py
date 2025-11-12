@@ -31,8 +31,8 @@ API_BASE = f"{BACKEND_URL}/api"
 TEST_CREDENTIALS = {
     'superadmin': {'email': 'superadmin@aloria.com', 'password': 'SuperAdmin123!'},
     'manager': {'email': 'manager@test.com', 'password': 'password123'},
-    'employee': {'email': 'employee@aloria.com', 'password': 'password123'},
-    'consultant': {'email': 'consultant@aloria.com', 'password': 'password123'}
+    'employee': {'email': 'employee@aloria.com', 'password': 'Aloria2024!'},
+    'consultant': {'email': 'consultant@aloria.com', 'password': 'Aloria2024!'}
 }
 
 class AloriaReviewTester:
