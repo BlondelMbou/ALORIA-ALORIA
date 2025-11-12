@@ -20,6 +20,8 @@ const HierarchicalUserCreation = ({ onUserCreated }) => {
   const [loading, setLoading] = useState(false);
   const [generatedPassword, setGeneratedPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [showCredentialsDialog, setShowCredentialsDialog] = useState(false);
+  const [newUserCredentials, setNewUserCredentials] = useState(null);
 
   // Determine available roles based on current user role
   const getAvailableRoles = () => {
