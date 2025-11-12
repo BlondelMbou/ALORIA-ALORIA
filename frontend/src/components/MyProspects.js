@@ -133,14 +133,17 @@ export default function MyProspects() {
       const response = await api.post(`/contact-messages/${selectedProspect.id}/convert-to-client`, conversionData);
       
       // Afficher les identifiants du nouveau client
-      if (response.data.email && response.data.temp_password) {
+      if (response.data.login_email && response.data.temporary_password) {
         toast.success(
           <div>
-            <p className="font-semibold">Client créé avec succès!</p>
-            <p className="text-sm mt-2">Email: {response.data.email}</p>
-            <p className="text-sm">Mot de passe: {response.data.temp_password}</p>
+            <p className="font-semibold">✅ Client créé avec succès!</p>
+            <div className="mt-3 bg-slate-800 p-3 rounded">
+              <p className="text-sm font-semibold">Identifiants du client:</p>
+              <p className="text-sm mt-1">📧 Email: <span className="font-mono">{response.data.login_email}</span></p>
+              <p className="text-sm">🔑 Mot de passe: <span className="font-mono font-semibold">{response.data.temporary_password}</span></p>
+            </div>
           </div>,
-          { duration: 10000 }
+          { duration: 15000 }
         );
       } else {
         toast.success('Prospect converti en client avec succès !');
