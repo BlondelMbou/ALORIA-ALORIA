@@ -38,6 +38,12 @@ export default function MyProspects() {
   const [selectedProspect, setSelectedProspect] = useState(null);
   const [paymentMethod, setPaymentMethod] = useState('Cash');
   const [transactionRef, setTransactionRef] = useState('');
+  const [showConversionDialog, setShowConversionDialog] = useState(false);
+  const [conversionData, setConversionData] = useState({
+    country: '',
+    visa_type: '',
+    first_payment_amount: 0
+  });
 
   const statusLabels = {
     'assigne_employe': { label: 'À Contacter', color: 'bg-purple-500', icon: '📞' },
