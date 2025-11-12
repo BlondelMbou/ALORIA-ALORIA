@@ -114,13 +114,39 @@ export default function MyProspects() {
   };
 
   const handleConvertToClient = async (prospect) => {
-    if (!window.confirm(`Convertir "${prospect.name}" en client ? Cette action créera un compte client et un dossier.`)) {
+    setSelectedProspect(prospect);
+    setConversionData({
+      country: prospect.country || '',
+      visa_type: prospect.visa_type || '',
+      first_payment_amount: 0
+    });
+    setShowConversionDialog(true);
+  };
+
+  const confirmConversion = async () => {
+    if (!conversionData.country || !conversionData.visa_type) {
+      toast.error('Veuillez renseigner le pays et le type de visa');
       return;
     }
 
     try {
-      await api.post(`/contact-messages/${prospect.id}/convert-to-client`);
-      toast.success('Prospect converti en client avec succès !');
+      const response = await api.post(`/contact-messages/${selectedProspect.id}/convert-to-client`, conversionData);
+      
+      // Afficher les identifiants du nouveau client
+      if (response.data.email && response.data.temp_password) {
+        toast.success(
+          <div>
+            <p className="font-semibold">Client créé avec succès!</p>
+            <p className="text-sm mt-2">Email: {response.data.email}</p>
+            <p className="text-sm">Mot de passe: {response.data.temp_password}</p>
+          </div>,
+          { duration: 10000 }
+        );
+      } else {
+        toast.success('Prospect converti en client avec succès !');
+      }
+      
+      setShowConversionDialog(false);
       fetchMyProspects();
     } catch (error) {
       console.error('Erreur conversion:', error);
