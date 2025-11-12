@@ -293,6 +293,9 @@
         -working: true
         -agent: "testing"
         -comment: "✅ TESTED: Country-specific workflow system fully functional. GET /api/workflows returns comprehensive workflows for Canada (Work Permit, Study Permit, Permanent Residence) and France (Work Permit, Student Visa, Family Reunification). POST /api/workflows/{country}/{visa_type}/steps allows managers to add custom workflow steps (403 for employees). Successfully added custom step 'Étape personnalisée de vérification' to Canada Work Permit workflow. Custom workflow storage in MongoDB working correctly."
+        -working: true
+        -agent: "testing"
+        -comment: "🇫🇷 WORKFLOW TRANSLATION TESTING COMPLETE - 100% SUCCESS! Comprehensive testing of French workflow translations completed with PERFECT RESULTS (10/10 tests passed). ✅ API WORKFLOWS: GET /api/workflows returns data in French with 'Permis de travail' for Canada and 'Visa étudiant' for France. ✅ FRENCH TERMS VERIFIED: All workflows contain 'Consultation initiale' steps and duration in 'jours' format as requested. ✅ CASE CREATION: New cases created use French workflow names correctly - test client created with 'Visa étudiant' type shows French terms (Consultation initiale, visa, étudiant) in workflow steps. ✅ TRANSLATION QUALITY: All workflow titles, descriptions, and durations properly translated to French. The workflow translation system is 100% operational and ready for French-speaking clients!"
 
   - task: "Manager-only case update permissions"
     implemented: true
