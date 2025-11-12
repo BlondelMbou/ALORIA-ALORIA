@@ -403,7 +403,7 @@ const HierarchicalUserCreation = ({ onUserCreated }) => {
         )}
       </DialogContent>
     </Dialog>
-  </div>
+    </>
   );
 };
 
