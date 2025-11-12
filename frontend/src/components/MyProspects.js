@@ -435,6 +435,112 @@ export default function MyProspects() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Dialog de conversion en client */}
+      <Dialog open={showConversionDialog} onOpenChange={setShowConversionDialog}>
+        <DialogContent className="bg-[#1E293B] border-slate-700 max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <UserPlus className="w-6 h-6 text-blue-500" />
+              Convertir en Client
+            </DialogTitle>
+            <DialogDescription className="text-slate-400">
+              Veuillez compléter les informations pour créer le compte client et son dossier d'immigration.
+            </DialogDescription>
+          </DialogHeader>
+          
+          {selectedProspect && (
+            <div className="space-y-6 mt-4">
+              <div className="bg-slate-800 p-4 rounded-lg space-y-2">
+                <p className="text-white font-semibold">{selectedProspect.name}</p>
+                <p className="text-slate-400 text-sm">{selectedProspect.email}</p>
+                <p className="text-slate-400 text-sm">{selectedProspect.phone}</p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-slate-300">Pays de destination *</Label>
+                  <select
+                    value={conversionData.country}
+                    onChange={(e) => setConversionData({...conversionData, country: e.target.value, visa_type: ''})}
+                    className="w-full mt-1 bg-slate-800 border-slate-600 text-white p-2 rounded"
+                  >
+                    <option value="">Sélectionner...</option>
+                    <option value="Canada">Canada</option>
+                    <option value="France">France</option>
+                  </select>
+                </div>
+
+                <div>
+                  <Label className="text-slate-300">Type de visa *</Label>
+                  <select
+                    value={conversionData.visa_type}
+                    onChange={(e) => setConversionData({...conversionData, visa_type: e.target.value})}
+                    className="w-full mt-1 bg-slate-800 border-slate-600 text-white p-2 rounded"
+                    disabled={!conversionData.country}
+                  >
+                    <option value="">Sélectionner...</option>
+                    {conversionData.country === 'Canada' && (
+                      <>
+                        <option value="Permis de travail">Permis de travail</option>
+                        <option value="Permis d'études">Permis d'études</option>
+                        <option value="Résidence permanente (Entrée express)">Résidence permanente (Entrée express)</option>
+                      </>
+                    )}
+                    {conversionData.country === 'France' && (
+                      <>
+                        <option value="Permis de travail (Passeport Talent)">Permis de travail (Passeport Talent)</option>
+                        <option value="Visa étudiant">Visa étudiant</option>
+                        <option value="Regroupement familial">Regroupement familial</option>
+                      </>
+                    )}
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <Label className="text-slate-300">Premier versement (CFA)</Label>
+                <Input
+                  type="number"
+                  min="0"
+                  value={conversionData.first_payment_amount}
+                  onChange={(e) => setConversionData({...conversionData, first_payment_amount: parseFloat(e.target.value) || 0})}
+                  placeholder="Montant du premier versement"
+                  className="mt-1 bg-slate-800 border-slate-600 text-white"
+                />
+                <p className="text-slate-500 text-xs mt-1">Optionnel - Si le client a déjà effectué un paiement</p>
+              </div>
+
+              <div className="bg-blue-500/10 border border-blue-500/30 p-4 rounded-lg">
+                <p className="text-blue-400 text-sm">
+                  ℹ️ Un compte client sera créé avec un mot de passe temporaire qui sera affiché après la création.
+                </p>
+              </div>
+
+              <div className="flex gap-3">
+                <Button 
+                  variant="outline"
+                  className="flex-1 border-slate-600 text-white hover:bg-slate-700"
+                  onClick={() => {
+                    setShowConversionDialog(false);
+                    setSelectedProspect(null);
+                  }}
+                >
+                  Annuler
+                </Button>
+                <Button 
+                  className="flex-1 bg-blue-500 hover:bg-blue-600"
+                  onClick={confirmConversion}
+                  disabled={!conversionData.country || !conversionData.visa_type}
+                >
+                  <CheckCircle className="w-4 h-4 mr-2" />
+                  Créer le Client
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
