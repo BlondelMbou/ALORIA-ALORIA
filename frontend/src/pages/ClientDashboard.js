@@ -709,7 +709,7 @@ export default function ClientDashboard() {
                             <p className="text-slate-300 text-sm mb-2">{payment.description}</p>
                           )}
                           
-                          <div className="flex justify-between text-xs text-slate-500">
+                          <div className="flex justify-between items-center text-xs text-slate-500 mb-2">
                             <span>Déclaré le: {new Date(payment.created_at).toLocaleDateString('fr-FR')}</span>
                             {payment.invoice_number && (
                               <span>Facture: {payment.invoice_number}</span>
@@ -721,6 +721,17 @@ export default function ClientDashboard() {
                               <CheckCircle className="h-3 w-3 inline mr-1" />
                               Confirmé le: {new Date(payment.confirmation_date).toLocaleDateString('fr-FR')}
                             </div>
+                          )}
+                          
+                          {/* Bouton télécharger facture */}
+                          {payment.status === 'CONFIRMED' && payment.invoice_number && (
+                            <button
+                              onClick={() => downloadInvoice(payment.id, payment.invoice_number)}
+                              className="mt-3 w-full flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-3 py-2 rounded text-sm transition-colors"
+                            >
+                              <Download className="w-4 h-4" />
+                              Télécharger la facture
+                            </button>
                           )}
                         </div>
                       ))
