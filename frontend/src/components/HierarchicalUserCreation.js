@@ -84,6 +84,15 @@ const HierarchicalUserCreation = ({ onUserCreated }) => {
         const result = await response.json();
         setGeneratedPassword(password);
         
+        // Afficher le dialog avec les credentials
+        setNewUserCredentials({
+          email: formData.email,
+          password: password,
+          full_name: formData.full_name,
+          role: formData.role
+        });
+        setShowCredentialsDialog(true);
+        
         toast.success(`Utilisateur ${formData.role.toLowerCase()} créé avec succès !`);
         
         // Reset form
