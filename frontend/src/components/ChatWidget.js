@@ -33,8 +33,10 @@ const ChatWidget = ({ currentUser, onUnreadCountChange }) => {
   useEffect(() => {
     // Calculate total unread count
     const totalUnread = conversations.reduce((sum, conv) => sum + conv.unread_count, 0);
-    onUnreadCountChange?.(totalUnread);
-  }, [conversations, onUnreadCountChange]);
+    if (onUnreadCountChange) {
+      onUnreadCountChange(totalUnread);
+    }
+  }, [conversations]);
 
   const loadConversations = async () => {
     try {
