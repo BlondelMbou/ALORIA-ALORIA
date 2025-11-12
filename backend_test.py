@@ -3712,6 +3712,9 @@ class APITester:
         self.test_priority_5_payment_workflow()
         self.test_priority_6_withdrawal_manager()
         
+        # NEW: Chat Permissions Testing (from review request)
+        self.test_chat_permissions_comprehensive()
+        
         # Print comprehensive summary
         print("=" * 80)
         print("🎯 PRODUCTION READINESS TEST SUMMARY")
