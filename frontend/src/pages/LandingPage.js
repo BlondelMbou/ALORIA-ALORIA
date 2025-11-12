@@ -159,34 +159,34 @@ export default function LandingPage() {
 
   const testimonials = [
     {
-      name: "Marie Dubois",
-      role: "Ingénieure Logiciel",
+      name: "Marie-Claire Fouda",
+      role: "Infirmière diplômée",
       country: "Canada 🇨🇦",
-      text: "Grâce à ALORIA AGENCY, j'ai obtenu mon permis de travail au Canada en seulement 3 mois. Un service exceptionnel avec un suivi personnalisé extraordinaire !",
+      text: "Franchement, ALORIA AGENCY c'est du sérieux! Mon permis de travail pour le Canada est sorti en 3 mois seulement. L'équipe là, ils sont trop forts, ils m'ont suivi de A à Z. Je suis trop contente, c'est top!",
       rating: 5,
       image: "M"
     },
     {
-      name: "Ahmed Ben Ali", 
-      role: "Étudiant en Master",
+      name: "Jean-Paul Mbarga", 
+      role: "Étudiant en Informatique",
       country: "France 🇫🇷",
-      text: "L'équipe m'a accompagné parfaitement pour mon visa étudiant. Processus transparent, conseils avisés et résultats concrets. Je recommande vivement !",
+      text: "Eh, mes amis, si vous cherchez pour aller en France, passez par ALORIA! Mon visa étudiant est sorti sans problème. Ils connaissent bien le terrain, tout est clair. Je recommande à 100%!",
       rating: 5,
-      image: "A"
+      image: "J"
     },
     {
-      name: "Chen Wei",
-      role: "Consultant IT",
+      name: "Patrick Ekotto",
+      role: "Ingénieur Réseaux",
       country: "Canada 🇨🇦",
-      text: "Processus totalement transparent avec une équipe dédiée. Ma résidence permanente a été approuvée sans le moindre stress. Professionnalisme remarquable !",
+      text: "ALORIA m'a vraiment aidé pour ma résidence permanente au Canada. Le processus était bien expliqué, pas de stress du tout. Aujourd'hui je suis établi là-bas avec ma famille. Merci infiniment!",
       rating: 5,
-      image: "C"
+      image: "P"
     },
     {
-      name: "Sophie Martin",
-      role: "Architecte",
-      country: "Allemagne 🇩🇪",
-      text: "ALORIA AGENCY m'a aidée à obtenir ma Carte Bleue européenne. Expertise technique et accompagnement humain au rendez-vous. Un grand merci !",
+      name: "Sylvie Atangana",
+      role: "Comptable professionnelle",
+      country: "France 🇫🇷",
+      text: "C'est une agence sérieuse, ça marche bien! Ils m'ont accompagnée pour mon Passeport Talent en France. Le dossier était bien monté, tout est passé nickel. Je suis vraiment satisfaite, que Dieu les bénisse!",
       rating: 5,
       image: "S"
     }
