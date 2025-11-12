@@ -517,6 +517,130 @@ const SuperAdminDashboard = () => {
         {activeTab === 'users-creation' && <HierarchicalUserCreation onUserCreated={fetchDashboardData} />}
         {activeTab === 'balance' && <BalanceMonitor />}
       </div>
+
+      {/* User Details Modal */}
+      {showUserDetails && selectedUser && (
+        <Dialog open={showUserDetails} onOpenChange={setShowUserDetails}>
+          <DialogContent className="bg-[#1E293B] border-slate-700 max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="text-white text-xl">Détails Utilisateur</DialogTitle>
+            </DialogHeader>
+            
+            <div className="space-y-4 py-4">
+              {/* Avatar & Nom */}
+              <div className="flex items-center space-x-4 pb-4 border-b border-slate-700">
+                <div className="w-16 h-16 rounded-full bg-gradient-to-r from-orange-500 to-orange-600 flex items-center justify-center">
+                  <span className="text-2xl font-bold text-white">
+                    {selectedUser.full_name?.charAt(0)}
+                  </span>
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-white">{selectedUser.full_name}</h3>
+                  <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${
+                    selectedUser.role === 'SUPERADMIN' ? 'bg-purple-500/20 text-purple-400' :
+                    selectedUser.role === 'MANAGER' ? 'bg-blue-500/20 text-blue-400' :
+                    selectedUser.role === 'CONSULTANT' ? 'bg-green-500/20 text-green-400' :
+                    selectedUser.role === 'EMPLOYEE' ? 'bg-orange-500/20 text-orange-400' :
+                    'bg-slate-500/20 text-slate-400'
+                  }`}>
+                    {selectedUser.role}
+                  </span>
+                </div>
+              </div>
+
+              {/* Informations */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-slate-800/50 p-4 rounded-lg">
+                  <p className="text-slate-400 text-sm mb-1">Email</p>
+                  <p className="text-white font-medium">{selectedUser.email}</p>
+                </div>
+
+                <div className="bg-slate-800/50 p-4 rounded-lg">
+                  <p className="text-slate-400 text-sm mb-1">Statut</p>
+                  <p className={`font-medium ${selectedUser.is_active ? 'text-green-400' : 'text-red-400'}`}>
+                    {selectedUser.is_active ? '✅ Actif' : '❌ Inactif'}
+                  </p>
+                </div>
+
+                <div className="bg-slate-800/50 p-4 rounded-lg">
+                  <p className="text-slate-400 text-sm mb-1">Créé le</p>
+                  <p className="text-white">
+                    {new Date(selectedUser.created_at).toLocaleDateString('fr-FR', {
+                      day: 'numeric',
+                      month: 'long',
+                      year: 'numeric'
+                    })}
+                  </p>
+                </div>
+
+                <div className="bg-slate-800/50 p-4 rounded-lg">
+                  <p className="text-slate-400 text-sm mb-1">Dernière connexion</p>
+                  <p className="text-white">
+                    {selectedUser.last_login 
+                      ? new Date(selectedUser.last_login).toLocaleDateString('fr-FR')
+                      : 'Jamais'
+                    }
+                  </p>
+                </div>
+              </div>
+
+              {/* Mot de passe temporaire */}
+              {userTempPassword && (
+                <div className="bg-orange-500/10 border border-orange-500/30 p-4 rounded-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-orange-400 font-semibold">🔑 Mot de passe temporaire</p>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <code className="flex-1 px-4 py-2 bg-slate-800 rounded text-white font-mono">
+                      {userTempPassword}
+                    </code>
+                    <Button
+                      onClick={() => {
+                        navigator.clipboard.writeText(userTempPassword);
+                        toast.success('Mot de passe copié!');
+                      }}
+                      className="bg-orange-500 hover:bg-orange-600"
+                    >
+                      📋 Copier
+                    </Button>
+                  </div>
+                  <p className="text-xs text-slate-400 mt-2">
+                    ⚠️ Ce mot de passe a été généré lors de la création du compte
+                  </p>
+                </div>
+              )}
+
+              {!userTempPassword && (
+                <div className="bg-slate-800/50 p-4 rounded-lg text-center">
+                  <p className="text-slate-400 text-sm">
+                    ℹ️ Mot de passe temporaire non disponible (déjà changé par l'utilisateur)
+                  </p>
+                </div>
+              )}
+            </div>
+
+            <div className="flex gap-2 pt-4 border-t border-slate-700">
+              <Button
+                onClick={() => setShowUserDetails(false)}
+                className="flex-1 bg-slate-700 hover:bg-slate-600"
+              >
+                Fermer
+              </Button>
+              {selectedUser.role !== 'SUPERADMIN' && (
+                <Button
+                  onClick={() => {
+                    setShowUserDetails(false);
+                    handleImpersonate(selectedUser.id);
+                  }}
+                  className="flex-1 bg-orange-500 hover:bg-orange-600"
+                >
+                  🎭 Impersonner
+                </Button>
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 };
