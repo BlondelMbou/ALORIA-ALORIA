@@ -4120,9 +4120,69 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Setup shutdown event first
+# Automated Task: Check 48h consultation alerts
+async def auto_check_48h_alerts():
+    """Tâche automatique qui vérifie les prospects potentiels non convertis depuis >48h"""
+    try:
+        logger.info("🕐 Running automated 48h consultation alerts check...")
+        
+        now = datetime.now(timezone.utc)
+        hours_48_ago = now - timedelta(hours=48)
+        
+        # Chercher prospects potentiels non convertis depuis >48h
+        query = {
+            "status": ContactStatus.IN_CONSULTATION,
+            "is_potential_client": True,
+            "potential_level": "OUI",
+            "consultation_completed_at": {"$lt": hours_48_ago.isoformat()},
+            "alert_48h_sent": {"$ne": True}  # Pas encore alerté
+        }
+        
+        prospects = await db.contact_messages.find(query).to_list(100)
+        alerts_sent = 0
+        
+        for prospect in prospects:
+            if prospect.get("assigned_to"):
+                # Créer notification rappel
+                await create_notification(
+                    user_id=prospect["assigned_to"],
+                    title="⏰ RAPPEL URGENT - 48H Dépassées",
+                    message=f"🚨 {prospect['name']} : Prospect potentiel client non converti depuis 48h. Action requise immédiatement !",
+                    type="urgent_followup_48h",
+                    related_id=prospect["id"]
+                )
+                alerts_sent += 1
+                
+                # Marquer alerte envoyée
+                await db.contact_messages.update_one(
+                    {"id": prospect["id"]},
+                    {"$set": {"alert_48h_sent": True, "alert_48h_sent_at": now.isoformat()}}
+                )
+        
+        logger.info(f"✅ 48h check complete: {alerts_sent} alerts sent for {len(prospects)} prospects")
+        
+    except Exception as e:
+        logger.error(f"❌ Error in auto_check_48h_alerts: {e}")
+
+# Setup startup event
+@app.on_event("startup")
+async def startup_scheduler():
+    """Démarrer le scheduler pour les tâches automatiques"""
+    # Ajouter tâche: Vérifier 48h toutes les heures
+    scheduler.add_job(
+        auto_check_48h_alerts,
+        CronTrigger(hour='*'),  # Toutes les heures
+        id='check_48h_alerts',
+        name='Check 48h consultation alerts',
+        replace_existing=True
+    )
+    scheduler.start()
+    logger.info("✅ Scheduler started - 48h alerts will be checked every hour")
+
+# Setup shutdown event
 @app.on_event("shutdown")
 async def shutdown_db_client():
+    scheduler.shutdown()
     client.close()
 
 # Mount Socket.IO sur un path spécifique pour ne pas écraser les routes API
