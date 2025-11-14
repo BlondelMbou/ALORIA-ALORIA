@@ -5170,15 +5170,15 @@ class APITester:
 
     def run_critical_tests(self):
         """Run critical tests selon la demande de révision"""
-        print("🚀 ALORIA AGENCY - TESTS CRITIQUES URGENTS - RESET PASSWORD")
+        print("🚀 ALORIA AGENCY - TEST COMPLET SYSTÈME FACTURES PNG")
         print(f"🌐 Testing against: {API_BASE}")
         print("=" * 80)
         
         # Authentication first
         self.authenticate_all_roles()
         
-        # TEST CRITIQUE 1: ERREUR RETRAIT MANAGER
-        self.test_critical_1_withdrawal_manager_error()
+        # MAIN TEST: PNG Invoice Generation Workflow
+        self.test_png_invoice_generation_workflow()
         
         # TEST CRITIQUE 2: FACTURES PNG (NOUVEAU)
         self.test_critical_2_png_invoices_system()
