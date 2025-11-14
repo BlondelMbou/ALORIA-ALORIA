@@ -437,7 +437,7 @@ export default function LandingPage() {
         )}
 
       {/* Hero Section - Mobile-First Responsive */}
-      <section className="pt-16 sm:pt-20 md:pt-24 pb-12 sm:pb-16 px-4 sm:px-6 lg:px-8 relative overflow-hidden min-h-screen flex items-center">
+      <section className="pt-20 sm:pt-24 md:pt-28 pb-16 sm:pb-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden min-h-[600px] sm:min-h-screen flex items-center">
         {/* Animated background elements - Optimized for mobile */}
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute -top-20 sm:-top-40 -right-20 sm:-right-40 w-40 sm:w-80 h-40 sm:h-80 bg-orange-500/10 rounded-full blur-3xl animate-pulse"></div>
