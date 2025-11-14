@@ -1111,7 +1111,7 @@ export default function ManagerDashboard() {
                             </p>
                           )}
                           {/* Bouton télécharger facture */}
-                          {payment.status === 'confirmed' && payment.invoice_number && (
+                          {payment.status === 'CONFIRMED' && payment.invoice_number && (
                             <button
                               onClick={() => downloadInvoice(payment.id, payment.invoice_number)}
                               className="mt-2 w-full flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-2 py-1 rounded text-xs transition-colors"
