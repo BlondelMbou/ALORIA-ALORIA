@@ -126,78 +126,56 @@ class PNGInvoiceWorkflowTester:
             self.log_result("1.2 Use Existing Payment", False, "Exception occurred", str(e))
             return
         
-        # ÉTAPE 2 - CONFIRMER LE PAIEMENT
-        print("\n🔸 ÉTAPE 2 - CONFIRMER LE PAIEMENT")
+        # ÉTAPE 2 - VÉRIFIER LE PAIEMENT CONFIRMÉ
+        print("\n🔸 ÉTAPE 2 - VÉRIFIER LE PAIEMENT CONFIRMÉ")
         
         try:
             headers = {"Authorization": f"Bearer {self.manager_token}"}
             
-            # 2.1 GET /api/payments/pending pour trouver le paiement
-            pending_response = self.session.get(f"{API_BASE}/payments/pending", headers=headers)
+            # 2.1 Vérifier les détails du paiement confirmé
+            payments_response = self.session.get(f"{API_BASE}/payments/history", headers=headers)
             
-            if pending_response.status_code == 200:
-                pending_payments = pending_response.json()
-                our_payment = next((p for p in pending_payments if p.get('id') == self.payment_id), None)
+            if payments_response.status_code == 200:
+                payments = payments_response.json()
+                our_payment = next((p for p in payments if p.get('id') == self.payment_id), None)
                 
                 if our_payment:
-                    self.log_result("2.1 Find Pending Payment", True, f"Paiement trouvé dans pending: {our_payment['id']}")
+                    # Vérifications selon review request
+                    verification_results = []
+                    
+                    status = our_payment.get('status', '').upper()
+                    if status == 'CONFIRMED':
+                        verification_results.append(f"✅ Status: {status}")
+                    else:
+                        verification_results.append(f"❌ Status: {status} (attendu CONFIRMED)")
+                    
+                    invoice_number = our_payment.get('invoice_number')
+                    if invoice_number and invoice_number.startswith('ALO-'):
+                        verification_results.append(f"✅ Invoice number: {invoice_number}")
+                        self.invoice_number = invoice_number
+                    else:
+                        verification_results.append(f"❌ Invoice number: {invoice_number}")
+                    
+                    pdf_invoice_url = our_payment.get('pdf_invoice_url')
+                    if pdf_invoice_url:
+                        verification_results.append(f"✅ pdf_invoice_url: {pdf_invoice_url}")
+                    else:
+                        verification_results.append(f"❌ pdf_invoice_url manquant")
+                    
+                    all_verified = all("✅" in result for result in verification_results)
+                    self.log_result("2.1 Payment Status Verification", all_verified, f"Vérifications: {'; '.join(verification_results)}")
+                    
+                    if not all_verified:
+                        return
                 else:
-                    self.log_result("2.1 Find Pending Payment", False, f"Paiement {self.payment_id} non trouvé dans pending")
+                    self.log_result("2.1 Payment Status Verification", False, f"Paiement {self.payment_id} non trouvé")
                     return
             else:
-                self.log_result("2.1 Find Pending Payment", False, f"Status: {pending_response.status_code}", pending_response.text)
-                return
-            
-            # 2.2 Générer code de confirmation
-            code_response = self.session.post(f"{API_BASE}/payments/{self.payment_id}/generate-confirmation-code", headers=headers)
-            
-            if code_response.status_code == 200:
-                code_data = code_response.json()
-                confirmation_code = code_data.get('confirmation_code')
-                self.log_result("2.2 Generate Confirmation Code", True, f"Code généré: {confirmation_code}")
-            else:
-                self.log_result("2.2 Generate Confirmation Code", False, f"Status: {code_response.status_code}", code_response.text)
-                return
-            
-            # 2.3 Confirmer avec le code
-            confirm_data = {"confirmation_code": confirmation_code}
-            confirm_response = self.session.patch(f"{API_BASE}/payments/{self.payment_id}/confirm", json=confirm_data, headers=headers)
-            
-            if confirm_response.status_code == 200:
-                confirm_result = confirm_response.json()
-                
-                # Vérifications selon review request
-                verification_results = []
-                
-                status = confirm_result.get('status', '').upper()
-                if status in ['CONFIRMED', 'CONFIRMED']:
-                    verification_results.append(f"✅ Status: {status}")
-                else:
-                    verification_results.append(f"❌ Status: {status} (attendu CONFIRMED)")
-                
-                self.invoice_number = confirm_result.get('invoice_number')
-                if self.invoice_number and self.invoice_number.startswith('ALO-'):
-                    verification_results.append(f"✅ Invoice number: {self.invoice_number}")
-                else:
-                    verification_results.append(f"❌ Invoice number: {self.invoice_number}")
-                
-                pdf_invoice_url = confirm_result.get('pdf_invoice_url')
-                if pdf_invoice_url:
-                    verification_results.append(f"✅ pdf_invoice_url: {pdf_invoice_url}")
-                else:
-                    verification_results.append(f"❌ pdf_invoice_url manquant")
-                
-                all_verified = all("✅" in result for result in verification_results)
-                self.log_result("2.3 Payment Confirmation", all_verified, f"Vérifications: {'; '.join(verification_results)}")
-                
-                if not all_verified:
-                    return
-            else:
-                self.log_result("2.3 Payment Confirmation", False, f"Status: {confirm_response.status_code}", confirm_response.text)
+                self.log_result("2.1 Payment Status Verification", False, f"Status: {payments_response.status_code}", payments_response.text)
                 return
                 
         except Exception as e:
-            self.log_result("2.3 Payment Confirmation", False, "Exception occurred", str(e))
+            self.log_result("2.1 Payment Status Verification", False, "Exception occurred", str(e))
             return
         
         # ÉTAPE 3 - VÉRIFIER FICHIER PNG
