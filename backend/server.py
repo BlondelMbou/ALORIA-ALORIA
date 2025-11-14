@@ -3233,7 +3233,8 @@ async def download_invoice(payment_id: str, current_user: dict = Depends(get_cur
         raise HTTPException(status_code=404, detail="Paiement non trouvé")
     
     # Vérifier que le paiement est confirmé et a une facture
-    if payment.get("status") != "confirmed":
+    payment_status = payment.get("status", "").lower()
+    if payment_status != "confirmed":
         raise HTTPException(status_code=400, detail="Le paiement n'est pas confirmé")
     
     invoice_number = payment.get("invoice_number")
