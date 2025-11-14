@@ -4821,6 +4821,40 @@ class APITester:
         print("=" * 80)
         return self.results['failed'] == 0
 
+    def print_final_results(self):
+        """Print comprehensive test results"""
+        print("\n" + "=" * 80)
+        print("🎯 TESTS CRITIQUES ALORIA AGENCY - RÉSULTATS")
+        print("=" * 80)
+        
+        total_tests = self.results['passed'] + self.results['failed']
+        success_rate = (self.results['passed'] / total_tests * 100) if total_tests > 0 else 0
+        
+        print(f"📊 TOTAL TESTS: {total_tests}")
+        print(f"✅ PASSED: {self.results['passed']}")
+        print(f"❌ FAILED: {self.results['failed']}")
+        print(f"📈 SUCCESS RATE: {success_rate:.1f}%")
+        
+        if self.results['errors']:
+            print(f"\n🚨 ERREURS CRITIQUES DÉTECTÉES:")
+            for i, error in enumerate(self.results['errors'], 1):
+                print(f"{i}. {error['test']}")
+                if error['message']:
+                    print(f"   Message: {error['message']}")
+                if error['error']:
+                    print(f"   Error: {error['error']}")
+                print()
+        
+        # Critical assessment
+        if success_rate == 100:
+            print("🎉 TOUS LES TESTS CRITIQUES RÉUSSIS!")
+        elif success_rate >= 80:
+            print("⚠️  PROBLÈMES MINEURS - Quelques corrections nécessaires")
+        else:
+            print("🚨 PROBLÈMES CRITIQUES - Attention immédiate requise")
+        
+        print("=" * 80)
+
 if __name__ == "__main__":
     tester = APITester()
     
