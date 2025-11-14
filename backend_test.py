@@ -151,10 +151,10 @@ class APITester:
             self.log_result("TEST 1 - No Admin Access", False, "Neither Manager nor SuperAdmin credentials available")
             return
             
-        headers = {"Authorization": f"Bearer {self.tokens['manager']}"}
+        headers = {"Authorization": f"Bearer {test_token}"}
         
-        # ÉTAPE 1: Login Manager (manager@test.com / password123) - DÉJÀ FAIT
-        self.log_result("1.1 Manager Login", True, "Manager logged in successfully")
+        # ÉTAPE 1: Login Admin - DÉJÀ FAIT
+        self.log_result("1.1 Admin Login", True, f"{test_role} logged in successfully")
         
         # ÉTAPE 2: GET /api/clients
         try:
