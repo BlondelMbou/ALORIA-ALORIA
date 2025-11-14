@@ -40,6 +40,34 @@ except ImportError as e:
     print(f"Service d'e-mails non disponible: {e}")
     EMAIL_SERVICE_AVAILABLE = False
 
+# Import des services réutilisables ALORIA
+from services.user_service import (
+    create_user_account,
+    verify_user_permissions,
+    get_user_by_id,
+    get_user_by_email,
+    log_user_activity
+)
+from services.client_service import (
+    create_client_profile,
+    verify_client_dashboard_accessible,
+    set_workflows
+)
+from services.assignment_service import (
+    assign_client_to_employee,
+    find_least_busy_employee,
+    reassign_client
+)
+from services.credentials_service import (
+    generate_temporary_password,
+    generate_credentials_response
+)
+from services.notification_service import (
+    send_creation_notifications,
+    send_welcome_email_notification,
+    create_notification
+)
+
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
