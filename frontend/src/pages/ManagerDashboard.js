@@ -177,41 +177,55 @@ export default function ManagerDashboard() {
           body: JSON.stringify({ action: 'CONFIRMED' })
         });
         
-        if (!response.ok) throw new Error('Failed to confirm payment');
+        if (!response.ok) throw new Error('Échec de génération du code');
         
         const result = await response.json();
         
-        // Afficher le code à l'utilisateur dans une dialog
-        const userConfirmCode = prompt(`Code de confirmation généré: ${result.confirmation_code}\n\nVeuillez saisir ce code pour valider la confirmation du paiement:`);
-        
-        if (!userConfirmCode) {
-          toast.info('Confirmation annulée');
-          return;
-        }
-        
-        // Deuxième étape : confirmer avec le code
-        const confirmResponse = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/payments/${payment.id}/confirm`, {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          },
-          body: JSON.stringify({ 
-            action: 'CONFIRMED',
-            confirmation_code: userConfirmCode
-          })
+        // Ouvrir le dialog de confirmation avec le code généré
+        setConfirmationDialog({
+          show: true,
+          payment,
+          code: '',
+          generatedCode: result.confirmation_code
         });
         
-        if (!confirmResponse.ok) {
-          const errorData = await confirmResponse.json();
-          throw new Error(errorData.detail || 'Code de confirmation incorrect');
-        }
-        
-        toast.success('Paiement confirmé avec succès!');
-        fetchPayments();
       } catch (error) {
         toast.error(error.message || 'Erreur lors de la confirmation');
       }
+    }
+  };
+
+  const handleConfirmWithCode = async () => {
+    const { payment, code } = confirmationDialog;
+    
+    if (!code || code.trim() === '') {
+      toast.error('Veuillez saisir le code de confirmation');
+      return;
+    }
+    
+    try {
+      const confirmResponse = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/payments/${payment.id}/confirm`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({ 
+          action: 'CONFIRMED',
+          confirmation_code: code.trim()
+        })
+      });
+      
+      if (!confirmResponse.ok) {
+        const errorData = await confirmResponse.json();
+        throw new Error(errorData.detail || 'Code de confirmation incorrect');
+      }
+      
+      toast.success('✅ Paiement confirmé avec succès!');
+      setConfirmationDialog({ show: false, payment: null, code: '', generatedCode: '' });
+      fetchPayments();
+    } catch (error) {
+      toast.error(error.message || 'Erreur lors de la confirmation');
     }
   };
 
