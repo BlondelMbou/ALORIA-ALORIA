@@ -42,6 +42,10 @@ export default function EmployeeDashboard() {
     message: ''
   });
   
+  // Credentials popup state
+  const [showCredentialsDialog, setShowCredentialsDialog] = useState(false);
+  const [newClientCredentials, setNewClientCredentials] = useState(null);
+  
   // Visitor registration state
   const [showVisitorForm, setShowVisitorForm] = useState(false);
   const [newVisitor, setNewVisitor] = useState({
