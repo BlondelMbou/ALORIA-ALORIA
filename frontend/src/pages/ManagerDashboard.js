@@ -1362,18 +1362,15 @@ export default function ManagerDashboard() {
         </Dialog>
       )}
 
-      {/* Dialog Credentials Nouveau Client */}
-      {showCredentialsDialog && newClientCredentials && (
-        {/* Popup Credentials Uniforme */}
-        <CredentialsPopup
-          open={showCredentialsDialog}
-          onOpenChange={(open) => {
-            setShowCredentialsDialog(open);
-            if (!open) setNewClientCredentials(null);
-          }}
-          credentials={newClientCredentials}
-        />
-      )}
+      {/* Popup Credentials Uniforme */}
+      <CredentialsPopup
+        open={showCredentialsDialog}
+        onOpenChange={(open) => {
+          setShowCredentialsDialog(open);
+          if (!open) setNewClientCredentials(null);
+        }}
+        credentials={newClientCredentials}
+      />
 
       {/* Dialog Détails Client */}
       {selectedClient && (
