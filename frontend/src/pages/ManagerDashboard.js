@@ -769,7 +769,7 @@ export default function ManagerDashboard() {
                 <Card className="bg-gradient-to-br from-[#1E293B] to-[#334155] border-slate-700">
                   <CardHeader>
                     <CardTitle className="text-white">Liste de Tous les Clients</CardTitle>
-                    <CardDescription className="text-slate-400">Voir et gérer tous les clients de l'équipe</CardDescription>
+                    <CardDescription className="text-slate-400">Suivez l'évolution des dossiers de vos clients</CardDescription>
                   </CardHeader>
                   <CardContent>
                     {/* Recherche et Tri */}
@@ -784,7 +784,7 @@ export default function ManagerDashboard() {
                         { value: 'current_status', label: 'Statut' }
                       ]}
                       onFilteredDataChange={setFilteredClients}
-                      placeholder="Rechercher un client (nom, conseiller, pays, visa, statut)..."
+                      placeholder="Rechercher un dossier (client, pays, type de visa, statut)..."
                     />
 
                 <div className="overflow-x-auto">
