@@ -229,7 +229,7 @@ class APITester:
         try:
             client_login = self.session.post(f"{API_BASE}/auth/login", json={
                 "email": client_email,
-                "password": "Aloria2024!"
+                "password": client_temp_password
             })
             if client_login.status_code == 200:
                 client_token = client_login.json()['access_token']
