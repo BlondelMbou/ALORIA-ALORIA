@@ -2116,6 +2116,11 @@ async def create_user_advanced(user_data: UserCreateRequest, current_user: dict 
     )
 
 # Note: log_user_activity est maintenant dans services/user_service.py
+# Wrapper local pour simplifier les appels (ajoute automatiquement db)
+async def log_activity(user_id: str, action: str, details: dict = None, ip_address: str = None):
+    """Wrapper pour log_user_activity qui ajoute automatiquement db"""
+    from services.user_service import log_user_activity as service_log_activity
+    await service_log_activity(db, user_id, action, details, ip_address)
 
 # Fonction d'envoi d'email (placeholder pour l'instant)
 async def send_welcome_email(email: str, name: str, role: str, password: str, created_by: str):
