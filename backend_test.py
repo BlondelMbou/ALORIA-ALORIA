@@ -496,10 +496,10 @@ class APITester:
         print("\n🔸 ÉTAPE 7 - TESTS D'ERREUR")
         
         # 7.1 - GET /api/payments/{payment_id}/invoice avec paiement status "pending" → Doit retourner 400
-        if 'manager' in self.tokens:
+        if manager_token:
             try:
                 # Create a new payment that stays pending
-                headers = {"Authorization": f"Bearer {self.tokens['manager']}"}
+                headers = {"Authorization": f"Bearer {manager_token}"}
                 client_data = {
                     "email": f"client.error.test.{int(time.time())}@example.com",
                     "full_name": "Client Error Test",
