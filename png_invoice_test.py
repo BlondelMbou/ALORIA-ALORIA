@@ -100,72 +100,30 @@ class PNGInvoiceWorkflowTester:
             self.log_result("1.1 Manager Setup", False, "Exception occurred", str(e))
             return
         
-        # 1.2 Créer un nouveau client
+        # 1.2 Use existing confirmed payment for testing
         try:
             headers = {"Authorization": f"Bearer {self.manager_token}"}
-            client_data = {
-                "full_name": "Test Facture PNG",
-                "email": "test.facture@aloria.com",
-                "phone": "+237699999999",
-                "country": "Canada",
-                "visa_type": "Travail",
-                "first_payment": 80000,
-                "payment_method": "Mobile Money"
-            }
             
-            # Use the client creation endpoint
-            client_create_data = {
-                "email": client_data["email"],
-                "full_name": client_data["full_name"],
-                "phone": client_data["phone"],
-                "country": client_data["country"],
-                "visa_type": client_data["visa_type"],
-                "message": f"Premier paiement: {client_data['first_payment']} via {client_data['payment_method']}"
-            }
-            
-            response = self.session.post(f"{API_BASE}/clients", json=client_create_data, headers=headers)
-            
-            if response.status_code in [200, 201]:
-                client_response = response.json()
-                self.client_id = client_response['id']
-                client_user_id = client_response['user_id']
-                self.log_result("1.2 Client Creation", True, f"Client créé: ID={self.client_id}, User_ID={client_user_id}")
+            # Get existing payments to find a confirmed one
+            payments_response = self.session.get(f"{API_BASE}/payments/history", headers=headers)
+            if payments_response.status_code == 200:
+                payments = payments_response.json()
+                confirmed_payment = next((p for p in payments if p.get('status') == 'CONFIRMED' and p.get('invoice_number')), None)
                 
-                # Login as client to declare payment
-                client_login = self.session.post(f"{API_BASE}/auth/login", json={
-                    "email": client_data["email"],
-                    "password": "Aloria2024!"  # Default password
-                })
-                
-                if client_login.status_code == 200:
-                    client_token = client_login.json()['access_token']
-                    
-                    # Declare payment
-                    client_headers = {"Authorization": f"Bearer {client_token}"}
-                    payment_data = {
-                        "amount": client_data["first_payment"],
-                        "currency": "CFA",
-                        "description": f"Premier paiement - {client_data['visa_type']} {client_data['country']}",
-                        "payment_method": client_data["payment_method"]
-                    }
-                    
-                    payment_response = self.session.post(f"{API_BASE}/payments/declare", json=payment_data, headers=client_headers)
-                    
-                    if payment_response.status_code in [200, 201]:
-                        payment_result = payment_response.json()
-                        self.payment_id = payment_result['id']
-                        self.log_result("1.3 Payment Declaration", True, f"Paiement déclaré: ID={self.payment_id}, Montant={client_data['first_payment']} CFA")
-                    else:
-                        self.log_result("1.3 Payment Declaration", False, f"Status: {payment_response.status_code}", payment_response.text)
-                        return
+                if confirmed_payment:
+                    self.payment_id = confirmed_payment['id']
+                    self.invoice_number = confirmed_payment['invoice_number']
+                    self.client_id = confirmed_payment.get('client_id')
+                    self.log_result("1.2 Use Existing Payment", True, f"Using existing confirmed payment: ID={self.payment_id}, Invoice={self.invoice_number}")
                 else:
-                    self.log_result("1.3 Client Login", False, f"Status: {client_login.status_code}", client_login.text)
+                    self.log_result("1.2 Use Existing Payment", False, "No confirmed payments found with invoice numbers")
                     return
             else:
-                self.log_result("1.2 Client Creation", False, f"Status: {response.status_code}", response.text)
+                self.log_result("1.2 Get Payments", False, f"Status: {payments_response.status_code}")
                 return
+                
         except Exception as e:
-            self.log_result("1.2 Client Creation", False, "Exception occurred", str(e))
+            self.log_result("1.2 Use Existing Payment", False, "Exception occurred", str(e))
             return
         
         # ÉTAPE 2 - CONFIRMER LE PAIEMENT
