@@ -910,7 +910,7 @@ export default function ManagerDashboard() {
               <CardContent>
                 {/* Recherche et Tri */}
                 <SearchAndSort
-                  data={clients.filter(c => c.assigned_employee_id === user?.id)}
+                  data={myClients}
                   searchFields={['full_name', 'client_name', 'country', 'visa_type', 'current_status']}
                   sortOptions={[
                     { value: 'created_at', label: 'Date de création' },
