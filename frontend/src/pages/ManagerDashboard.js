@@ -58,6 +58,8 @@ export default function ManagerDashboard() {
   const [paymentHistory, setPaymentHistory] = useState([]);
   const [rejectionDialog, setRejectionDialog] = useState({ show: false, payment: null, reason: '' });
   const [reassignDialog, setReassignDialog] = useState({ show: false, client: null, newEmployeeId: '' });
+  const [activeTab, setActiveTab] = useState('overview');
+  const [showProfileSettings, setShowProfileSettings] = useState(false);
   
   // WebSocket hook
   const { connected } = useSocket(localStorage.getItem('token'));
