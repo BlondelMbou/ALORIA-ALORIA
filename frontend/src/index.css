@@ -45,12 +45,36 @@ body {
     h1 {
         line-height: 1.2;
         word-break: break-word;
+        font-size: clamp(1.75rem, 8vw, 2.5rem) !important;
     }
     
     /* Fix pour les badges et badges qui débordent */
     .badge, .inline-flex {
         max-width: 100%;
         flex-wrap: wrap;
+    }
+    
+    /* Optimisation Hero mobile */
+    section[class*="min-h-screen"] {
+        min-height: 600px !important;
+    }
+    
+    /* Boutons pleine largeur sur mobile */
+    button, .button {
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
+    }
+    
+    /* Améliorer l'espacement des cards */
+    .card, [class*="Card"] {
+        margin-bottom: 1rem;
+    }
+}
+
+/* Optimisations tablettes */
+@media (min-width: 641px) and (max-width: 1024px) {
+    h1 {
+        font-size: clamp(2rem, 5vw, 3rem);
     }
 }
 
