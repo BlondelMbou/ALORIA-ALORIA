@@ -639,15 +639,15 @@
 
 ## test_plan:
   current_focus:
+    - "Client Data N/A Issue - RÉSOLU ✅"
+    - "Password Change Issue - RÉSOLU ✅"
     - "PNG Invoice Generation System - Case Sensitivity Bug Identified ❌"
-    - "PNG Invoice Alternative Endpoint - 404 Error ❌"
-    - "Password Reset System - CORRECTION VALIDÉE ✅"
   stuck_tasks: 
     - "PNG Invoice case sensitivity bug (line 3237 server.py)"
     - "Alternative invoice endpoint GET /api/invoices/{invoice_number} broken"
   test_all: false
-  test_priority: "png_invoice_case_sensitivity_fix"
-  last_test_session: "PNG INVOICE GENERATION WORKFLOW TESTING - 57.1% SUCCÈS (4/7 tests passés). ✅ PNG GENERATION CONFIRMED WORKING: Recent payments generate PNG files correctly (34KB), download endpoints functional. ❌ CASE SENSITIVITY BUG: Line 3237 checks 'confirmed' but DB stores 'CONFIRMED'. ❌ INCONSISTENT GENERATION: Older payments only have PDF files. ❌ ALTERNATIVE ENDPOINT BROKEN: GET /api/invoices/{invoice_number} returns 404. DIAGNOSTIC COMPLET TERMINÉ - Actions spécifiques identifiées pour correction."
+  test_priority: "urgent_issues_resolved"
+  last_test_session: "TESTS URGENTS DONNÉES CLIENTS N/A + CHANGEMENT MOT DE PASSE - 100% RÉSOLU! Les 2 problèmes urgents rapportés par l'utilisateur ont été testés et sont RÉSOLUS. ✅ DONNÉES CLIENTS: Analysé 199 clients via GET /api/clients, aucun client avec données N/A détecté, système de fallback fonctionnel. ✅ CHANGEMENT MOT DE PASSE: Testé PATCH /api/auth/change-password avec Manager et Client, changements appliqués correctement, login avec nouveaux mots de passe réussi. Les systèmes fonctionnent correctement - aucune action corrective nécessaire."
 
 ## agent_communication:
     -agent: "testing"
