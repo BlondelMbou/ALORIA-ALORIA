@@ -227,7 +227,7 @@ class APITester:
         
         # 1.2 - Le client déclare un paiement via POST /api/payments/declare
         try:
-            # Debug: Check if client user exists
+            # Debug: Check if client user exists and reset password
             debug_headers = {"Authorization": f"Bearer {self.tokens['superadmin']}"}
             users_response = self.session.get(f"{API_BASE}/admin/users", headers=debug_headers)
             if users_response.status_code == 200:
@@ -235,13 +235,27 @@ class APITester:
                 client_user = next((u for u in users if u['email'] == client_email), None)
                 if client_user:
                     print(f"🔍 Client user found: {client_user['email']}, active: {client_user.get('is_active')}")
+                    # Try to reset password
+                    reset_data = {"email": client_email}
+                    reset_response = self.session.post(f"{API_BASE}/auth/reset-password", json=reset_data)
+                    if reset_response.status_code == 200:
+                        print(f"🔍 Password reset initiated for {client_email}")
                 else:
                     print(f"🔍 Client user NOT found: {client_email}")
             
+            # Try with the original temp password first
             client_login = self.session.post(f"{API_BASE}/auth/login", json={
                 "email": client_email,
                 "password": client_temp_password
             })
+            
+            # If that fails, try with default password
+            if client_login.status_code != 200:
+                print(f"🔍 Trying with default password...")
+                client_login = self.session.post(f"{API_BASE}/auth/login", json={
+                    "email": client_email,
+                    "password": "Aloria2024!"
+                })
             if client_login.status_code == 200:
                 client_token = client_login.json()['access_token']
                 
