@@ -294,6 +294,246 @@ class APITester:
                         return
                 else:
                     self.log_result("2.2 Generate Confirmation Code", False, 
+        
+        # ============================================================================
+        # ÉTAPE 3 - VÉRIFIER LA GÉNÉRATION DU FICHIER PNG
+        # ============================================================================
+        print("\n🔸 ÉTAPE 3 - VÉRIFIER LA GÉNÉRATION DU FICHIER PNG")
+        
+        if test_invoice_number:
+            try:
+                import os
+                
+                # 3.1 - Vérifier que le fichier existe : /app/backend/invoices/{invoice_number}.png
+                png_path = f"/app/backend/invoices/{test_invoice_number}.png"
+                print(f"🔍 Checking PNG file existence: {png_path}")
+                
+                if os.path.exists(png_path):
+                    # 3.2 - Vérifier que le fichier n'est pas vide (taille > 0)
+                    file_size = os.path.getsize(png_path)
+                    if file_size > 0:
+                        self.log_result("3.1 PNG File Generation", True, 
+                                      f"Fichier PNG généré: {png_path} (taille: {file_size} bytes)")
+                    else:
+                        self.log_result("3.1 PNG File Generation", False, 
+                                      f"Fichier PNG vide: {png_path}")
+                else:
+                    self.log_result("3.1 PNG File Generation", False, 
+                                  f"Fichier PNG non trouvé: {png_path}")
+                
+                # 3.3 - Lister les fichiers dans /app/backend/invoices/
+                invoices_dir = "/app/backend/invoices/"
+                if os.path.exists(invoices_dir):
+                    invoice_files = [f for f in os.listdir(invoices_dir) if f.endswith('.png')]
+                    self.log_result("3.2 List Invoice Files", True, 
+                                  f"Fichiers PNG trouvés dans {invoices_dir}: {len(invoice_files)} fichiers")
+                    print(f"   Fichiers: {invoice_files[:5]}...")  # Show first 5 files
+                else:
+                    self.log_result("3.2 List Invoice Files", False, 
+                                  f"Répertoire invoices non trouvé: {invoices_dir}")
+                    
+            except Exception as e:
+                self.log_result("3.1 PNG File Generation", False, "Exception occurred", str(e))
+        
+        # ============================================================================
+        # ÉTAPE 4 - TÉLÉCHARGER LA FACTURE (CLIENT)
+        # ============================================================================
+        print("\n🔸 ÉTAPE 4 - TÉLÉCHARGER LA FACTURE (CLIENT)")
+        
+        if client_token and test_payment_id:
+            try:
+                headers = {"Authorization": f"Bearer {client_token}"}
+                print(f"🔍 Client downloading invoice: GET /api/payments/{test_payment_id}/invoice")
+                
+                # 4.1 - GET /api/payments/{payment_id}/invoice
+                invoice_response = self.session.get(f"{API_BASE}/payments/{test_payment_id}/invoice", headers=headers)
+                
+                # 4.2 - VÉRIFIER Status code : 200 OK, Content-Type : image/png, fichier PNG retourné, taille > 10KB
+                verification_results = []
+                
+                if invoice_response.status_code == 200:
+                    verification_results.append("✅ Status code: 200 OK")
+                else:
+                    verification_results.append(f"❌ Status code: {invoice_response.status_code}")
+                
+                content_type = invoice_response.headers.get('content-type', '')
+                if 'image/png' in content_type:
+                    verification_results.append(f"✅ Content-Type: {content_type}")
+                else:
+                    verification_results.append(f"❌ Content-Type: {content_type} (attendu image/png)")
+                
+                content_length = len(invoice_response.content)
+                if content_length > 10240:  # 10KB
+                    verification_results.append(f"✅ Taille fichier: {content_length} bytes (> 10KB)")
+                else:
+                    verification_results.append(f"❌ Taille fichier: {content_length} bytes (< 10KB)")
+                
+                # Vérifier signature PNG
+                if invoice_response.content.startswith(b'\x89PNG\r\n\x1a\n'):
+                    verification_results.append("✅ Signature PNG valide")
+                else:
+                    verification_results.append("❌ Signature PNG invalide")
+                
+                all_verified = all("✅" in result for result in verification_results)
+                self.log_result("4.1 Client Invoice Download", all_verified, 
+                              f"Vérifications: {'; '.join(verification_results)}")
+                
+            except Exception as e:
+                self.log_result("4.1 Client Invoice Download", False, "Exception occurred", str(e))
+        
+        # ============================================================================
+        # ÉTAPE 5 - TÉLÉCHARGER LA FACTURE (MANAGER)
+        # ============================================================================
+        print("\n🔸 ÉTAPE 5 - TÉLÉCHARGER LA FACTURE (MANAGER)")
+        
+        if 'manager' in self.tokens and test_payment_id:
+            try:
+                headers = {"Authorization": f"Bearer {self.tokens['manager']}"}
+                print(f"🔍 Manager downloading invoice: GET /api/payments/{test_payment_id}/invoice")
+                
+                # 5.1 - GET /api/payments/{payment_id}/invoice
+                invoice_response = self.session.get(f"{API_BASE}/payments/{test_payment_id}/invoice", headers=headers)
+                
+                # 5.2 - VÉRIFIER même résultat que pour le client
+                verification_results = []
+                
+                if invoice_response.status_code == 200:
+                    verification_results.append("✅ Status code: 200 OK")
+                else:
+                    verification_results.append(f"❌ Status code: {invoice_response.status_code}")
+                
+                content_type = invoice_response.headers.get('content-type', '')
+                if 'image/png' in content_type:
+                    verification_results.append(f"✅ Content-Type: {content_type}")
+                else:
+                    verification_results.append(f"❌ Content-Type: {content_type}")
+                
+                content_length = len(invoice_response.content)
+                if content_length > 10240:  # 10KB
+                    verification_results.append(f"✅ Taille fichier: {content_length} bytes")
+                else:
+                    verification_results.append(f"❌ Taille fichier: {content_length} bytes")
+                
+                all_verified = all("✅" in result for result in verification_results)
+                self.log_result("5.1 Manager Invoice Download", all_verified, 
+                              f"Vérifications: {'; '.join(verification_results)}")
+                
+            except Exception as e:
+                self.log_result("5.1 Manager Invoice Download", False, "Exception occurred", str(e))
+        
+        # ============================================================================
+        # ÉTAPE 6 - TESTER L'ENDPOINT ALTERNATIF
+        # ============================================================================
+        print("\n🔸 ÉTAPE 6 - TESTER L'ENDPOINT ALTERNATIF")
+        
+        if 'manager' in self.tokens and test_invoice_number:
+            try:
+                headers = {"Authorization": f"Bearer {self.tokens['manager']}"}
+                print(f"🔍 Testing alternative endpoint: GET /api/invoices/{test_invoice_number}")
+                
+                # 6.1 - GET /api/invoices/{invoice_number}
+                invoice_response = self.session.get(f"{API_BASE}/invoices/{test_invoice_number}", headers=headers)
+                
+                # 6.2 - VÉRIFIER que la facture est téléchargeable via le numéro de facture
+                if invoice_response.status_code == 200:
+                    content_type = invoice_response.headers.get('content-type', '')
+                    content_length = len(invoice_response.content)
+                    self.log_result("6.1 Alternative Invoice Download", True, 
+                                  f"Téléchargement réussi via numéro de facture - Type: {content_type}, Taille: {content_length} bytes")
+                else:
+                    self.log_result("6.1 Alternative Invoice Download", False, 
+                                  f"Status: {invoice_response.status_code}", invoice_response.text)
+                
+            except Exception as e:
+                self.log_result("6.1 Alternative Invoice Download", False, "Exception occurred", str(e))
+        
+        # ============================================================================
+        # ÉTAPE 7 - TESTS D'ERREUR
+        # ============================================================================
+        print("\n🔸 ÉTAPE 7 - TESTS D'ERREUR")
+        
+        # 7.1 - GET /api/payments/{payment_id}/invoice avec paiement status "pending" → Doit retourner 400
+        if 'manager' in self.tokens:
+            try:
+                # Create a new payment that stays pending
+                headers = {"Authorization": f"Bearer {self.tokens['manager']}"}
+                client_data = {
+                    "email": f"client.error.test.{int(time.time())}@example.com",
+                    "full_name": "Client Error Test",
+                    "phone": "+33987654321",
+                    "country": "Canada",
+                    "visa_type": "Study Permit"
+                }
+                client_response = self.session.post(f"{API_BASE}/clients", json=client_data, headers=headers)
+                if client_response.status_code in [200, 201]:
+                    # Login as this client and declare payment
+                    error_client_login = self.session.post(f"{API_BASE}/auth/login", json={
+                        "email": client_data["email"],
+                        "password": "Aloria2024!"
+                    })
+                    if error_client_login.status_code == 200:
+                        error_client_token = error_client_login.json()['access_token']
+                        error_headers = {"Authorization": f"Bearer {error_client_token}"}
+                        
+                        error_payment_data = {
+                            "amount": 50000,
+                            "currency": "CFA",
+                            "description": "Test error payment",
+                            "payment_method": "Cash"
+                        }
+                        error_payment_response = self.session.post(f"{API_BASE}/payments/declare", 
+                                                                 json=error_payment_data, headers=error_headers)
+                        if error_payment_response.status_code in [200, 201]:
+                            error_payment_id = error_payment_response.json()['id']
+                            
+                            # Try to download invoice for pending payment
+                            error_invoice_response = self.session.get(f"{API_BASE}/payments/{error_payment_id}/invoice", 
+                                                                    headers=error_headers)
+                            if error_invoice_response.status_code == 400:
+                                self.log_result("7.1 Error Test - Pending Payment", True, 
+                                              "Téléchargement correctement refusé pour paiement pending (400)")
+                            else:
+                                self.log_result("7.1 Error Test - Pending Payment", False, 
+                                              f"Attendu 400, reçu {error_invoice_response.status_code}")
+                        
+            except Exception as e:
+                self.log_result("7.1 Error Test - Pending Payment", False, "Exception occurred", str(e))
+        
+        # 7.2 - GET /api/payments/{payment_id}/invoice avec paiement inexistant → Doit retourner 404
+        if client_token:
+            try:
+                headers = {"Authorization": f"Bearer {client_token}"}
+                fake_payment_id = "00000000-0000-0000-0000-000000000000"
+                
+                error_response = self.session.get(f"{API_BASE}/payments/{fake_payment_id}/invoice", headers=headers)
+                if error_response.status_code == 404:
+                    self.log_result("7.2 Error Test - Nonexistent Payment", True, 
+                                  "Téléchargement correctement refusé pour paiement inexistant (404)")
+                else:
+                    self.log_result("7.2 Error Test - Nonexistent Payment", False, 
+                                  f"Attendu 404, reçu {error_response.status_code}")
+                    
+            except Exception as e:
+                self.log_result("7.2 Error Test - Nonexistent Payment", False, "Exception occurred", str(e))
+        
+        # 7.3 - GET /api/invoices/{invoice_number} avec numéro invalide → Doit retourner 404
+        if 'manager' in self.tokens:
+            try:
+                headers = {"Authorization": f"Bearer {self.tokens['manager']}"}
+                fake_invoice_number = "ALO-00000000-INVALID"
+                
+                error_response = self.session.get(f"{API_BASE}/invoices/{fake_invoice_number}", headers=headers)
+                if error_response.status_code == 404:
+                    self.log_result("7.3 Error Test - Invalid Invoice Number", True, 
+                                  "Téléchargement correctement refusé pour numéro de facture invalide (404)")
+                else:
+                    self.log_result("7.3 Error Test - Invalid Invoice Number", False, 
+                                  f"Attendu 404, reçu {error_response.status_code}")
+                    
+            except Exception as e:
+                self.log_result("7.3 Error Test - Invalid Invoice Number", False, "Exception occurred", str(e))
+        
+        print("\n🎯 WORKFLOW COMPLET DE GÉNÉRATION DE FACTURES PNG TERMINÉ")
                                   f"Code Gen Status: {code_response.status_code}", code_response.text)
                     return
             except Exception as e:
