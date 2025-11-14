@@ -89,6 +89,286 @@ class APITester:
             except Exception as e:
                 self.log_result(f"{role.upper()} Login", False, "Exception occurred", str(e))
 
+    def test_urgent_1_client_data_na_issue(self):
+        """TEST URGENT 1: DIAGNOSTIC DONNÉES CLIENTS N/A"""
+        print("=== TEST URGENT 1: DIAGNOSTIC DONNÉES CLIENTS N/A ===")
+        
+        if 'manager' not in self.tokens:
+            self.log_result("TEST 1 - Manager Login Required", False, "Manager credentials not available")
+            return
+            
+        headers = {"Authorization": f"Bearer {self.tokens['manager']}"}
+        
+        # ÉTAPE 1: Login Manager (manager@test.com / password123) - DÉJÀ FAIT
+        self.log_result("1.1 Manager Login", True, "Manager logged in successfully")
+        
+        # ÉTAPE 2: GET /api/clients
+        try:
+            print("🔍 TESTING GET /api/clients")
+            response = self.session.get(f"{API_BASE}/clients", headers=headers)
+            
+            if response.status_code == 200:
+                clients = response.json()
+                print(f"📊 NOMBRE DE CLIENTS RETOURNÉS: {len(clients)}")
+                
+                # ÉTAPE 3: ANALYSER la réponse
+                na_clients = []
+                valid_clients = []
+                
+                for i, client in enumerate(clients[:5]):  # Analyser les 5 premiers clients
+                    client_analysis = {
+                        'client_id': client.get('id', 'N/A'),
+                        'user_id': client.get('user_id', 'N/A'),
+                        'full_name': client.get('full_name', 'N/A'),
+                        'email': client.get('email', 'N/A'),
+                        'phone': client.get('phone', 'N/A')
+                    }
+                    
+                    print(f"🔍 CLIENT {i+1}: ID={client_analysis['client_id']}")
+                    print(f"   - user_id: {client_analysis['user_id']}")
+                    print(f"   - full_name: {client_analysis['full_name']}")
+                    print(f"   - email: {client_analysis['email']}")
+                    print(f"   - phone: {client_analysis['phone']}")
+                    
+                    # Vérifier si les données sont N/A, vides ou null
+                    has_na_data = (
+                        client_analysis['full_name'] in [None, '', 'N/A', 'null'] or
+                        client_analysis['email'] in [None, '', 'N/A', 'null'] or
+                        client_analysis['phone'] in [None, '', 'N/A', 'null']
+                    )
+                    
+                    if has_na_data:
+                        na_clients.append(client_analysis)
+                    else:
+                        valid_clients.append(client_analysis)
+                
+                # ÉTAPE 4: Pour UN client avec données N/A, vérifier user_id
+                if na_clients:
+                    problem_client = na_clients[0]
+                    print(f"\n🚨 PROBLÈME DÉTECTÉ - Client avec données N/A: {problem_client['client_id']}")
+                    
+                    if problem_client['user_id'] not in [None, '', 'N/A']:
+                        # Vérifier si l'utilisateur existe
+                        try:
+                            user_response = self.session.get(f"{API_BASE}/admin/users", headers=headers)
+                            if user_response.status_code == 200:
+                                users = user_response.json()
+                                user_found = next((u for u in users if u.get('id') == problem_client['user_id']), None)
+                                
+                                if user_found:
+                                    print(f"✅ USER TROUVÉ: {user_found.get('id')}")
+                                    print(f"   - full_name: {user_found.get('full_name')}")
+                                    print(f"   - email: {user_found.get('email')}")
+                                    print(f"   - phone: {user_found.get('phone')}")
+                                    
+                                    self.log_result("1.2 Client Data Analysis", False, 
+                                                  f"❌ DIAGNOSTIC RACINE: User existe avec données complètes mais client affiche N/A. "
+                                                  f"Le code de fallback ne fonctionne pas correctement. "
+                                                  f"Client ID: {problem_client['client_id']}, User ID: {problem_client['user_id']}")
+                                else:
+                                    self.log_result("1.2 Client Data Analysis", False, 
+                                                  f"❌ DIAGNOSTIC RACINE: user_id présent ({problem_client['user_id']}) mais user inexistant - User supprimé")
+                            else:
+                                self.log_result("1.2 Client Data Analysis", False, 
+                                              f"Cannot access users list - Status: {user_response.status_code}")
+                        except Exception as e:
+                            self.log_result("1.2 Client Data Analysis", False, f"Exception checking user: {str(e)}")
+                    else:
+                        self.log_result("1.2 Client Data Analysis", False, 
+                                      f"❌ DIAGNOSTIC RACINE: Les clients n'ont pas de user_id lié")
+                else:
+                    self.log_result("1.2 Client Data Analysis", True, 
+                                  f"✅ AUCUN PROBLÈME DÉTECTÉ: Tous les clients analysés ont des données complètes. "
+                                  f"Clients valides: {len(valid_clients)}")
+                
+                # ÉTAPE 5: RÉSUMÉ DIAGNOSTIC
+                print(f"\n📋 RÉSUMÉ DIAGNOSTIC:")
+                print(f"   - Total clients: {len(clients)}")
+                print(f"   - Clients avec données N/A: {len(na_clients)}")
+                print(f"   - Clients avec données valides: {len(valid_clients)}")
+                
+            else:
+                self.log_result("1.2 GET /api/clients", False, f"Status: {response.status_code}", response.text)
+                
+        except Exception as e:
+            self.log_result("1.2 GET /api/clients", False, "Exception occurred", str(e))
+
+    def test_urgent_2_password_change_issue(self):
+        """TEST URGENT 2: CHANGEMENT MOT DE PASSE NE FONCTIONNE PAS"""
+        print("=== TEST URGENT 2: CHANGEMENT MOT DE PASSE ===")
+        
+        # ÉTAPE 1: Créer un utilisateur test pour le changement de mot de passe
+        test_user_email = f"test.password.change.{int(time.time())}@example.com"
+        test_user_id = None
+        original_password = "TestPassword123!"
+        new_password = "NouveauMotDePasse123!"
+        
+        # Créer un client test via Manager
+        if 'manager' in self.tokens:
+            try:
+                headers = {"Authorization": f"Bearer {self.tokens['manager']}"}
+                client_data = {
+                    "email": test_user_email,
+                    "full_name": "Test Password Change User",
+                    "phone": "+33123456789",
+                    "country": "France",
+                    "visa_type": "Work Permit",
+                    "message": "Test user for password change"
+                }
+                
+                print(f"🔍 CREATING TEST USER: {test_user_email}")
+                response = self.session.post(f"{API_BASE}/clients", json=client_data, headers=headers)
+                
+                if response.status_code in [200, 201]:
+                    client_response = response.json()
+                    test_user_id = client_response.get('user_id')
+                    original_password = "Aloria2024!"  # Default password for new clients
+                    
+                    self.log_result("2.1 Create Test User", True, f"Test user created: {test_user_email}")
+                    print(f"   - User ID: {test_user_id}")
+                    print(f"   - Original Password: {original_password}")
+                else:
+                    self.log_result("2.1 Create Test User", False, f"Status: {response.status_code}", response.text)
+                    return
+                    
+            except Exception as e:
+                self.log_result("2.1 Create Test User", False, f"Exception: {str(e)}")
+                return
+        
+        # ÉTAPE 2: Login avec l'utilisateur test
+        test_user_token = None
+        try:
+            print(f"🔍 LOGIN TEST USER: {test_user_email}")
+            login_response = self.session.post(f"{API_BASE}/auth/login", json={
+                "email": test_user_email,
+                "password": original_password
+            })
+            
+            if login_response.status_code == 200:
+                login_data = login_response.json()
+                test_user_token = login_data['access_token']
+                test_user_id = login_data['user']['id']
+                
+                self.log_result("2.2 Test User Login", True, f"Test user logged in successfully")
+                print(f"   - User ID: {test_user_id}")
+                print(f"   - Token obtained: {test_user_token[:20]}...")
+            else:
+                self.log_result("2.2 Test User Login", False, f"Status: {login_response.status_code}", login_response.text)
+                return
+                
+        except Exception as e:
+            self.log_result("2.2 Test User Login", False, f"Exception: {str(e)}")
+            return
+        
+        # ÉTAPE 3: POST /api/users/change-password (CORRECTION: endpoint is /api/auth/change-password)
+        if test_user_token:
+            try:
+                headers = {"Authorization": f"Bearer {test_user_token}"}
+                password_change_data = {
+                    "old_password": original_password,
+                    "new_password": new_password
+                }
+                
+                print(f"🔍 TESTING POST /api/auth/change-password")
+                print(f"   - Old Password: {original_password}")
+                print(f"   - New Password: {new_password}")
+                
+                response = self.session.patch(f"{API_BASE}/auth/change-password", json=password_change_data, headers=headers)
+                
+                print(f"📊 RESPONSE STATUS: {response.status_code}")
+                print(f"📊 RESPONSE HEADERS: {dict(response.headers)}")
+                
+                # ÉTAPE 4: VÉRIFIER la réponse
+                if response.status_code == 200:
+                    response_data = response.json()
+                    print(f"✅ SUCCESS RESPONSE: {response_data}")
+                    
+                    self.log_result("2.3 Password Change Request", True, 
+                                  f"✅ Password change successful - Message: {response_data.get('message', 'Success')}")
+                    
+                    # ÉTAPE 5: TEST DE CONNEXION AVEC NOUVEAU MDP
+                    print(f"🔍 TESTING LOGIN WITH NEW PASSWORD")
+                    time.sleep(1)  # Wait a moment for password to be updated
+                    
+                    new_login_response = self.session.post(f"{API_BASE}/auth/login", json={
+                        "email": test_user_email,
+                        "password": new_password
+                    })
+                    
+                    if new_login_response.status_code == 200:
+                        self.log_result("2.4 Login with New Password", True, 
+                                      "✅ Login successful with new password - Password change applied correctly")
+                    else:
+                        self.log_result("2.4 Login with New Password", False, 
+                                      f"❌ Login failed with new password - Status: {new_login_response.status_code}")
+                        
+                        # ÉTAPE 6: SI ÉCHEC - Tester avec l'ancien mot de passe
+                        print(f"🔍 TESTING LOGIN WITH OLD PASSWORD (fallback)")
+                        old_login_response = self.session.post(f"{API_BASE}/auth/login", json={
+                            "email": test_user_email,
+                            "password": original_password
+                        })
+                        
+                        if old_login_response.status_code == 200:
+                            self.log_result("2.5 Login with Old Password", False, 
+                                          "❌ PROBLÈME: L'ancien mot de passe fonctionne encore - Le changement n'a pas été appliqué")
+                        else:
+                            self.log_result("2.5 Login with Old Password", False, 
+                                          "❌ PROBLÈME CRITIQUE: Aucun mot de passe ne fonctionne - Problème de hash ou DB")
+                
+                elif response.status_code == 400:
+                    try:
+                        error_data = response.json()
+                        error_message = error_data.get('detail', 'Unknown error')
+                        
+                        if 'incorrect' in error_message.lower() or 'actuel' in error_message.lower():
+                            self.log_result("2.3 Password Change Request", False, 
+                                          f"❌ ERREUR: Mot de passe actuel incorrect - {error_message}")
+                        else:
+                            self.log_result("2.3 Password Change Request", False, 
+                                          f"❌ ERREUR 400: {error_message}")
+                    except:
+                        self.log_result("2.3 Password Change Request", False, 
+                                      f"❌ ERREUR 400: {response.text}")
+                
+                elif response.status_code == 422:
+                    try:
+                        error_data = response.json()
+                        self.log_result("2.3 Password Change Request", False, 
+                                      f"❌ ERREUR VALIDATION 422: {error_data}")
+                    except:
+                        self.log_result("2.3 Password Change Request", False, 
+                                      f"❌ ERREUR VALIDATION 422: {response.text}")
+                
+                else:
+                    self.log_result("2.3 Password Change Request", False, 
+                                  f"❌ ERREUR INATTENDUE: Status {response.status_code}, Response: {response.text}")
+                
+            except Exception as e:
+                self.log_result("2.3 Password Change Request", False, f"❌ Exception: {str(e)}")
+        
+        # ÉTAPE 7: Test avec Manager credentials aussi
+        print(f"\n🔍 TESTING PASSWORD CHANGE WITH MANAGER CREDENTIALS")
+        if 'manager' in self.tokens:
+            try:
+                headers = {"Authorization": f"Bearer {self.tokens['manager']}"}
+                manager_password_change = {
+                    "old_password": "password123",
+                    "new_password": "NewManagerPassword123!"
+                }
+                
+                response = self.session.patch(f"{API_BASE}/auth/change-password", json=manager_password_change, headers=headers)
+                
+                if response.status_code == 200:
+                    self.log_result("2.6 Manager Password Change", True, 
+                                  "✅ Manager password change successful")
+                else:
+                    self.log_result("2.6 Manager Password Change", False, 
+                                  f"❌ Manager password change failed - Status: {response.status_code}, Response: {response.text}")
+                    
+            except Exception as e:
+                self.log_result("2.6 Manager Password Change", False, f"❌ Exception: {str(e)}")
+
     def test_critical_1_withdrawal_manager_error(self):
         """TEST CRITIQUE 1: ERREUR RETRAIT MANAGER - Identifier l'erreur exacte"""
         print("=== TEST CRITIQUE 1: ERREUR DÉCLARATION RETRAIT MANAGER ===")
