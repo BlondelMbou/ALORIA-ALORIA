@@ -42,12 +42,15 @@ export default function ManagerDashboard() {
     cni_number: '' 
   });
   const [showCreateClient, setShowCreateClient] = useState(false);
+  const [showCredentialsDialog, setShowCredentialsDialog] = useState(false);
+  const [newClientCredentials, setNewClientCredentials] = useState(null);
   const [newClient, setNewClient] = useState({
     email: '',
     full_name: '',
     phone: '',
     country: '',
     visa_type: '',
+    first_payment_amount: 0,
     message: ''
   });
   const [chatUnreadCount, setChatUnreadCount] = useState(0);
