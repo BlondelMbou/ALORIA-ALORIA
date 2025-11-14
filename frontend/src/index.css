@@ -14,6 +14,44 @@ body {
         "Helvetica Neue", sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    /* Prévenir les débordements horizontaux sur mobile */
+    overflow-x: hidden;
+}
+
+/* Fix pour mobile - empêcher les débordements */
+* {
+    box-sizing: border-box;
+}
+
+/* Amélioration du responsive mobile */
+@media (max-width: 640px) {
+    /* Empêcher le zoom sur les inputs mobile */
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="number"],
+    textarea,
+    select {
+        font-size: 16px !important;
+    }
+    
+    /* Meilleur espacement sur mobile */
+    .container {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+    
+    /* Améliorer la lisibilité des titres sur mobile */
+    h1 {
+        line-height: 1.2;
+        word-break: break-word;
+    }
+    
+    /* Fix pour les badges et badges qui débordent */
+    .badge, .inline-flex {
+        max-width: 100%;
+        flex-wrap: wrap;
+    }
 }
 
 /* Animations pour les sections */
