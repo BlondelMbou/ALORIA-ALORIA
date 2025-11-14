@@ -424,66 +424,116 @@ export default function ManagerDashboard() {
                     <span className="sm:hidden">Client</span>
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="bg-[#1E293B] border-slate-700">
+                <DialogContent className="bg-[#1E293B] border-slate-700 max-w-2xl">
                   <DialogHeader>
                     <DialogTitle className="text-white">Créer un Nouveau Client</DialogTitle>
                     <DialogDescription className="text-slate-400">
-                      Remplissez les informations pour créer un nouveau profil client
+                      Remplissez les informations pour créer un nouveau profil client et son dossier d'immigration
                     </DialogDescription>
                   </DialogHeader>
                   <form onSubmit={handleCreateClient} className="space-y-4">
-                    <div>
-                      <Label className="text-slate-300">Nom Complet</Label>
-                      <Input
-                        value={newClient.full_name}
-                        onChange={(e) => setNewClient({ ...newClient, full_name: e.target.value })}
-                        required
-                        className="bg-slate-800 border-slate-600 text-white"
-                        data-testid="client-name-input"
-                      />
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label className="text-slate-300">Nom Complet *</Label>
+                        <Input
+                          value={newClient.full_name}
+                          onChange={(e) => setNewClient({ ...newClient, full_name: e.target.value })}
+                          required
+                          placeholder="Ex: Jean Dupont"
+                          className="bg-slate-800 border-slate-600 text-white"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-slate-300">Email *</Label>
+                        <Input
+                          type="email"
+                          value={newClient.email}
+                          onChange={(e) => setNewClient({ ...newClient, email: e.target.value })}
+                          required
+                          placeholder="email@example.com"
+                          className="bg-slate-800 border-slate-600 text-white"
+                        />
+                      </div>
                     </div>
-                    <div>
-                      <Label className="text-slate-300">Email</Label>
-                      <Input
-                        type="email"
-                        value={newClient.email}
-                        onChange={(e) => setNewClient({ ...newClient, email: e.target.value })}
-                        required
-                        className="bg-slate-800 border-slate-600 text-white"
-                        data-testid="client-email-input"
-                      />
-                    </div>
+                    
                     <div>
                       <Label className="text-slate-300">Téléphone</Label>
                       <Input
                         value={newClient.phone}
                         onChange={(e) => setNewClient({ ...newClient, phone: e.target.value })}
+                        placeholder="+237 XXX XXX XXX"
                         className="bg-slate-800 border-slate-600 text-white"
-                        data-testid="client-phone-input"
                       />
                     </div>
-                    <div>
-                      <Label className="text-slate-300">Pays de Destination</Label>
-                      <Select value={newClient.country} onValueChange={(value) => setNewClient({ ...newClient, country: value })}>
-                        <SelectTrigger className="bg-slate-800 border-slate-600 text-white" data-testid="client-country-select">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent className="bg-[#1E293B] border-slate-600">
-                          <SelectItem value="Canada" className="text-white hover:bg-slate-700">Canada</SelectItem>
-                          <SelectItem value="France" className="text-white hover:bg-slate-700">France</SelectItem>
-                        </SelectContent>
-                      </Select>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label className="text-slate-300">Pays de Destination *</Label>
+                        <select
+                          value={newClient.country}
+                          onChange={(e) => setNewClient({ ...newClient, country: e.target.value, visa_type: '' })}
+                          required
+                          className="w-full bg-slate-800 border-slate-600 text-white p-2 rounded"
+                        >
+                          <option value="">Sélectionner...</option>
+                          <option value="Canada">Canada</option>
+                          <option value="France">France</option>
+                        </select>
+                      </div>
+                      
+                      <div>
+                        <Label className="text-slate-300">Type de Visa *</Label>
+                        <select
+                          value={newClient.visa_type}
+                          onChange={(e) => setNewClient({ ...newClient, visa_type: e.target.value })}
+                          required
+                          disabled={!newClient.country}
+                          className="w-full bg-slate-800 border-slate-600 text-white p-2 rounded"
+                        >
+                          <option value="">Sélectionner...</option>
+                          {newClient.country === 'Canada' && (
+                            <>
+                              <option value="Permis de travail">Permis de travail</option>
+                              <option value="Permis d'études">Permis d'études</option>
+                              <option value="Résidence permanente (Entrée express)">Résidence permanente (Entrée express)</option>
+                            </>
+                          )}
+                          {newClient.country === 'France' && (
+                            <>
+                              <option value="Permis de travail (Passeport Talent)">Permis de travail (Passeport Talent)</option>
+                              <option value="Visa étudiant">Visa étudiant</option>
+                              <option value="Regroupement familial">Regroupement familial</option>
+                            </>
+                          )}
+                        </select>
+                      </div>
                     </div>
+                    
                     <div>
-                      <Label className="text-slate-300">Type de Visa</Label>
+                      <Label className="text-slate-300">Premier Versement (CFA)</Label>
                       <Input
-                        value={newClient.visa_type}
-                        onChange={(e) => setNewClient({ ...newClient, visa_type: e.target.value })}
+                        type="number"
+                        min="0"
+                        value={newClient.first_payment_amount}
+                        onChange={(e) => setNewClient({ ...newClient, first_payment_amount: parseFloat(e.target.value) || 0 })}
+                        placeholder="Montant du premier versement (optionnel)"
                         className="bg-slate-800 border-slate-600 text-white"
-                        data-testid="client-visa-input"
                       />
+                      <p className="text-slate-500 text-xs mt-1">Optionnel - Si le client effectue déjà un premier versement</p>
                     </div>
-                    <Button type="submit" className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white" data-testid="submit-client-btn">
+                    
+                    <div className="bg-blue-500/10 border border-blue-500/30 p-3 rounded-lg">
+                      <p className="text-blue-400 text-sm">
+                        ℹ️ Un compte client sera créé avec un mot de passe temporaire qui sera affiché après la création.
+                      </p>
+                    </div>
+                    
+                    <Button 
+                      type="submit" 
+                      className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white"
+                      disabled={!newClient.country || !newClient.visa_type}
+                    >
+                      <UserPlus className="w-4 h-4 mr-2" />
                       Créer le Client
                     </Button>
                   </form>
