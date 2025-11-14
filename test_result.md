@@ -439,7 +439,7 @@
     implemented: true
     working: false
     file: "server.py"
-    stuck_count: 1
+    stuck_count: 2
     priority: "high"
     needs_retesting: false
     status_history:
@@ -449,6 +449,9 @@
         -working: false
         -agent: "testing"
         -comment: "❌ FACTURES PNG - ERREUR CRITIQUE IDENTIFIÉE: Test complet effectué via Manager Dashboard. 6 factures disponibles pour téléchargement trouvées mais erreur 404 lors du téléchargement (/api/payments/{id}/invoice). Le système de génération de factures PNG n'est pas fonctionnel - endpoint manquant ou défaillant. PROBLÈME CRITIQUE: API de téléchargement de factures non opérationnelle."
+        -working: false
+        -agent: "testing"
+        -comment: "🚨 WORKFLOW COMPLET TESTÉ - ERREURS CRITIQUES MULTIPLES IDENTIFIÉES: Test exhaustif du système de factures PNG révèle 4 problèmes majeurs: 1) ❌ CASE SENSITIVITY BUG: Endpoint /api/payments/{id}/invoice vérifie status != 'confirmed' (minuscule) mais DB stocke 'CONFIRMED' (majuscule) → erreur 400 'Le paiement n'est pas confirmé'. 2) ❌ GÉNÉRATION PNG DÉFAILLANTE: Système génère des fichiers PDF (/app/backend/invoices/*.pdf) au lieu de PNG, mais code cherche des fichiers .png → erreur 404. 3) ❌ ENDPOINT ALTERNATIF CASSÉ: GET /api/invoices/{invoice_number} retourne 404 'Fichier de facture non trouvé'. 4) ❌ TESTS D'ERREUR PARTIELS: Seuls 2/3 tests d'erreur passent. RÉSULTAT: 69.2% de réussite (9/13 tests). ACTIONS REQUISES: Corriger la casse du status, implémenter génération PNG, réparer endpoint alternatif."
 
   - task: "SuperAdmin Dashboard Financial Stats"
     implemented: true
