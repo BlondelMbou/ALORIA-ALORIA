@@ -349,6 +349,9 @@ class ClientResponse(BaseModel):
     model_config = ConfigDict(extra="ignore")
     id: str
     user_id: str
+    full_name: Optional[str] = None  # AJOUTÉ: pour affichage détails client
+    email: Optional[str] = None      # AJOUTÉ: pour affichage détails client
+    phone: Optional[str] = None      # AJOUTÉ: pour affichage détails client
     assigned_employee_id: Optional[str]
     assigned_employee_name: Optional[str]
     country: str
