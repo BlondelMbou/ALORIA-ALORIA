@@ -2166,6 +2166,7 @@ async def declare_payment(payment_data: PaymentDeclaration, current_user: dict =
     payment_id = str(uuid.uuid4())
     payment_dict = {
         "id": payment_id,
+        "user_id": current_user["id"],  # AJOUTÉ: user_id pour la recherche d'historique
         "client_id": client["id"],
         "client_name": current_user["full_name"],
         "amount": payment_data.amount,
