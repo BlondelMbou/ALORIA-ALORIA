@@ -329,9 +329,9 @@ class APITester:
                                           f"✅ SUCCESS - Message: {reset_result['message']}, Temp Password: {reset_result['temporary_password']}")
                             
                             # Verify notification was created
-                            client_user = await self.get_user_by_email(client_email)
+                            client_user = self.get_user_by_email(client_email)
                             if client_user:
-                                notifications = await self.get_user_notifications(client_user['id'])
+                                notifications = self.get_user_notifications(client_user['id'])
                                 password_reset_notifications = [n for n in notifications if n.get('type') == 'password_reset']
                                 if password_reset_notifications:
                                     self.log_result("TEST 1 - Notification Created", True, 
