@@ -2295,27 +2295,10 @@ async def generate_invoice_png(payment_id: str, invoice_number: str):
         
         # Créer l'image PNG moderne
         create_png(invoice_data, png_path)
-        c.rect(50, height - 460, width - 100, 50, fill=1)
-        
-        c.setFillColorRGB(0, 0, 0)
-        c.setFont("Helvetica-Bold", 16)
-        c.drawString(60, height - 435, f"MONTANT TOTAL: {invoice_data['amount']} {invoice_data['currency']}")
-        
-        # Pied de page
-        c.setFont("Helvetica-Oblique", 10)
-        c.setFillColorRGB(0.5, 0.5, 0.5)
-        c.drawString(50, 80, "Cette facture atteste du paiement des services d'immigration.")
-        c.drawString(50, 65, "Pour toute question, veuillez nous contacter à contact@aloria-agency.com")
-        
-        c.setFont("Helvetica-Bold", 11)
-        c.setFillColorRGB(0.96, 0.49, 0.13)
-        c.drawString(width/2 - 100, 40, "Merci de votre confiance - ALORIA AGENCY")
-        
-        c.save()
-        logger.info(f"✅ Facture PDF {invoice_number} générée avec succès à {pdf_path}")
+        logger.info(f"✅ Facture PNG {invoice_number} générée avec succès à {png_path}")
         
     except Exception as e:
-        logger.error(f"❌ Erreur génération facture PDF: {e}", exc_info=True)
+        logger.error(f"❌ Erreur génération facture PNG: {e}", exc_info=True)
 
 @api_router.get("/payments/client-history", response_model=List[PaymentDeclarationResponse])
 async def get_client_payment_history(current_user: dict = Depends(get_current_user)):
