@@ -1197,124 +1197,108 @@ async def get_client_credentials(client_id: str, current_user: dict = Depends(ge
         password="Aloria2024!"  # Default password
     )
 
-# Client Management
+# ============================================================================
+# GESTION CLIENTS - REFACTORISÉ AVEC SERVICES RÉUTILISABLES
+# ============================================================================
+
 @api_router.post("/clients", response_model=ClientResponse) 
 async def create_client(client_data: ClientCreate, current_user: dict = Depends(get_current_user)):
-    # Vérifier les permissions avec la nouvelle hiérarchie
-    if not can_create_role(current_user["role"], "CLIENT"):
+    """
+    Créer un client avec profil complet et dashboard automatique.
+    
+    ENDPOINT REFACTORISÉ - Utilise les services réutilisables:
+    - user_service.create_user_account()
+    - client_service.create_client_profile()
+    - assignment_service.assign_client_to_employee()
+    - notification_service.send_creation_notifications()
+    """
+    
+    # 1. Vérifier les permissions
+    if not verify_user_permissions(current_user["role"], "CLIENT"):
         raise HTTPException(
             status_code=403, 
             detail="Vous n'avez pas l'autorisation de créer un client"
         )
-        
-    # Check if user exists with this email
-    existing_user = await db.users.find_one({"email": client_data.email})
+    
+    # 2. Vérifier si l'utilisateur existe déjà
+    existing_user = await get_user_by_email(db, client_data.email)
     
     if existing_user:
-        # User exists, just create client record
+        # Utilisateur existe déjà, utiliser son ID
         user_id = existing_user["id"]
+        temp_password = None  # Pas de nouveau mot de passe
     else:
-        # Create new user account for client
-        user_id = str(uuid.uuid4())
-        user_dict = {
-            "id": user_id,
-            "email": client_data.email,
-            "password": hash_password("Aloria2024!"),  # Temporary password - must be changed
-            "full_name": client_data.full_name,
-            "phone": client_data.phone,
-            "role": "CLIENT",
-            "is_active": True,
-            "created_at": datetime.now(timezone.utc).isoformat()
-        }
-        await db.users.insert_one(user_dict)
+        # Créer un nouveau compte utilisateur (SERVICE RÉUTILISABLE)
+        user_account = await create_user_account(
+            db=db,
+            email=client_data.email,
+            full_name=client_data.full_name,
+            phone=client_data.phone,
+            role="CLIENT",
+            created_by_id=current_user["id"],
+            password=None  # Génération automatique
+        )
+        user_id = user_account["user_id"]
+        temp_password = user_account["temporary_password"]
     
-    # Find employee with least clients for load balancing
-    assigned_employee_id = None
-    employees = await db.users.find({"role": "EMPLOYEE", "is_active": True}).to_list(100)
-    if employees:
-        # Count clients per employee
-        employee_loads = []
-        for emp in employees:
-            count = await db.clients.count_documents({"assigned_employee_id": emp["id"]})
-            employee_loads.append((emp["id"], count))
-        assigned_employee_id = min(employee_loads, key=lambda x: x[1])[0]
+    # 3. Déterminer l'affectation intelligente (SERVICE RÉUTILISABLE)
+    assignment_result = await assign_client_to_employee(
+        db=db,
+        client_id=None,  # Sera créé dans create_client_profile
+        employee_id=getattr(client_data, 'assigned_employee_id', None),
+        created_by_id=current_user["id"],
+        created_by_role=current_user["role"],
+        use_load_balancing=True
+    )
     
-    # Create client record
-    client_id = str(uuid.uuid4())
-    client_dict = {
-        "id": client_id,
-        "user_id": user_id,
-        "assigned_employee_id": assigned_employee_id,
-        "country": client_data.country,
-        "visa_type": client_data.visa_type,
-        "current_status": "Nouveau",
-        "current_step": 0,
-        "progress_percentage": 0.0,
-        "created_at": datetime.now(timezone.utc).isoformat(),
-        "updated_at": datetime.now(timezone.utc).isoformat()
-    }
-    await db.clients.insert_one(client_dict)
-    
-    # Create case with workflow
-    workflow_steps = WORKFLOWS.get(client_data.country, {}).get(client_data.visa_type, [])
-    case_id = str(uuid.uuid4())
-    case_dict = {
-        "id": case_id,
-        "client_id": client_id,
-        "country": client_data.country,
-        "visa_type": client_data.visa_type,
-        "workflow_steps": workflow_steps,
-        "current_step_index": 0,
-        "status": "Nouveau",
-        "notes": client_data.message or "",
-        "created_at": datetime.now(timezone.utc).isoformat(),
-        "updated_at": datetime.now(timezone.utc).isoformat()
-    }
-    await db.cases.insert_one(case_dict)
-    
-    # Get assigned employee name
-    assigned_employee_name = None
-    if assigned_employee_id:
-        employee = await db.users.find_one({"id": assigned_employee_id})
-        if employee:
-            assigned_employee_name = employee["full_name"]
-    
-    # Log activity to user_activities collection (for SuperAdmin monitoring)
-    try:
-        activity = {
-            "id": str(uuid.uuid4()),
-            "user_id": current_user["id"],
-            "user_name": current_user["full_name"],
-            "user_role": current_user["role"],
-            "action": "client_created",
-            "details": {
-                "client_id": client_id,
-                "client_name": client_data.full_name,
-                "client_email": client_data.email,
-                "country": client_data.country,
-                "visa_type": client_data.visa_type
-            },
-            "ip_address": None,
-            "timestamp": datetime.now(timezone.utc).isoformat()
-        }
-        await db.user_activities.insert_one(activity)
-    except Exception as e:
-        logger.error(f"Erreur lors de l'enregistrement de l'activité client_created: {e}")
-
-    return ClientResponse(
-        id=client_id,
+    # 4. Créer le profil client complet avec dashboard garanti (SERVICE RÉUTILISABLE)
+    client_profile = await create_client_profile(
+        db=db,
         user_id=user_id,
-        assigned_employee_id=assigned_employee_id,
-        assigned_employee_name=assigned_employee_name,
+        email=client_data.email,
+        full_name=client_data.full_name,
+        phone=client_data.phone,
+        country=client_data.country,
+        visa_type=client_data.visa_type,
+        assigned_employee_id=assignment_result["assigned_employee_id"],
+        created_by_id=current_user["id"],
+        first_payment=0,
+        payment_method=None,
+        additional_data={"message": client_data.message or ""}
+    )
+    
+    # 5. Envoyer toutes les notifications (SERVICE RÉUTILISABLE)
+    await send_creation_notifications(
+        db=db,
+        created_user_id=user_id,
+        created_user_role="CLIENT",
+        created_user_name=client_data.full_name,
+        created_user_email=client_data.email,
+        created_by_id=current_user["id"],
+        created_by_role=current_user["role"],
+        created_by_name=current_user["full_name"],
+        additional_context={
+            "country": client_data.country,
+            "visa_type": client_data.visa_type,
+            "assigned_employee_id": assignment_result["assigned_employee_id"]
+        }
+    )
+    
+    # 6. Retourner la réponse avec credentials
+    return ClientResponse(
+        id=client_profile["client_id"],
+        user_id=user_id,
+        assigned_employee_id=assignment_result["assigned_employee_id"],
+        assigned_employee_name=assignment_result["assigned_employee_name"],
         country=client_data.country,
         visa_type=client_data.visa_type,
         current_status="Nouveau",
         current_step=0,
         progress_percentage=0.0,
-        created_at=client_dict["created_at"],
-        updated_at=client_dict["updated_at"],
+        created_at=datetime.now(timezone.utc).isoformat(),
+        updated_at=datetime.now(timezone.utc).isoformat(),
         login_email=client_data.email,
-        default_password="Aloria2024!" if not existing_user else None
+        default_password=temp_password if temp_password else "Aloria2024!"
     )
 
 @api_router.get("/clients", response_model=List[ClientResponse])
