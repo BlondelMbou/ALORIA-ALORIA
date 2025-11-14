@@ -3946,6 +3946,197 @@ class APITester:
             except Exception as e:
                 self.log_result("7.8 Client to Another Client (should fail)", False, "Exception occurred", str(e))
 
+    def test_critical_bugs_client_details_and_payment_history(self):
+        """
+        CRITICAL BUGS TESTING - USER REPORTED ISSUES
+        Test the two critical bugs that were recently fixed:
+        1. Client details display (full_name, email, phone showing empty)
+        2. Client payment history (remains empty after payment declaration)
+        """
+        print("=== CRITICAL BUGS TESTING - CLIENT DETAILS & PAYMENT HISTORY ===")
+        
+        # TEST 1: CLIENT DETAILS WITH COMPLETE DATA
+        print("\n--- TEST 1: CLIENT DETAILS WITH COMPLETE DATA ---")
+        
+        if 'manager' not in self.tokens:
+            self.log_result("TEST 1 - Client Details", False, "No manager token available")
+            return
+            
+        try:
+            headers = {"Authorization": f"Bearer {self.tokens['manager']}"}
+            
+            # Step 1: Get list of clients
+            response = self.session.get(f"{API_BASE}/clients", headers=headers)
+            if response.status_code != 200:
+                self.log_result("TEST 1.1 - Get Clients List", False, f"Status: {response.status_code}", response.text)
+                return
+                
+            clients = response.json()
+            if not clients:
+                self.log_result("TEST 1.1 - Get Clients List", False, "No clients found in system")
+                return
+                
+            self.log_result("TEST 1.1 - Get Clients List", True, f"Retrieved {len(clients)} clients")
+            
+            # Step 2: Take first client and get details
+            first_client = clients[0]
+            client_id = first_client['id']
+            
+            response = self.session.get(f"{API_BASE}/clients/{client_id}", headers=headers)
+            if response.status_code != 200:
+                self.log_result("TEST 1.2 - Get Client Details", False, f"Status: {response.status_code}", response.text)
+                return
+                
+            client_details = response.json()
+            
+            # Step 3: Verify full_name, email, phone are present and non-empty
+            missing_fields = []
+            empty_fields = []
+            
+            required_fields = ['full_name', 'email', 'phone']
+            for field in required_fields:
+                if field not in client_details:
+                    missing_fields.append(field)
+                elif not client_details[field] or client_details[field].strip() == "":
+                    empty_fields.append(field)
+            
+            if missing_fields or empty_fields:
+                error_msg = ""
+                if missing_fields:
+                    error_msg += f"Missing fields: {missing_fields}. "
+                if empty_fields:
+                    error_msg += f"Empty fields: {empty_fields}. "
+                    
+                self.log_result("TEST 1.2 - Client Details Complete", False, 
+                              f"Client ID: {client_id}", error_msg)
+                
+                # Step 4: If fields are empty, check if client has user_id and verify users collection
+                if client_details.get('user_id'):
+                    self.log_result("TEST 1.3 - User ID Present", True, f"Client has user_id: {client_details['user_id']}")
+                    
+                    # Try to get user data to verify fallback should work
+                    user_response = self.session.get(f"{API_BASE}/admin/users", headers=headers)
+                    if user_response.status_code == 200:
+                        users = user_response.json()
+                        user_data = next((u for u in users if u['id'] == client_details['user_id']), None)
+                        if user_data:
+                            self.log_result("TEST 1.4 - User Data Available", True, 
+                                          f"User data exists: full_name='{user_data.get('full_name')}', email='{user_data.get('email')}', phone='{user_data.get('phone')}'")
+                        else:
+                            self.log_result("TEST 1.4 - User Data Available", False, "User not found in users collection")
+                    else:
+                        self.log_result("TEST 1.4 - User Data Check", False, f"Cannot access users: {user_response.status_code}")
+                else:
+                    self.log_result("TEST 1.3 - User ID Present", False, "Client missing user_id field")
+            else:
+                self.log_result("TEST 1.2 - Client Details Complete", True, 
+                              f"✅ All fields present: full_name='{client_details['full_name']}', email='{client_details['email']}', phone='{client_details['phone']}'")
+                
+        except Exception as e:
+            self.log_result("TEST 1 - Client Details", False, "Exception occurred", str(e))
+        
+        # TEST 2: CLIENT PAYMENT DECLARATION & HISTORY
+        print("\n--- TEST 2: CLIENT PAYMENT DECLARATION & HISTORY ---")
+        
+        try:
+            # Step 1: Create a new client for testing
+            timestamp = int(time.time())
+            client_data = {
+                "email": f"test.payment.client.{timestamp}@example.com",
+                "full_name": "Client Test Paiement",
+                "phone": "+33123456789",
+                "country": "France", 
+                "visa_type": "Permis de travail",
+                "message": "Client créé pour test historique paiements"
+            }
+            
+            headers = {"Authorization": f"Bearer {self.tokens['manager']}"}
+            response = self.session.post(f"{API_BASE}/clients", json=client_data, headers=headers)
+            
+            if response.status_code not in [200, 201]:
+                self.log_result("TEST 2.1 - Create Test Client", False, f"Status: {response.status_code}", response.text)
+                return
+                
+            new_client = response.json()
+            test_client_email = client_data['email']
+            test_client_password = new_client.get('default_password', 'Aloria2024!')
+            
+            self.log_result("TEST 2.1 - Create Test Client", True, f"Client created: {test_client_email}")
+            
+            # Step 2: Login as the new client
+            client_login_data = {
+                "email": test_client_email,
+                "password": test_client_password
+            }
+            
+            login_response = self.session.post(f"{API_BASE}/auth/login", json=client_login_data)
+            if login_response.status_code != 200:
+                self.log_result("TEST 2.2 - Client Login", False, f"Status: {login_response.status_code}", login_response.text)
+                return
+                
+            client_token = login_response.json()['access_token']
+            client_headers = {"Authorization": f"Bearer {client_token}"}
+            
+            self.log_result("TEST 2.2 - Client Login", True, f"Client logged in successfully")
+            
+            # Step 3: Declare a payment
+            payment_data = {
+                "amount": 5000,
+                "currency": "CFA",
+                "description": "Test paiement historique",
+                "payment_method": "Mobile Money"
+            }
+            
+            payment_response = self.session.post(f"{API_BASE}/payments/declare", json=payment_data, headers=client_headers)
+            if payment_response.status_code not in [200, 201]:
+                self.log_result("TEST 2.3 - Declare Payment", False, f"Status: {payment_response.status_code}", payment_response.text)
+                return
+                
+            payment_result = payment_response.json()
+            payment_id = payment_result.get('id')
+            
+            if not payment_id:
+                self.log_result("TEST 2.3 - Declare Payment", False, "No payment_id in response", str(payment_result))
+                return
+                
+            self.log_result("TEST 2.3 - Declare Payment", True, f"Payment declared with ID: {payment_id}")
+            
+            # Step 4: Check client payment history
+            history_response = self.session.get(f"{API_BASE}/payments/client-history", headers=client_headers)
+            if history_response.status_code != 200:
+                self.log_result("TEST 2.4 - Get Payment History", False, f"Status: {history_response.status_code}", history_response.text)
+                return
+                
+            payment_history = history_response.json()
+            
+            if not payment_history or len(payment_history) == 0:
+                self.log_result("TEST 2.4 - Payment History Non-Empty", False, "Payment history is empty after declaration")
+                return
+                
+            # Step 5: Verify the declared payment is in history
+            declared_payment = next((p for p in payment_history if p.get('id') == payment_id), None)
+            
+            if not declared_payment:
+                self.log_result("TEST 2.5 - Payment in History", False, f"Declared payment {payment_id} not found in history")
+                return
+                
+            # Step 6: Verify payment has both user_id and client_id
+            missing_ids = []
+            if not declared_payment.get('user_id'):
+                missing_ids.append('user_id')
+            if not declared_payment.get('client_id'):
+                missing_ids.append('client_id')
+                
+            if missing_ids:
+                self.log_result("TEST 2.6 - Payment IDs Complete", False, f"Payment missing: {missing_ids}")
+            else:
+                self.log_result("TEST 2.6 - Payment IDs Complete", True, f"Payment has user_id: {declared_payment['user_id']}, client_id: {declared_payment['client_id']}")
+                
+            self.log_result("TEST 2.4 - Payment History Non-Empty", True, f"✅ Payment history contains {len(payment_history)} payments including declared payment")
+            
+        except Exception as e:
+            self.log_result("TEST 2 - Payment History", False, "Exception occurred", str(e))
+
     def run_all_tests(self):
         """Run all tests in sequence - PRODUCTION READY EXHAUSTIVE TESTING"""
         print("🚀 ALORIA AGENCY - BACKEND TESTING EXHAUSTIF - PRODUCTION READY")
