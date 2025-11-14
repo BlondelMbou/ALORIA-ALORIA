@@ -19,6 +19,10 @@ export default function LoginPage() {
     email: '',
     password: ''
   });
+  
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [resetEmail, setResetEmail] = useState('');
+  const [resetLoading, setResetLoading] = useState(false);
 
   // Registration removed - only SuperAdmin can create users via hierarchy
 
