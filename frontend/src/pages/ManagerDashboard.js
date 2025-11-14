@@ -855,7 +855,103 @@ export default function ManagerDashboard() {
             </Card>
           </TabsContent>
 
-          {/* Employees Tab */}
+          {/* Mes Clients (Manager's own clients) */}
+          <TabsContent value="my-clients">
+            <Card className="bg-gradient-to-br from-[#1E293B] to-[#334155] border-slate-700">
+              <CardHeader>
+                <CardTitle className="text-white">Mes Clients Personnels</CardTitle>
+                <CardDescription className="text-slate-400">Clients qui me sont directement assignés</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {/* Recherche et Tri */}
+                <SearchAndSort
+                  data={clients.filter(c => c.assigned_employee_id === user?.id)}
+                  searchFields={['client_name', 'country', 'visa_type', 'current_status']}
+                  sortOptions={[
+                    { value: 'created_at', label: 'Date de création' },
+                    { value: 'client_name', label: 'Nom du client' },
+                    { value: 'country', label: 'Pays' },
+                    { value: 'progress_percentage', label: 'Progression' }
+                  ]}
+                  onFilteredDataChange={(filtered) => setFilteredClients(filtered)}
+                  placeholder="Rechercher dans mes clients..."
+                />
+
+                <div className="overflow-x-auto mt-4">
+                  <table className="w-full">
+                    <thead className="border-b border-slate-700">
+                      <tr>
+                        <th className="text-left py-3 px-4 font-semibold text-slate-300">Nom Client</th>
+                        <th className="text-left py-3 px-4 font-semibold text-slate-300">Pays</th>
+                        <th className="text-left py-3 px-4 font-semibold text-slate-300">Type de Visa</th>
+                        <th className="text-left py-3 px-4 font-semibold text-slate-300">Statut</th>
+                        <th className="text-left py-3 px-4 font-semibold text-slate-300">Progrès</th>
+                        <th className="text-left py-3 px-4 font-semibold text-slate-300">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {clients.filter(c => c.assigned_employee_id === user?.id).map((client) => {
+                        const clientCase = cases.find(c => c.client_id === client.id);
+                        return (
+                          <tr key={client.id} className="border-b border-slate-700/50 hover:bg-slate-800/30">
+                            <td className="py-3 px-4 text-white">{clientCase?.client_name || 'N/A'}</td>
+                            <td className="py-3 px-4">
+                              <Badge variant="outline" className="border-slate-600 text-slate-300">{client.country}</Badge>
+                            </td>
+                            <td className="py-3 px-4 text-slate-300">{client.visa_type}</td>
+                            <td className="py-3 px-4">
+                              <Badge className={getStatusColor(client.current_status)}>{client.current_status}</Badge>
+                            </td>
+                            <td className="py-3 px-4">
+                              <div className="flex items-center gap-2">
+                                <div className="flex-1 bg-slate-700 rounded-full h-2 overflow-hidden">
+                                  <div 
+                                    className="bg-gradient-to-r from-orange-500 to-orange-600 h-full transition-all" 
+                                    style={{ width: `${client.progress_percentage || 0}%` }}
+                                  />
+                                </div>
+                                <span className="text-xs text-slate-400">{client.progress_percentage || 0}%</span>
+                              </div>
+                            </td>
+                            <td className="py-3 px-4">
+                              <div className="flex gap-2">
+                                <Button 
+                                  variant="outline" 
+                                  size="sm"
+                                  className="border-slate-600 text-slate-300 hover:bg-slate-800 hover:text-white"
+                                  onClick={() => setSelectedClient(client)}
+                                >
+                                  Détails
+                                </Button>
+                                <Button 
+                                  variant="outline" 
+                                  size="sm"
+                                  className="border-orange-600 text-orange-400 hover:bg-orange-800 hover:text-white"
+                                  onClick={() => setReassignDialog({ show: true, client, newEmployeeId: '' })}
+                                >
+                                  Réassigner
+                                </Button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+
+                  {clients.filter(c => c.assigned_employee_id === user?.id).length === 0 && (
+                    <div className="text-center py-8">
+                      <p className="text-slate-400">Aucun client ne vous est directement assigné</p>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </TabsContent>
+
+      {/* Employees Tab */}
           <TabsContent value="employees">
             <Card className="bg-gradient-to-br from-[#1E293B] to-[#334155] border-slate-700">
               <CardHeader className="flex flex-row items-center justify-between">
