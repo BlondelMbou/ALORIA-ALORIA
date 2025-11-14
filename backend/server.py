@@ -1374,6 +1374,9 @@ async def get_cases(current_user: dict = Depends(get_current_user)):
     
     for case in cases:
         case["client_name"] = client_map.get(case["client_id"], "Unknown")
+        # Ensure all required fields have default values
+        if "notes" not in case:
+            case["notes"] = ""
     
     return [CaseResponse(**case) for case in cases]
 
