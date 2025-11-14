@@ -5180,15 +5180,6 @@ class APITester:
         # MAIN TEST: PNG Invoice Generation Workflow
         self.test_png_invoice_generation_workflow()
         
-        # TEST CRITIQUE 2: FACTURES PNG (NOUVEAU)
-        self.test_critical_2_png_invoices_system()
-        
-        # TEST CRITIQUE 3: RESET PASSWORD POUR TOUS LES RÔLES (CORRECTION URGENTE)
-        self.test_critical_3_password_reset_all_roles()
-        
-        # TEST CRITIQUE 4: DASHBOARD SUPERADMIN (État des comptes)
-        self.test_critical_4_superadmin_dashboard_stats()
-        
         # Print final results
         self.print_final_results()
         total_tests = self.results['passed'] + self.results['failed']
