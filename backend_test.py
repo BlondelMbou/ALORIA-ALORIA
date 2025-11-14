@@ -4307,6 +4307,261 @@ class APITester:
         except Exception as e:
             self.log_result("TEST 2 - Payment History", False, "Exception occurred", str(e))
 
+    def test_payment_status_bug_urgent(self):
+        """URGENT TEST - Payment Status Bug Investigation"""
+        print("🚨 === URGENT: PAYMENT STATUS BUG INVESTIGATION ===")
+        print("Testing reported issue: Client payment created with 'rejected' status instead of 'pending'")
+        
+        # Step 1: Create a test client first
+        test_client_email = f"client.payment.test.{int(time.time())}@example.com"
+        test_client_id = None
+        client_token = None
+        
+        if 'manager' in self.tokens:
+            try:
+                headers = {"Authorization": f"Bearer {self.tokens['manager']}"}
+                client_data = {
+                    "email": test_client_email,
+                    "full_name": "Client Test Paiement",
+                    "phone": "+33123456789",
+                    "country": "France",
+                    "visa_type": "Permis de travail",
+                    "message": "Client créé pour test bug paiement"
+                }
+                response = self.session.post(f"{API_BASE}/clients", json=client_data, headers=headers)
+                if response.status_code in [200, 201]:
+                    data = response.json()
+                    test_client_id = data['id']
+                    self.log_result("TEST 0 - Client Creation for Payment Test", True, f"Client created: {test_client_id}")
+                    
+                    # Login as client
+                    client_login = self.session.post(f"{API_BASE}/auth/login", json={
+                        "email": test_client_email,
+                        "password": "Aloria2024!"
+                    })
+                    if client_login.status_code == 200:
+                        client_token = client_login.json()['access_token']
+                        self.log_result("TEST 0 - Client Login", True, "Client logged in successfully")
+                    else:
+                        self.log_result("TEST 0 - Client Login", False, f"Status: {client_login.status_code}")
+                else:
+                    self.log_result("TEST 0 - Client Creation for Payment Test", False, f"Status: {response.status_code}")
+                    return
+            except Exception as e:
+                self.log_result("TEST 0 - Client Creation for Payment Test", False, "Exception occurred", str(e))
+                return
+
+        if not client_token or not test_client_id:
+            print("❌ Cannot proceed with payment tests - client setup failed")
+            return
+
+        # TEST 1: Verify payment creation with correct status
+        print("\n--- TEST 1: VÉRIFIER LA CRÉATION DE PAIEMENT ---")
+        payment_id = None
+        try:
+            headers = {"Authorization": f"Bearer {client_token}"}
+            payment_data = {
+                "amount": 10000,
+                "currency": "CFA",
+                "description": "Test status bug",
+                "payment_method": "Mobile Money"
+            }
+            response = self.session.post(f"{API_BASE}/payments/declare", json=payment_data, headers=headers)
+            
+            if response.status_code in [200, 201]:
+                data = response.json()
+                payment_id = data.get('id')
+                status = data.get('status')
+                
+                print(f"   📋 Payment ID: {payment_id}")
+                print(f"   📋 Status in API response: {status}")
+                print(f"   📋 Full response: {json.dumps(data, indent=2)}")
+                
+                if status == "pending":
+                    self.log_result("TEST 1 - Payment Creation Status", True, f"✅ Status is 'pending' as expected")
+                elif status == "rejected":
+                    self.log_result("TEST 1 - Payment Creation Status", False, f"❌ BUG CONFIRMED: Status is 'rejected' instead of 'pending'")
+                else:
+                    self.log_result("TEST 1 - Payment Creation Status", False, f"❌ Unexpected status: '{status}'")
+            else:
+                self.log_result("TEST 1 - Payment Creation Status", False, f"API Error - Status: {response.status_code}, Response: {response.text}")
+                return
+        except Exception as e:
+            self.log_result("TEST 1 - Payment Creation Status", False, "Exception occurred", str(e))
+            return
+
+        if not payment_id:
+            print("❌ Cannot proceed - payment creation failed")
+            return
+
+        # TEST 2: Check status directly in database via API
+        print("\n--- TEST 2: VÉRIFIER LE STATUS DANS LA BASE ---")
+        try:
+            if 'manager' in self.tokens:
+                headers = {"Authorization": f"Bearer {self.tokens['manager']}"}
+                response = self.session.get(f"{API_BASE}/payments/history", headers=headers)
+                
+                if response.status_code == 200:
+                    payments = response.json()
+                    test_payment = None
+                    for payment in payments:
+                        if payment.get('id') == payment_id:
+                            test_payment = payment
+                            break
+                    
+                    if test_payment:
+                        db_status = test_payment.get('status')
+                        has_rejected_fields = 'rejected_at' in test_payment or 'rejection_reason' in test_payment
+                        
+                        print(f"   📋 Payment found in database")
+                        print(f"   📋 Status in database: {db_status}")
+                        print(f"   📋 Has rejected_at field: {'rejected_at' in test_payment}")
+                        print(f"   📋 Has rejection_reason field: {'rejection_reason' in test_payment}")
+                        print(f"   📋 Full payment record: {json.dumps(test_payment, indent=2)}")
+                        
+                        if db_status == "pending" and not has_rejected_fields:
+                            self.log_result("TEST 2 - Database Status Check", True, "✅ Database shows 'pending' with no rejection fields")
+                        elif db_status == "rejected":
+                            self.log_result("TEST 2 - Database Status Check", False, f"❌ BUG CONFIRMED: Database shows 'rejected' status")
+                        else:
+                            self.log_result("TEST 2 - Database Status Check", False, f"❌ Unexpected database state: status='{db_status}', rejected_fields={has_rejected_fields}")
+                    else:
+                        self.log_result("TEST 2 - Database Status Check", False, "❌ Payment not found in database")
+                else:
+                    self.log_result("TEST 2 - Database Status Check", False, f"API Error - Status: {response.status_code}")
+        except Exception as e:
+            self.log_result("TEST 2 - Database Status Check", False, "Exception occurred", str(e))
+
+        # TEST 3: Check manager view
+        print("\n--- TEST 3: VÉRIFIER VUE MANAGER ---")
+        try:
+            if 'manager' in self.tokens:
+                headers = {"Authorization": f"Bearer {self.tokens['manager']}"}
+                
+                # Check pending payments
+                pending_response = self.session.get(f"{API_BASE}/payments/pending", headers=headers)
+                if pending_response.status_code == 200:
+                    pending_payments = pending_response.json()
+                    test_in_pending = any(p.get('id') == payment_id for p in pending_payments)
+                    
+                    print(f"   📋 Total pending payments: {len(pending_payments)}")
+                    print(f"   📋 Test payment in pending list: {test_in_pending}")
+                    
+                    if test_in_pending:
+                        self.log_result("TEST 3A - Manager Pending View", True, "✅ Payment appears in pending list")
+                    else:
+                        self.log_result("TEST 3A - Manager Pending View", False, "❌ Payment NOT in pending list")
+                else:
+                    self.log_result("TEST 3A - Manager Pending View", False, f"API Error - Status: {pending_response.status_code}")
+                
+                # Check history view
+                history_response = self.session.get(f"{API_BASE}/payments/history", headers=headers)
+                if history_response.status_code == 200:
+                    history_payments = history_response.json()
+                    test_in_history = None
+                    for p in history_payments:
+                        if p.get('id') == payment_id:
+                            test_in_history = p
+                            break
+                    
+                    print(f"   📋 Total payments in history: {len(history_payments)}")
+                    
+                    if test_in_history:
+                        history_status = test_in_history.get('status')
+                        print(f"   📋 Test payment status in history: {history_status}")
+                        
+                        if history_status == "pending":
+                            self.log_result("TEST 3B - Manager History View", True, "✅ Payment shows 'pending' in history")
+                        elif history_status == "rejected":
+                            self.log_result("TEST 3B - Manager History View", False, "❌ BUG CONFIRMED: Payment shows 'rejected' in history")
+                        else:
+                            self.log_result("TEST 3B - Manager History View", False, f"❌ Unexpected status in history: '{history_status}'")
+                    else:
+                        self.log_result("TEST 3B - Manager History View", False, "❌ Payment not found in history")
+                else:
+                    self.log_result("TEST 3B - Manager History View", False, f"API Error - Status: {history_response.status_code}")
+        except Exception as e:
+            self.log_result("TEST 3 - Manager View Check", False, "Exception occurred", str(e))
+
+        # TEST 4: Test multiple payments pattern
+        print("\n--- TEST 4: TESTER PLUSIEURS PAIEMENTS ---")
+        payment_ids = [payment_id]  # Include first payment
+        
+        for i in range(2, 4):  # Create 2 more payments
+            try:
+                headers = {"Authorization": f"Bearer {client_token}"}
+                payment_data = {
+                    "amount": 5000 + (i * 1000),
+                    "currency": "CFA", 
+                    "description": f"Test payment #{i} - pattern check",
+                    "payment_method": "Mobile Money"
+                }
+                response = self.session.post(f"{API_BASE}/payments/declare", json=payment_data, headers=headers)
+                
+                if response.status_code in [200, 201]:
+                    data = response.json()
+                    new_payment_id = data.get('id')
+                    status = data.get('status')
+                    payment_ids.append(new_payment_id)
+                    
+                    print(f"   📋 Payment #{i} - ID: {new_payment_id}, Status: {status}")
+                    
+                    if status == "pending":
+                        self.log_result(f"TEST 4.{i} - Multiple Payment #{i}", True, f"✅ Payment #{i} has 'pending' status")
+                    else:
+                        self.log_result(f"TEST 4.{i} - Multiple Payment #{i}", False, f"❌ Payment #{i} has '{status}' status")
+                else:
+                    self.log_result(f"TEST 4.{i} - Multiple Payment #{i}", False, f"API Error - Status: {response.status_code}")
+            except Exception as e:
+                self.log_result(f"TEST 4.{i} - Multiple Payment #{i}", False, "Exception occurred", str(e))
+
+        # TEST 5: Check existing payments statistics
+        print("\n--- TEST 5: VÉRIFIER LES ANCIENS PAIEMENTS ---")
+        try:
+            if 'manager' in self.tokens:
+                headers = {"Authorization": f"Bearer {self.tokens['manager']}"}
+                response = self.session.get(f"{API_BASE}/payments/history", headers=headers)
+                
+                if response.status_code == 200:
+                    all_payments = response.json()
+                    
+                    status_counts = {}
+                    rejected_with_reason = 0
+                    
+                    for payment in all_payments:
+                        status = payment.get('status', 'unknown')
+                        status_counts[status] = status_counts.get(status, 0) + 1
+                        
+                        if status == 'rejected' and payment.get('rejection_reason'):
+                            rejected_with_reason += 1
+                    
+                    print(f"   📋 Total payments in system: {len(all_payments)}")
+                    for status, count in status_counts.items():
+                        print(f"   📋 Status '{status}': {count} payments")
+                    print(f"   📋 Rejected payments with reason: {rejected_with_reason}")
+                    
+                    pending_count = status_counts.get('pending', 0)
+                    rejected_count = status_counts.get('rejected', 0)
+                    confirmed_count = status_counts.get('confirmed', 0)
+                    
+                    self.log_result("TEST 5 - Payment Statistics", True, 
+                                  f"✅ Found {pending_count} pending, {rejected_count} rejected, {confirmed_count} confirmed payments")
+                    
+                    # Check if there's a suspicious pattern
+                    if rejected_count > pending_count and rejected_count > 0:
+                        self.log_result("TEST 5 - Suspicious Pattern", False, 
+                                      f"❌ SUSPICIOUS: More rejected ({rejected_count}) than pending ({pending_count}) payments")
+                    else:
+                        self.log_result("TEST 5 - Pattern Analysis", True, "✅ Payment status distribution looks normal")
+                        
+                else:
+                    self.log_result("TEST 5 - Payment Statistics", False, f"API Error - Status: {response.status_code}")
+        except Exception as e:
+            self.log_result("TEST 5 - Payment Statistics", False, "Exception occurred", str(e))
+
+        print("\n🔍 PAYMENT STATUS BUG INVESTIGATION COMPLETE")
+        print("=" * 60)
+
     def run_all_tests(self):
         """Run all tests in sequence - CRITICAL BUGS FOCUS + PRODUCTION READY TESTING"""
         print("🚀 ALORIA AGENCY - CRITICAL BUGS TESTING + BACKEND EXHAUSTIF")
