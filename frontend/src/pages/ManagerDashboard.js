@@ -1473,15 +1473,31 @@ export default function ManagerDashboard() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-3 max-h-96 overflow-y-auto">
-                    {paymentHistory.length === 0 ? (
-                      <div className="text-center py-8">
-                        <div className="text-4xl mb-3">📋</div>
-                        <p className="text-slate-400">Aucun historique</p>
-                        <p className="text-slate-500 text-sm">Les paiements traités apparaîtront ici</p>
-                      </div>
-                    ) : (
-                      paymentHistory.map((payment) => (
+                  {paymentHistory.length === 0 ? (
+                    <div className="text-center py-8">
+                      <div className="text-4xl mb-3">📋</div>
+                      <p className="text-slate-400">Aucun historique</p>
+                      <p className="text-slate-500 text-sm">Les paiements traités apparaîtront ici</p>
+                    </div>
+                  ) : (
+                    <>
+                      {/* Recherche et Tri */}
+                      <SearchAndSort
+                        data={paymentHistory}
+                        searchFields={['client_name', 'payment_method', 'invoice_number', 'description']}
+                        sortOptions={[
+                          { value: 'confirmed_at', label: 'Date de traitement' },
+                          { value: 'declared_at', label: 'Date de déclaration' },
+                          { value: 'client_name', label: 'Client' },
+                          { value: 'amount', label: 'Montant' },
+                          { value: 'status', label: 'Statut' }
+                        ]}
+                        onFilteredDataChange={setFilteredPaymentHistory}
+                        placeholder="Rechercher dans l'historique (client, facture, méthode)..."
+                      />
+
+                      <div className="space-y-3 max-h-96 overflow-y-auto mt-4">
+                        {filteredPaymentHistory.map((payment) => (
                         <div key={payment.id} className="bg-slate-600 rounded-lg p-3 border border-slate-500">
                           <div className="flex justify-between items-start mb-2">
                             <div>
