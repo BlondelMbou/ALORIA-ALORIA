@@ -117,29 +117,35 @@
         -agent: "testing"
         -comment: "✅ TESTED V2: SuperAdmin creation with secret key protection working perfectly. POST /api/auth/create-superadmin requires correct secret key 'ALORIA_SUPER_SECRET_2024'. Role hierarchy fully functional: SuperAdmin→Manager→Employee→Client. SuperAdmin can create Managers, Manager can create Employees and Clients, Employee can create Clients. Permission restrictions properly enforced (Employee cannot create Manager = 403). User creation API /api/users/create working with temporary password generation."
 
-  - task: "Declarative payment system"
+  - task: "Client details display (full_name, email, phone)"
     implemented: true
-    working: true
+    working: false
     file: "server.py"
-    stuck_count: 0
+    stuck_count: 1
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
         -working: false
+        -agent: "user"
+        -comment: "❌ USER REPORTED: Les données du client (nom complet, email, téléphone) ne s'affichent pas dans les détails du client. Affichent vide ou 'Non renseigné'."
+        -working: false
         -agent: "main"
-        -comment: "❌ USER REPORTED: Critical bugs in payment system. Accept/reject workflow has issues, confirmation codes not working correctly, PDF generation problems, history not displaying properly. User demands complete functional system with working PDFs and history on both sides."
-        -working: true
-        -agent: "testing"
-        -comment: "✅ TESTED V2: Complete payment system working perfectly. Client declares payment with POST /api/payments/declare (amount, currency, description, payment_method). Manager views pending payments with GET /api/payments/pending. Manager confirms/rejects with PATCH /api/payments/{id}/confirm. Invoice number generation working (format: INV-YYYYMMDD-XXXXXXXX). Payment history accessible via GET /api/payments/history. Full workflow tested: Client declares €2000 payment → Manager confirms → Invoice INV-20251009-FC4693BE generated."
-        -working: true
-        -agent: "testing"
-        -comment: "🔧 CRITICAL BUGS FIXED - COMPREHENSIVE TESTING COMPLETE: All payment system issues resolved! Fixed duplicate API endpoints causing conflicts, corrected status value inconsistencies (pending vs PENDING), added missing fields to PaymentDeclarationResponse model (confirmation_code, pdf_invoice_url, rejection_reason), fixed client payment history query (user_id vs client_id mapping). ✅ TESTED WORKFLOW: 1) Client declares payment (€2500) → 2) Manager views pending → 3) Two-step confirmation (code generation: 71XO → confirmation with code) → 4) Invoice generated (ALO-20251011-DE428A44) → 5) PDF URL created → 6) Rejection workflow tested → 7) History working (Manager sees all, Client sees own only) → 8) Double confirmation prevention → 9) Invalid code validation. ALL 12 CRITICAL TESTS PASSED 100%!"
-        -working: true
-        -agent: "testing"
-        -comment: "🎯 FRONTEND PAYMENT SYSTEM VALIDATION COMPLETE - 100% FUNCTIONAL! Comprehensive frontend testing of ALORIA AGENCY payment system completed with FULL SUCCESS. ✅ MANAGER DASHBOARD: Successfully logged in as manager@test.com, navigated to Payments tab, found 2 pending payments and 20 payment history entries. Payment system UI fully functional with proper sections for 'Paiements En Attente' and 'Historique des Paiements'. ✅ PAYMENT WORKFLOW UI: Confirmation and rejection buttons present and functional, proper dialog systems implemented for code generation and rejection reasons. ✅ CLIENT SYSTEM: Client login working (client@test.com), shows 'Aucun Dossier Actif' which is correct behavior - clients need cases created by managers first before accessing payment features. ✅ SYSTEM INTEGRATION: Frontend properly integrated with backend corrections, all UI components render correctly, payment history displays confirmed/rejected statuses, invoice numbers visible (ALO-format). The payment system frontend is 100% operational and ready for production use!"
-        -working: true
-        -agent: "testing"
-        -comment: "🎉 PAYMENT SYSTEM POST-DEBUGGING VALIDATION - 100% SUCCESS! Comprehensive testing of ALORIA AGENCY payment system completed after debugging corrections with PERFECT RESULTS. ✅ MANAGER LOGIN: Successfully authenticated with manager@test.com / password123 credentials as requested. ✅ COMPLETE WORKFLOW: Full payment process validated: 1) Client declares payment (€3500) → 2) Status: pending → 3) Manager generates confirmation code (8IXI) → 4) Manager confirms with code → 5) Status changes to 'confirmed' (NOT rejected) → 6) Invoice generated (ALO-20251011-D545669E). ✅ CONFIRMATION CODES: Code generation and validation working perfectly - wrong codes rejected (400 error), correct codes accepted and payment confirmed. ✅ PAYMENT HISTORY: Manager can see all 29 payments including 13 confirmed payments, Client can access their own payment history via /api/payments/client-history. ✅ PERSISTENCE: Payment data remains consistent after API refresh (29 total, 13 confirmed). ✅ PDF GENERATION: Invoice PDFs generated for confirmed payments (sample: /invoices/ALO-20251011-A9ECB0F2.pdf). ✅ DEBUG LOGS: Backend debug logging working correctly showing code generation/validation process. ALL 6 CRITICAL REQUIREMENTS FROM REVIEW REQUEST PASSED 100%!"
+        -comment: "🔧 FIX IMPLEMENTED: Ajout de fallback pour récupérer full_name, email, phone depuis la collection 'users' si absents de la collection 'clients'. Modifié GET /api/clients/{client_id} (ligne 1333) et GET /api/clients (ligne 1304) pour enrichir les données manquantes depuis users.user_id. Cela résout le problème pour les anciens clients qui n'ont pas ces champs dans leur document client."
+  
+  - task: "Client payment history display"
+    implemented: true
+    working: false
+    file: "server.py"
+    stuck_count: 1
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        -working: false
+        -agent: "user"
+        -comment: "❌ USER REPORTED: Quand un client déclare un paiement depuis son dashboard, l'historique des paiements reste vide."
+        -working: false
+        -agent: "main"
+        -comment: "🔧 FIX IMPLEMENTED: Problème identifié - POST /api/payments/declare créait des paiements avec 'client_id' uniquement, mais GET /api/payments/client-history cherchait par 'user_id'. Ajouté le champ 'user_id' lors de la création de paiement (ligne 2169 de server.py). Maintenant les paiements contiennent à la fois user_id et client_id pour compatibilité totale."
 
   - task: "SuperAdmin monitoring APIs"
     implemented: true
