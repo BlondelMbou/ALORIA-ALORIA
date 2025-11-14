@@ -23,6 +23,8 @@ const SuperAdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [showUserDetails, setShowUserDetails] = useState(false);
   const [userTempPassword, setUserTempPassword] = useState(null);
+  const [visitors, setVisitors] = useState([]);
+  const [filteredVisitors, setFilteredVisitors] = useState([]);
 
   // useCallback pour stabiliser les fonctions de callback
   const handleFilteredUsersChange = React.useCallback((data) => {
