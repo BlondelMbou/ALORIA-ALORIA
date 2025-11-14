@@ -350,6 +350,66 @@ export default function ManagerDashboard() {
     }
   };
 
+  const handleCreateEmployee = async (e) => {
+    e.preventDefault();
+    
+    if (!newEmployee.email || !newEmployee.full_name || !newEmployee.phone) {
+      toast.error('Veuillez remplir tous les champs obligatoires');
+      return;
+    }
+    
+    try {
+      // Utiliser l'endpoint /api/users/create
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/users/create`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+          email: newEmployee.email,
+          full_name: newEmployee.full_name,
+          phone: newEmployee.phone,
+          role: 'EMPLOYEE',
+          send_email: false
+        })
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Erreur lors de la création');
+      }
+      
+      const data = await response.json();
+      
+      // Préparer les credentials pour le popup
+      setNewClientCredentials({
+        email: data.email,
+        login_email: data.email,
+        temporary_password: data.temporary_password,
+        default_password: data.temporary_password,
+        full_name: newEmployee.full_name,
+        role: 'EMPLOYEE'
+      });
+      setShowCredentialsDialog(true);
+      
+      toast.success('✅ Employé créé avec succès!');
+      setShowCreateEmployee(false);
+      
+      // Reset form
+      setNewEmployee({
+        email: '',
+        full_name: '',
+        phone: ''
+      });
+      
+      fetchData(); // Refresh
+    } catch (error) {
+      toast.error(error.message || 'Erreur lors de la création de l\'employé');
+      console.error(error);
+    }
+  };
+
   const handleUpdateCase = async (caseId, updates) => {
     try {
       await casesAPI.update(caseId, updates);
