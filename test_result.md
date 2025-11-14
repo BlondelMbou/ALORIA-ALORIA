@@ -615,15 +615,13 @@
 
 ## test_plan:
   current_focus:
-    - "Withdrawal Manager - Category Validation Error - NEEDS FIX ❌"
-    - "PNG Invoice Generation System - NEEDS FIX ❌"
-    - "SuperAdmin Dashboard Financial Stats - NEEDS FIX ❌"
+    - "PNG Invoice Generation System - API Endpoint Missing ❌"
+    - "SearchAndSort React Loop Error - Minor Fix Needed ⚠️"
   stuck_tasks: 
-    - "Client login authentication failing with default password"
-    - "SuperAdmin dashboard missing financial fields (total_withdrawals, current_balance)"
+    - "PNG Invoice download API returning 404 error"
   test_all: false
-  test_priority: "critical_urgent"
-  last_test_session: "TESTS CRITIQUES URGENTS TERMINÉS - 70% SUCCÈS (7/10 tests passés). ✅ ERREUR RETRAIT MANAGER IDENTIFIÉE: POST /api/withdrawals retourne 422 - Validation Error pour enum 'category'. ❌ FACTURES PNG: Client créé mais login échoue. ❌ DASHBOARD SUPERADMIN: Manque 'total_withdrawals' et 'current_balance'. 3 problèmes critiques identifiés nécessitant correction immédiate."
+  test_priority: "high_priority_fixes"
+  last_test_session: "TESTS CRITIQUES RÉVISION TERMINÉS - 83% SUCCÈS (5/6 tests passés). ✅ SYSTÈMES DE TRI: Tous les SearchAndSort fonctionnels dans Manager Dashboard ✅ DASHBOARD SUPERADMIN FINANCES: 100% opérationnel avec toutes les stats critiques ❌ FACTURES PNG: API de téléchargement défaillante (404 error). 1 problème critique et 1 problème mineur identifiés."
 
 ## agent_communication:
     -agent: "main"
