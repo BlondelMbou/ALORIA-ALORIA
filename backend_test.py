@@ -28,6 +28,7 @@ API_BASE = f"{BACKEND_URL}/api"
 
 # Test credentials from review request
 TEST_CREDENTIALS = {
+    'manager': {'email': 'manager@test.com', 'password': 'password123'},
     'superadmin': {'email': 'superadmin@aloria.com', 'password': 'SuperAdmin123!'},
     'consultant': {'email': 'consultant@aloria.com', 'password': 'consultant123'}
 }
