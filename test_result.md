@@ -597,22 +597,15 @@
 
 ## test_plan:
   current_focus:
-    - "BACKEND TESTING EXHAUSTIF - PRODUCTION READY - COMPLETED ✅"
-    - "Complete prospect workflow (nouveau → converti_client) - COMPLETED ✅"
-    - "Manager/Employee actions (visitor management) - COMPLETED ✅"
-    - "SuperAdmin operations (user creation, dashboard) - COMPLETED ✅"
-    - "Role-based prospect access - COMPLETED ✅"
-    - "Payment workflow - COMPLETED ✅"
-    - "Payment Status Bug Investigation (User Reported) - COMPLETED ✅"
-    - "Withdrawal manager - COMPLETED ✅"
-    - "Consultation Payment Workflow 50K CFA - COMPLETED ✅"
-    - "Chat Permissions & Communication System - COMPLETED ✅"
+    - "Withdrawal Manager - Category Validation Error - NEEDS FIX ❌"
+    - "PNG Invoice Generation System - NEEDS FIX ❌"
+    - "SuperAdmin Dashboard Financial Stats - NEEDS FIX ❌"
   stuck_tasks: 
-    - "SuperAdmin cannot create EMPLOYEE users (permission system bug)"
-    - "Client reassignment API parameter format issue"
-  test_all: true
-  test_priority: "production_readiness"
-  last_test_session: "CONSULTATION PAYMENT WORKFLOW TESTING COMPLETE - 90.6% SUCCESS RATE! Comprehensive testing of ALORIA AGENCY backend completed with 29/32 tests passed. ✅ NEW FEATURE TESTED: Consultation Payment Workflow (50K CFA) - 100% FUNCTIONAL! All 4 critical tests from review request passed: 1) Employee assigns prospect to consultant with payment recording, 2) SuperAdmin retrieves consultation payments, 3) Dashboard stats include consultations section, 4) SuperAdmin notifications created. Payment records properly stored in 'payments' collection with type='consultation', invoice numbers generated (CONS-format), status transitions working (nouveau → assigne_employe → paiement_50k). ✅ EXISTING SYSTEMS: All priority workflows still functional - complete 5-step prospect process, visitor management, SuperAdmin operations, role-based access, withdrawal manager. ❌ REMAINING ISSUES: 3 minor API issues (client reassignment parameter format, SuperAdmin→Employee creation permission, client login for payment testing). Backend consultation payment system 100% operational and ready for production use!"
+    - "Client login authentication failing with default password"
+    - "SuperAdmin dashboard missing financial fields (total_withdrawals, current_balance)"
+  test_all: false
+  test_priority: "critical_urgent"
+  last_test_session: "TESTS CRITIQUES URGENTS TERMINÉS - 70% SUCCÈS (7/10 tests passés). ✅ ERREUR RETRAIT MANAGER IDENTIFIÉE: POST /api/withdrawals retourne 422 - Validation Error pour enum 'category'. ❌ FACTURES PNG: Client créé mais login échoue. ❌ DASHBOARD SUPERADMIN: Manque 'total_withdrawals' et 'current_balance'. 3 problèmes critiques identifiés nécessitant correction immédiate."
 
 ## agent_communication:
     -agent: "main"
