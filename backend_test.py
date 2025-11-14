@@ -1,13 +1,10 @@
 #!/usr/bin/env python3
 """
-ALORIA AGENCY Backend API Testing Suite - PRODUCTION READY EXHAUSTIVE TESTING
-Tests ALL backend functionalities for production deployment including:
-- Complete prospect workflow (nouveau → assigne_employe → paiement_50k → en_consultation → converti_client)
-- Manager/Employee actions (client reassignment, visitor management)
-- SuperAdmin operations (user creation, dashboard stats, activities)
-- Role-based prospect access for all roles
-- Payment workflow (declaration, confirmation with PDF generation)
-- Withdrawal manager system
+ALORIA AGENCY Backend API Testing Suite - CRITICAL TESTS FOCUS
+Tests critiques selon la demande de révision:
+1. TEST ERREUR RETRAIT MANAGER - Identifier l'erreur exacte POST /api/withdrawals
+2. TEST FACTURES PNG - Nouveau système de factures PNG (pas PDF)
+3. TEST DASHBOARD SUPERADMIN - État des comptes (total_payments, total_withdrawals, current_balance)
 """
 
 import requests
