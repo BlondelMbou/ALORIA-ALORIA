@@ -157,6 +157,16 @@ export default function LoginPage() {
                     />
                   </div>
 
+                  <div className="flex items-center justify-between">
+                    <button
+                      type="button"
+                      onClick={() => setShowForgotPassword(true)}
+                      className="text-sm text-orange-400 hover:text-orange-300 underline"
+                    >
+                      Mot de passe oublié ?
+                    </button>
+                  </div>
+
                   <Button
                     type="submit"
                     className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg shadow-orange-500/50 h-10 sm:h-11 text-sm sm:text-base touch-manipulation"
