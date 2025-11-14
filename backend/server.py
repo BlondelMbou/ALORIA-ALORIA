@@ -1362,8 +1362,8 @@ async def get_cases(current_user: dict = Depends(get_current_user)):
     else:  # CLIENT
         clients = await db.clients.find({"user_id": current_user["id"]}, {"_id": 0}).to_list(1000)
     
-    client_ids = [c["id"] for c in clients]
-    cases = await db.cases.find({"client_id": {"$in": client_ids}}, {"_id": 0}).to_list(1000)
+    client_user_ids = [c["user_id"] for c in clients]
+    cases = await db.cases.find({"client_id": {"$in": client_user_ids}}, {"_id": 0}).to_list(1000)
     
     # Enrich with client names
     client_map = {}
