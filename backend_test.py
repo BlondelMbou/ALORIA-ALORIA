@@ -539,11 +539,6 @@ class APITester:
                 self.log_result("7.3 Error Test - Invalid Invoice Number", False, "Exception occurred", str(e))
         
         print("\n🎯 WORKFLOW COMPLET DE GÉNÉRATION DE FACTURES PNG TERMINÉ")
-                                  f"Code Gen Status: {code_response.status_code}", code_response.text)
-                    return
-            except Exception as e:
-                self.log_result("2.3 Payment Confirmation", False, "Exception occurred", str(e))
-                return
 
     def test_critical_3_password_reset_all_roles(self):
         """TEST CRITIQUE 3: RESET PASSWORD POUR TOUS LES RÔLES - Correction appliquée"""
