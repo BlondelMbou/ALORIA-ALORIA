@@ -1,20 +1,18 @@
 #!/usr/bin/env python3
 """
-ALORIA AGENCY Backend API Testing Suite - PNG INVOICE GENERATION WORKFLOW
-Test complet du workflow de génération et téléchargement de factures PNG selon la demande de révision française:
+ALORIA AGENCY Backend API Testing Suite - URGENT CLIENT DATA & PASSWORD CHANGE ISSUES
 
-WORKFLOW COMPLET À TESTER (SELON REVIEW REQUEST):
-ÉTAPE 1 - CRÉER CLIENT ET PAIEMENT
-ÉTAPE 2 - CONFIRMER LE PAIEMENT  
-ÉTAPE 3 - VÉRIFIER FICHIER PNG
-ÉTAPE 4 - TÉLÉCHARGER VIA API (MANAGER)
-ÉTAPE 5 - TÉLÉCHARGER VIA INVOICE NUMBER
-ÉTAPE 6 - LISTER TOUS LES FICHIERS PNG
+TEST URGENT - DONNÉES CLIENTS N/A + CHANGEMENT MOT DE PASSE
 
-BUGS IDENTIFIÉS À CORRIGER:
-1. Case sensitivity: status != 'confirmed' vs DB stocke 'CONFIRMED'
-2. PNG generation: système génère PDF mais cherche PNG
-3. Endpoint alternatif cassé: GET /api/invoices/{invoice_number} retourne 404
+**Problème 1 : Données clients affichent N/A**
+L'utilisateur voit "N/A" pour les noms et emails des clients dans le dashboard Manager.
+
+**Problème 2 : Changement de mot de passe ne fonctionne pas**
+
+TESTS À EFFECTUER:
+1. LOGIN MANAGER + DIAGNOSTIC DONNÉES CLIENTS
+2. TEST CHANGEMENT MOT DE PASSE COMPLET
+3. ANALYSE RACINE DES PROBLÈMES
 """
 
 import requests
