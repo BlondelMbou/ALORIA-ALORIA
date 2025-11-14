@@ -3914,6 +3914,24 @@ async def convert_prospect_to_client(
     
     await db.users.insert_one(user_dict)
     
+    # Créer le profil client dans la collection clients
+    client_profile_dict = {
+        "id": str(uuid.uuid4()),
+        "user_id": client_id,
+        "full_name": prospect["name"],
+        "email": prospect["email"],
+        "phone": prospect.get("phone", ""),
+        "country": country,
+        "visa_type": visa_type,
+        "assigned_employee_id": current_user["id"],
+        "assigned_employee_name": current_user["full_name"],
+        "status": "active",
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "updated_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.clients.insert_one(client_profile_dict)
+    
     # Créer le dossier client
     case_id = str(uuid.uuid4())
     
