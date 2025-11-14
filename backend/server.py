@@ -3220,22 +3220,7 @@ async def get_payment_history(current_user: dict = Depends(get_current_user)):
     
     return [PaymentDeclarationResponse(**p) for p in payments]
 
-@api_router.get("/payments/client-history", response_model=List[PaymentDeclarationResponse])
-async def get_client_payment_history(current_user: dict = Depends(get_current_user)):
-    """Obtenir l'historique des paiements pour un client spécifique"""
-    if current_user["role"] != "CLIENT":
-        raise HTTPException(status_code=403, detail="Accès réservé aux clients")
-    
-    # Find the client record for this user
-    client = await db.clients.find_one({"user_id": current_user["id"]})
-    if not client:
-        raise HTTPException(status_code=404, detail="Profil client non trouvé")
-    
-    payments = await db.payment_declarations.find(
-        {"client_id": client["id"]}, {"_id": 0}
-    ).sort("declared_at", -1).to_list(100)
-    
-    return [PaymentDeclarationResponse(**p) for p in payments]
+# Note: /payments/client-history endpoint défini plus haut (ligne 2343) - doublon supprimé
 
 @api_router.get("/payments/consultations")
 async def get_consultation_payments(current_user: dict = Depends(get_current_user)):
