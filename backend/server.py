@@ -3058,7 +3058,46 @@ async def confirm_payment_with_code(
         
         if provided_code != stored_code:
             logger.error(f"Code mismatch: expected {stored_code}, got {provided_code}")
-            raise HTTPException(status_code=400, detail="Code de confirmation incorrect")
+            
+            # Incrémenter le compteur de tentatives
+            attempts = payment.get("confirmation_attempts", 0) + 1
+            await db.payment_declarations.update_one(
+                {"id": payment_id}, 
+                {"$set": {"confirmation_attempts": attempts}}
+            )
+            
+            # Si 3 tentatives échouées, rejeter automatiquement
+            if attempts >= 3:
+                await db.payment_declarations.update_one(
+                    {"id": payment_id}, 
+                    {"$set": {
+                        "status": "REJECTED",
+                        "rejection_reason": "Code de vérification du paiement invalide (3 tentatives échouées)",
+                        "confirmed_by": current_user["id"],
+                        "confirmed_at": datetime.now(timezone.utc).isoformat()
+                    }}
+                )
+                
+                # Notifier le client du rejet automatique
+                await create_notification(
+                    user_id=payment["client_id"],
+                    title="Paiement rejeté",
+                    message=f"Votre paiement de {payment['amount']} {payment['currency']} a été rejeté automatiquement après 3 tentatives de code invalides.",
+                    type="payment_rejected",
+                    related_id=payment_id
+                )
+                
+                raise HTTPException(
+                    status_code=400, 
+                    detail="Paiement rejeté automatiquement après 3 tentatives de code invalides"
+                )
+            
+            # Sinon, indiquer le nombre de tentatives restantes
+            remaining = 3 - attempts
+            raise HTTPException(
+                status_code=400, 
+                detail=f"Code de confirmation incorrect. Tentatives restantes: {remaining}/3"
+            )
         
         # Confirmer le paiement
         invoice_number = f"ALO-{datetime.now().strftime('%Y%m%d')}-{payment_id[:8].upper()}"
