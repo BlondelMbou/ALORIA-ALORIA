@@ -4138,14 +4138,17 @@ class APITester:
             self.log_result("TEST 2 - Payment History", False, "Exception occurred", str(e))
 
     def run_all_tests(self):
-        """Run all tests in sequence - PRODUCTION READY EXHAUSTIVE TESTING"""
-        print("🚀 ALORIA AGENCY - BACKEND TESTING EXHAUSTIF - PRODUCTION READY")
+        """Run all tests in sequence - CRITICAL BUGS FOCUS + PRODUCTION READY TESTING"""
+        print("🚀 ALORIA AGENCY - CRITICAL BUGS TESTING + BACKEND EXHAUSTIF")
         print(f"Backend URL: {API_BASE}")
-        print("Testing ALL critical functionalities for production deployment")
+        print("FOCUS: Testing critical user-reported bugs + production functionalities")
         print("=" * 80)
         
         # Authentication setup
         self.authenticate_all_roles()
+        
+        # 🔥 PRIORITY 1: CRITICAL BUGS TESTING (USER REPORTED)
+        self.test_critical_bugs_client_details_and_payment_history()
         
         # SPECIAL DIAGNOSTIC: SuperAdmin Activities Issue (from review request)
         self.test_superadmin_activities_diagnostic()
