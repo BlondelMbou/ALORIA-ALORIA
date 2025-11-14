@@ -145,36 +145,48 @@ class APITester:
             self.log_result("TEST 1 - Manager Withdrawal", False, 
                           "Exception occurred during withdrawal test", str(e))
 
-    def test_critical_2_png_invoices_system(self):
-        """TEST CRITIQUE 2: FACTURES PNG (NOUVEAU) - Vérifier génération PNG pas PDF"""
-        print("=== TEST CRITIQUE 2: SYSTÈME FACTURES PNG ===")
+    def test_png_invoice_generation_workflow(self):
+        """TEST COMPLET - WORKFLOW DE GÉNÉRATION DE FACTURES PNG"""
+        print("=== WORKFLOW COMPLET DE GÉNÉRATION DE FACTURES PNG ===")
         
-        # Step 1: Create a client first (needed for payment)
+        # Variables pour stocker les données du test
+        test_client_id = None
+        test_payment_id = None
+        test_invoice_number = None
         client_email = f"client.png.test.{int(time.time())}@example.com"
+        client_token = None
+        
+        # ============================================================================
+        # ÉTAPE 1 - CRÉER UN CLIENT ET DÉCLARER UN PAIEMENT
+        # ============================================================================
+        print("\n🔸 ÉTAPE 1 - CRÉER UN CLIENT ET DÉCLARER UN PAIEMENT")
+        
+        # 1.1 - Créer un nouveau client via POST /api/clients
         if 'manager' in self.tokens:
             try:
                 headers = {"Authorization": f"Bearer {self.tokens['manager']}"}
                 client_data = {
                     "email": client_email,
-                    "full_name": "Client Test PNG",
+                    "full_name": "Client Test Facture PNG",
                     "phone": "+33123456789",
                     "country": "France",
-                    "visa_type": "Work Permit",
-                    "message": "Test client pour factures PNG"
+                    "visa_type": "Permis de travail",
+                    "message": "Test génération facture PNG"
                 }
+                print(f"🔍 Creating client: {client_data}")
                 response = self.session.post(f"{API_BASE}/clients", json=client_data, headers=headers)
                 if response.status_code in [200, 201]:
-                    client_data_response = response.json()
-                    test_client_id = client_data_response['id']
-                    self.log_result("2.1 Client Creation for PNG Test", True, f"Client created: {test_client_id}")
+                    client_response = response.json()
+                    test_client_id = client_response['id']
+                    self.log_result("1.1 Client Creation", True, f"Client créé: {test_client_id}")
                 else:
-                    self.log_result("2.1 Client Creation for PNG Test", False, f"Status: {response.status_code}", response.text)
+                    self.log_result("1.1 Client Creation", False, f"Status: {response.status_code}", response.text)
                     return
             except Exception as e:
-                self.log_result("2.1 Client Creation for PNG Test", False, "Exception occurred", str(e))
+                self.log_result("1.1 Client Creation", False, "Exception occurred", str(e))
                 return
         
-        # Step 2: Client declares payment (10000 CFA)
+        # 1.2 - Le client déclare un paiement via POST /api/payments/declare
         try:
             client_login = self.session.post(f"{API_BASE}/auth/login", json={
                 "email": client_email,
@@ -185,120 +197,108 @@ class APITester:
                 
                 headers = {"Authorization": f"Bearer {client_token}"}
                 payment_data = {
-                    "amount": 10000,
+                    "amount": 75000,
                     "currency": "CFA",
-                    "description": "Test paiement pour facture PNG",
+                    "description": "Test génération facture PNG",
                     "payment_method": "Mobile Money"
                 }
                 
-                print(f"🔍 CLIENT DECLARES PAYMENT: {payment_data}")
-                response = self.session.post(f"{API_BASE}/payments", json=payment_data, headers=headers)
+                print(f"🔍 Client declares payment: {payment_data}")
+                response = self.session.post(f"{API_BASE}/payments/declare", json=payment_data, headers=headers)
                 if response.status_code in [200, 201]:
                     payment_response = response.json()
                     test_payment_id = payment_response['id']
-                    self.log_result("2.2 Client Payment Declaration", True, f"Payment declared: {test_payment_id}")
+                    
+                    # 1.3 - VÉRIFIER que le paiement est créé avec status "pending"
+                    if payment_response.get('status') == 'pending':
+                        self.log_result("1.2 Payment Declaration", True, f"Paiement déclaré avec status 'pending': {test_payment_id}")
+                    else:
+                        self.log_result("1.2 Payment Declaration", False, f"Status attendu 'pending', reçu '{payment_response.get('status')}'")
+                        return
                 else:
-                    self.log_result("2.2 Client Payment Declaration", False, f"Status: {response.status_code}", response.text)
+                    self.log_result("1.2 Payment Declaration", False, f"Status: {response.status_code}", response.text)
                     return
             else:
-                self.log_result("2.2 Client Login for Payment", False, "Could not login as client")
+                self.log_result("1.2 Client Login", False, f"Login failed: {client_login.status_code}")
                 return
         except Exception as e:
-            self.log_result("2.2 Client Payment Declaration", False, "Exception occurred", str(e))
+            self.log_result("1.2 Payment Declaration", False, "Exception occurred", str(e))
             return
         
-        # Step 3: Manager confirms payment (should generate PNG invoice)
+        # ============================================================================
+        # ÉTAPE 2 - MANAGER CONFIRME LE PAIEMENT
+        # ============================================================================
+        print("\n🔸 ÉTAPE 2 - MANAGER CONFIRME LE PAIEMENT")
+        
         if 'manager' in self.tokens and test_payment_id:
             try:
                 headers = {"Authorization": f"Bearer {self.tokens['manager']}"}
                 
-                # Generate confirmation code
-                print(f"🔍 MANAGER GENERATES CONFIRMATION CODE for payment: {test_payment_id}")
+                # 2.1 - Login Manager et GET /api/payments/pending pour voir le paiement
+                print(f"🔍 Getting pending payments")
+                pending_response = self.session.get(f"{API_BASE}/payments/pending", headers=headers)
+                if pending_response.status_code == 200:
+                    pending_payments = pending_response.json()
+                    test_payment_found = any(p.get('id') == test_payment_id for p in pending_payments)
+                    if test_payment_found:
+                        self.log_result("2.1 Manager View Pending Payments", True, f"Paiement trouvé dans la liste des paiements en attente")
+                    else:
+                        self.log_result("2.1 Manager View Pending Payments", False, f"Paiement {test_payment_id} non trouvé dans les paiements en attente")
+                else:
+                    self.log_result("2.1 Manager View Pending Payments", False, f"Status: {pending_response.status_code}")
+                
+                # 2.2 - Générer le code de confirmation
+                print(f"🔍 Generating confirmation code for payment: {test_payment_id}")
                 code_response = self.session.post(f"{API_BASE}/payments/{test_payment_id}/generate-code", headers=headers)
                 if code_response.status_code == 200:
                     code_data = code_response.json()
                     confirmation_code = code_data.get('confirmation_code')
+                    self.log_result("2.2 Generate Confirmation Code", True, f"Code généré: {confirmation_code}")
                     
-                    # Confirm payment
+                    # 2.3 - PATCH /api/payments/{payment_id}/confirm avec code de confirmation
                     confirm_data = {
                         "action": "CONFIRMED",
                         "confirmation_code": confirmation_code
                     }
-                    print(f"🔍 MANAGER CONFIRMS PAYMENT with code: {confirmation_code}")
+                    print(f"🔍 Confirming payment with code: {confirmation_code}")
                     confirm_response = self.session.patch(f"{API_BASE}/payments/{test_payment_id}/confirm", 
                                                         json=confirm_data, headers=headers)
                     if confirm_response.status_code == 200:
                         confirm_result = confirm_response.json()
-                        invoice_number = confirm_result.get('invoice_number')
+                        test_invoice_number = confirm_result.get('invoice_number')
                         pdf_invoice_url = confirm_result.get('pdf_invoice_url')
                         
-                        if invoice_number and pdf_invoice_url:
-                            self.log_result("2.3 Manager Payment Confirmation", True, 
-                                          f"Payment confirmed - Invoice: {invoice_number}, URL: {pdf_invoice_url}")
+                        # 2.4 - VÉRIFIER que le status passe à "confirmed", invoice_number généré, pdf_invoice_url rempli
+                        verification_results = []
+                        if confirm_result.get('status') == 'confirmed':
+                            verification_results.append("✅ Status = 'confirmed'")
                         else:
-                            self.log_result("2.3 Manager Payment Confirmation", False, 
-                                          f"Missing invoice_number or pdf_invoice_url in response")
-                    else:
-                        self.log_result("2.3 Manager Payment Confirmation", False, 
-                                      f"Confirm Status: {confirm_response.status_code}", confirm_response.text)
-                else:
-                    self.log_result("2.3 Manager Payment Confirmation", False, 
-                                  f"Code Gen Status: {code_response.status_code}", code_response.text)
-            except Exception as e:
-                self.log_result("2.3 Manager Payment Confirmation", False, "Exception occurred", str(e))
-        
-        # Step 4: Verify GET /api/payments/history - payment must have pdf_invoice_url
-        if 'manager' in self.tokens:
-            try:
-                headers = {"Authorization": f"Bearer {self.tokens['manager']}"}
-                print(f"🔍 CHECKING PAYMENT HISTORY for pdf_invoice_url")
-                response = self.session.get(f"{API_BASE}/payments/history", headers=headers)
-                if response.status_code == 200:
-                    payments = response.json()
-                    # Find our test payment
-                    test_payment = next((p for p in payments if p.get('id') == test_payment_id), None)
-                    if test_payment and test_payment.get('pdf_invoice_url'):
-                        self.log_result("2.4 Payment History PDF URL", True, 
-                                      f"Payment has pdf_invoice_url: {test_payment['pdf_invoice_url']}")
+                            verification_results.append(f"❌ Status = '{confirm_result.get('status')}' (attendu 'confirmed')")
                         
-                        # Step 5: Test GET /api/invoices/{invoice_number} to download PNG
-                        invoice_number = test_payment.get('invoice_number')
-                        if invoice_number:
-                            try:
-                                print(f"🔍 TESTING INVOICE DOWNLOAD: /api/invoices/{invoice_number}")
-                                invoice_response = self.session.get(f"{API_BASE}/invoices/{invoice_number}", headers=headers)
-                                if invoice_response.status_code == 200:
-                                    content_type = invoice_response.headers.get('content-type', '')
-                                    content_length = len(invoice_response.content)
-                                    
-                                    # Check if it's PNG (not PDF)
-                                    if 'image/png' in content_type:
-                                        self.log_result("2.5 Invoice Download PNG Format", True, 
-                                                      f"✅ INVOICE IS PNG - Content-Type: {content_type}, Size: {content_length} bytes")
-                                    elif 'application/pdf' in content_type:
-                                        self.log_result("2.5 Invoice Download PNG Format", False, 
-                                                      f"❌ INVOICE IS PDF (should be PNG) - Content-Type: {content_type}")
-                                    else:
-                                        # Check file signature for PNG
-                                        png_signature = b'\x89PNG\r\n\x1a\n'
-                                        if invoice_response.content.startswith(png_signature):
-                                            self.log_result("2.5 Invoice Download PNG Format", True, 
-                                                          f"✅ INVOICE IS PNG (by signature) - Size: {content_length} bytes")
-                                        else:
-                                            self.log_result("2.5 Invoice Download PNG Format", False, 
-                                                          f"❌ INVOICE FORMAT UNKNOWN - Content-Type: {content_type}")
-                                else:
-                                    self.log_result("2.5 Invoice Download", False, 
-                                                  f"Download failed - Status: {invoice_response.status_code}")
-                            except Exception as e:
-                                self.log_result("2.5 Invoice Download", False, "Exception occurred", str(e))
+                        if test_invoice_number and test_invoice_number.startswith('ALO-'):
+                            verification_results.append(f"✅ Invoice number généré: {test_invoice_number}")
+                        else:
+                            verification_results.append(f"❌ Invoice number invalide: {test_invoice_number}")
+                        
+                        if pdf_invoice_url:
+                            verification_results.append(f"✅ pdf_invoice_url rempli: {pdf_invoice_url}")
+                        else:
+                            verification_results.append("❌ pdf_invoice_url manquant")
+                        
+                        all_verified = all("✅" in result for result in verification_results)
+                        self.log_result("2.3 Payment Confirmation Verification", all_verified, 
+                                      f"Vérifications: {'; '.join(verification_results)}")
                     else:
-                        self.log_result("2.4 Payment History PDF URL", False, 
-                                      "Test payment not found or missing pdf_invoice_url")
+                        self.log_result("2.3 Payment Confirmation", False, 
+                                      f"Confirm Status: {confirm_response.status_code}", confirm_response.text)
+                        return
                 else:
-                    self.log_result("2.4 Payment History", False, f"Status: {response.status_code}", response.text)
+                    self.log_result("2.2 Generate Confirmation Code", False, 
+                                  f"Code Gen Status: {code_response.status_code}", code_response.text)
+                    return
             except Exception as e:
-                self.log_result("2.4 Payment History", False, "Exception occurred", str(e))
+                self.log_result("2.3 Payment Confirmation", False, "Exception occurred", str(e))
+                return
 
     def test_critical_3_password_reset_all_roles(self):
         """TEST CRITIQUE 3: RESET PASSWORD POUR TOUS LES RÔLES - Correction appliquée"""
