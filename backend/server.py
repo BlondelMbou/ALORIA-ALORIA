@@ -1356,14 +1356,19 @@ async def get_client(client_id: str, current_user: dict = Depends(get_current_us
     
     # CORRECTION: Récupérer les données manquantes depuis users si nécessaire
     if not client.get("full_name") or not client.get("email") or not client.get("phone"):
+        logger.info(f"🔍 CLIENT FALLBACK: Client {client['id']} missing fields - full_name: {client.get('full_name')}, email: {client.get('email')}, phone: {client.get('phone')}")
         user = await db.users.find_one({"id": client["user_id"]})
         if user:
+            logger.info(f"🔍 USER FOUND: {user['id']} - full_name: {user.get('full_name')}, email: {user.get('email')}, phone: {user.get('phone')}")
             if not client.get("full_name"):
                 client["full_name"] = user.get("full_name", "")
             if not client.get("email"):
                 client["email"] = user.get("email", "")
             if not client.get("phone"):
                 client["phone"] = user.get("phone", "")
+            logger.info(f"🔍 CLIENT AFTER FALLBACK: full_name: {client.get('full_name')}, email: {client.get('email')}, phone: {client.get('phone')}")
+        else:
+            logger.error(f"❌ USER NOT FOUND for client {client['id']} with user_id {client['user_id']}")
     
     # Get assigned employee name
     if client.get("assigned_employee_id"):
