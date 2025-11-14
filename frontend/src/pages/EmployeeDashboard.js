@@ -18,6 +18,7 @@ import NotificationBell from '../components/NotificationBell';
 import MyProspects from '../components/MyProspects';
 import SearchAndSort from '../components/SearchAndSort';
 import AloriaLogo from '../components/AloriaLogo';
+import CredentialsPopup from '../components/CredentialsPopup';
 import useSocket from '../hooks/useSocket';
 
 export default function EmployeeDashboard() {
