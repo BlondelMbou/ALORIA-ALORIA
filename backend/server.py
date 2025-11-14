@@ -2462,6 +2462,18 @@ async def get_admin_dashboard_stats(current_user: dict = Depends(get_current_use
     consultation_count = len(consultation_payments_list)
     consultation_total = sum(p.get("amount", 0) for p in consultation_payments_list)
     
+    # === FINANCES - État des comptes ===
+    # Total des paiements confirmés (entrées d'argent)
+    confirmed_payments = await db.payment_declarations.find({"status": "confirmed"}).to_list(10000)
+    total_payments_amount = sum(p.get("amount", 0) for p in confirmed_payments)
+    
+    # Total des retraits (sorties d'argent)
+    withdrawals = await db.withdrawals.find({}).to_list(10000)
+    total_withdrawals = sum(w.get("amount", 0) for w in withdrawals)
+    
+    # Solde actuel (entrées - sorties)
+    current_balance = total_payments_amount - total_withdrawals
+    
     # Activités récentes
     recent_activities = await db.user_activities.find(
         {}, {"_id": 0}
@@ -2486,6 +2498,12 @@ async def get_admin_dashboard_stats(current_user: dict = Depends(get_current_use
             "active_cases": active_cases,
             "total_payments": total_payments,
             "pending_payments": pending_payments
+        },
+        "finances": {
+            "total_payments_amount": total_payments_amount,
+            "total_withdrawals": total_withdrawals,
+            "current_balance": current_balance,
+            "currency": "CFA"
         },
         "consultations": {
             "total_count": consultation_count,
