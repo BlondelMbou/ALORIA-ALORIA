@@ -516,18 +516,18 @@ export default function ClientDashboard() {
                 <div className="mt-8">
                   <h4 className="text-white font-semibold mb-4">Tous les Documents du Processus</h4>
                   <div className="grid md:grid-cols-2 gap-4">
-                    {caseData.workflow_steps.map((step, stepIdx) => (
-                      step.documents && step.documents.length > 0 && (
+                    {workflowSteps.map((step, stepIdx) => (
+                      step && step.documents && step.documents.length > 0 && (
                         <div key={stepIdx} className="bg-[#0F172A] border border-slate-700 rounded-lg p-4">
                           <h5 className="font-medium text-slate-200 mb-2">
-                            Étape {stepIdx + 1}: {step.title}
+                            Étape {stepIdx + 1}: {step.title || 'Étape'}
                           </h5>
                           <ul className="space-y-1 text-sm">
                             {step.documents.map((doc, docIdx) => (
                               <li key={docIdx} className="flex items-center text-slate-400">
-                                {stepIdx < caseData.current_step_index ? (
+                                {stepIdx < currentStepIndex ? (
                                   <CheckCircle className="w-4 h-4 mr-2 text-green-500" />
-                                ) : stepIdx === caseData.current_step_index ? (
+                                ) : stepIdx === currentStepIndex ? (
                                   <Clock className="w-4 h-4 mr-2 text-orange-500" />
                                 ) : (
                                   <div className="w-4 h-4 mr-2 rounded-full border border-slate-600"></div>
