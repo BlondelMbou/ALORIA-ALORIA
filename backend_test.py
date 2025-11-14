@@ -409,25 +409,65 @@ class APITester:
         
         # ÉTAPE 7: Test avec Manager credentials aussi
         print(f"\n🔍 TESTING PASSWORD CHANGE WITH MANAGER CREDENTIALS")
-        if 'manager' in self.tokens:
-            try:
-                headers = {"Authorization": f"Bearer {self.tokens['manager']}"}
-                manager_password_change = {
-                    "old_password": "password123",
-                    "new_password": "NewManagerPassword123!"
-                }
+        
+        # First, let's create the manager@test.com user and reset password
+        try:
+            # Reset password for manager@test.com
+            reset_response = self.session.post(f"{API_BASE}/auth/forgot-password", json={"email": "manager@test.com"})
+            if reset_response.status_code == 200:
+                reset_data = reset_response.json()
+                temp_password = reset_data.get('temporary_password')
                 
-                response = self.session.patch(f"{API_BASE}/auth/change-password", json=manager_password_change, headers=headers)
-                
-                if response.status_code == 200:
-                    self.log_result("2.6 Manager Password Change", True, 
-                                  "✅ Manager password change successful")
+                if temp_password:
+                    # Login with temp password
+                    login_response = self.session.post(f"{API_BASE}/auth/login", json={
+                        "email": "manager@test.com",
+                        "password": temp_password
+                    })
+                    
+                    if login_response.status_code == 200:
+                        manager_token = login_response.json()['access_token']
+                        
+                        # Now test password change
+                        headers = {"Authorization": f"Bearer {manager_token}"}
+                        manager_password_change = {
+                            "old_password": temp_password,
+                            "new_password": "NewManagerPassword123!"
+                        }
+                        
+                        response = self.session.patch(f"{API_BASE}/auth/change-password", json=manager_password_change, headers=headers)
+                        
+                        if response.status_code == 200:
+                            self.log_result("2.6 Manager Password Change", True, 
+                                          "✅ Manager password change successful")
+                            
+                            # Test login with new password
+                            new_login = self.session.post(f"{API_BASE}/auth/login", json={
+                                "email": "manager@test.com",
+                                "password": "NewManagerPassword123!"
+                            })
+                            
+                            if new_login.status_code == 200:
+                                self.log_result("2.7 Manager New Password Login", True, 
+                                              "✅ Manager can login with new password")
+                            else:
+                                self.log_result("2.7 Manager New Password Login", False, 
+                                              f"❌ Cannot login with new password: {new_login.status_code}")
+                        else:
+                            self.log_result("2.6 Manager Password Change", False, 
+                                          f"❌ Manager password change failed - Status: {response.status_code}, Response: {response.text}")
+                    else:
+                        self.log_result("2.6 Manager Password Change", False, 
+                                      f"❌ Cannot login with temp password: {login_response.status_code}")
                 else:
                     self.log_result("2.6 Manager Password Change", False, 
-                                  f"❌ Manager password change failed - Status: {response.status_code}, Response: {response.text}")
+                                  "❌ No temporary password in reset response")
+            else:
+                self.log_result("2.6 Manager Password Change", False, 
+                              f"❌ Password reset failed: {reset_response.status_code}")
                     
-            except Exception as e:
-                self.log_result("2.6 Manager Password Change", False, f"❌ Exception: {str(e)}")
+        except Exception as e:
+            self.log_result("2.6 Manager Password Change", False, f"❌ Exception: {str(e)}")
 
     def test_critical_1_withdrawal_manager_error(self):
         """TEST CRITIQUE 1: ERREUR RETRAIT MANAGER - Identifier l'erreur exacte"""
