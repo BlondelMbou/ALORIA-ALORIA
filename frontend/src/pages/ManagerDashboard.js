@@ -825,9 +825,18 @@ export default function ManagerDashboard() {
           {/* Employees Tab */}
           <TabsContent value="employees">
             <Card className="bg-gradient-to-br from-[#1E293B] to-[#334155] border-slate-700">
-              <CardHeader>
-                <CardTitle className="text-white">Membres de l'Équipe</CardTitle>
-                <CardDescription className="text-slate-400">Voir et gérer vos conseillers en immigration</CardDescription>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle className="text-white">Membres de l'Équipe</CardTitle>
+                  <CardDescription className="text-slate-400">Voir et gérer vos conseillers en immigration</CardDescription>
+                </div>
+                <Button
+                  onClick={() => setShowCreateEmployee(true)}
+                  className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white"
+                >
+                  <UserPlus className="w-4 h-4 mr-2" />
+                  Créer un Employé
+                </Button>
               </CardHeader>
               <CardContent>
                 {/* Recherche et Tri */}
