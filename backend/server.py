@@ -4302,6 +4302,103 @@ async def change_password(
     
     return {"message": "Mot de passe modifié avec succès"}
 
+@api_router.post("/auth/forgot-password")
+async def forgot_password(email_data: dict):
+    """Réinitialiser le mot de passe - génère un nouveau mot de passe temporaire"""
+    email = email_data.get("email", "").strip().lower()
+    
+    if not email:
+        raise HTTPException(status_code=400, detail="Email requis")
+    
+    # Chercher l'utilisateur
+    user = await db.users.find_one({"email": email})
+    if not user:
+        # Pour des raisons de sécurité, ne pas révéler que l'email n'existe pas
+        return {"message": "Si cet email existe, un nouveau mot de passe temporaire a été envoyé"}
+    
+    # Générer un nouveau mot de passe temporaire
+    temp_password = generate_temporary_password()
+    hashed_password = pwd_context.hash(temp_password)
+    
+    # Mettre à jour le mot de passe
+    await db.users.update_one(
+        {"id": user["id"]},
+        {"$set": {
+            "password": hashed_password,
+            "password_reset_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    # Envoyer l'email avec le nouveau mot de passe
+    if EMAIL_SERVICE_AVAILABLE:
+        try:
+            email_sent = await send_password_reset_email({
+                "email": email,
+                "full_name": user.get("full_name", "Utilisateur"),
+                "temporary_password": temp_password
+            })
+            if email_sent:
+                logger.info(f"Email de réinitialisation envoyé à {email}")
+        except Exception as e:
+            logger.error(f"Erreur envoi email réinitialisation à {email}: {e}")
+    
+    # Créer une notification dans l'app
+    await create_notification(
+        user_id=user["id"],
+        title="🔑 Mot de passe réinitialisé",
+        message=f"Votre mot de passe a été réinitialisé. Nouveau mot de passe temporaire: {temp_password}. Changez-le dès votre connexion.",
+        type="password_reset"
+    )
+    
+    return {
+        "message": "Si cet email existe, un nouveau mot de passe temporaire a été envoyé",
+        "temporary_password": temp_password  # EN PRODUCTION: Ne pas retourner ici, seulement par email
+    }
+
+async def send_password_reset_email(user_data):
+    """Envoyer un email de réinitialisation de mot de passe"""
+    if not EMAIL_SERVICE_AVAILABLE:
+        return False
+    
+    try:
+        from_email = os.environ.get('SENDGRID_FROM_EMAIL', 'noreply@aloria-agency.com')
+        
+        message = Mail(
+            from_email=from_email,
+            to_emails=user_data['email'],
+            subject='Réinitialisation de votre mot de passe ALORIA AGENCY',
+            html_content=f"""
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <h2 style="color: #FF6B35;">Réinitialisation de Mot de Passe</h2>
+                <p>Bonjour {user_data['full_name']},</p>
+                <p>Votre mot de passe a été réinitialisé avec succès.</p>
+                <div style="background-color: #f5f5f5; padding: 15px; border-radius: 5px; margin: 20px 0;">
+                    <p style="margin: 0;"><strong>Votre nouveau mot de passe temporaire:</strong></p>
+                    <p style="font-size: 24px; color: #FF6B35; font-weight: bold; margin: 10px 0;">{user_data['temporary_password']}</p>
+                </div>
+                <p><strong style="color: #d9534f;">⚠️ Important:</strong></p>
+                <ul>
+                    <li>Connectez-vous avec ce mot de passe temporaire</li>
+                    <li>Changez-le immédiatement depuis votre profil</li>
+                    <li>Ne partagez ce mot de passe avec personne</li>
+                </ul>
+                <p>Si vous n'avez pas demandé cette réinitialisation, contactez-nous immédiatement.</p>
+                <hr style="margin: 30px 0;">
+                <p style="color: #666; font-size: 12px;">
+                    ALORIA AGENCY - Votre partenaire immigration<br>
+                    © 2024 Tous droits réservés
+                </p>
+            </div>
+            """
+        )
+        
+        sg = SendGridAPIClient(os.environ.get('SENDGRID_API_KEY'))
+        response = sg.send(message)
+        return response.status_code in [200, 201, 202]
+    except Exception as e:
+        logger.error(f"SendGrid error for password reset {user_data['email']}: {e}")
+        return False
+
 # Activity Logs
 @api_router.get("/activities", response_model=List[ActivityLogResponse])
 async def get_activity_logs(
