@@ -120,8 +120,27 @@ export default function EmployeeDashboard() {
   const handleCreateClient = async (e) => {
     e.preventDefault();
     try {
-      await clientsAPI.create(newClientForm);
-      toast.success('Client created successfully');
+      const response = await clientsAPI.create(newClientForm);
+      
+      // Afficher le popup avec les credentials
+      if (response.data) {
+        setNewClientCredentials({
+          email: response.data.login_email || response.data.email,
+          login_email: response.data.login_email || response.data.email,
+          temporary_password: response.data.default_password || response.data.temporary_password,
+          default_password: response.data.default_password || response.data.temporary_password,
+          full_name: newClientForm.full_name,
+          role: 'CLIENT',
+          additional_info: {
+            case_id: response.data.id,
+            country: newClientForm.country,
+            visa_type: newClientForm.visa_type
+          }
+        });
+        setShowCredentialsDialog(true);
+      }
+      
+      toast.success('✅ Client créé avec succès!');
       setNewClientForm({
         full_name: '',
         email: '',
@@ -132,7 +151,7 @@ export default function EmployeeDashboard() {
       });
       fetchData();
     } catch (error) {
-      toast.error(error.response?.data?.detail || 'Failed to create client');
+      toast.error(error.response?.data?.detail || 'Erreur lors de la création du client');
     }
   };
   
