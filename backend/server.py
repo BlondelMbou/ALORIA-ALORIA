@@ -1082,7 +1082,7 @@ async def login(user_credentials: UserLogin):
     access_token = create_access_token(data={"sub": user["id"], "role": user["role"]})
     
     # Log de connexion
-    await log_user_activity(
+    await log_activity(
         user_id=user["id"],
         action="login",
         details={"login_time": datetime.now(timezone.utc).isoformat()}
@@ -1137,7 +1137,7 @@ async def create_first_superadmin(
     await db.users.insert_one(superadmin_dict)
     
     # Log la création
-    await log_user_activity(
+    await log_activity(
         user_id=user_id,
         action="superadmin_created",
         details={"created_by": "system", "initial_setup": True}
@@ -2220,7 +2220,7 @@ async def declare_payment(payment_data: PaymentDeclaration, current_user: dict =
         )
     
     # Log activité
-    await log_user_activity(
+    await log_activity(
         user_id=current_user["id"],
         action="declare_payment",
         details={"payment_id": payment_id, "amount": payment_data.amount}
@@ -2466,7 +2466,7 @@ async def impersonate_user(request: ImpersonationRequest, current_user: dict = D
     impersonation_token = jwt.encode(impersonation_data, SECRET_KEY, algorithm=ALGORITHM)
     
     # Log l'impersonation
-    await log_user_activity(
+    await log_activity(
         user_id=current_user["id"],
         action="impersonate_user",
         details={
@@ -2574,7 +2574,7 @@ async def admin_update_user(
         await db.users.update_one({"id": user_id}, {"$set": update_dict})
         
         # Log l'action
-        await log_user_activity(
+        await log_activity(
             user_id=current_user["id"],
             action="admin_update_user",
             details={
@@ -2611,7 +2611,7 @@ async def admin_delete_user(user_id: str, current_user: dict = Depends(get_curre
     )
     
     # Log l'action
-    await log_user_activity(
+    await log_activity(
         user_id=current_user["id"],
         action="admin_delete_user",
         details={
@@ -2975,7 +2975,7 @@ async def create_withdrawal(withdrawal_data: WithdrawalCreate, current_user: dic
     await db.withdrawals.insert_one(withdrawal_dict)
     
     # Log de l'activité
-    await log_user_activity(
+    await log_activity(
         user_id=current_user["id"],
         action="withdrawal_created",
         details={
@@ -3189,7 +3189,7 @@ async def confirm_payment_with_code(
             )
     
     # Log de l'activité
-    await log_user_activity(
+    await log_activity(
         user_id=current_user["id"],
         action=f"payment_{confirmation_data.action.lower()}",
         details={
@@ -3431,7 +3431,7 @@ async def create_contact_message(message_data: ContactMessageCreate):
         )
     
     # Log de l'activité
-    await log_user_activity(
+    await log_activity(
         user_id="public",
         action="contact_message_created",
         details={
@@ -3516,7 +3516,7 @@ async def assign_contact_message(
     )
     
     # Log activity
-    await log_user_activity(
+    await log_activity(
         user_id=current_user["id"],
         action="prospect_assigned",
         details={
@@ -3636,7 +3636,7 @@ async def respond_to_contact_message(
     )
     
     # Log d'activité
-    await log_user_activity(
+    await log_activity(
         user_id=current_user["id"],
         action="RESPOND_TO_CONTACT",
         resource_type="contact_message",
@@ -3731,7 +3731,7 @@ async def assign_prospect_to_consultant(
         )
     
     # Log activity
-    await log_user_activity(
+    await log_activity(
         user_id=current_user["id"],
         action="consultation_payment_confirmed",
         details={
@@ -3844,7 +3844,7 @@ async def add_consultant_notes(
                 logger.info(f"Email notification needed for {assignee['email']} about potential client {prospect['name']}")
     
     # Log activity
-    await log_user_activity(
+    await log_activity(
         user_id=current_user["id"],
         action="consultant_note_added",
         details={
@@ -4081,7 +4081,7 @@ async def convert_prospect_to_client(
             )
     
     # Log activity
-    await log_user_activity(
+    await log_activity(
         user_id=current_user["id"],
         action="prospect_converted_to_client",
         details={
@@ -4255,7 +4255,7 @@ async def create_client_direct(
             )
     
     # Log activity
-    await log_user_activity(
+    await log_activity(
         user_id=current_user["id"],
         action="client_created_direct",
         details={
@@ -4629,7 +4629,7 @@ async def update_case_progress_sequential(
     )
     
     # Log de l'activité
-    await log_user_activity(
+    await log_activity(
         user_id=current_user["id"],
         action="case_progress_updated",
         details={
