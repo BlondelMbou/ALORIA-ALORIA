@@ -347,6 +347,9 @@
         -working: true
         -agent: "testing"
         -comment: "✅ TESTED: Password change API fully functional. PATCH /api/auth/change-password works correctly with valid old password, returns 400 'Mot de passe actuel incorrect' for invalid old password. Password successfully updated in database and verified by subsequent login attempts. Both manager and client password changes tested successfully."
+        -working: true
+        -agent: "testing"
+        -comment: "✅ URGENT RE-TEST CONFIRMÉ: Test urgent du changement de mot de passe effectué. Manager: ancien mot de passe (sQbU#iDHP&8S) → nouveau (NewManagerPassword123!) → login réussi. Client: ancien mot de passe (wPkr5OCZx#p$) → nouveau (NewClientPassword123!) → login réussi. PATCH /api/auth/change-password fonctionne parfaitement pour tous les rôles. Le problème rapporté par l'utilisateur est RÉSOLU - le système de changement de mot de passe est 100% fonctionnel."
 
   - task: "Client credentials API with permissions"
     implemented: true
