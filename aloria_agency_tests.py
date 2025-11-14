@@ -17,7 +17,7 @@ from datetime import datetime
 import time
 
 # Configuration
-BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://aloria-manager.preview.emergentagent.com')
+BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://migration-hub.preview.emergentagent.com')
 API_BASE = f"{BACKEND_URL}/api"
 
 class AloriaAgencyTester:
