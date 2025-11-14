@@ -560,9 +560,9 @@ class APITester:
                 self.log_result("7.2 Error Test - Nonexistent Payment", False, "Exception occurred", str(e))
         
         # 7.3 - GET /api/invoices/{invoice_number} avec numéro invalide → Doit retourner 404
-        if 'manager' in self.tokens:
+        if manager_token:
             try:
-                headers = {"Authorization": f"Bearer {self.tokens['manager']}"}
+                headers = {"Authorization": f"Bearer {manager_token}"}
                 fake_invoice_number = "ALO-00000000-INVALID"
                 
                 error_response = self.session.get(f"{API_BASE}/invoices/{fake_invoice_number}", headers=headers)
