@@ -290,7 +290,8 @@ export default function ManagerDashboard() {
     }
     
     try {
-      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/clients/create-direct`, {
+      // Utiliser l'endpoint refactorisé /api/clients
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/clients`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -306,11 +307,19 @@ export default function ManagerDashboard() {
       
       const data = await response.json();
       
-      // Afficher le dialog avec les credentials
+      // Préparer les credentials pour le popup
       setNewClientCredentials({
-        email: data.login_email,
-        password: data.temporary_password,
-        full_name: newClient.full_name
+        email: data.login_email || data.email,
+        login_email: data.login_email || data.email,
+        temporary_password: data.default_password || data.temporary_password,
+        default_password: data.default_password || data.temporary_password,
+        full_name: newClient.full_name,
+        role: 'CLIENT',
+        additional_info: {
+          case_id: data.id,
+          country: newClient.country,
+          visa_type: newClient.visa_type
+        }
       });
       setShowCredentialsDialog(true);
       
