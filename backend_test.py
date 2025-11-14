@@ -228,8 +228,8 @@ class APITester:
         # 1.2 - Le client déclare un paiement via POST /api/payments/declare
         try:
             # Wait a moment for user creation to complete
-            import time
-            time.sleep(2)
+            import time as time_module
+            time_module.sleep(2)
             
             print(f"🔍 Attempting client login with email: {client_email}")
             client_login = self.session.post(f"{API_BASE}/auth/login", json={
