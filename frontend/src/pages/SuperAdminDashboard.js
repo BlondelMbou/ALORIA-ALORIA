@@ -536,6 +536,66 @@ const SuperAdminDashboard = () => {
         {activeTab === 'users' && <UsersTab />}
         {activeTab === 'activities' && <ActivityHistory />}
         {activeTab === 'prospects' && <ProspectManagement userRole="SUPERADMIN" />}
+        {activeTab === 'visitors' && (
+          <div className="bg-[#1E293B] rounded-lg p-6 border border-slate-700">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold text-white">Liste des Visiteurs</h2>
+              <p className="text-slate-400">Total: {visitors.length}</p>
+            </div>
+            
+            <SearchAndSort
+              data={visitors}
+              searchFields={['email', 'phone', 'country', 'visa_type', 'message']}
+              sortOptions={[
+                { value: 'created_at', label: 'Date de visite' },
+                { value: 'email', label: 'Email' },
+                { value: 'country', label: 'Pays' }
+              ]}
+              onFilteredDataChange={setFilteredVisitors}
+            />
+
+            <div className="mt-6 overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-slate-700">
+                    <th className="text-left py-3 px-4 text-slate-300 font-medium">Date</th>
+                    <th className="text-left py-3 px-4 text-slate-300 font-medium">Email</th>
+                    <th className="text-left py-3 px-4 text-slate-300 font-medium">Téléphone</th>
+                    <th className="text-left py-3 px-4 text-slate-300 font-medium">Pays</th>
+                    <th className="text-left py-3 px-4 text-slate-300 font-medium">Type de Visa</th>
+                    <th className="text-left py-3 px-4 text-slate-300 font-medium">Message</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredVisitors.length === 0 ? (
+                    <tr>
+                      <td colSpan="6" className="text-center py-8 text-slate-400">
+                        Aucun visiteur trouvé
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredVisitors.map((visitor) => (
+                      <tr key={visitor.id} className="border-b border-slate-700/50 hover:bg-slate-800/50">
+                        <td className="py-3 px-4 text-slate-300">
+                          {visitor.created_at ? new Date(visitor.created_at).toLocaleDateString('fr-FR') : 'N/A'}
+                        </td>
+                        <td className="py-3 px-4 text-slate-300">{visitor.email || 'N/A'}</td>
+                        <td className="py-3 px-4 text-slate-300">{visitor.phone || 'N/A'}</td>
+                        <td className="py-3 px-4 text-slate-300">{visitor.country || 'N/A'}</td>
+                        <td className="py-3 px-4 text-slate-300">{visitor.visa_type || 'N/A'}</td>
+                        <td className="py-3 px-4 text-slate-300">
+                          <div className="max-w-xs truncate" title={visitor.message}>
+                            {visitor.message || 'Aucun message'}
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
         {activeTab === 'users-creation' && <HierarchicalUserCreation onUserCreated={fetchDashboardData} />}
         {activeTab === 'balance' && <BalanceMonitor />}
       </div>
