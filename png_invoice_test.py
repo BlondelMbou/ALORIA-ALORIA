@@ -53,19 +53,51 @@ class PNGInvoiceWorkflowTester:
         # ÉTAPE 1 - CRÉER CLIENT ET PAIEMENT
         print("\n🔸 ÉTAPE 1 - CRÉER CLIENT ET PAIEMENT")
         
-        # 1.1 Login Manager
+        # 1.1 Login SuperAdmin and create Manager
         try:
-            manager_credentials = {"email": "manager@test.com", "password": "password123"}
-            response = self.session.post(f"{API_BASE}/auth/login", json=manager_credentials)
+            # First login as SuperAdmin
+            superadmin_credentials = {"email": "superadmin@aloria.com", "password": "SuperAdmin123!"}
+            response = self.session.post(f"{API_BASE}/auth/login", json=superadmin_credentials)
             
             if response.status_code == 200:
-                self.manager_token = response.json()['access_token']
-                self.log_result("1.1 Manager Login", True, f"Manager connecté: {manager_credentials['email']}")
+                superadmin_token = response.json()['access_token']
+                
+                # Create a manager for testing
+                headers = {"Authorization": f"Bearer {superadmin_token}"}
+                manager_email = f"test.manager.png.{int(time.time())}@aloria.com"
+                manager_data = {
+                    "email": manager_email,
+                    "full_name": "Test Manager PNG",
+                    "phone": "+33123456789",
+                    "role": "MANAGER",
+                    "send_email": False
+                }
+                
+                create_response = self.session.post(f"{API_BASE}/users/create", json=manager_data, headers=headers)
+                if create_response.status_code in [200, 201]:
+                    manager_result = create_response.json()
+                    temp_password = manager_result.get('temporary_password')
+                    
+                    # Now login as the manager
+                    manager_login = self.session.post(f"{API_BASE}/auth/login", json={
+                        "email": manager_email,
+                        "password": temp_password
+                    })
+                    
+                    if manager_login.status_code == 200:
+                        self.manager_token = manager_login.json()['access_token']
+                        self.log_result("1.1 Manager Creation & Login", True, f"Manager créé et connecté: {manager_email}")
+                    else:
+                        self.log_result("1.1 Manager Login", False, f"Login failed: {manager_login.status_code}", manager_login.text)
+                        return
+                else:
+                    self.log_result("1.1 Manager Creation", False, f"Status: {create_response.status_code}", create_response.text)
+                    return
             else:
-                self.log_result("1.1 Manager Login", False, f"Status: {response.status_code}", response.text)
+                self.log_result("1.1 SuperAdmin Login", False, f"Status: {response.status_code}", response.text)
                 return
         except Exception as e:
-            self.log_result("1.1 Manager Login", False, "Exception occurred", str(e))
+            self.log_result("1.1 Manager Setup", False, "Exception occurred", str(e))
             return
         
         # 1.2 Créer un nouveau client
