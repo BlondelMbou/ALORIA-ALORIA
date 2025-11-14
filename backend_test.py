@@ -294,6 +294,11 @@ class APITester:
                         return
                 else:
                     self.log_result("2.2 Generate Confirmation Code", False, 
+                                  f"Code Gen Status: {code_response.status_code}", code_response.text)
+                    return
+            except Exception as e:
+                self.log_result("2.3 Payment Confirmation", False, "Exception occurred", str(e))
+                return
         
         # ============================================================================
         # ÉTAPE 3 - VÉRIFIER LA GÉNÉRATION DU FICHIER PNG
