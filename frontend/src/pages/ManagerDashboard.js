@@ -895,74 +895,102 @@ export default function ManagerDashboard() {
             <Card className="bg-gradient-to-br from-[#1E293B] to-[#334155] border-slate-700">
               <CardHeader>
                 <CardTitle className="text-white">Mes Clients Personnels</CardTitle>
-                <CardDescription className="text-slate-400">Clients qui me sont directement assignés</CardDescription>
+                <CardDescription className="text-slate-400">Suivez l'évolution des dossiers de vos clients personnels</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="overflow-x-auto mt-4">
-                  <table className="w-full">
-                    <thead className="border-b border-slate-700">
-                      <tr>
-                        <th className="text-left py-3 px-4 font-semibold text-slate-300">Nom Client</th>
-                        <th className="text-left py-3 px-4 font-semibold text-slate-300">Pays</th>
-                        <th className="text-left py-3 px-4 font-semibold text-slate-300">Type de Visa</th>
-                        <th className="text-left py-3 px-4 font-semibold text-slate-300">Statut</th>
-                        <th className="text-left py-3 px-4 font-semibold text-slate-300">Progrès</th>
-                        <th className="text-left py-3 px-4 font-semibold text-slate-300">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {clients.filter(c => c.assigned_employee_id === user?.id).map((client) => {
-                        const clientCase = cases.find(c => c.client_id === client.id);
-                        return (
-                          <tr key={client.id} className="border-b border-slate-700/50 hover:bg-slate-800/30">
-                            <td className="py-3 px-4 text-white">{clientCase?.client_name || 'N/A'}</td>
-                            <td className="py-3 px-4">
-                              <Badge variant="outline" className="border-slate-600 text-slate-300">{client.country}</Badge>
-                            </td>
-                            <td className="py-3 px-4 text-slate-300">{client.visa_type}</td>
-                            <td className="py-3 px-4">
-                              <Badge className={getStatusColor(client.current_status)}>{client.current_status}</Badge>
-                            </td>
-                            <td className="py-3 px-4">
-                              <div className="flex items-center gap-2">
-                                <div className="flex-1 bg-slate-700 rounded-full h-2 overflow-hidden">
-                                  <div 
-                                    className="bg-gradient-to-r from-orange-500 to-orange-600 h-full transition-all" 
-                                    style={{ width: `${client.progress_percentage || 0}%` }}
-                                  />
+                {/* Cartes Clients - Style Mes Dossiers */}
+                <div className="grid gap-6 mt-4">
+                  {clients.filter(c => c.assigned_employee_id === user?.id).map((client) => {
+                    const clientCase = cases.find(c => c.client_id === client.user_id);
+                    const currentStepIndex = clientCase?.current_step_index || 0;
+                    const totalSteps = clientCase?.workflow_steps?.length || 0;
+                    const progressPercentage = client.progress_percentage || 0;
+
+                    return (
+                      <Card key={client.id} className="bg-[#0F172A] border-slate-700 hover:border-orange-500/50 transition-all">
+                        <CardContent className="p-6">
+                          {/* En-tête avec nom et statut */}
+                          <div className="flex justify-between items-start mb-4">
+                            <div className="flex-1">
+                              <h3 className="text-xl font-semibold text-white mb-1">
+                                {client.full_name || client.client_name || 'Client'}
+                              </h3>
+                              <p className="text-slate-300">
+                                {client.country} - {client.visa_type}
+                              </p>
+                            </div>
+                            <Badge className={getStatusColor(client.current_status)}>
+                              {client.current_status || 'Nouveau'}
+                            </Badge>
+                          </div>
+
+                          {/* Progression */}
+                          <div className="mb-4">
+                            <div className="flex justify-between items-center mb-2">
+                              <span className="text-sm text-slate-400">
+                                Step {currentStepIndex + 1} of {totalSteps || 0}
+                              </span>
+                              <span className="text-sm font-medium text-orange-400">
+                                {progressPercentage}%
+                              </span>
+                            </div>
+                            <div className="w-full bg-slate-700 rounded-full h-2 overflow-hidden">
+                              <div 
+                                className="bg-gradient-to-r from-orange-500 to-orange-600 h-full transition-all" 
+                                style={{ width: `${progressPercentage}%` }}
+                              />
+                            </div>
+                          </div>
+
+                          {/* Informations supplémentaires */}
+                          <div className="bg-slate-900/50 rounded-lg p-4 mb-4 space-y-2">
+                            {clientCase && (
+                              <>
+                                <div className="text-sm text-slate-400">
+                                  <span className="font-semibold text-slate-300">Current Step:</span>
+                                  <p className="text-slate-400 mt-1">
+                                    {clientCase.workflow_steps?.[currentStepIndex]?.title || 'En cours de traitement'}
+                                  </p>
                                 </div>
-                                <span className="text-xs text-slate-400">{client.progress_percentage || 0}%</span>
-                              </div>
-                            </td>
-                            <td className="py-3 px-4">
-                              <div className="flex gap-2">
-                                <Button 
-                                  variant="outline" 
-                                  size="sm"
-                                  className="border-slate-600 text-slate-300 hover:bg-slate-800 hover:text-white"
-                                  onClick={() => setSelectedClient(client)}
-                                >
-                                  Détails
-                                </Button>
-                                <Button 
-                                  variant="outline" 
-                                  size="sm"
-                                  className="border-orange-600 text-orange-400 hover:bg-orange-800 hover:text-white"
-                                  onClick={() => setReassignDialog({ show: true, client, newEmployeeId: '' })}
-                                >
-                                  Réassigner
-                                </Button>
-                              </div>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
+                                <div className="text-sm text-slate-400 border-t border-slate-700 pt-2 mt-2">
+                                  <span className="font-semibold text-slate-300">Required Documents:</span>
+                                  <p className="text-slate-400 mt-1">
+                                    {clientCase.workflow_steps?.[currentStepIndex]?.documents?.join(', ') || 'Aucun'}
+                                  </p>
+                                </div>
+                              </>
+                            )}
+                          </div>
+
+                          {/* Actions */}
+                          <div className="flex gap-2">
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              className="flex-1 border-slate-600 text-slate-300 hover:bg-slate-800 hover:text-white"
+                              onClick={() => setSelectedClient(client)}
+                            >
+                              <FileText className="w-4 h-4 mr-2" />
+                              Voir Détails
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              className="border-orange-600 text-orange-400 hover:bg-orange-600 hover:text-white"
+                              onClick={() => setReassignDialog({ show: true, client, newEmployeeId: '' })}
+                            >
+                              Réassigner
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
 
                   {clients.filter(c => c.assigned_employee_id === user?.id).length === 0 && (
-                    <div className="text-center py-8">
-                      <p className="text-slate-400">Aucun client ne vous est directement assigné</p>
+                    <div className="text-center py-12">
+                      <p className="text-slate-400 text-lg">Aucun client ne vous est directement assigné</p>
+                      <p className="text-slate-500 text-sm mt-2">Créez un nouveau client ou demandez une réassignation</p>
                     </div>
                   )}
                 </div>
