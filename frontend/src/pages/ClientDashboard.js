@@ -77,7 +77,8 @@ export default function ClientDashboard() {
         setClient(myClient);
 
         const casesRes = await casesAPI.getAll();
-        const myCase = casesRes.data.find(c => c.client_id === myClient.id);
+        // Le case.client_id correspond au user_id du client
+        const myCase = casesRes.data.find(c => c.client_id === myClient.user_id);
         setCaseData(myCase);
 
         if (myClient.assigned_employee_id) {
