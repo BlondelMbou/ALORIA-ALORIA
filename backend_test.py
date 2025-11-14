@@ -469,9 +469,9 @@ class APITester:
         # ============================================================================
         print("\n🔸 ÉTAPE 6 - TESTER L'ENDPOINT ALTERNATIF")
         
-        if 'manager' in self.tokens and test_invoice_number:
+        if manager_token and test_invoice_number:
             try:
-                headers = {"Authorization": f"Bearer {self.tokens['manager']}"}
+                headers = {"Authorization": f"Bearer {manager_token}"}
                 print(f"🔍 Testing alternative endpoint: GET /api/invoices/{test_invoice_number}")
                 
                 # 6.1 - GET /api/invoices/{invoice_number}
