@@ -263,9 +263,18 @@ export default function ClientDashboard() {
     );
   }
 
-  const currentStep = caseData.workflow_steps[caseData.current_step_index];
-  const progressPercentage = ((caseData.current_step_index + 1) / caseData.workflow_steps.length) * 100;
-  const nextSteps = caseData.workflow_steps.slice(caseData.current_step_index + 1, caseData.current_step_index + 4);
+  // Vérifier que workflow_steps existe et contient des données
+  const workflowSteps = caseData.workflow_steps || [];
+  const currentStepIndex = caseData.current_step_index || 0;
+  const currentStep = workflowSteps[currentStepIndex] || {
+    title: 'Étape en cours',
+    description: 'Votre dossier est en cours de traitement',
+    documents: []
+  };
+  const progressPercentage = workflowSteps.length > 0 
+    ? ((currentStepIndex + 1) / workflowSteps.length) * 100 
+    : 0;
+  const nextSteps = workflowSteps.slice(currentStepIndex + 1, currentStepIndex + 4);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0F172A] via-[#1E293B] to-[#0F172A]">
