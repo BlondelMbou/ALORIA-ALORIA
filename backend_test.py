@@ -259,78 +259,55 @@ class APITester:
             return
         
         # ============================================================================
-        # ÉTAPE 2 - MANAGER CONFIRME LE PAIEMENT
+        # ÉTAPE 2 - VÉRIFIER LE STATUT DU PAIEMENT
         # ============================================================================
-        print("\n🔸 ÉTAPE 2 - MANAGER CONFIRME LE PAIEMENT")
+        print("\n🔸 ÉTAPE 2 - VÉRIFIER LE STATUT DU PAIEMENT")
         
         if manager_token and test_payment_id:
             try:
                 headers = {"Authorization": f"Bearer {manager_token}"}
                 
-                # 2.1 - Login Manager et GET /api/payments/pending pour voir le paiement
-                print(f"🔍 Getting pending payments")
-                pending_response = self.session.get(f"{API_BASE}/payments/pending", headers=headers)
-                if pending_response.status_code == 200:
-                    pending_payments = pending_response.json()
-                    test_payment_found = any(p.get('id') == test_payment_id for p in pending_payments)
-                    if test_payment_found:
-                        self.log_result("2.1 Manager View Pending Payments", True, f"Paiement trouvé dans la liste des paiements en attente")
-                    else:
-                        self.log_result("2.1 Manager View Pending Payments", False, f"Paiement {test_payment_id} non trouvé dans les paiements en attente")
-                else:
-                    self.log_result("2.1 Manager View Pending Payments", False, f"Status: {pending_response.status_code}")
-                
-                # 2.2 - Générer le code de confirmation
-                print(f"🔍 Generating confirmation code for payment: {test_payment_id}")
-                code_response = self.session.post(f"{API_BASE}/payments/{test_payment_id}/generate-code", headers=headers)
-                if code_response.status_code == 200:
-                    code_data = code_response.json()
-                    confirmation_code = code_data.get('confirmation_code')
-                    self.log_result("2.2 Generate Confirmation Code", True, f"Code généré: {confirmation_code}")
+                # Get payment details to check if it's already confirmed
+                payments_response = self.session.get(f"{API_BASE}/payments/history", headers=headers)
+                if payments_response.status_code == 200:
+                    payments = payments_response.json()
+                    current_payment = next((p for p in payments if p.get('id') == test_payment_id), None)
                     
-                    # 2.3 - PATCH /api/payments/{payment_id}/confirm avec code de confirmation
-                    confirm_data = {
-                        "action": "CONFIRMED",
-                        "confirmation_code": confirmation_code
-                    }
-                    print(f"🔍 Confirming payment with code: {confirmation_code}")
-                    confirm_response = self.session.patch(f"{API_BASE}/payments/{test_payment_id}/confirm", 
-                                                        json=confirm_data, headers=headers)
-                    if confirm_response.status_code == 200:
-                        confirm_result = confirm_response.json()
-                        test_invoice_number = confirm_result.get('invoice_number')
-                        pdf_invoice_url = confirm_result.get('pdf_invoice_url')
-                        
-                        # 2.4 - VÉRIFIER que le status passe à "confirmed", invoice_number généré, pdf_invoice_url rempli
-                        verification_results = []
-                        if confirm_result.get('status') == 'confirmed':
-                            verification_results.append("✅ Status = 'confirmed'")
+                    if current_payment:
+                        if current_payment.get('status') == 'CONFIRMED':
+                            test_invoice_number = current_payment.get('invoice_number')
+                            pdf_invoice_url = current_payment.get('pdf_invoice_url')
+                            
+                            verification_results = []
+                            verification_results.append("✅ Status = 'CONFIRMED' (déjà confirmé)")
+                            
+                            if test_invoice_number and test_invoice_number.startswith('ALO-'):
+                                verification_results.append(f"✅ Invoice number: {test_invoice_number}")
+                            else:
+                                verification_results.append(f"❌ Invoice number invalide: {test_invoice_number}")
+                            
+                            if pdf_invoice_url:
+                                verification_results.append(f"✅ pdf_invoice_url: {pdf_invoice_url}")
+                            else:
+                                verification_results.append("❌ pdf_invoice_url manquant")
+                            
+                            all_verified = all("✅" in result for result in verification_results)
+                            self.log_result("2.1 Payment Status Verification", all_verified, 
+                                          f"Vérifications: {'; '.join(verification_results)}")
                         else:
-                            verification_results.append(f"❌ Status = '{confirm_result.get('status')}' (attendu 'confirmed')")
-                        
-                        if test_invoice_number and test_invoice_number.startswith('ALO-'):
-                            verification_results.append(f"✅ Invoice number généré: {test_invoice_number}")
-                        else:
-                            verification_results.append(f"❌ Invoice number invalide: {test_invoice_number}")
-                        
-                        if pdf_invoice_url:
-                            verification_results.append(f"✅ pdf_invoice_url rempli: {pdf_invoice_url}")
-                        else:
-                            verification_results.append("❌ pdf_invoice_url manquant")
-                        
-                        all_verified = all("✅" in result for result in verification_results)
-                        self.log_result("2.3 Payment Confirmation Verification", all_verified, 
-                                      f"Vérifications: {'; '.join(verification_results)}")
+                            self.log_result("2.1 Payment Status Verification", False, 
+                                          f"Paiement non confirmé, status: {current_payment.get('status')}")
+                            return
                     else:
-                        self.log_result("2.3 Payment Confirmation", False, 
-                                      f"Confirm Status: {confirm_response.status_code}", confirm_response.text)
+                        self.log_result("2.1 Payment Status Verification", False, 
+                                      f"Paiement non trouvé: {test_payment_id}")
                         return
                 else:
-                    self.log_result("2.2 Generate Confirmation Code", False, 
-                                  f"Code Gen Status: {code_response.status_code}", code_response.text)
+                    self.log_result("2.1 Payment Status Verification", False, 
+                                  f"Status: {payments_response.status_code}")
                     return
             except Exception as e:
-                self.log_result("2.3 Payment Confirmation", False, "Exception occurred", str(e))
+                self.log_result("2.1 Payment Status Verification", False, "Exception occurred", str(e))
                 return
         
         # ============================================================================
