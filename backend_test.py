@@ -257,8 +257,14 @@ class APITester:
         original_password = "TestPassword123!"
         new_password = "NouveauMotDePasse123!"
         
-        # Créer un client test via Manager
+        # Créer un client test via Manager ou SuperAdmin
+        admin_token = None
         if 'manager' in self.tokens:
+            admin_token = self.tokens['manager']
+        elif 'superadmin' in self.tokens:
+            admin_token = self.tokens['superadmin']
+        
+        if admin_token:
             try:
                 headers = {"Authorization": f"Bearer {self.tokens['manager']}"}
                 client_data = {
