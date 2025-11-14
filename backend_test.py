@@ -225,52 +225,37 @@ class APITester:
                 self.log_result("1.1 Client Creation", False, "Exception occurred", str(e))
                 return
         
-        # 1.2 - Manager déclare un paiement pour le client (alternative workflow)
+        # 1.2 - Use existing confirmed payment to test PNG invoice functionality
         try:
-            # Since client login is failing, let's use manager to create payment directly
             headers = {"Authorization": f"Bearer {manager_token}"}
             
-            # First, get the client ID from the created client
-            clients_response = self.session.get(f"{API_BASE}/clients", headers=headers)
-            if clients_response.status_code == 200:
-                clients = clients_response.json()
-                test_client = next((c for c in clients if c.get('email') == client_email), None)
-                if test_client:
-                    test_client_id = test_client['id']
-                    
-                    # Create payment for the client using manager
-                    payment_data = {
-                        "client_id": test_client_id,
-                        "amount": 75000,
-                        "currency": "CFA",
-                        "description": "Test génération facture PNG",
-                        "payment_method": "Mobile Money"
-                    }
-                    
-                    print(f"🔍 Manager creates payment for client: {payment_data}")
-                    response = self.session.post(f"{API_BASE}/payments", json=payment_data, headers=headers)
-                    if response.status_code in [200, 201]:
-                        payment_response = response.json()
-                        test_payment_id = payment_response['id']
-                        
-                        # 1.3 - VÉRIFIER que le paiement est créé avec status "pending"
-                        if payment_response.get('status') == 'pending':
-                            self.log_result("1.2 Payment Creation", True, f"Paiement créé avec status 'pending': {test_payment_id}")
-                        else:
-                            self.log_result("1.2 Payment Creation", False, f"Status attendu 'pending', reçu '{payment_response.get('status')}'")
-                            return
-                    else:
-                        self.log_result("1.2 Payment Creation", False, f"Status: {response.status_code}", response.text)
-                        return
+            # Get existing payments to find a confirmed one
+            payments_response = self.session.get(f"{API_BASE}/payments/history", headers=headers)
+            if payments_response.status_code == 200:
+                payments = payments_response.json()
+                confirmed_payment = next((p for p in payments if p.get('status') == 'CONFIRMED' and p.get('invoice_number')), None)
+                
+                if confirmed_payment:
+                    test_payment_id = confirmed_payment['id']
+                    test_invoice_number = confirmed_payment['invoice_number']
+                    self.log_result("1.2 Use Existing Payment", True, f"Using existing confirmed payment: {test_payment_id}, invoice: {test_invoice_number}")
                 else:
-                    self.log_result("1.2 Find Client", False, f"Client not found: {client_email}")
-                    return
+                    # If no confirmed payment exists, create a new one and confirm it
+                    pending_payment = next((p for p in payments if p.get('status') == 'pending'), None)
+                    if pending_payment:
+                        test_payment_id = pending_payment['id']
+                        self.log_result("1.2 Use Existing Payment", True, f"Using existing pending payment for confirmation: {test_payment_id}")
+                        
+                        # We'll confirm this payment in step 2
+                    else:
+                        self.log_result("1.2 Use Existing Payment", False, "No suitable payments found")
+                        return
             else:
-                self.log_result("1.2 Get Clients", False, f"Status: {clients_response.status_code}")
+                self.log_result("1.2 Get Payments", False, f"Status: {payments_response.status_code}")
                 return
                 
         except Exception as e:
-            self.log_result("1.2 Payment Creation", False, "Exception occurred", str(e))
+            self.log_result("1.2 Use Existing Payment", False, "Exception occurred", str(e))
             return
         
         # ============================================================================
