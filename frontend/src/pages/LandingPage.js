@@ -490,16 +490,20 @@ export default function LandingPage() {
 
               {/* CTA Buttons - Mobile optimized */}
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full">
-                <a href="#start-application" className="flex-1 sm:flex-none">
-                  <Button 
-                    size="lg" 
-                    className="w-full sm:w-auto bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white px-6 sm:px-8 py-4 sm:py-6 text-base sm:text-lg shadow-2xl shadow-orange-500/50 hover:shadow-orange-500/70 transition-all duration-300 hover:scale-105 touch-manipulation"
-                  >
-                    <MousePointer2 className="mr-2 w-4 h-4 sm:w-5 sm:h-5" />
-                    <span className="hidden xs:inline">Commencer Maintenant</span>
-                    <span className="xs:hidden">Commencer</span>
-                  </Button>
-                </a>
+                <Button 
+                  size="lg" 
+                  className="w-full sm:w-auto bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white px-6 sm:px-8 py-4 sm:py-6 text-base sm:text-lg shadow-2xl shadow-orange-500/50 hover:shadow-orange-500/70 transition-all duration-300 hover:scale-105 touch-manipulation"
+                  onClick={() => {
+                    const crsCalculator = document.getElementById('crs-calculator');
+                    if (crsCalculator) {
+                      crsCalculator.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                  }}
+                >
+                  <Calculator className="mr-2 w-4 h-4 sm:w-5 sm:h-5" />
+                  <span className="hidden xs:inline">Commencer Maintenant</span>
+                  <span className="xs:hidden">Commencer</span>
+                </Button>
                 <Button 
                   variant="outline"
                   size="lg"
