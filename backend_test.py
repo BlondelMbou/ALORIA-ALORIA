@@ -4147,6 +4147,9 @@ class APITester:
         # Authentication setup
         self.authenticate_all_roles()
         
+        # 🚨 URGENT: MANAGER PAYMENT DASHBOARD EMPTY ISSUE
+        self.test_manager_payment_dashboard_urgent()
+        
         # 🔥 PRIORITY 1: CRITICAL BUGS TESTING (USER REPORTED)
         self.test_critical_bugs_client_details_and_payment_history()
         
