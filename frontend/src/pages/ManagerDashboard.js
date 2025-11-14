@@ -563,7 +563,27 @@ export default function ManagerDashboard() {
         </CardContent>
       </Card>
 
+      {/* Profil Settings */}
+      {showProfileSettings && (
+        <div className="p-6">
+          <div className="max-w-4xl mx-auto">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-white">Mon Profil</h2>
+              <Button
+                onClick={() => setShowProfileSettings(false)}
+                variant="outline"
+                className="border-slate-600 text-white"
+              >
+                Retour
+              </Button>
+            </div>
+            <ProfileSettings user={user} onUpdate={fetchData} />
+          </div>
+        </div>
+      )}
+
       {/* Stats Cards */}
+      {!showProfileSettings && (
       <div className="p-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <Card className="bg-gradient-to-br from-[#1E293B] to-[#334155] border-l-4 border-l-blue-500 border-slate-700" data-testid="kpi-total-cases">
