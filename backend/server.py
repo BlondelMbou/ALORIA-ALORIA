@@ -4030,6 +4030,19 @@ async def convert_prospect_to_client(
         type="client_created"
     )
     
+    # Notifier le manager si c'est un employé qui a créé le client
+    if current_user["role"] == "EMPLOYEE":
+        # Chercher le manager de cet employé
+        employee_record = await db.users.find_one({"id": current_user["id"]})
+        if employee_record and employee_record.get("manager_id"):
+            await create_notification(
+                user_id=employee_record["manager_id"],
+                title="👤 Nouveau client créé",
+                message=f"{current_user['full_name']} a créé un nouveau client: {prospect['name']} ({country} - {visa_type})",
+                type="employee_created_client",
+                related_id=client_id
+            )
+    
     # Log activity
     await log_user_activity(
         user_id=current_user["id"],
