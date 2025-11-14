@@ -4777,47 +4777,26 @@ class APITester:
         print("\n🔍 PAYMENT STATUS BUG INVESTIGATION COMPLETE")
         print("=" * 60)
 
-    def run_all_tests(self):
-        """Run all tests in sequence - CRITICAL BUGS FOCUS + PRODUCTION READY TESTING"""
-        print("🚀 ALORIA AGENCY - CRITICAL BUGS TESTING + BACKEND EXHAUSTIF")
-        print(f"Backend URL: {API_BASE}")
-        print("FOCUS: Testing critical user-reported bugs + production functionalities")
+    def run_critical_tests(self):
+        """Run critical tests selon la demande de révision"""
+        print("🚀 ALORIA AGENCY - TESTS CRITIQUES URGENTS")
+        print(f"🌐 Testing against: {API_BASE}")
         print("=" * 80)
         
-        # Authentication setup
+        # Authentication first
         self.authenticate_all_roles()
         
-        # 🚨 URGENT: PAYMENT STATUS BUG INVESTIGATION
-        self.test_payment_status_bug_urgent()
+        # TEST CRITIQUE 1: ERREUR RETRAIT MANAGER
+        self.test_critical_1_withdrawal_manager_error()
         
-        # 🚨 URGENT: MANAGER PAYMENT DASHBOARD EMPTY ISSUE
-        self.test_manager_payment_dashboard_urgent()
+        # TEST CRITIQUE 2: FACTURES PNG (NOUVEAU)
+        self.test_critical_2_png_invoices_system()
         
-        # 🔥 PRIORITY 1: CRITICAL BUGS TESTING (USER REPORTED)
-        self.test_critical_bugs_client_details_and_payment_history()
+        # TEST CRITIQUE 3: DASHBOARD SUPERADMIN (État des comptes)
+        self.test_critical_3_superadmin_dashboard_stats()
         
-        # SPECIAL DIAGNOSTIC: SuperAdmin Activities Issue (from review request)
-        self.test_superadmin_activities_diagnostic()
-        
-        # NEW: Test Consultation Payment Workflow (from review request)
-        self.test_consultation_payment_workflow()
-        
-        # Run priority tests in order
-        self.test_priority_1_prospect_workflow()
-        self.test_priority_2_manager_employee_actions()
-        self.test_priority_3_superadmin_operations()
-        self.test_priority_4_role_based_prospect_access()
-        self.test_priority_5_payment_workflow()
-        self.test_priority_6_withdrawal_manager()
-        
-        # NEW: Chat Permissions Testing (from review request)
-        self.test_chat_permissions_comprehensive()
-        
-        # Print comprehensive summary
-        print("=" * 80)
-        print("🎯 PRODUCTION READINESS TEST SUMMARY")
-        print(f"✅ Passed: {self.results['passed']}")
-        print(f"❌ Failed: {self.results['failed']}")
+        # Print final results
+        self.print_final_results()
         total_tests = self.results['passed'] + self.results['failed']
         success_rate = (self.results['passed'] / total_tests * 100) if total_tests > 0 else 0
         print(f"📊 Success Rate: {success_rate:.1f}%")
