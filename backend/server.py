@@ -4063,6 +4063,181 @@ async def convert_prospect_to_client(
         "temporary_password": temp_password
     }
 
+@api_router.post("/clients/create-direct")
+async def create_client_direct(
+    client_data: dict,
+    current_user: dict = Depends(get_current_user)
+):
+    """Créer un client directement (Manager/Employee) sans passer par prospect"""
+    if current_user["role"] not in ["MANAGER", "EMPLOYEE"]:
+        raise HTTPException(status_code=403, detail="Seuls les employés/managers peuvent créer des clients")
+    
+    # Validation des données requises
+    email = client_data.get("email", "").strip()
+    full_name = client_data.get("full_name", "").strip()
+    phone = client_data.get("phone", "").strip()
+    country = client_data.get("country", "").strip()
+    visa_type = client_data.get("visa_type", "").strip()
+    first_payment = client_data.get("first_payment_amount", 0)
+    
+    if not email or not full_name or not country or not visa_type:
+        raise HTTPException(status_code=400, detail="Email, nom, pays et type de visa requis")
+    
+    # Vérifier si l'email existe déjà
+    existing_user = await db.users.find_one({"email": email})
+    if existing_user:
+        raise HTTPException(status_code=400, detail="Un utilisateur avec cet email existe déjà")
+    
+    # Créer l'utilisateur client
+    client_id = str(uuid.uuid4())
+    temp_password = generate_temporary_password()
+    hashed_password = pwd_context.hash(temp_password)
+    
+    user_dict = {
+        "id": client_id,
+        "email": email,
+        "full_name": full_name,
+        "phone": phone,
+        "password": hashed_password,
+        "role": "CLIENT",
+        "is_active": True,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.users.insert_one(user_dict)
+    
+    # Créer le profil client
+    client_profile_dict = {
+        "id": str(uuid.uuid4()),
+        "user_id": client_id,
+        "full_name": full_name,
+        "email": email,
+        "phone": phone,
+        "country": country,
+        "visa_type": visa_type,
+        "assigned_employee_id": current_user["id"],
+        "assigned_employee_name": current_user["full_name"],
+        "status": "active",
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "updated_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.clients.insert_one(client_profile_dict)
+    
+    # Créer le dossier client
+    case_id = str(uuid.uuid4())
+    
+    # Récupérer le workflow
+    workflow_steps = WORKFLOWS.get(country, {}).get(visa_type, [])
+    
+    case_dict = {
+        "id": case_id,
+        "client_id": client_id,
+        "client_name": full_name,
+        "client_email": email,
+        "assigned_employee_id": current_user["id"],
+        "assigned_employee_name": current_user["full_name"],
+        "country": country,
+        "visa_type": visa_type,
+        "status": "En cours",
+        "current_step_index": 0,
+        "workflow_steps": workflow_steps,
+        "progress_percentage": 0,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "updated_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.cases.insert_one(case_dict)
+    
+    # Enregistrer le premier paiement si présent
+    if first_payment and first_payment > 0:
+        payment_id = str(uuid.uuid4())
+        invoice_num = f"ALO-{datetime.now(timezone.utc).strftime('%Y%m%d')}-{uuid.uuid4().hex[:8].upper()}"
+        payment_dict = {
+            "id": payment_id,
+            "user_id": client_id,
+            "client_id": client_id,
+            "client_name": full_name,
+            "amount": first_payment,
+            "currency": "CFA",
+            "payment_method": "Premier versement",
+            "description": "Premier versement pour création de dossier client",
+            "status": "CONFIRMED",
+            "invoice_number": invoice_num,
+            "created_at": datetime.now(timezone.utc).isoformat(),
+            "confirmed_at": datetime.now(timezone.utc).isoformat(),
+            "confirmed_by": current_user["id"],
+            "declared_at": datetime.now(timezone.utc).isoformat()
+        }
+        await db.payment_declarations.insert_one(payment_dict)
+        
+        # Notification SuperAdmin
+        superadmins = await db.users.find({"role": "SUPERADMIN", "is_active": True}).to_list(10)
+        for superadmin in superadmins:
+            await create_notification(
+                user_id=superadmin["id"],
+                title="💰 Premier versement client",
+                message=f"Premier versement de {first_payment} CFA - Nouveau client: {full_name} (créé par {current_user['full_name']})",
+                type="admin_payment_confirmed",
+                related_id=payment_id
+            )
+    
+    # Envoyer email au nouveau client
+    if EMAIL_SERVICE_AVAILABLE:
+        try:
+            email_sent = await send_user_welcome_email({
+                "email": email,
+                "full_name": full_name,
+                "role": "CLIENT",
+                "login_email": email,
+                "default_password": temp_password
+            })
+            if email_sent:
+                logger.info(f"Email de bienvenue envoyé au nouveau client {email}")
+        except Exception as e:
+            logger.error(f"Erreur envoi email au client {email}: {e}")
+    
+    # Notifier le client
+    await create_notification(
+        user_id=client_id,
+        title="🎉 Bienvenue chez ALORIA AGENCY!",
+        message=f"Votre dossier d'immigration pour {country} - {visa_type} a été créé. Consultez votre espace client.",
+        type="client_created"
+    )
+    
+    # Notifier le manager si c'est un employé qui a créé
+    if current_user["role"] == "EMPLOYEE":
+        employee_record = await db.users.find_one({"id": current_user["id"]})
+        if employee_record and employee_record.get("manager_id"):
+            await create_notification(
+                user_id=employee_record["manager_id"],
+                title="👤 Nouveau client créé",
+                message=f"{current_user['full_name']} a créé un nouveau client: {full_name} ({country} - {visa_type})",
+                type="employee_created_client",
+                related_id=client_id
+            )
+    
+    # Log activity
+    await log_user_activity(
+        user_id=current_user["id"],
+        action="client_created_direct",
+        details={
+            "client_id": client_id,
+            "client_name": full_name,
+            "country": country,
+            "visa_type": visa_type,
+            "first_payment": first_payment
+        }
+    )
+    
+    return {
+        "message": "Client créé avec succès",
+        "client_id": client_id,
+        "case_id": case_id,
+        "login_email": email,
+        "temporary_password": temp_password
+    }
+
 # Activity Logs
 @api_router.get("/activities", response_model=List[ActivityLogResponse])
 async def get_activity_logs(
