@@ -82,127 +82,311 @@ class APITester:
             except Exception as e:
                 self.log_result(f"{role.upper()} Login", False, "Exception occurred", str(e))
 
-    def test_priority_1_prospect_workflow(self):
-        """PRIORITY 1: Test complete prospect workflow (nouveau → converti_client)"""
-        print("=== PRIORITY 1: PROSPECT WORKFLOW COMPLET ===")
+    def test_critical_1_withdrawal_manager_error(self):
+        """TEST CRITIQUE 1: ERREUR RETRAIT MANAGER - Identifier l'erreur exacte"""
+        print("=== TEST CRITIQUE 1: ERREUR DÉCLARATION RETRAIT MANAGER ===")
         
-        # Step 1: Create new prospect
-        prospect_data = {
-            "name": "Jean-Baptiste Kouassi",
-            "email": "jb.kouassi@example.com",
-            "phone": "+225070123456",
-            "country": "France",
-            "visa_type": "Work Permit (Talent Permit)",
-            "budget_range": "5000+€",
-            "urgency_level": "Urgent",
-            "message": "Je souhaite obtenir un permis de travail en France pour rejoindre mon employeur. J'ai déjà une offre d'emploi confirmée et tous mes diplômes sont prêts. C'est urgent car je dois commencer le travail dans 2 mois.",
-            "lead_source": "Référencement",
-            "how_did_you_know": "Recommandé par un ami qui a utilisé vos services"
-        }
-        
+        if 'manager' not in self.tokens:
+            self.log_result("TEST 1 - Manager Withdrawal Error", False, "No manager token available")
+            return
+            
         try:
-            response = self.session.post(f"{API_BASE}/contact-messages", json=prospect_data)
-            if response.status_code in [200, 201]:
+            headers = {"Authorization": f"Bearer {self.tokens['manager']}"}
+            withdrawal_data = {
+                "amount": 50000,
+                "category": "Frais de bureau",
+                "subcategory": "Loyer",
+                "description": "Loyer bureau novembre 2025",
+                "receipt_url": ""
+            }
+            
+            print(f"🔍 TESTING POST /api/withdrawals with data: {withdrawal_data}")
+            response = self.session.post(f"{API_BASE}/withdrawals", json=withdrawal_data, headers=headers)
+            
+            print(f"📊 RESPONSE STATUS: {response.status_code}")
+            print(f"📊 RESPONSE HEADERS: {dict(response.headers)}")
+            
+            if response.status_code == 500:
+                print("🚨 ERROR 500 DETECTED - Checking backend logs needed")
+                self.log_result("TEST 1 - Manager Withdrawal (500 Error)", False, 
+                              f"Server Error 500 - Backend traceback needed", 
+                              f"Response: {response.text}")
+                              
+            elif response.status_code == 422:
+                print("🚨 ERROR 422 DETECTED - Validation Error")
+                try:
+                    error_data = response.json()
+                    print(f"📋 VALIDATION ERRORS: {error_data}")
+                    self.log_result("TEST 1 - Manager Withdrawal (422 Validation)", False,
+                                  f"Validation Error - Missing fields: {error_data}",
+                                  f"Full response: {response.text}")
+                except:
+                    self.log_result("TEST 1 - Manager Withdrawal (422 Validation)", False,
+                                  "Validation Error - Cannot parse JSON response",
+                                  f"Raw response: {response.text}")
+                                  
+            elif response.status_code in [200, 201]:
                 data = response.json()
-                self.test_prospect_id = data['id']
-                if data.get('status') == 'nouveau':
-                    self.log_result("1.1 Prospect Creation", True, f"Prospect created with status 'nouveau', ID: {self.test_prospect_id}")
-                else:
-                    self.log_result("1.1 Prospect Creation", False, f"Expected status 'nouveau', got '{data.get('status')}'")
+                self.test_withdrawal_id = data.get('id')
+                self.log_result("TEST 1 - Manager Withdrawal", True, 
+                              f"✅ WITHDRAWAL SUCCESSFUL - ID: {self.test_withdrawal_id}")
+                              
             else:
-                self.log_result("1.1 Prospect Creation", False, f"Status: {response.status_code}", response.text)
+                self.log_result("TEST 1 - Manager Withdrawal", False,
+                              f"Unexpected status code: {response.status_code}",
+                              f"Response: {response.text}")
+                              
         except Exception as e:
-            self.log_result("1.1 Prospect Creation", False, "Exception occurred", str(e))
-            return
+            self.log_result("TEST 1 - Manager Withdrawal", False, 
+                          "Exception occurred during withdrawal test", str(e))
 
-        if not self.test_prospect_id:
-            return
-
-        # Step 2: SuperAdmin assigns to Employee
-        if 'superadmin' in self.tokens and 'employee' in self.users:
+    def test_critical_2_png_invoices_system(self):
+        """TEST CRITIQUE 2: FACTURES PNG (NOUVEAU) - Vérifier génération PNG pas PDF"""
+        print("=== TEST CRITIQUE 2: SYSTÈME FACTURES PNG ===")
+        
+        # Step 1: Create a client first (needed for payment)
+        client_email = f"client.png.test.{int(time.time())}@example.com"
+        if 'manager' in self.tokens:
             try:
-                headers = {"Authorization": f"Bearer {self.tokens['superadmin']}"}
-                assign_data = {"assigned_to": self.users['employee']['id']}
-                response = self.session.patch(f"{API_BASE}/contact-messages/{self.test_prospect_id}/assign", 
-                                            json=assign_data, headers=headers)
-                if response.status_code == 200:
-                    data = response.json()
-                    # Check if assignment was successful by checking the success message
-                    if 'message' in data and 'assigné avec succès' in data['message']:
-                        self.log_result("1.2 SuperAdmin Assignment", True, f"Prospect assigned to employee: {data.get('assigned_to_name', 'Employee')}")
-                    else:
-                        self.log_result("1.2 SuperAdmin Assignment", False, f"Assignment failed. Response: {data}")
-                else:
-                    self.log_result("1.2 SuperAdmin Assignment", False, f"Status: {response.status_code}", response.text)
-            except Exception as e:
-                self.log_result("1.2 SuperAdmin Assignment", False, "Exception occurred", str(e))
-
-        # Step 3: Employee assigns to consultant with 50k payment
-        if 'employee' in self.tokens:
-            try:
-                headers = {"Authorization": f"Bearer {self.tokens['employee']}"}
-                consultant_data = {
-                    "consultant_id": self.users.get('consultant', {}).get('id', 'consultant-id'),
-                    "payment_amount": 50000
-                }
-                response = self.session.patch(f"{API_BASE}/contact-messages/{self.test_prospect_id}/assign-consultant", 
-                                            json=consultant_data, headers=headers)
-                if response.status_code == 200:
-                    data = response.json()
-                    # Check if payment was recorded
-                    if data.get('payment_50k_amount') == 50000:
-                        self.log_result("1.3 Consultant Assignment + 50k Payment", True, f"Payment recorded: 50000 CFA")
-                    else:
-                        self.log_result("1.3 Consultant Assignment + 50k Payment", False, f"Payment not recorded correctly. Response: {data}")
-                else:
-                    self.log_result("1.3 Consultant Assignment + 50k Payment", False, f"Status: {response.status_code}", response.text)
-            except Exception as e:
-                self.log_result("1.3 Consultant Assignment + 50k Payment", False, "Exception occurred", str(e))
-
-        # Step 4: SuperAdmin adds consultant notes
-        if 'superadmin' in self.tokens:
-            try:
-                headers = {"Authorization": f"Bearer {self.tokens['superadmin']}"}
-                notes_data = {
-                    "note": "Consultation effectuée avec le prospect. Profil très intéressant, diplômes validés, expérience pertinente. Recommande de procéder à la conversion en client."
-                }
-                response = self.session.patch(f"{API_BASE}/contact-messages/{self.test_prospect_id}/consultant-notes", 
-                                            json=notes_data, headers=headers)
-                if response.status_code == 200:
-                    data = response.json()
-                    # Check if notes were added by checking success message
-                    if 'message' in data and 'Note ajoutée avec succès' in data['message']:
-                        self.log_result("1.4 Consultant Notes", True, f"Notes added successfully, Note ID: {data.get('note_id')}")
-                    else:
-                        self.log_result("1.4 Consultant Notes", False, f"Notes not added. Response: {data}")
-                else:
-                    self.log_result("1.4 Consultant Notes", False, f"Status: {response.status_code}", response.text)
-            except Exception as e:
-                self.log_result("1.4 Consultant Notes", False, "Exception occurred", str(e))
-
-        # Step 5: Employee converts to client
-        if 'employee' in self.tokens:
-            try:
-                headers = {"Authorization": f"Bearer {self.tokens['employee']}"}
-                client_conversion_data = {
-                    "first_payment_amount": 1500,
+                headers = {"Authorization": f"Bearer {self.tokens['manager']}"}
+                client_data = {
+                    "email": client_email,
+                    "full_name": "Client Test PNG",
+                    "phone": "+33123456789",
                     "country": "France",
-                    "visa_type": "Work Permit (Talent Permit)"
+                    "visa_type": "Work Permit",
+                    "message": "Test client pour factures PNG"
                 }
-                response = self.session.post(f"{API_BASE}/contact-messages/{self.test_prospect_id}/convert-to-client", 
-                                           json=client_conversion_data, headers=headers)
-                if response.status_code == 200:
-                    data = response.json()
-                    # Check if client was created by checking success message and client_id
-                    if 'message' in data and 'converti en client avec succès' in data['message'] and 'client_id' in data:
-                        self.test_client_id = data['client_id']
-                        self.log_result("1.5 Client Conversion", True, f"Client created with ID: {self.test_client_id}, Login: {data.get('login_email')}")
-                    else:
-                        self.log_result("1.5 Client Conversion", False, f"Client creation failed. Response: {data}")
+                response = self.session.post(f"{API_BASE}/clients", json=client_data, headers=headers)
+                if response.status_code in [200, 201]:
+                    client_data_response = response.json()
+                    test_client_id = client_data_response['id']
+                    self.log_result("2.1 Client Creation for PNG Test", True, f"Client created: {test_client_id}")
                 else:
-                    self.log_result("1.5 Client Conversion", False, f"Status: {response.status_code}", response.text)
+                    self.log_result("2.1 Client Creation for PNG Test", False, f"Status: {response.status_code}", response.text)
+                    return
             except Exception as e:
-                self.log_result("1.5 Client Conversion", False, "Exception occurred", str(e))
+                self.log_result("2.1 Client Creation for PNG Test", False, "Exception occurred", str(e))
+                return
+        
+        # Step 2: Client declares payment (10000 CFA)
+        try:
+            client_login = self.session.post(f"{API_BASE}/auth/login", json={
+                "email": client_email,
+                "password": "Aloria2024!"
+            })
+            if client_login.status_code == 200:
+                client_token = client_login.json()['access_token']
+                
+                headers = {"Authorization": f"Bearer {client_token}"}
+                payment_data = {
+                    "amount": 10000,
+                    "currency": "CFA",
+                    "description": "Test paiement pour facture PNG",
+                    "payment_method": "Mobile Money"
+                }
+                
+                print(f"🔍 CLIENT DECLARES PAYMENT: {payment_data}")
+                response = self.session.post(f"{API_BASE}/payments", json=payment_data, headers=headers)
+                if response.status_code in [200, 201]:
+                    payment_response = response.json()
+                    test_payment_id = payment_response['id']
+                    self.log_result("2.2 Client Payment Declaration", True, f"Payment declared: {test_payment_id}")
+                else:
+                    self.log_result("2.2 Client Payment Declaration", False, f"Status: {response.status_code}", response.text)
+                    return
+            else:
+                self.log_result("2.2 Client Login for Payment", False, "Could not login as client")
+                return
+        except Exception as e:
+            self.log_result("2.2 Client Payment Declaration", False, "Exception occurred", str(e))
+            return
+        
+        # Step 3: Manager confirms payment (should generate PNG invoice)
+        if 'manager' in self.tokens and test_payment_id:
+            try:
+                headers = {"Authorization": f"Bearer {self.tokens['manager']}"}
+                
+                # Generate confirmation code
+                print(f"🔍 MANAGER GENERATES CONFIRMATION CODE for payment: {test_payment_id}")
+                code_response = self.session.post(f"{API_BASE}/payments/{test_payment_id}/generate-code", headers=headers)
+                if code_response.status_code == 200:
+                    code_data = code_response.json()
+                    confirmation_code = code_data.get('confirmation_code')
+                    
+                    # Confirm payment
+                    confirm_data = {
+                        "action": "CONFIRMED",
+                        "confirmation_code": confirmation_code
+                    }
+                    print(f"🔍 MANAGER CONFIRMS PAYMENT with code: {confirmation_code}")
+                    confirm_response = self.session.patch(f"{API_BASE}/payments/{test_payment_id}/confirm", 
+                                                        json=confirm_data, headers=headers)
+                    if confirm_response.status_code == 200:
+                        confirm_result = confirm_response.json()
+                        invoice_number = confirm_result.get('invoice_number')
+                        pdf_invoice_url = confirm_result.get('pdf_invoice_url')
+                        
+                        if invoice_number and pdf_invoice_url:
+                            self.log_result("2.3 Manager Payment Confirmation", True, 
+                                          f"Payment confirmed - Invoice: {invoice_number}, URL: {pdf_invoice_url}")
+                        else:
+                            self.log_result("2.3 Manager Payment Confirmation", False, 
+                                          f"Missing invoice_number or pdf_invoice_url in response")
+                    else:
+                        self.log_result("2.3 Manager Payment Confirmation", False, 
+                                      f"Confirm Status: {confirm_response.status_code}", confirm_response.text)
+                else:
+                    self.log_result("2.3 Manager Payment Confirmation", False, 
+                                  f"Code Gen Status: {code_response.status_code}", code_response.text)
+            except Exception as e:
+                self.log_result("2.3 Manager Payment Confirmation", False, "Exception occurred", str(e))
+        
+        # Step 4: Verify GET /api/payments/history - payment must have pdf_invoice_url
+        if 'manager' in self.tokens:
+            try:
+                headers = {"Authorization": f"Bearer {self.tokens['manager']}"}
+                print(f"🔍 CHECKING PAYMENT HISTORY for pdf_invoice_url")
+                response = self.session.get(f"{API_BASE}/payments/history", headers=headers)
+                if response.status_code == 200:
+                    payments = response.json()
+                    # Find our test payment
+                    test_payment = next((p for p in payments if p.get('id') == test_payment_id), None)
+                    if test_payment and test_payment.get('pdf_invoice_url'):
+                        self.log_result("2.4 Payment History PDF URL", True, 
+                                      f"Payment has pdf_invoice_url: {test_payment['pdf_invoice_url']}")
+                        
+                        # Step 5: Test GET /api/invoices/{invoice_number} to download PNG
+                        invoice_number = test_payment.get('invoice_number')
+                        if invoice_number:
+                            try:
+                                print(f"🔍 TESTING INVOICE DOWNLOAD: /api/invoices/{invoice_number}")
+                                invoice_response = self.session.get(f"{API_BASE}/invoices/{invoice_number}", headers=headers)
+                                if invoice_response.status_code == 200:
+                                    content_type = invoice_response.headers.get('content-type', '')
+                                    content_length = len(invoice_response.content)
+                                    
+                                    # Check if it's PNG (not PDF)
+                                    if 'image/png' in content_type:
+                                        self.log_result("2.5 Invoice Download PNG Format", True, 
+                                                      f"✅ INVOICE IS PNG - Content-Type: {content_type}, Size: {content_length} bytes")
+                                    elif 'application/pdf' in content_type:
+                                        self.log_result("2.5 Invoice Download PNG Format", False, 
+                                                      f"❌ INVOICE IS PDF (should be PNG) - Content-Type: {content_type}")
+                                    else:
+                                        # Check file signature for PNG
+                                        png_signature = b'\x89PNG\r\n\x1a\n'
+                                        if invoice_response.content.startswith(png_signature):
+                                            self.log_result("2.5 Invoice Download PNG Format", True, 
+                                                          f"✅ INVOICE IS PNG (by signature) - Size: {content_length} bytes")
+                                        else:
+                                            self.log_result("2.5 Invoice Download PNG Format", False, 
+                                                          f"❌ INVOICE FORMAT UNKNOWN - Content-Type: {content_type}")
+                                else:
+                                    self.log_result("2.5 Invoice Download", False, 
+                                                  f"Download failed - Status: {invoice_response.status_code}")
+                            except Exception as e:
+                                self.log_result("2.5 Invoice Download", False, "Exception occurred", str(e))
+                    else:
+                        self.log_result("2.4 Payment History PDF URL", False, 
+                                      "Test payment not found or missing pdf_invoice_url")
+                else:
+                    self.log_result("2.4 Payment History", False, f"Status: {response.status_code}", response.text)
+            except Exception as e:
+                self.log_result("2.4 Payment History", False, "Exception occurred", str(e))
+
+    def test_critical_3_superadmin_dashboard_stats(self):
+        """TEST CRITIQUE 3: DASHBOARD SUPERADMIN - État des comptes"""
+        print("=== TEST CRITIQUE 3: DASHBOARD SUPERADMIN (ÉTAT DES COMPTES) ===")
+        
+        if 'superadmin' not in self.tokens:
+            self.log_result("TEST 3 - SuperAdmin Dashboard", False, "No SuperAdmin token available")
+            return
+            
+        headers = {"Authorization": f"Bearer {self.tokens['superadmin']}"}
+        
+        # Step 1: GET /api/admin/dashboard-stats
+        try:
+            print(f"🔍 TESTING GET /api/admin/dashboard-stats")
+            response = self.session.get(f"{API_BASE}/admin/dashboard-stats", headers=headers)
+            
+            if response.status_code == 200:
+                stats = response.json()
+                print(f"📊 DASHBOARD STATS STRUCTURE: {list(stats.keys())}")
+                
+                # Check for required financial stats
+                required_fields = ['total_payments', 'total_withdrawals', 'current_balance']
+                found_fields = []
+                missing_fields = []
+                
+                # Check in different possible locations
+                for field in required_fields:
+                    if field in stats:
+                        found_fields.append(field)
+                    elif 'business' in stats and field in stats['business']:
+                        found_fields.append(f"business.{field}")
+                    elif 'finances' in stats and field in stats['finances']:
+                        found_fields.append(f"finances.{field}")
+                    else:
+                        missing_fields.append(field)
+                
+                if not missing_fields:
+                    # Extract values
+                    total_payments = stats.get('total_payments') or stats.get('business', {}).get('total_payments') or stats.get('finances', {}).get('total_payments', 0)
+                    total_withdrawals = stats.get('total_withdrawals') or stats.get('business', {}).get('total_withdrawals') or stats.get('finances', {}).get('total_withdrawals', 0)
+                    current_balance = stats.get('current_balance') or stats.get('business', {}).get('current_balance') or stats.get('finances', {}).get('current_balance', 0)
+                    
+                    self.log_result("3.1 SuperAdmin Dashboard Stats", True, 
+                                  f"✅ ALL REQUIRED FIELDS FOUND - Payments: {total_payments}, Withdrawals: {total_withdrawals}, Balance: {current_balance}")
+                else:
+                    self.log_result("3.1 SuperAdmin Dashboard Stats", False, 
+                                  f"❌ MISSING FIELDS: {missing_fields}, Found: {found_fields}")
+                    print(f"📋 FULL STATS RESPONSE: {json.dumps(stats, indent=2)}")
+            else:
+                self.log_result("3.1 SuperAdmin Dashboard Stats", False, 
+                              f"Status: {response.status_code}", response.text)
+        except Exception as e:
+            self.log_result("3.1 SuperAdmin Dashboard Stats", False, "Exception occurred", str(e))
+        
+        # Step 2: Create 1 withdrawal if endpoint works (to test balance update)
+        if 'manager' in self.tokens:
+            try:
+                print(f"🔍 CREATING TEST WITHDRAWAL to verify balance update")
+                manager_headers = {"Authorization": f"Bearer {self.tokens['manager']}"}
+                withdrawal_data = {
+                    "amount": 1000,
+                    "category": "BUREAUX",
+                    "subcategory": "Test",
+                    "description": "Test withdrawal for balance verification"
+                }
+                
+                withdrawal_response = self.session.post(f"{API_BASE}/withdrawals", json=withdrawal_data, headers=manager_headers)
+                if withdrawal_response.status_code in [200, 201]:
+                    withdrawal_data_response = withdrawal_response.json()
+                    withdrawal_id = withdrawal_data_response.get('id')
+                    self.log_result("3.2 Test Withdrawal Creation", True, f"Withdrawal created: {withdrawal_id}")
+                    
+                    # Step 3: Re-verify stats - total_withdrawals should increase, balance should decrease
+                    time.sleep(1)  # Give time for stats to update
+                    print(f"🔍 RE-CHECKING DASHBOARD STATS after withdrawal")
+                    stats_response = self.session.get(f"{API_BASE}/admin/dashboard-stats", headers=headers)
+                    if stats_response.status_code == 200:
+                        new_stats = stats_response.json()
+                        
+                        # Extract new values
+                        new_total_withdrawals = new_stats.get('total_withdrawals') or new_stats.get('business', {}).get('total_withdrawals') or new_stats.get('finances', {}).get('total_withdrawals', 0)
+                        new_current_balance = new_stats.get('current_balance') or new_stats.get('business', {}).get('current_balance') or new_stats.get('finances', {}).get('current_balance', 0)
+                        
+                        self.log_result("3.3 Dashboard Stats After Withdrawal", True, 
+                                      f"✅ STATS UPDATED - New Withdrawals: {new_total_withdrawals}, New Balance: {new_current_balance}")
+                    else:
+                        self.log_result("3.3 Dashboard Stats After Withdrawal", False, 
+                                      f"Could not re-check stats - Status: {stats_response.status_code}")
+                else:
+                    self.log_result("3.2 Test Withdrawal Creation", False, 
+                                  f"Status: {withdrawal_response.status_code}", withdrawal_response.text)
+            except Exception as e:
+                self.log_result("3.2 Test Withdrawal Creation", False, "Exception occurred", str(e))
 
     def test_priority_2_manager_employee_actions(self):
         """PRIORITY 2: Test Manager/Employee actions"""
