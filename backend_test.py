@@ -416,7 +416,7 @@ class APITester:
         except Exception as e:
             self.log_result("TEST 4 - Invalid Email", False, f"❌ Exception: {str(e)}")
 
-    async def get_user_by_email(self, email):
+    def get_user_by_email(self, email):
         """Helper method to get user by email"""
         try:
             if 'superadmin' in self.tokens:
@@ -429,7 +429,7 @@ class APITester:
             pass
         return None
 
-    async def get_user_notifications(self, user_id):
+    def get_user_notifications(self, user_id):
         """Helper method to get user notifications"""
         try:
             if 'superadmin' in self.tokens:
