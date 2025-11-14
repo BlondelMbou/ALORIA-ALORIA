@@ -199,10 +199,10 @@ class APITester:
         # ============================================================================
         print("\n🔸 ÉTAPE 1 - CRÉER UN CLIENT ET DÉCLARER UN PAIEMENT")
         
-        # 1.1 - Créer un nouveau client via POST /api/clients (using SuperAdmin for better control)
-        if 'superadmin' in self.tokens:
+        # 1.1 - Créer un nouveau client via POST /api/clients (using Manager)
+        if manager_token:
             try:
-                headers = {"Authorization": f"Bearer {self.tokens['superadmin']}"}
+                headers = {"Authorization": f"Bearer {manager_token}"}
                 client_data = {
                     "email": client_email,
                     "full_name": "Client Test Facture PNG",
