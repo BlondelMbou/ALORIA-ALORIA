@@ -419,6 +419,14 @@ export default function ManagerDashboard() {
             </div>
 
             <div className="flex items-center gap-3">
+              <Button
+                onClick={() => setShowProfileSettings(!showProfileSettings)}
+                className="bg-slate-700 hover:bg-slate-600 text-white"
+                title="Mon Profil"
+              >
+                <Settings className="w-4 h-4 mr-2" />
+                <span className="hidden sm:inline">Profil</span>
+              </Button>
               <Dialog>
                 <DialogTrigger asChild>
                   <Button className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg shadow-orange-500/50" data-testid="create-client-btn">
