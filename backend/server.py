@@ -3109,13 +3109,13 @@ async def confirm_payment_with_code(
         }
         
         try:
-            # Use the existing PDF generation function
-            await generate_invoice_pdf(payment_id, invoice_number)
-            # Store PDF URL
-            pdf_url = f"/invoices/{invoice_number}.pdf"
+            # Générer la facture PNG
+            await generate_invoice_png(payment_id, invoice_number)
+            # Store PNG URL
+            png_url = f"/invoices/{invoice_number}.png"
             await db.payment_declarations.update_one(
                 {"id": payment_id}, 
-                {"$set": {"pdf_invoice_url": pdf_url}}
+                {"$set": {"pdf_invoice_url": png_url}}
             )
         except Exception as e:
             logger.error(f"Erreur génération PDF: {e}")
