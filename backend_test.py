@@ -227,6 +227,17 @@ class APITester:
         
         # 1.2 - Le client déclare un paiement via POST /api/payments/declare
         try:
+            # Debug: Check if client user exists
+            debug_headers = {"Authorization": f"Bearer {self.tokens['superadmin']}"}
+            users_response = self.session.get(f"{API_BASE}/admin/users", headers=debug_headers)
+            if users_response.status_code == 200:
+                users = users_response.json()
+                client_user = next((u for u in users if u['email'] == client_email), None)
+                if client_user:
+                    print(f"🔍 Client user found: {client_user['email']}, active: {client_user.get('is_active')}")
+                else:
+                    print(f"🔍 Client user NOT found: {client_email}")
+            
             client_login = self.session.post(f"{API_BASE}/auth/login", json={
                 "email": client_email,
                 "password": client_temp_password
