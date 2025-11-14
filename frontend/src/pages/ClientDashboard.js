@@ -559,14 +559,14 @@ export default function ClientDashboard() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-6">
-                  {nextSteps.map((step, idx) => (
+                  {nextSteps.map((step, idx) => step && (
                     <div key={idx} className="flex items-start space-x-4 p-4 bg-[#0F172A] border border-slate-700 rounded-lg">
                       <div className="w-10 h-10 bg-slate-700 text-slate-400 rounded-full flex items-center justify-center font-semibold">
-                        {caseData.current_step_index + idx + 2}
+                        {currentStepIndex + idx + 2}
                       </div>
                       <div className="flex-1">
-                        <h4 className="font-semibold text-white mb-2">{step.title}</h4>
-                        <p className="text-slate-300 mb-3">{step.description}</p>
+                        <h4 className="font-semibold text-white mb-2">{step.title || 'Étape à venir'}</h4>
+                        <p className="text-slate-300 mb-3">{step.description || 'Détails à venir'}</p>
                         {step.duration && (
                           <div className="flex items-center text-sm text-slate-400 mb-2">
                             <Clock className="w-4 h-4 mr-2" />
