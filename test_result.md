@@ -639,14 +639,15 @@
 
 ## test_plan:
   current_focus:
+    - "PNG Invoice Generation System - Case Sensitivity Bug Identified ❌"
+    - "PNG Invoice Alternative Endpoint - 404 Error ❌"
     - "Password Reset System - CORRECTION VALIDÉE ✅"
-    - "PNG Invoice Generation System - API Endpoint Missing ❌"
-    - "SearchAndSort React Loop Error - Minor Fix Needed ⚠️"
   stuck_tasks: 
-    - "PNG Invoice download API returning 404 error"
+    - "PNG Invoice case sensitivity bug (line 3237 server.py)"
+    - "Alternative invoice endpoint GET /api/invoices/{invoice_number} broken"
   test_all: false
-  test_priority: "urgent_password_reset_validation"
-  last_test_session: "RESET PASSWORD URGENT TESTING - 86.7% SUCCÈS (13/15 tests passés). ✅ RESET PASSWORD: 100% fonctionnel pour tous les rôles (Client, Employé, Manager, Email invalide) ✅ DASHBOARD SUPERADMIN: Stats financières complètes opérationnelles ❌ FACTURES PNG: Problème login client pour tests ❌ WITHDRAWAL MANAGER: Erreur validation enum (problème de test, pas de fonctionnalité). CORRECTION RESET PASSWORD VALIDÉE AVEC SUCCÈS!"
+  test_priority: "png_invoice_case_sensitivity_fix"
+  last_test_session: "PNG INVOICE GENERATION WORKFLOW TESTING - 57.1% SUCCÈS (4/7 tests passés). ✅ PNG GENERATION CONFIRMED WORKING: Recent payments generate PNG files correctly (34KB), download endpoints functional. ❌ CASE SENSITIVITY BUG: Line 3237 checks 'confirmed' but DB stores 'CONFIRMED'. ❌ INCONSISTENT GENERATION: Older payments only have PDF files. ❌ ALTERNATIVE ENDPOINT BROKEN: GET /api/invoices/{invoice_number} returns 404. DIAGNOSTIC COMPLET TERMINÉ - Actions spécifiques identifiées pour correction."
 
 ## agent_communication:
     -agent: "testing"
