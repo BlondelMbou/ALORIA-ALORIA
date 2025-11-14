@@ -1,15 +1,20 @@
 #!/usr/bin/env python3
 """
 ALORIA AGENCY Backend API Testing Suite - PNG INVOICE GENERATION WORKFLOW
-Test complet du workflow de génération et téléchargement de factures PNG selon la demande de révision:
+Test complet du workflow de génération et téléchargement de factures PNG selon la demande de révision française:
 
-WORKFLOW COMPLET À TESTER:
-1. CRÉER UN CLIENT ET DÉCLARER UN PAIEMENT
-2. MANAGER CONFIRME LE PAIEMENT  
-3. VÉRIFIER LA GÉNÉRATION DU FICHIER PNG
-4. TÉLÉCHARGER LA FACTURE (CLIENT ET MANAGER)
-5. TESTER L'ENDPOINT ALTERNATIF
-6. TESTS D'ERREUR
+WORKFLOW COMPLET À TESTER (SELON REVIEW REQUEST):
+ÉTAPE 1 - CRÉER CLIENT ET PAIEMENT
+ÉTAPE 2 - CONFIRMER LE PAIEMENT  
+ÉTAPE 3 - VÉRIFIER FICHIER PNG
+ÉTAPE 4 - TÉLÉCHARGER VIA API (MANAGER)
+ÉTAPE 5 - TÉLÉCHARGER VIA INVOICE NUMBER
+ÉTAPE 6 - LISTER TOUS LES FICHIERS PNG
+
+BUGS IDENTIFIÉS À CORRIGER:
+1. Case sensitivity: status != 'confirmed' vs DB stocke 'CONFIRMED'
+2. PNG generation: système génère PDF mais cherche PNG
+3. Endpoint alternatif cassé: GET /api/invoices/{invoice_number} retourne 404
 """
 
 import requests
