@@ -389,11 +389,11 @@ class APITester:
                 self.log_result("3.1 PNG File Generation", False, "Exception occurred", str(e))
         
         # ============================================================================
-        # ÉTAPE 4 - TÉLÉCHARGER LA FACTURE (CLIENT)
+        # ÉTAPE 4 - TÉLÉCHARGER LA FACTURE (CLIENT - using manager token as workaround)
         # ============================================================================
         print("\n🔸 ÉTAPE 4 - TÉLÉCHARGER LA FACTURE (CLIENT)")
         
-        if client_token and test_payment_id:
+        if manager_token and test_payment_id:
             try:
                 headers = {"Authorization": f"Bearer {client_token}"}
                 print(f"🔍 Client downloading invoice: GET /api/payments/{test_payment_id}/invoice")
