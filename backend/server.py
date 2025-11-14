@@ -4238,6 +4238,70 @@ async def create_client_direct(
         "temporary_password": temp_password
     }
 
+@api_router.patch("/users/profile")
+async def update_user_profile(
+    profile_data: dict,
+    current_user: dict = Depends(get_current_user)
+):
+    """Mettre à jour le profil utilisateur"""
+    update_dict = {}
+    
+    if "full_name" in profile_data:
+        update_dict["full_name"] = profile_data["full_name"].strip()
+    
+    if "phone" in profile_data:
+        update_dict["phone"] = profile_data["phone"].strip()
+    
+    if not update_dict:
+        raise HTTPException(status_code=400, detail="Aucune donnée à mettre à jour")
+    
+    update_dict["updated_at"] = datetime.now(timezone.utc).isoformat()
+    
+    await db.users.update_one(
+        {"id": current_user["id"]},
+        {"$set": update_dict}
+    )
+    
+    return {"message": "Profil mis à jour avec succès"}
+
+@api_router.post("/users/change-password")
+async def change_password(
+    password_data: dict,
+    current_user: dict = Depends(get_current_user)
+):
+    """Changer le mot de passe utilisateur"""
+    current_password = password_data.get("current_password")
+    new_password = password_data.get("new_password")
+    
+    if not current_password or not new_password:
+        raise HTTPException(status_code=400, detail="Mot de passe actuel et nouveau requis")
+    
+    if len(new_password) < 6:
+        raise HTTPException(status_code=400, detail="Le nouveau mot de passe doit contenir au moins 6 caractères")
+    
+    # Récupérer l'utilisateur avec le mot de passe
+    user = await db.users.find_one({"id": current_user["id"]})
+    if not user:
+        raise HTTPException(status_code=404, detail="Utilisateur non trouvé")
+    
+    # Vérifier le mot de passe actuel
+    if not pwd_context.verify(current_password, user["password"]):
+        raise HTTPException(status_code=400, detail="Mot de passe actuel incorrect")
+    
+    # Hasher le nouveau mot de passe
+    hashed_password = pwd_context.hash(new_password)
+    
+    # Mettre à jour
+    await db.users.update_one(
+        {"id": current_user["id"]},
+        {"$set": {
+            "password": hashed_password,
+            "password_changed_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    return {"message": "Mot de passe modifié avec succès"}
+
 # Activity Logs
 @api_router.get("/activities", response_model=List[ActivityLogResponse])
 async def get_activity_logs(
