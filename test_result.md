@@ -483,6 +483,24 @@
         -agent: "main"
         -comment: "✅ FRONTEND BUG FIXED: Root cause identified in ManagerDashboard.js ligne 1477-1482. Le badge de status utilisait une logique binaire (CONFIRMED=vert, else=rouge) sans gérer le status 'pending'. Correction: Ajout du 3e cas pour 'pending' avec badge orange '⏳ En attente'. Maintenant les 3 status s'affichent correctement: confirmed=✅ Confirmé (vert), rejected=❌ Rejeté (rouge), pending=⏳ En attente (orange)."
 
+  - task: "Password Reset System for All Roles (URGENT FIX)"
+    implemented: true
+    working: true
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: false
+        -agent: "user"
+        -comment: "❌ USER REPORTED: L'utilisateur obtient une erreur lors du reset de mot de passe (tous les rôles : Client, Employé, Manager)."
+        -working: false
+        -agent: "main"
+        -comment: "🔧 CORRECTION APPLIQUÉE: Ajout du paramètre `db` manquant dans l'appel à `create_notification` (ligne 4116), correction du paramètre `type` en `notification_type` (ligne 4120), import correct de la fonction depuis services.notification_service (ligne 4114). Endpoint POST /api/auth/forgot-password corrigé pour tous les rôles."
+        -working: true
+        -agent: "testing"
+        -comment: "✅ RESET PASSWORD CORRECTION VALIDÉE - 100% SUCCÈS! Tests exhaustifs du système de réinitialisation de mot de passe terminés avec PARFAIT RÉSULTAT (4/4 tests critiques réussis). ✅ TEST 1 - RESET PASSWORD CLIENT: Succès complet - Message de sécurité retourné, mot de passe temporaire généré (aeSOwc@yfzBx), notification créée dans l'application. ✅ TEST 2 - RESET PASSWORD EMPLOYÉ: Succès complet avec mot de passe temporaire (Wz#vgU@*lwk^) pour employee@aloria.com. ✅ TEST 3 - RESET PASSWORD MANAGER: Succès complet avec mot de passe temporaire (UCAsF2GV3FBw) pour manager@test.com. ✅ TEST 4 - EMAIL INVALIDE: Gestion sécurisée correcte - message de sécurité retourné sans révéler l'existence de l'email. La correction du main agent est 100% fonctionnelle - paramètre `db` ajouté, `notification_type` corrigé, import services.notification_service validé. Système de reset password opérationnel pour tous les rôles!"
+
 ## frontend:
   - task: "Manager Dashboard SearchAndSort Systems"
     implemented: true
