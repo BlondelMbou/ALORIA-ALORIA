@@ -93,8 +93,62 @@ class APITester:
         """TEST URGENT 1: DIAGNOSTIC DONNÉES CLIENTS N/A"""
         print("=== TEST URGENT 1: DIAGNOSTIC DONNÉES CLIENTS N/A ===")
         
-        if 'manager' not in self.tokens:
-            self.log_result("TEST 1 - Manager Login Required", False, "Manager credentials not available")
+        # Try to create a manager first if we have SuperAdmin access
+        if 'manager' not in self.tokens and 'superadmin' in self.tokens:
+            print("🔍 CREATING MANAGER FOR TESTING")
+            try:
+                headers = {"Authorization": f"Bearer {self.tokens['superadmin']}"}
+                manager_data = {
+                    "email": "manager@test.com",
+                    "full_name": "Test Manager",
+                    "phone": "+33123456789",
+                    "role": "MANAGER",
+                    "send_email": False
+                }
+                response = self.session.post(f"{API_BASE}/users/create", json=manager_data, headers=headers)
+                if response.status_code in [200, 201]:
+                    manager_response = response.json()
+                    temp_password = manager_response.get('temporary_password', 'password123')
+                    
+                    # Try to login with the new manager
+                    login_response = self.session.post(f"{API_BASE}/auth/login", json={
+                        "email": "manager@test.com",
+                        "password": temp_password
+                    })
+                    if login_response.status_code == 200:
+                        login_data = login_response.json()
+                        self.tokens['manager'] = login_data['access_token']
+                        self.users['manager'] = login_data['user']
+                        self.log_result("1.0 Create Manager", True, f"Manager created and logged in with password: {temp_password}")
+                    else:
+                        # Try with default password
+                        login_response = self.session.post(f"{API_BASE}/auth/login", json={
+                            "email": "manager@test.com",
+                            "password": "password123"
+                        })
+                        if login_response.status_code == 200:
+                            login_data = login_response.json()
+                            self.tokens['manager'] = login_data['access_token']
+                            self.users['manager'] = login_data['user']
+                            self.log_result("1.0 Create Manager", True, "Manager logged in with default password")
+                        else:
+                            self.log_result("1.0 Create Manager", False, f"Login failed: {login_response.status_code}")
+                else:
+                    self.log_result("1.0 Create Manager", False, f"Manager creation failed: {response.status_code}")
+            except Exception as e:
+                self.log_result("1.0 Create Manager", False, f"Exception: {str(e)}")
+        
+        # Use SuperAdmin if Manager still not available
+        test_token = None
+        test_role = None
+        if 'manager' in self.tokens:
+            test_token = self.tokens['manager']
+            test_role = "MANAGER"
+        elif 'superadmin' in self.tokens:
+            test_token = self.tokens['superadmin']
+            test_role = "SUPERADMIN"
+        else:
+            self.log_result("TEST 1 - No Admin Access", False, "Neither Manager nor SuperAdmin credentials available")
             return
             
         headers = {"Authorization": f"Bearer {self.tokens['manager']}"}
