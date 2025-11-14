@@ -5534,12 +5534,43 @@ class APITester:
         
         print("=" * 80)
 
-if __name__ == "__main__":
+def main():
+    """Main test execution - URGENT CLIENT DATA & PASSWORD CHANGE ISSUES"""
+    print("🚀 ALORIA AGENCY Backend API Testing Suite - URGENT ISSUES")
+    print("=" * 80)
+    print("TEST URGENT - DONNÉES CLIENTS N/A + CHANGEMENT MOT DE PASSE")
+    print("=" * 80)
+    
     tester = APITester()
     
-    # Run critical tests as requested in review
-    tester.run_critical_tests()
+    # Step 1: Authenticate all roles
+    tester.authenticate_all_roles()
     
-    # Return success/failure based on results
-    success = tester.results['failed'] == 0
-    sys.exit(0 if success else 1)
+    # Step 2: Run URGENT tests
+    print("\n🚨 RUNNING URGENT DIAGNOSTIC TESTS")
+    tester.test_urgent_1_client_data_na_issue()
+    tester.test_urgent_2_password_change_issue()
+    
+    # Final Results
+    print("\n" + "=" * 80)
+    print("🎯 URGENT TEST RESULTS")
+    print("=" * 80)
+    print(f"✅ PASSED: {tester.results['passed']}")
+    print(f"❌ FAILED: {tester.results['failed']}")
+    
+    if tester.results['passed'] + tester.results['failed'] > 0:
+        success_rate = (tester.results['passed'] / (tester.results['passed'] + tester.results['failed']) * 100)
+        print(f"📊 SUCCESS RATE: {success_rate:.1f}%")
+    
+    if tester.results['errors']:
+        print(f"\n🚨 CRITICAL ERRORS IDENTIFIED:")
+        for error in tester.results['errors']:
+            print(f"   - {error['test']}: {error['message']}")
+            if error['error']:
+                print(f"     Error Details: {error['error']}")
+    
+    print("\n🎯 DIAGNOSTIC COMPLET TERMINÉ")
+    print("OBJECTIF: Identifier la cause exacte des 2 problèmes urgents")
+
+if __name__ == "__main__":
+    main()
