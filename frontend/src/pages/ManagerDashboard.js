@@ -748,26 +748,44 @@ export default function ManagerDashboard() {
 
           {/* Clients Tab */}
           <TabsContent value="clients">
-            <Card className="bg-gradient-to-br from-[#1E293B] to-[#334155] border-slate-700">
-              <CardHeader>
-                <CardTitle className="text-white">Liste des Clients</CardTitle>
-                <CardDescription className="text-slate-400">Gérer et suivre tous vos clients</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {/* Recherche et Tri */}
-                <SearchAndSort
-                  data={clients}
-                  searchFields={['client_name', 'assigned_employee_name', 'country', 'visa_type', 'current_status']}
-                  sortOptions={[
-                    { value: 'created_at', label: 'Date de création' },
-                    { value: 'client_name', label: 'Nom du client' },
-                    { value: 'country', label: 'Pays' },
-                    { value: 'progress_percentage', label: 'Progression' },
-                    { value: 'current_status', label: 'Statut' }
-                  ]}
-                  onFilteredDataChange={setFilteredClients}
-                  placeholder="Rechercher un client (nom, conseiller, pays, visa, statut)..."
-                />
+            <Tabs defaultValue="all-clients" className="space-y-4">
+              <TabsList className="grid w-full grid-cols-2 bg-[#0F172A] border border-slate-700">
+                <TabsTrigger 
+                  value="all-clients" 
+                  className="data-[state=active]:bg-orange-600 data-[state=active]:text-white text-slate-300"
+                >
+                  Tous les Clients
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="my-clients" 
+                  className="data-[state=active]:bg-orange-600 data-[state=active]:text-white text-slate-300"
+                >
+                  Mes Clients
+                </TabsTrigger>
+              </TabsList>
+
+              {/* Tous les Clients */}
+              <TabsContent value="all-clients">
+                <Card className="bg-gradient-to-br from-[#1E293B] to-[#334155] border-slate-700">
+                  <CardHeader>
+                    <CardTitle className="text-white">Liste de Tous les Clients</CardTitle>
+                    <CardDescription className="text-slate-400">Voir et gérer tous les clients de l'équipe</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {/* Recherche et Tri */}
+                    <SearchAndSort
+                      data={clients}
+                      searchFields={['client_name', 'assigned_employee_name', 'country', 'visa_type', 'current_status']}
+                      sortOptions={[
+                        { value: 'created_at', label: 'Date de création' },
+                        { value: 'client_name', label: 'Nom du client' },
+                        { value: 'country', label: 'Pays' },
+                        { value: 'progress_percentage', label: 'Progression' },
+                        { value: 'current_status', label: 'Statut' }
+                      ]}
+                      onFilteredDataChange={setFilteredClients}
+                      placeholder="Rechercher un client (nom, conseiller, pays, visa, statut)..."
+                    />
 
                 <div className="overflow-x-auto">
                   <table className="w-full">
