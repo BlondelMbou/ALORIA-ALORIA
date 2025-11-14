@@ -3894,194 +3894,147 @@ async def check_48h_consultation_alerts(current_user: dict = Depends(get_current
         "prospects_needing_action": len(prospects_needing_followup)
     }
 
+# ============================================================================
+# CONVERSION PROSPECT → CLIENT - REFACTORISÉ AVEC SERVICES RÉUTILISABLES
+# ============================================================================
+
 @api_router.post("/contact-messages/{message_id}/convert-to-client")
 async def convert_prospect_to_client(
     message_id: str,
     client_data: dict,
     current_user: dict = Depends(get_current_user)
 ):
-    """Convertir un prospect en client (Manager/Employee)"""
+    """
+    Convertir un prospect en client (Manager/Employee).
+    
+    ENDPOINT REFACTORISÉ - Utilise les mêmes services que create_client:
+    - user_service.create_user_account()
+    - client_service.create_client_profile()
+    - assignment_service.assign_client_to_employee()
+    - notification_service.send_creation_notifications()
+    
+    Garantit un workflow IDENTIQUE à la création directe de client.
+    """
+    
+    # 1. Vérifications d'autorisation
     if current_user["role"] not in ["MANAGER", "EMPLOYEE"]:
-        raise HTTPException(status_code=403, detail="Seuls les employés/managers peuvent convertir les prospects")
+        raise HTTPException(
+            status_code=403,
+            detail="Seuls les employés/managers peuvent convertir les prospects"
+        )
     
-    # Vérifier que le prospect existe et est assigné à l'utilisateur
-    prospect = await db.contact_messages.find_one({"id": message_id, "assigned_to": current_user["id"]})
+    # 2. Vérifier que le prospect existe et est assigné
+    prospect = await db.contact_messages.find_one({
+        "id": message_id,
+        "assigned_to": current_user["id"]
+    })
     if not prospect:
-        raise HTTPException(status_code=404, detail="Prospect non trouvé ou non assigné à vous")
+        raise HTTPException(
+            status_code=404,
+            detail="Prospect non trouvé ou non assigné à vous"
+        )
     
-    # Récupérer les données du client
+    # 3. Extraire les données
     first_payment = client_data.get("first_payment_amount", 0)
-    country = client_data.get("country", prospect.get("country", ""))
-    visa_type = client_data.get("visa_type", prospect.get("visa_type", ""))
+    payment_method = client_data.get("payment_method", "Premier versement")
+    country = client_data.get("country", prospect.get("country", "Canada"))
+    visa_type = client_data.get("visa_type", prospect.get("visa_type", "Permis de travail"))
     
     if not country or not visa_type:
         raise HTTPException(status_code=400, detail="Pays et type de visa requis")
     
-    # Créer l'utilisateur client
-    client_id = str(uuid.uuid4())
-    temp_password = generate_temporary_password()
-    hashed_password = pwd_context.hash(temp_password)
+    # 4. Créer le compte utilisateur (SERVICE RÉUTILISABLE)
+    user_account = await create_user_account(
+        db=db,
+        email=prospect["email"],
+        full_name=prospect["name"],
+        phone=prospect.get("phone", ""),
+        role="CLIENT",
+        created_by_id=current_user["id"],
+        password=None  # Génération automatique
+    )
     
-    user_dict = {
-        "id": client_id,
-        "email": prospect["email"],
-        "full_name": prospect["name"],
-        "phone": prospect.get("phone", ""),
-        "password": hashed_password,
-        "role": "CLIENT",
-        "is_active": True,
-        "created_at": datetime.now(timezone.utc).isoformat()
-    }
+    user_id = user_account["user_id"]
+    temp_password = user_account["temporary_password"]
     
-    await db.users.insert_one(user_dict)
+    # 5. Créer le profil client complet avec dashboard (SERVICE RÉUTILISABLE)
+    # Auto-affectation à l'employé/manager qui convertit
+    client_profile = await create_client_profile(
+        db=db,
+        user_id=user_id,
+        email=prospect["email"],
+        full_name=prospect["name"],
+        phone=prospect.get("phone", ""),
+        country=country,
+        visa_type=visa_type,
+        assigned_employee_id=current_user["id"],  # Auto-affectation
+        created_by_id=current_user["id"],
+        first_payment=first_payment,
+        payment_method=payment_method
+    )
     
-    # Créer le profil client dans la collection clients
-    client_profile_dict = {
-        "id": str(uuid.uuid4()),
-        "user_id": client_id,
-        "full_name": prospect["name"],
-        "email": prospect["email"],
-        "phone": prospect.get("phone", ""),
-        "country": country,
-        "visa_type": visa_type,
-        "assigned_employee_id": current_user["id"],
-        "assigned_employee_name": current_user["full_name"],
-        "status": "active",
-        "created_at": datetime.now(timezone.utc).isoformat(),
-        "updated_at": datetime.now(timezone.utc).isoformat()
-    }
-    
-    await db.clients.insert_one(client_profile_dict)
-    
-    # Créer le dossier client
-    case_id = str(uuid.uuid4())
-    
-    # Récupérer le workflow
-    workflows_data = await db.workflows.find_one({"country": country})
-    if not workflows_data:
-        # Workflow par défaut si non trouvé
-        workflow_steps = WORKFLOWS.get(country, {}).get(visa_type, [])
-    else:
-        workflow_steps = workflows_data.get("workflows", {}).get(visa_type, [])
-    
-    case_dict = {
-        "id": case_id,
-        "client_id": client_id,
-        "client_name": prospect["name"],
-        "client_email": prospect["email"],
-        "assigned_employee_id": current_user["id"],
-        "assigned_employee_name": current_user["full_name"],
-        "country": country,
-        "visa_type": visa_type,
-        "status": "En cours",
-        "current_step_index": 0,
-        "workflow_steps": workflow_steps,
-        "progress_percentage": 0,
-        "created_at": datetime.now(timezone.utc).isoformat(),
-        "updated_at": datetime.now(timezone.utc).isoformat()
-    }
-    
-    await db.cases.insert_one(case_dict)
-    
-    # Si un premier paiement est déclaré, l'enregistrer
-    if first_payment and first_payment > 0:
-        payment_id = str(uuid.uuid4())
-        invoice_num = f"ALO-{datetime.now(timezone.utc).strftime('%Y%m%d')}-{uuid.uuid4().hex[:8].upper()}"
-        payment_dict = {
-            "id": payment_id,
-            "user_id": client_id,
-            "client_id": client_id,
-            "client_name": prospect["name"],
-            "amount": first_payment,
-            "currency": "CFA",
-            "payment_method": "Premier versement",
-            "description": "Premier versement pour création de dossier client",
-            "status": "CONFIRMED",
-            "invoice_number": invoice_num,
-            "created_at": datetime.now(timezone.utc).isoformat(),
-            "confirmed_at": datetime.now(timezone.utc).isoformat(),
-            "confirmed_by": current_user["id"],
-            "declared_at": datetime.now(timezone.utc).isoformat()
-        }
-        await db.payment_declarations.insert_one(payment_dict)
-        
-        # Notification SuperAdmin du paiement
-        superadmins = await db.users.find({"role": "SUPERADMIN", "is_active": True}).to_list(10)
-        for superadmin in superadmins:
-            await create_notification(
-                user_id=superadmin["id"],
-                title="💰 Premier versement client",
-                message=f"Premier versement de {first_payment} CFA reçu - Nouveau client: {prospect['name']} (créé par {current_user['full_name']})",
-                type="admin_payment_confirmed",
-                related_id=payment_id
-            )
-    
-    # Mettre à jour le statut du prospect
+    # 6. Mettre à jour le statut du prospect
     await db.contact_messages.update_one(
         {"id": message_id},
         {
             "$set": {
-                "status": ContactStatus.CONVERTED_CLIENT,
-                "client_id": client_id,
+                "status": "converti_client",  # ContactStatus.CONVERTED_CLIENT
+                "client_id": user_id,
                 "updated_at": datetime.now(timezone.utc).isoformat()
             }
         }
     )
     
-    # Envoyer email au nouveau client avec ses identifiants
-    if EMAIL_SERVICE_AVAILABLE:
-        try:
-            email_sent = await send_user_welcome_email({
-                "email": prospect["email"],
-                "full_name": prospect["name"],
-                "role": "CLIENT",
-                "login_email": prospect["email"],
-                "default_password": temp_password
-            })
-            if email_sent:
-                logger.info(f"Email de bienvenue envoyé au nouveau client {prospect['email']}")
-        except Exception as e:
-            logger.error(f"Erreur envoi email au client {prospect['email']}: {e}")
-    
-    # Notifier le client (dans l'app)
-    await create_notification(
-        user_id=client_id,
-        title="🎉 Bienvenue chez ALORIA AGENCY!",
-        message=f"Votre dossier d'immigration pour {country} - {visa_type} a été créé. Consultez votre espace client.",
-        type="client_created"
+    # 7. Envoyer toutes les notifications (SERVICE RÉUTILISABLE)
+    await send_creation_notifications(
+        db=db,
+        created_user_id=user_id,
+        created_user_role="CLIENT",
+        created_user_name=prospect["name"],
+        created_user_email=prospect["email"],
+        created_by_id=current_user["id"],
+        created_by_role=current_user["role"],
+        created_by_name=current_user["full_name"],
+        additional_context={
+            "country": country,
+            "visa_type": visa_type,
+            "assigned_employee_id": current_user["id"],
+            "converted_from_prospect": True,
+            "prospect_id": message_id,
+            "first_payment": first_payment
+        }
     )
     
-    # Notifier le manager si c'est un employé qui a créé le client
-    if current_user["role"] == "EMPLOYEE":
-        # Chercher le manager de cet employé
-        employee_record = await db.users.find_one({"id": current_user["id"]})
-        if employee_record and employee_record.get("manager_id"):
-            await create_notification(
-                user_id=employee_record["manager_id"],
-                title="👤 Nouveau client créé",
-                message=f"{current_user['full_name']} a créé un nouveau client: {prospect['name']} ({country} - {visa_type})",
-                type="employee_created_client",
-                related_id=client_id
-            )
+    # 8. Envoyer l'email de bienvenue
+    await send_welcome_email_notification(
+        email=prospect["email"],
+        full_name=prospect["name"],
+        role="CLIENT",
+        temporary_password=temp_password
+    )
     
-    # Log activity
+    # 9. Logger l'activité
     await log_activity(
         user_id=current_user["id"],
         action="prospect_converted_to_client",
         details={
             "prospect_id": message_id,
-            "client_id": client_id,
+            "client_id": user_id,
             "client_name": prospect["name"],
-            "first_payment": first_payment
+            "first_payment": first_payment,
+            "country": country,
+            "visa_type": visa_type
         }
     )
     
+    # 10. Retourner les credentials
     return {
         "message": "Prospect converti en client avec succès",
-        "client_id": client_id,
-        "case_id": case_id,
+        "client_id": user_id,
+        "case_id": client_profile["case_id"],
         "login_email": prospect["email"],
-        "temporary_password": temp_password
+        "temporary_password": temp_password,
+        "dashboard_ready": client_profile["dashboard_ready"]
     }
 
 @api_router.post("/clients/create-direct")
