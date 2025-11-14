@@ -1542,6 +1542,7 @@ export default function ManagerDashboard() {
           </DialogContent>
         </Dialog>
       )}
+      )}
     </div>
   );
 }
