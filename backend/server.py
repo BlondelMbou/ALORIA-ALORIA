@@ -1312,13 +1312,21 @@ async def get_clients(current_user: dict = Depends(get_current_user)):
     
     clients = await db.clients.find(query, {"_id": 0}).to_list(1000)
     
-    # Enrich with employee names
+    # Enrich with employee names and add defaults for missing fields
     for client in clients:
         if client.get("assigned_employee_id"):
             employee = await db.users.find_one({"id": client["assigned_employee_id"]})
             client["assigned_employee_name"] = employee["full_name"] if employee else None
         else:
             client["assigned_employee_name"] = None
+        
+        # Add default values for missing fields (backwards compatibility)
+        if "current_status" not in client:
+            client["current_status"] = "Nouveau"
+        if "current_step" not in client:
+            client["current_step"] = 0
+        if "progress_percentage" not in client:
+            client["progress_percentage"] = 0.0
     
     return [ClientResponse(**client) for client in clients]
 
