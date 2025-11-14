@@ -1095,11 +1095,11 @@ export default function ManagerDashboard() {
                               <p className="text-slate-300 text-sm">{payment.client_name}</p>
                             </div>
                             <Badge className={
-                              payment.status === 'confirmed' 
+                              payment.status === 'CONFIRMED' 
                                 ? 'bg-green-500/20 text-green-400 border-green-500/30'
                                 : 'bg-red-500/20 text-red-400 border-red-500/30'
                             }>
-                              {payment.status === 'confirmed' ? '✅ Confirmé' : '❌ Rejeté'}
+                              {payment.status === 'CONFIRMED' ? '✅ Confirmé' : '❌ Rejeté'}
                             </Badge>
                           </div>
                           <p className="text-xs text-slate-400">
