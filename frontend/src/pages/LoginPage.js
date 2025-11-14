@@ -194,6 +194,62 @@ export default function LoginPage() {
           <p className="sm:hidden">Identifiants de démo disponibles</p>
         </div>
       </div>
+
+      {/* Dialog Mot de Passe Oublié */}
+      <Dialog open={showForgotPassword} onOpenChange={setShowForgotPassword}>
+        <DialogContent className="bg-[#1E293B] border-slate-700">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <KeyRound className="w-6 h-6 text-orange-500" />
+              Mot de Passe Oublié
+            </DialogTitle>
+            <DialogDescription className="text-slate-400">
+              Entrez votre adresse email pour recevoir un nouveau mot de passe temporaire
+            </DialogDescription>
+          </DialogHeader>
+
+          <form onSubmit={handleForgotPassword} className="space-y-4 mt-4">
+            <div>
+              <Label className="text-slate-300">Adresse Email</Label>
+              <Input
+                type="email"
+                value={resetEmail}
+                onChange={(e) => setResetEmail(e.target.value)}
+                required
+                placeholder="votre.email@exemple.com"
+                className="bg-slate-800 border-slate-600 text-white mt-1"
+              />
+            </div>
+
+            <div className="bg-blue-500/10 border border-blue-500/30 p-3 rounded-lg">
+              <p className="text-blue-400 text-sm">
+                ℹ️ Un nouveau mot de passe temporaire sera envoyé par email et notification. Changez-le dès votre connexion.
+              </p>
+            </div>
+
+            <div className="flex gap-3">
+              <Button
+                type="button"
+                variant="outline"
+                className="flex-1 border-slate-600 text-white"
+                onClick={() => {
+                  setShowForgotPassword(false);
+                  setResetEmail('');
+                }}
+              >
+                Annuler
+              </Button>
+              <Button
+                type="submit"
+                className="flex-1 bg-orange-500 hover:bg-orange-600"
+                disabled={resetLoading}
+              >
+                {resetLoading ? 'Envoi...' : 'Réinitialiser'}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
