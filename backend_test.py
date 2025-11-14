@@ -553,9 +553,9 @@ class APITester:
                 self.log_result("7.1 Error Test - Pending Payment", False, "Exception occurred", str(e))
         
         # 7.2 - GET /api/payments/{payment_id}/invoice avec paiement inexistant → Doit retourner 404
-        if client_token:
+        if manager_token:
             try:
-                headers = {"Authorization": f"Bearer {client_token}"}
+                headers = {"Authorization": f"Bearer {manager_token}"}
                 fake_payment_id = "00000000-0000-0000-0000-000000000000"
                 
                 error_response = self.session.get(f"{API_BASE}/payments/{fake_payment_id}/invoice", headers=headers)
