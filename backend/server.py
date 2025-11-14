@@ -2333,17 +2333,17 @@ async def download_invoice(invoice_number: str, current_user: dict = Depends(get
     elif current_user["role"] not in ["MANAGER", "SUPERADMIN"]:
         raise HTTPException(status_code=403, detail="Accès refusé")
     
-    pdf_path = f"/app/backend/invoices/{invoice_number}.pdf"
+    png_path = f"/app/backend/invoices/{invoice_number}.png"
     
     # Vérifier que le fichier existe
     import os
-    if not os.path.exists(pdf_path):
-        raise HTTPException(status_code=404, detail="Fichier PDF non trouvé")
+    if not os.path.exists(png_path):
+        raise HTTPException(status_code=404, detail="Fichier de facture non trouvé")
     
     return FileResponse(
-        path=pdf_path,
-        media_type="application/pdf",
-        filename=f"{invoice_number}.pdf"
+        path=png_path,
+        media_type="image/png",
+        filename=f"Facture_{invoice_number}.png"
     )
 
 @api_router.get("/payments/manager-history", response_model=List[PaymentDeclarationResponse])
