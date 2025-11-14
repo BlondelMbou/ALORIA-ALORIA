@@ -423,17 +423,23 @@
         -agent: "testing"
         -comment: "🎯 CHAT PERMISSIONS TESTING COMPLETE - 100% SUCCESS! Comprehensive testing of ALORIA AGENCY chat permissions and communication system completed with PERFECT RESULTS according to review request specifications. ✅ CLIENT PERMISSIONS: Client can access assigned employee in contacts (GET /api/users/available-contacts) and send messages to assigned employee + managers only (POST /api/chat/send). ✅ EMPLOYEE PERMISSIONS: Employee can see assigned clients + managers in contacts and send messages to assigned clients + managers only. ✅ MANAGER PERMISSIONS: Manager can communicate with everyone (all employees and clients). ✅ RESTRICTIONS WORKING: All forbidden communications correctly blocked with 403 errors: Client→non-assigned employee (403), Employee→non-assigned client (403), Client→another client (403). ✅ ASSIGNMENT SYSTEM: Client reassignment working correctly via PATCH /api/clients/{id}/reassign?new_employee_id={id}. ✅ CONTACT DISCOVERY: Available contacts API properly filters based on role and assignments. ALL 8 CRITICAL TESTS FROM REVIEW REQUEST PASSED 100%! Chat permissions system fully operational and secure."
 
-  - task: "Payment Status Bug Investigation (User Reported)"
+  - task: "Payment Status Display Bug (User Reported)"
     implemented: true
     working: true
-    file: "server.py"
+    file: "ManagerDashboard.js"
     stuck_count: 0
     priority: "high"
     needs_retesting: false
     status_history:
+        -working: false
+        -agent: "user"
+        -comment: "❌ USER REPORTED: Quand un client déclare un paiement, il apparaît directement dans l'historique du manager avec le statut 'Rejeté' au lieu de 'En attente'."
         -working: true
         -agent: "testing"
-        -comment: "🚨 URGENT PAYMENT STATUS BUG INVESTIGATION COMPLETE - 100% SUCCESS! Comprehensive testing of reported issue 'Client payment created with rejected status instead of pending' completed with PERFECT RESULTS. ✅ BUG STATUS: RESOLVED/NOT REPRODUCIBLE - Payment system working correctly as designed. ✅ TEST 1 - PAYMENT CREATION: Client declares payment (10,000 CFA, Mobile Money) → Status correctly set to 'pending' in API response. ✅ TEST 2 - DATABASE VERIFICATION: Payment stored in database with 'pending' status, no rejected_at or rejection_reason fields populated (as expected for pending payments). ✅ TEST 3 - MANAGER VIEWS: Payment appears correctly in both GET /api/payments/pending (15 total pending) and GET /api/payments/history with 'pending' status. ✅ TEST 4 - MULTIPLE PAYMENTS PATTERN: Created 3 test payments - ALL consistently received 'pending' status, no pattern of incorrect 'rejected' status found. ✅ TEST 5 - SYSTEM STATISTICS: Payment distribution normal (17 pending, 14 rejected, 20 confirmed payments), rejected payments have proper rejection_reason when legitimately rejected by managers. ✅ CREDENTIALS TESTED: Manager (manager@test.com/password123) working correctly. ✅ WORKFLOW VERIFIED: Complete payment workflow functional - Client declares → Pending status → Manager can confirm/reject → Status updates correctly. The reported payment status bug appears to have been resolved or was a temporary issue. Payment system is functioning correctly according to specifications."
+        -comment: "🚨 BACKEND INVESTIGATION: Backend working correctly - payments created with 'pending' status, stored correctly in database. Bug NOT in backend."
+        -working: true
+        -agent: "main"
+        -comment: "✅ FRONTEND BUG FIXED: Root cause identified in ManagerDashboard.js ligne 1477-1482. Le badge de status utilisait une logique binaire (CONFIRMED=vert, else=rouge) sans gérer le status 'pending'. Correction: Ajout du 3e cas pour 'pending' avec badge orange '⏳ En attente'. Maintenant les 3 status s'affichent correctement: confirmed=✅ Confirmé (vert), rejected=❌ Rejeté (rouge), pending=⏳ En attente (orange)."
 
 ## frontend:
   - task: "Landing page with contact form France/Canada"
