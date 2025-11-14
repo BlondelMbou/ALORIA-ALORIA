@@ -134,6 +134,9 @@
         -working: true
         -agent: "testing"
         -comment: "✅ CRITICAL BUG FIXED: Comprehensive testing confirms client details now display correctly. Fallback mechanism working perfectly - when full_name, email, phone are missing from clients collection, they are retrieved from users collection. Tested with multiple clients (167 total), all showing complete data. Example: Client ID 4e32d98f shows full_name='client', email='client1@gmail.com', phone='+33784801254'. Both individual client details (GET /api/clients/{id}) and client list (GET /api/clients) endpoints working. Issue: ClientResponse model was missing these fields - added full_name, email, phone as Optional fields to model."
+        -working: true
+        -agent: "testing"
+        -comment: "✅ URGENT RE-TEST CONFIRMÉ: Test urgent des données clients N/A effectué avec manager@test.com. Analysé 199 clients via GET /api/clients, AUCUN client avec données N/A détecté. Tous les clients affichent correctement: full_name, email, phone. Exemples vérifiés: 'client' (client1@gmail.com), 'Blondel MBOU SONGMENE' (blondel.mbou@gmail.com), 'Test Client' (client.test@example.com). Le problème rapporté par l'utilisateur est RÉSOLU - le système de fallback fonctionne parfaitement."
   
   - task: "Client payment history display"
     implemented: true
