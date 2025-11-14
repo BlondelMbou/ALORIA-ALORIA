@@ -863,20 +863,6 @@ export default function ManagerDashboard() {
                 <CardDescription className="text-slate-400">Clients qui me sont directement assignés</CardDescription>
               </CardHeader>
               <CardContent>
-                {/* Recherche et Tri */}
-                <SearchAndSort
-                  data={clients.filter(c => c.assigned_employee_id === user?.id)}
-                  searchFields={['client_name', 'country', 'visa_type', 'current_status']}
-                  sortOptions={[
-                    { value: 'created_at', label: 'Date de création' },
-                    { value: 'client_name', label: 'Nom du client' },
-                    { value: 'country', label: 'Pays' },
-                    { value: 'progress_percentage', label: 'Progression' }
-                  ]}
-                  onFilteredDataChange={(filtered) => setFilteredClients(filtered)}
-                  placeholder="Rechercher dans mes clients..."
-                />
-
                 <div className="overflow-x-auto mt-4">
                   <table className="w-full">
                     <thead className="border-b border-slate-700">
