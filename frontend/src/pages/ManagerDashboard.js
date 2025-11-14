@@ -26,6 +26,7 @@ export default function ManagerDashboard() {
   const [stats, setStats] = useState(null);
   const [clients, setClients] = useState([]);
   const [filteredClients, setFilteredClients] = useState([]);
+  const [myClients, setMyClients] = useState([]);
   const [filteredMyClients, setFilteredMyClients] = useState([]);
   const [filteredPaymentHistory, setFilteredPaymentHistory] = useState([]);
   const [cases, setCases] = useState([]);
