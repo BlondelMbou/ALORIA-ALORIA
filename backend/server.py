@@ -1342,6 +1342,17 @@ async def get_client(client_id: str, current_user: dict = Depends(get_current_us
     if current_user["role"] == "CLIENT" and client["user_id"] != current_user["id"]:
         raise HTTPException(status_code=403, detail="Access denied")
     
+    # CORRECTION: Récupérer les données manquantes depuis users si nécessaire
+    if not client.get("full_name") or not client.get("email") or not client.get("phone"):
+        user = await db.users.find_one({"id": client["user_id"]})
+        if user:
+            if not client.get("full_name"):
+                client["full_name"] = user.get("full_name", "")
+            if not client.get("email"):
+                client["email"] = user.get("email", "")
+            if not client.get("phone"):
+                client["phone"] = user.get("phone", "")
+    
     # Get assigned employee name
     if client.get("assigned_employee_id"):
         employee = await db.users.find_one({"id": client["assigned_employee_id"]})
