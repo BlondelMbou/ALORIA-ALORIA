@@ -528,7 +528,7 @@ class PaymentDeclaration(BaseModel):
 class PaymentDeclarationResponse(BaseModel):
     model_config = ConfigDict(extra="ignore")
     id: str
-    user_id: str  # AJOUTÉ: user_id pour compatibilité historique
+    user_id: Optional[str] = None  # AJOUTÉ: user_id pour compatibilité historique (optionnel)
     client_id: str
     client_name: str
     amount: float
