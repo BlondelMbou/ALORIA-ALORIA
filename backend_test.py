@@ -202,7 +202,7 @@ class APITester:
         # 1.1 - Créer un nouveau client via POST /api/clients
         if manager_token:
             try:
-                headers = {"Authorization": f"Bearer {self.tokens['manager']}"}
+                headers = {"Authorization": f"Bearer {manager_token}"}
                 client_data = {
                     "email": client_email,
                     "full_name": "Client Test Facture PNG",
