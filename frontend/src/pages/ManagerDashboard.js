@@ -16,6 +16,7 @@ import ChatWidget from '../components/ChatWidget';
 import NotificationBell from '../components/NotificationBell';
 import SearchAndSort from '../components/SearchAndSort';
 import AloriaLogo from '../components/AloriaLogo';
+import ProfileSettings from '../components/ProfileSettings';
 import useSocket from '../hooks/useSocket';
 import api, { clientsAPI, casesAPI, dashboardAPI, employeesAPI, visitorsAPI } from '../utils/api';
 
