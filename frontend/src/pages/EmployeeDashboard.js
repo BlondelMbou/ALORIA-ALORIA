@@ -920,6 +920,58 @@ export default function EmployeeDashboard() {
                     />
                   </div>
 
+                  {/* Section Premier Paiement */}
+                  <div className="bg-gradient-to-r from-orange-500/10 to-blue-500/10 p-4 rounded-lg border border-orange-500/30">
+                    <h3 className="text-white font-semibold mb-4 flex items-center gap-2">
+                      💰 Premier Paiement (Optionnel)
+                    </h3>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="first-payment-amount" className="text-slate-300 font-medium">
+                          Montant (CFA)
+                        </Label>
+                        <Input
+                          id="first-payment-amount"
+                          type="number"
+                          min="0"
+                          value={newClientForm.first_payment_amount}
+                          onChange={(e) => setNewClientForm({ 
+                            ...newClientForm, 
+                            first_payment_amount: parseFloat(e.target.value) || 0 
+                          })}
+                          placeholder="Ex: 50000"
+                          className="bg-slate-800 border-slate-600 text-white mt-2"
+                        />
+                      </div>
+
+                      <div>
+                        <Label htmlFor="payment-method" className="text-slate-300 font-medium">
+                          Méthode de Paiement
+                        </Label>
+                        <Select 
+                          value={newClientForm.payment_method}
+                          onValueChange={(value) => setNewClientForm({ ...newClientForm, payment_method: value })}
+                        >
+                          <SelectTrigger className="bg-slate-800 border-slate-600 text-white mt-2">
+                            <SelectValue placeholder="Sélectionner une méthode" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-slate-800 border-slate-600">
+                            <SelectItem value="Espèces">Espèces</SelectItem>
+                            <SelectItem value="Virement bancaire">Virement bancaire</SelectItem>
+                            <SelectItem value="Mobile Money">Mobile Money</SelectItem>
+                            <SelectItem value="Carte bancaire">Carte bancaire</SelectItem>
+                            <SelectItem value="Autre">Autre</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+
+                    <p className="text-slate-400 text-xs mt-3">
+                      💡 Le premier paiement sera automatiquement confirmé et enregistré dans l'historique du client
+                    </p>
+                  </div>
+
                   <Button type="submit" className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold shadow-lg" data-testid="create-client-submit-btn">
                     <UserPlus className="w-5 h-5 mr-2" />
                     Créer le Client
