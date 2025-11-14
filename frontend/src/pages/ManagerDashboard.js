@@ -65,6 +65,7 @@ export default function ManagerDashboard() {
   const [pendingPayments, setPendingPayments] = useState([]);
   const [paymentHistory, setPaymentHistory] = useState([]);
   const [rejectionDialog, setRejectionDialog] = useState({ show: false, payment: null, reason: '' });
+  const [confirmationDialog, setConfirmationDialog] = useState({ show: false, payment: null, code: '', generatedCode: '' });
   const [reassignDialog, setReassignDialog] = useState({ show: false, client: null, newEmployeeId: '' });
   const [activeTab, setActiveTab] = useState('overview');
   const [showProfileSettings, setShowProfileSettings] = useState(false);
