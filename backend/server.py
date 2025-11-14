@@ -3965,21 +3965,35 @@ async def convert_prospect_to_client(
     # Si un premier paiement est déclaré, l'enregistrer
     if first_payment and first_payment > 0:
         payment_id = str(uuid.uuid4())
+        invoice_num = f"ALO-{datetime.now(timezone.utc).strftime('%Y%m%d')}-{uuid.uuid4().hex[:8].upper()}"
         payment_dict = {
             "id": payment_id,
             "user_id": client_id,
             "client_id": client_id,
+            "client_name": prospect["name"],
             "amount": first_payment,
             "currency": "CFA",
-            "payment_method": "Virement bancaire",
-            "description": "Premier versement pour devenir client",
-            "status": "confirmed",
-            "invoice_number": f"ALO-{datetime.now(timezone.utc).strftime('%Y%m%d')}-{uuid.uuid4().hex[:8].upper()}",
+            "payment_method": "Premier versement",
+            "description": "Premier versement pour création de dossier client",
+            "status": "CONFIRMED",
+            "invoice_number": invoice_num,
             "created_at": datetime.now(timezone.utc).isoformat(),
             "confirmed_at": datetime.now(timezone.utc).isoformat(),
-            "confirmed_by": current_user["id"]
+            "confirmed_by": current_user["id"],
+            "declared_at": datetime.now(timezone.utc).isoformat()
         }
-        await db.payments.insert_one(payment_dict)
+        await db.payment_declarations.insert_one(payment_dict)
+        
+        # Notification SuperAdmin du paiement
+        superadmins = await db.users.find({"role": "SUPERADMIN", "is_active": True}).to_list(10)
+        for superadmin in superadmins:
+            await create_notification(
+                user_id=superadmin["id"],
+                title="💰 Premier versement client",
+                message=f"Premier versement de {first_payment} CFA reçu - Nouveau client: {prospect['name']} (créé par {current_user['full_name']})",
+                type="admin_payment_confirmed",
+                related_id=payment_id
+            )
     
     # Mettre à jour le statut du prospect
     await db.contact_messages.update_one(
