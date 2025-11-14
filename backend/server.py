@@ -2346,12 +2346,9 @@ async def get_client_payment_history(current_user: dict = Depends(get_current_us
     if current_user["role"] != "CLIENT":
         raise HTTPException(status_code=403, detail="Accès refusé")
     
-    client = await db.clients.find_one({"user_id": current_user["id"]})
-    if not client:
-        raise HTTPException(status_code=404, detail="Profil client non trouvé")
-    
+    # Utiliser user_id pour chercher les paiements (standardisé dans les services)
     payments = await db.payment_declarations.find(
-        {"client_id": client["id"]}, {"_id": 0}
+        {"user_id": current_user["id"]}, {"_id": 0}
     ).sort("declared_at", -1).to_list(100)
     
     return [PaymentDeclarationResponse(**payment) for payment in payments]
