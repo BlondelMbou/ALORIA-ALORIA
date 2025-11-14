@@ -1233,6 +1233,110 @@ export default function ManagerDashboard() {
           </DialogContent>
         </Dialog>
       )}
+
+      {/* Dialog Détails Client */}
+      {selectedClient && (
+        <Dialog open={!!selectedClient} onOpenChange={() => setSelectedClient(null)}>
+          <DialogContent className="bg-[#1E293B] border-slate-700 max-w-3xl">
+            <DialogHeader>
+              <DialogTitle className="text-white flex items-center gap-2">
+                <User className="w-6 h-6 text-blue-500" />
+                Détails du Client
+              </DialogTitle>
+            </DialogHeader>
+            
+            <div className="space-y-6 mt-4">
+              {/* Informations de base */}
+              <div className="bg-slate-800 p-4 rounded-lg space-y-3">
+                <h4 className="text-white font-semibold mb-3">📋 Informations Personnelles</h4>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-slate-400 text-sm">Nom complet</p>
+                    <p className="text-white font-medium">{selectedClient.full_name}</p>
+                  </div>
+                  <div>
+                    <p className="text-slate-400 text-sm">Email</p>
+                    <p className="text-white">{selectedClient.email}</p>
+                  </div>
+                  <div>
+                    <p className="text-slate-400 text-sm">Téléphone</p>
+                    <p className="text-white">{selectedClient.phone || 'Non renseigné'}</p>
+                  </div>
+                  <div>
+                    <p className="text-slate-400 text-sm">Statut</p>
+                    <Badge className={selectedClient.status === 'active' ? 'bg-green-500/20 text-green-400' : 'bg-slate-500/20 text-slate-400'}>
+                      {selectedClient.status === 'active' ? 'Actif' : selectedClient.status}
+                    </Badge>
+                  </div>
+                </div>
+              </div>
+
+              {/* Informations du dossier */}
+              <div className="bg-slate-800 p-4 rounded-lg space-y-3">
+                <h4 className="text-white font-semibold mb-3">🗂️ Dossier d'Immigration</h4>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-slate-400 text-sm">Pays de destination</p>
+                    <p className="text-white font-medium">{selectedClient.country}</p>
+                  </div>
+                  <div>
+                    <p className="text-slate-400 text-sm">Type de visa</p>
+                    <p className="text-white">{selectedClient.visa_type}</p>
+                  </div>
+                  <div>
+                    <p className="text-slate-400 text-sm">Employé assigné</p>
+                    <p className="text-white">{selectedClient.assigned_employee_name || 'Non assigné'}</p>
+                  </div>
+                  <div>
+                    <p className="text-slate-400 text-sm">Date de création</p>
+                    <p className="text-white">
+                      {selectedClient.created_at ? new Date(selectedClient.created_at).toLocaleDateString('fr-FR') : 'N/A'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Identifiants de connexion */}
+              <div className="bg-blue-500/10 border border-blue-500/30 p-4 rounded-lg">
+                <h4 className="text-blue-400 font-semibold mb-3">🔑 Identifiants de Connexion</h4>
+                <div className="space-y-2">
+                  <div>
+                    <p className="text-slate-400 text-sm">Email de connexion</p>
+                    <div className="flex items-center gap-2">
+                      <code className="text-white bg-slate-900 px-3 py-1 rounded font-mono text-sm flex-1">
+                        {selectedClient.email}
+                      </code>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="border-slate-600"
+                        onClick={() => {
+                          navigator.clipboard.writeText(selectedClient.email);
+                          toast.success('Email copié!');
+                        }}
+                      >
+                        Copier
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="text-slate-400 text-xs mt-2">
+                    ℹ️ Le mot de passe temporaire a été envoyé par email lors de la création du compte
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-end">
+                <Button 
+                  onClick={() => setSelectedClient(null)}
+                  className="bg-slate-600 hover:bg-slate-500"
+                >
+                  Fermer
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }
