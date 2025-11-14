@@ -501,6 +501,16 @@ const SuperAdminDashboard = () => {
             Prospects
           </button>
           <button
+            onClick={() => setActiveTab('visitors')}
+            className={`px-6 py-3 rounded-lg font-medium transition-colors ${
+              activeTab === 'visitors'
+                ? 'bg-orange-600 text-white'
+                : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+            }`}
+          >
+            Visiteurs
+          </button>
+          <button
             onClick={() => setActiveTab('users-creation')}
             className={`px-6 py-3 rounded-lg font-medium transition-colors ${
               activeTab === 'users-creation'
