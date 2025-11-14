@@ -4111,11 +4111,13 @@ async def forgot_password(email_data: dict):
             logger.error(f"Erreur envoi email réinitialisation à {email}: {e}")
     
     # Créer une notification dans l'app
+    from services.notification_service import create_notification
     await create_notification(
+        db=db,
         user_id=user["id"],
         title="🔑 Mot de passe réinitialisé",
         message=f"Votre mot de passe a été réinitialisé. Nouveau mot de passe temporaire: {temp_password}. Changez-le dès votre connexion.",
-        type="password_reset"
+        notification_type="password_reset"
     )
     
     return {
