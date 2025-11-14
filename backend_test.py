@@ -429,9 +429,9 @@ class APITester:
         # ============================================================================
         print("\n🔸 ÉTAPE 5 - TÉLÉCHARGER LA FACTURE (MANAGER)")
         
-        if 'manager' in self.tokens and test_payment_id:
+        if manager_token and test_payment_id:
             try:
-                headers = {"Authorization": f"Bearer {self.tokens['manager']}"}
+                headers = {"Authorization": f"Bearer {manager_token}"}
                 print(f"🔍 Manager downloading invoice: GET /api/payments/{test_payment_id}/invoice")
                 
                 # 5.1 - GET /api/payments/{payment_id}/invoice
