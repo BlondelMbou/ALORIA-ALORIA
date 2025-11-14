@@ -4824,11 +4824,8 @@ class APITester:
 if __name__ == "__main__":
     tester = APITester()
     
-    # Check if rapid tests are requested
-    if len(sys.argv) > 1 and sys.argv[1] == "--rapid":
-        tester.run_rapid_tests()
-    else:
-        tester.run_all_tests()
+    # Run critical tests as requested in review
+    tester.run_critical_tests()
     
     # Return success/failure based on results
     success = tester.results['failed'] == 0
