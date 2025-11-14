@@ -1252,6 +1252,7 @@ export default function ManagerDashboard() {
           </TabsContent>
         </Tabs>
       </div>
+      )}
 
       {/* Chat Widget */}
       <ChatWidget userRole="MANAGER" />
