@@ -932,6 +932,16 @@ export default function EmployeeDashboard() {
         currentUser={user} 
         onUnreadCountChange={setChatUnreadCount}
       />
+
+      {/* Popup Credentials Uniforme */}
+      <CredentialsPopup
+        open={showCredentialsDialog}
+        onOpenChange={(open) => {
+          setShowCredentialsDialog(open);
+          if (!open) setNewClientCredentials(null);
+        }}
+        credentials={newClientCredentials}
+      />
     </div>
   );
 }
