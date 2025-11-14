@@ -216,7 +216,8 @@ class APITester:
                 if response.status_code in [200, 201]:
                     client_response = response.json()
                     test_client_id = client_response['id']
-                    self.log_result("1.1 Client Creation", True, f"Client créé: {test_client_id}")
+                    client_temp_password = client_response.get('temporary_password', 'Aloria2024!')
+                    self.log_result("1.1 Client Creation", True, f"Client créé: {test_client_id}, temp_password: {client_temp_password}")
                 else:
                     self.log_result("1.1 Client Creation", False, f"Status: {response.status_code}", response.text)
                     return
