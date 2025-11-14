@@ -395,7 +395,7 @@ class APITester:
         
         if manager_token and test_payment_id:
             try:
-                headers = {"Authorization": f"Bearer {client_token}"}
+                headers = {"Authorization": f"Bearer {manager_token}"}
                 print(f"🔍 Client downloading invoice: GET /api/payments/{test_payment_id}/invoice")
                 
                 # 4.1 - GET /api/payments/{payment_id}/invoice
