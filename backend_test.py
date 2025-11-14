@@ -4925,7 +4925,7 @@ class APITester:
 
     def run_critical_tests(self):
         """Run critical tests selon la demande de révision"""
-        print("🚀 ALORIA AGENCY - TESTS CRITIQUES URGENTS")
+        print("🚀 ALORIA AGENCY - TESTS CRITIQUES URGENTS - RESET PASSWORD")
         print(f"🌐 Testing against: {API_BASE}")
         print("=" * 80)
         
@@ -4938,8 +4938,11 @@ class APITester:
         # TEST CRITIQUE 2: FACTURES PNG (NOUVEAU)
         self.test_critical_2_png_invoices_system()
         
-        # TEST CRITIQUE 3: DASHBOARD SUPERADMIN (État des comptes)
-        self.test_critical_3_superadmin_dashboard_stats()
+        # TEST CRITIQUE 3: RESET PASSWORD POUR TOUS LES RÔLES (CORRECTION URGENTE)
+        self.test_critical_3_password_reset_all_roles()
+        
+        # TEST CRITIQUE 4: DASHBOARD SUPERADMIN (État des comptes)
+        self.test_critical_4_superadmin_dashboard_stats()
         
         # Print final results
         self.print_final_results()
