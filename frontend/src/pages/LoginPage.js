@@ -52,6 +52,47 @@ export default function LoginPage() {
     }
   };
 
+  const handleForgotPassword = async (e) => {
+    e.preventDefault();
+    setResetLoading(true);
+
+    try {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/auth/forgot-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: resetEmail })
+      });
+
+      const data = await response.json();
+      
+      if (response.ok) {
+        toast.success('Un nouveau mot de passe temporaire a été envoyé par email et notification', {
+          duration: 8000
+        });
+        
+        // Afficher le mot de passe temporaire (EN PRODUCTION: retirer)
+        if (data.temporary_password) {
+          toast.info(
+            <div>
+              <p className="font-semibold">Mot de passe temporaire:</p>
+              <p className="font-mono text-lg">{data.temporary_password}</p>
+            </div>,
+            { duration: 15000 }
+          );
+        }
+        
+        setShowForgotPassword(false);
+        setResetEmail('');
+      } else {
+        toast.error(data.detail || 'Erreur lors de la réinitialisation');
+      }
+    } catch (error) {
+      toast.error('Erreur de connexion au serveur');
+    } finally {
+      setResetLoading(false);
+    }
+  };
+
   // Registration function removed - hierarchical user creation only
 
   return (
