@@ -268,9 +268,9 @@ class APITester:
         # ============================================================================
         print("\n🔸 ÉTAPE 2 - MANAGER CONFIRME LE PAIEMENT")
         
-        if 'manager' in self.tokens and test_payment_id:
+        if manager_token and test_payment_id:
             try:
-                headers = {"Authorization": f"Bearer {self.tokens['manager']}"}
+                headers = {"Authorization": f"Bearer {manager_token}"}
                 
                 # 2.1 - Login Manager et GET /api/payments/pending pour voir le paiement
                 print(f"🔍 Getting pending payments")
