@@ -899,9 +899,23 @@ export default function ManagerDashboard() {
                 <CardDescription className="text-slate-400">Suivez l'évolution des dossiers de vos clients personnels</CardDescription>
               </CardHeader>
               <CardContent>
+                {/* Recherche et Tri */}
+                <SearchAndSort
+                  data={clients.filter(c => c.assigned_employee_id === user?.id)}
+                  searchFields={['full_name', 'client_name', 'country', 'visa_type', 'current_status']}
+                  sortOptions={[
+                    { value: 'created_at', label: 'Date de création' },
+                    { value: 'full_name', label: 'Nom' },
+                    { value: 'country', label: 'Pays' },
+                    { value: 'progress_percentage', label: 'Progression' }
+                  ]}
+                  onFilteredDataChange={setFilteredMyClients}
+                  placeholder="Rechercher dans mes clients..."
+                />
+
                 {/* Cartes Clients - Style Mes Dossiers */}
                 <div className="grid gap-6 mt-4">
-                  {clients.filter(c => c.assigned_employee_id === user?.id).map((client) => {
+                  {filteredMyClients.map((client) => {
                     const clientCase = cases.find(c => c.client_id === client.user_id);
                     const currentStepIndex = clientCase?.current_step_index || 0;
                     const totalSteps = clientCase?.workflow_steps?.length || 0;
