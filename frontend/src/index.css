@@ -78,6 +78,44 @@ body {
     }
 }
 
+/* Optimisations de performance */
+img {
+    /* Lazy loading natif */
+    loading: lazy;
+    /* Améliorer le rendu des images */
+    image-rendering: -webkit-optimize-contrast;
+}
+
+/* Améliorer les transitions sur mobile */
+@media (prefers-reduced-motion: no-preference) {
+    * {
+        scroll-behavior: smooth;
+    }
+}
+
+/* Réduire les animations sur mobile bas de gamme */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* Optimiser le scroll sur iOS */
+* {
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Améliorer le contraste en mode sombre */
+@media (prefers-color-scheme: dark) {
+    body {
+        background-color: #0F172A;
+    }
+}
+
 /* Animations pour les sections */
 @keyframes fadeInUp {
     from {
