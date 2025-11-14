@@ -1,10 +1,15 @@
 #!/usr/bin/env python3
 """
-ALORIA AGENCY Backend API Testing Suite - CRITICAL TESTS FOCUS
-Tests critiques selon la demande de révision:
-1. TEST ERREUR RETRAIT MANAGER - Identifier l'erreur exacte POST /api/withdrawals
-2. TEST FACTURES PNG - Nouveau système de factures PNG (pas PDF)
-3. TEST DASHBOARD SUPERADMIN - État des comptes (total_payments, total_withdrawals, current_balance)
+ALORIA AGENCY Backend API Testing Suite - PNG INVOICE GENERATION WORKFLOW
+Test complet du workflow de génération et téléchargement de factures PNG selon la demande de révision:
+
+WORKFLOW COMPLET À TESTER:
+1. CRÉER UN CLIENT ET DÉCLARER UN PAIEMENT
+2. MANAGER CONFIRME LE PAIEMENT  
+3. VÉRIFIER LA GÉNÉRATION DU FICHIER PNG
+4. TÉLÉCHARGER LA FACTURE (CLIENT ET MANAGER)
+5. TESTER L'ENDPOINT ALTERNATIF
+6. TESTS D'ERREUR
 """
 
 import requests
