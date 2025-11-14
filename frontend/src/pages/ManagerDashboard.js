@@ -279,21 +279,54 @@ export default function ManagerDashboard() {
 
   const handleCreateClient = async (e) => {
     e.preventDefault();
+    
+    if (!newClient.email || !newClient.full_name || !newClient.country || !newClient.visa_type) {
+      toast.error('Veuillez remplir tous les champs obligatoires');
+      return;
+    }
+    
     try {
-      await clientsAPI.create(newClient);
-      toast.success('Client créé avec succès');
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/clients/create-direct`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify(newClient)
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Erreur lors de la création');
+      }
+      
+      const data = await response.json();
+      
+      // Afficher le dialog avec les credentials
+      setNewClientCredentials({
+        email: data.login_email,
+        password: data.temporary_password,
+        full_name: newClient.full_name
+      });
+      setShowCredentialsDialog(true);
+      
+      toast.success('✅ Client créé avec succès!');
       setShowCreateClient(false);
+      
+      // Reset form
       setNewClient({
         email: '',
         full_name: '',
         phone: '',
         country: '',
         visa_type: '',
+        first_payment_amount: 0,
         message: ''
       });
-      fetchData(); // Refresh unique
+      
+      fetchData(); // Refresh
     } catch (error) {
-      toast.error('Erreur lors de la création du client');
+      toast.error(error.message || 'Erreur lors de la création du client');
       console.error(error);
     }
   };
