@@ -682,6 +682,9 @@ WORKFLOWS = {
     }
 }
 
+# Initialiser les workflows dans le service client
+set_workflows(WORKFLOWS)
+
 # V3 New Models
 class WithdrawalCreate(BaseModel):
     amount: float = Field(gt=0, description="Montant du retrait")
