@@ -153,6 +153,46 @@ class APITester:
         test_invoice_number = None
         client_email = f"client.png.test.{int(time.time())}@example.com"
         client_token = None
+        manager_token = None
+        
+        # ============================================================================
+        # ÉTAPE 0 - CRÉER UN MANAGER POUR LES TESTS
+        # ============================================================================
+        print("\n🔸 ÉTAPE 0 - CRÉER UN MANAGER POUR LES TESTS")
+        
+        if 'superadmin' in self.tokens:
+            try:
+                headers = {"Authorization": f"Bearer {self.tokens['superadmin']}"}
+                manager_email = f"test.manager.png.{int(time.time())}@aloria.com"
+                manager_data = {
+                    "email": manager_email,
+                    "full_name": "Test Manager PNG",
+                    "phone": "+33123456789",
+                    "role": "MANAGER",
+                    "send_email": False
+                }
+                response = self.session.post(f"{API_BASE}/users/create", json=manager_data, headers=headers)
+                if response.status_code in [200, 201]:
+                    manager_response = response.json()
+                    temp_password = manager_response.get('temporary_password')
+                    
+                    # Login as the new manager
+                    manager_login = self.session.post(f"{API_BASE}/auth/login", json={
+                        "email": manager_email,
+                        "password": temp_password
+                    })
+                    if manager_login.status_code == 200:
+                        manager_token = manager_login.json()['access_token']
+                        self.log_result("0.1 Create Test Manager", True, f"Manager créé et connecté: {manager_email}")
+                    else:
+                        self.log_result("0.1 Manager Login", False, f"Login failed: {manager_login.status_code}")
+                        return
+                else:
+                    self.log_result("0.1 Create Test Manager", False, f"Status: {response.status_code}", response.text)
+                    return
+            except Exception as e:
+                self.log_result("0.1 Create Test Manager", False, "Exception occurred", str(e))
+                return
         
         # ============================================================================
         # ÉTAPE 1 - CRÉER UN CLIENT ET DÉCLARER UN PAIEMENT
@@ -160,7 +200,7 @@ class APITester:
         print("\n🔸 ÉTAPE 1 - CRÉER UN CLIENT ET DÉCLARER UN PAIEMENT")
         
         # 1.1 - Créer un nouveau client via POST /api/clients
-        if 'manager' in self.tokens:
+        if manager_token:
             try:
                 headers = {"Authorization": f"Bearer {self.tokens['manager']}"}
                 client_data = {
