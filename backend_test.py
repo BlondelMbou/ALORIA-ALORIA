@@ -266,7 +266,7 @@ class APITester:
         
         if admin_token:
             try:
-                headers = {"Authorization": f"Bearer {self.tokens['manager']}"}
+                headers = {"Authorization": f"Bearer {admin_token}"}
                 client_data = {
                     "email": test_user_email,
                     "full_name": "Test Password Change User",
