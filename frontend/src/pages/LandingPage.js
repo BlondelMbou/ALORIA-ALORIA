@@ -494,7 +494,7 @@ export default function LandingPage() {
                   size="lg" 
                   className="w-full sm:w-auto bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white px-6 sm:px-8 py-4 sm:py-6 text-base sm:text-lg shadow-2xl shadow-orange-500/50 hover:shadow-orange-500/70 transition-all duration-300 hover:scale-105 touch-manipulation"
                   onClick={() => {
-                    const crsCalculator = document.getElementById('crs-calculator');
+                    const crsCalculator = document.getElementById('calculateur-crs');
                     if (crsCalculator) {
                       crsCalculator.scrollIntoView({ behavior: 'smooth', block: 'start' });
                     }
