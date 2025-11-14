@@ -4312,44 +4312,78 @@ class APITester:
         print("🚨 === URGENT: PAYMENT STATUS BUG INVESTIGATION ===")
         print("Testing reported issue: Client payment created with 'rejected' status instead of 'pending'")
         
-        # Step 1: Create a test client first
-        test_client_email = f"client.payment.test.{int(time.time())}@example.com"
-        test_client_id = None
+        # Use existing client credentials from review request
         client_token = None
+        test_client_id = None
         
-        if 'manager' in self.tokens:
+        # Try to login with existing client credentials
+        existing_clients = [
+            {"email": "client1@gmail.com", "password": "Aloria2024!"},
+            {"email": "client@test.com", "password": "Aloria2024!"},
+            {"email": "test.payment.client.1763128800@example.com", "password": "Aloria2024!"}
+        ]
+        
+        for client_creds in existing_clients:
             try:
-                headers = {"Authorization": f"Bearer {self.tokens['manager']}"}
-                client_data = {
-                    "email": test_client_email,
-                    "full_name": "Client Test Paiement",
-                    "phone": "+33123456789",
-                    "country": "France",
-                    "visa_type": "Permis de travail",
-                    "message": "Client créé pour test bug paiement"
-                }
-                response = self.session.post(f"{API_BASE}/clients", json=client_data, headers=headers)
-                if response.status_code in [200, 201]:
-                    data = response.json()
-                    test_client_id = data['id']
-                    self.log_result("TEST 0 - Client Creation for Payment Test", True, f"Client created: {test_client_id}")
+                client_login = self.session.post(f"{API_BASE}/auth/login", json=client_creds)
+                if client_login.status_code == 200:
+                    client_token = client_login.json()['access_token']
+                    client_user = client_login.json()['user']
                     
-                    # Login as client
-                    client_login = self.session.post(f"{API_BASE}/auth/login", json={
-                        "email": test_client_email,
-                        "password": "Aloria2024!"
-                    })
-                    if client_login.status_code == 200:
-                        client_token = client_login.json()['access_token']
-                        self.log_result("TEST 0 - Client Login", True, "Client logged in successfully")
+                    # Get client profile to find client_id
+                    headers = {"Authorization": f"Bearer {client_token}"}
+                    clients_response = self.session.get(f"{API_BASE}/clients", headers=headers)
+                    if clients_response.status_code == 200:
+                        clients = clients_response.json()
+                        if clients:
+                            test_client_id = clients[0]['id']
+                            self.log_result("TEST 0 - Existing Client Login", True, f"Logged in as {client_creds['email']}, Client ID: {test_client_id}")
+                            break
                     else:
-                        self.log_result("TEST 0 - Client Login", False, f"Status: {client_login.status_code}")
-                else:
-                    self.log_result("TEST 0 - Client Creation for Payment Test", False, f"Status: {response.status_code}")
-                    return
+                        continue
             except Exception as e:
-                self.log_result("TEST 0 - Client Creation for Payment Test", False, "Exception occurred", str(e))
-                return
+                continue
+        
+        # If no existing client works, create a new one
+        if not client_token:
+            print("⚠️ No existing client login worked, creating new client...")
+            test_client_email = f"client.payment.test.{int(time.time())}@example.com"
+            
+            if 'manager' in self.tokens:
+                try:
+                    headers = {"Authorization": f"Bearer {self.tokens['manager']}"}
+                    client_data = {
+                        "email": test_client_email,
+                        "full_name": "Client Test Paiement",
+                        "phone": "+33123456789",
+                        "country": "France",
+                        "visa_type": "Permis de travail",
+                        "message": "Client créé pour test bug paiement"
+                    }
+                    response = self.session.post(f"{API_BASE}/clients", json=client_data, headers=headers)
+                    if response.status_code in [200, 201]:
+                        data = response.json()
+                        test_client_id = data['id']
+                        default_password = data.get('default_password', 'Aloria2024!')
+                        
+                        self.log_result("TEST 0 - Client Creation for Payment Test", True, f"Client created: {test_client_id}")
+                        
+                        # Login as client with the returned password
+                        client_login = self.session.post(f"{API_BASE}/auth/login", json={
+                            "email": test_client_email,
+                            "password": default_password
+                        })
+                        if client_login.status_code == 200:
+                            client_token = client_login.json()['access_token']
+                            self.log_result("TEST 0 - Client Login", True, f"Client logged in with password: {default_password}")
+                        else:
+                            self.log_result("TEST 0 - Client Login", False, f"Status: {client_login.status_code}, tried password: {default_password}")
+                    else:
+                        self.log_result("TEST 0 - Client Creation for Payment Test", False, f"Status: {response.status_code}")
+                        return
+                except Exception as e:
+                    self.log_result("TEST 0 - Client Creation for Payment Test", False, "Exception occurred", str(e))
+                    return
 
         if not client_token or not test_client_id:
             print("❌ Cannot proceed with payment tests - client setup failed")
