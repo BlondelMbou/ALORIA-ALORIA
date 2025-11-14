@@ -1397,6 +1397,56 @@ export default function ManagerDashboard() {
         </Dialog>
       )}
 
+      {/* Confirmation Dialog */}
+      {confirmationDialog.show && (
+        <Dialog open={confirmationDialog.show} onOpenChange={(open) => setConfirmationDialog({ ...confirmationDialog, show: open })}>
+          <DialogContent className="bg-[#1E293B] border-slate-700">
+            <DialogHeader>
+              <DialogTitle className="text-white">Confirmer le Paiement</DialogTitle>
+              <DialogDescription className="text-slate-400">
+                Saisissez le code de confirmation pour valider le paiement
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="bg-blue-500/10 border border-blue-500/30 p-3 rounded-lg">
+                <p className="text-blue-400 text-sm font-medium">
+                  Code généré: <span className="font-mono text-lg">{confirmationDialog.generatedCode}</span>
+                </p>
+                <p className="text-blue-300 text-xs mt-1">
+                  Veuillez saisir ce code ci-dessous pour confirmer
+                </p>
+              </div>
+              <div>
+                <Label className="text-slate-300">Code de confirmation *</Label>
+                <Input
+                  value={confirmationDialog.code}
+                  onChange={(e) => setConfirmationDialog({ ...confirmationDialog, code: e.target.value })}
+                  placeholder="Saisissez le code de confirmation"
+                  className="bg-slate-800 border-slate-600 text-white mt-2"
+                  autoFocus
+                />
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  onClick={handleConfirmWithCode}
+                  className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+                  disabled={!confirmationDialog.code?.trim()}
+                >
+                  ✅ Confirmer le Paiement
+                </Button>
+                <Button
+                  onClick={() => setConfirmationDialog({ show: false, payment: null, code: '', generatedCode: '' })}
+                  variant="outline"
+                  className="flex-1 border-slate-600 text-slate-300 hover:bg-slate-800"
+                >
+                  Annuler
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+
       {/* Reassign Client Dialog */}
       {reassignDialog.show && (
         <Dialog open={reassignDialog.show} onOpenChange={(open) => setReassignDialog({ ...reassignDialog, show: open })}>
