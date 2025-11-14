@@ -1995,83 +1995,116 @@ async def get_available_contacts(current_user: dict = Depends(get_current_user))
     
     return unique_contacts
 
-# Gestion avancée des utilisateurs avec hiérarchie
+# ============================================================================
+# GESTION UTILISATEURS - REFACTORISÉ AVEC SERVICES RÉUTILISABLES
+# ============================================================================
+
 @api_router.post("/users/create", response_model=UserCreateResponse)
 async def create_user_advanced(user_data: UserCreateRequest, current_user: dict = Depends(get_current_user)):
-    """Créer un utilisateur selon la hiérarchie des rôles"""
+    """
+    Créer un utilisateur selon la hiérarchie des rôles.
     
-    # Vérifier les permissions
-    if not can_create_role(current_user["role"], user_data.role.value):
+    ENDPOINT REFACTORISÉ - Utilise les services réutilisables:
+    - user_service.create_user_account()
+    - client_service.create_client_profile() (si CLIENT)
+    - assignment_service.assign_client_to_employee() (si CLIENT)
+    - notification_service.send_creation_notifications()
+    - credentials_service.generate_credentials_response()
+    """
+    
+    # 1. Vérifier les permissions avec le service
+    if not verify_user_permissions(current_user["role"], user_data.role.value):
         raise HTTPException(
             status_code=403, 
             detail=f"Vous n'avez pas l'autorisation de créer un utilisateur {user_data.role.value}"
         )
     
-    # Vérifier si l'utilisateur existe déjà
-    existing_user = await db.users.find_one({"email": user_data.email})
-    if existing_user:
-        raise HTTPException(status_code=400, detail="Un utilisateur avec cet email existe déjà")
-    
-    # Générer un mot de passe temporaire
-    temp_password = generate_temporary_password()
-    hashed_password = hash_password(temp_password)
-    
-    # Créer l'utilisateur
-    user_id = str(uuid.uuid4())
-    new_user = {
-        "id": user_id,
-        "email": user_data.email,
-        "password": hashed_password,
-        "full_name": user_data.full_name,
-        "phone": user_data.phone,
-        "role": user_data.role.value,
-        "is_active": True,
-        "created_at": datetime.now(timezone.utc).isoformat(),
-        "created_by": current_user["id"],
-        "password_changed": False  # Pour forcer le changement au premier login
-    }
-    
-    await db.users.insert_one(new_user)
-    
-    # Enregistrer l'activité
-    await log_user_activity(
-        user_id=current_user["id"],
-        action="create_user",
-        details={
-            "created_user_id": user_id,
-            "created_user_role": user_data.role.value,
-            "created_user_email": user_data.email
-        }
+    # 2. Créer le compte utilisateur (SERVICE RÉUTILISABLE)
+    user_account = await create_user_account(
+        db=db,
+        email=user_data.email,
+        full_name=user_data.full_name,
+        phone=user_data.phone,
+        role=user_data.role.value,
+        created_by_id=current_user["id"],
+        password=None  # Le service génère un mot de passe temporaire
     )
     
-    # Envoi automatique d'e-mail de bienvenue
-    email_sent = False
-    if user_data.send_email and EMAIL_SERVICE_AVAILABLE:
-        try:
-            user_email_data = {
-                "full_name": user_data.full_name,
-                "email": user_data.email,
-                "role": user_data.role.value,
-                "login_email": user_data.email,
-                "default_password": temp_password
-            }
-            
-            email_sent = await send_user_welcome_email(user_email_data)
-            
-            if email_sent:
-                logger.info(f"E-mail de bienvenue envoyé à {user_data.email} ({user_data.role.value})")
-                # Enregistrer dans la base que l'e-mail a été envoyé
-                await db.users.update_one(
-                    {"id": user_id},
-                    {"$set": {"welcome_email_sent": True, "welcome_email_sent_at": datetime.now(timezone.utc).isoformat()}}
-                )
-            else:
-                logger.warning(f"Échec envoi e-mail de bienvenue à {user_data.email}")
-                
-        except Exception as e:
-            logger.error(f"Erreur envoi e-mail utilisateur {user_data.email}: {e}")
-            email_sent = False
+    user_id = user_account["user_id"]
+    temp_password = user_account["temporary_password"]
     
+    # 3. Si c'est un CLIENT, créer le profil client complet (SERVICE RÉUTILISABLE)
+    client_data = None
+    if user_data.role.value == "CLIENT":
+        # Les données supplémentaires pour le client
+        country = getattr(user_data, 'country', 'Canada')
+        visa_type = getattr(user_data, 'visa_type', 'Permis de travail')
+        
+        # Déterminer l'affectation intelligente
+        assignment_result = await assign_client_to_employee(
+            db=db,
+            client_id=None,  # Sera créé dans create_client_profile
+            employee_id=getattr(user_data, 'assigned_employee_id', None),
+            created_by_id=current_user["id"],
+            created_by_role=current_user["role"],
+            use_load_balancing=True if not getattr(user_data, 'assigned_employee_id', None) else False
+        )
+        
+        # Créer le profil client complet avec dashboard
+        client_data = await create_client_profile(
+            db=db,
+            user_id=user_id,
+            email=user_data.email,
+            full_name=user_data.full_name,
+            phone=user_data.phone,
+            country=country,
+            visa_type=visa_type,
+            assigned_employee_id=assignment_result["assigned_employee_id"],
+            created_by_id=current_user["id"],
+            first_payment=0,
+            payment_method=None
+        )
+    
+    # 4. Envoyer toutes les notifications (SERVICE RÉUTILISABLE)
+    await send_creation_notifications(
+        db=db,
+        created_user_id=user_id,
+        created_user_role=user_data.role.value,
+        created_user_name=user_data.full_name,
+        created_user_email=user_data.email,
+        created_by_id=current_user["id"],
+        created_by_role=current_user["role"],
+        created_by_name=current_user["full_name"],
+        additional_context=client_data if client_data else {}
+    )
+    
+    # 5. Envoyer l'email de bienvenue si demandé
+    email_sent = False
+    if user_data.send_email:
+        email_sent = await send_welcome_email_notification(
+            email=user_data.email,
+            full_name=user_data.full_name,
+            role=user_data.role.value,
+            temporary_password=temp_password
+        )
+        
+        if email_sent:
+            await db.users.update_one(
+                {"id": user_id},
+                {"$set": {"welcome_email_sent": True, "welcome_email_sent_at": datetime.now(timezone.utc).isoformat()}}
+            )
+    
+    # 6. Générer la réponse avec credentials (SERVICE RÉUTILISABLE)
+    credentials = generate_credentials_response(
+        user_id=user_id,
+        email=user_data.email,
+        full_name=user_data.full_name,
+        role=user_data.role.value,
+        temporary_password=temp_password,
+        additional_info=client_data if client_data else None
+    )
+    
+    # 7. Retourner la réponse standardisée
     return UserCreateResponse(
         id=user_id,
         email=user_data.email,
