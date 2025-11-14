@@ -3223,12 +3223,9 @@ async def get_consultation_payments(current_user: dict = Depends(get_current_use
 
 @api_router.get("/payments/{payment_id}/invoice")
 async def download_invoice(payment_id: str, current_user: dict = Depends(get_current_user)):
-    """Télécharger la facture PDF pour un paiement"""
-    from fastapi.responses import StreamingResponse
-    from invoice_generator import generate_invoice_pdf
-    
-    # Récupérer le paiement
-    payment = await db.payments.find_one({"id": payment_id}, {"_id": 0})
+    """Télécharger la facture PNG pour un paiement confirmé"""
+    # Récupérer le paiement depuis payment_declarations
+    payment = await db.payment_declarations.find_one({"id": payment_id}, {"_id": 0})
     if not payment:
         raise HTTPException(status_code=404, detail="Paiement non trouvé")
     
