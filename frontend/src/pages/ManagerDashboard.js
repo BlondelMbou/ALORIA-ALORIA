@@ -113,6 +113,13 @@ export default function ManagerDashboard() {
     return () => clearInterval(refreshInterval);
   }, []);
 
+  // Mettre à jour myClients quand clients change
+  useEffect(() => {
+    if (user && clients.length > 0) {
+      setMyClients(clients.filter(c => c.assigned_employee_id === user.id));
+    }
+  }, [clients, user]);
+
   const fetchData = async () => {
     setLoading(true);
     try {
