@@ -86,6 +86,15 @@ const SuperAdminDashboard = () => {
       console.log('📊 Activities loaded:', activitiesRes.data.length, 'activities');
       console.log('📊 First 3 activities:', activitiesRes.data.slice(0, 3));
       setActivities(activitiesRes.data);
+      
+      // Charger les visiteurs
+      try {
+        const visitorsResponse = await api.get('/visitors');
+        setVisitors(visitorsResponse.data);
+        setFilteredVisitors(visitorsResponse.data);
+      } catch (error) {
+        console.error('Error loading visitors:', error);
+      }
     } catch (error) {
       toast.error('Erreur lors du chargement des données');
       console.error('Error fetching dashboard data:', error);
