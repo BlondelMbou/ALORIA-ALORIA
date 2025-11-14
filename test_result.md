@@ -439,13 +439,16 @@
     implemented: true
     working: false
     file: "server.py"
-    stuck_count: 0
+    stuck_count: 1
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
         -working: false
         -agent: "testing"
         -comment: "❌ SYSTÈME FACTURES PNG PARTIELLEMENT FONCTIONNEL: Client créé avec succès (ID: 073272b6-9114-4783-92bc-8b9bda8e9d5f) mais login client échoue avec mot de passe par défaut 'Aloria2024!'. Impossible de tester la génération de factures PNG car le client ne peut pas se connecter pour déclarer un paiement. PROBLÈME: Authentification client défaillante malgré création réussie du compte."
+        -working: false
+        -agent: "testing"
+        -comment: "❌ FACTURES PNG - ERREUR CRITIQUE IDENTIFIÉE: Test complet effectué via Manager Dashboard. 6 factures disponibles pour téléchargement trouvées mais erreur 404 lors du téléchargement (/api/payments/{id}/invoice). Le système de génération de factures PNG n'est pas fonctionnel - endpoint manquant ou défaillant. PROBLÈME CRITIQUE: API de téléchargement de factures non opérationnelle."
 
   - task: "SuperAdmin Dashboard Financial Stats"
     implemented: true
