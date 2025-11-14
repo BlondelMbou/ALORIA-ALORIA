@@ -45,7 +45,7 @@ export default function ClientDashboard() {
   });
   
   // WebSocket hook  
-  const { connected } = useSocket(localStorage.getItem('token'));
+  const { connected, socket } = useSocket(localStorage.getItem('token'));
 
   useEffect(() => {
     fetchData();
