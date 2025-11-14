@@ -3946,6 +3946,176 @@ class APITester:
             except Exception as e:
                 self.log_result("7.8 Client to Another Client (should fail)", False, "Exception occurred", str(e))
 
+    def test_manager_payment_dashboard_urgent(self):
+        """URGENT TEST - Manager Payment Dashboard Empty Issue"""
+        print("=== 🚨 URGENT: MANAGER PAYMENT DASHBOARD TESTING ===")
+        
+        if 'manager' not in self.tokens:
+            self.log_result("Manager Payment Dashboard", False, "No manager token available")
+            return
+            
+        headers = {"Authorization": f"Bearer {self.tokens['manager']}"}
+        
+        # TEST 1 - VERIFY MANAGER ENDPOINTS
+        print("TEST 1 - VÉRIFIER LES ENDPOINTS MANAGER:")
+        
+        # 1.1 - GET /api/payments/pending
+        try:
+            response = self.session.get(f"{API_BASE}/payments/pending", headers=headers)
+            if response.status_code == 200:
+                pending_payments = response.json()
+                self.log_result("1.1 GET /api/payments/pending", True, f"Status 200 - Found {len(pending_payments)} pending payments")
+                if len(pending_payments) == 0:
+                    print("   ⚠️  WARNING: No pending payments found - this could be the issue!")
+            else:
+                self.log_result("1.1 GET /api/payments/pending", False, f"Status: {response.status_code}", response.text)
+        except Exception as e:
+            self.log_result("1.1 GET /api/payments/pending", False, "Exception occurred", str(e))
+        
+        # 1.2 - GET /api/payments/history
+        try:
+            response = self.session.get(f"{API_BASE}/payments/history", headers=headers)
+            if response.status_code == 200:
+                payment_history = response.json()
+                self.log_result("1.2 GET /api/payments/history", True, f"Status 200 - Found {len(payment_history)} payments in history")
+                if len(payment_history) == 0:
+                    print("   ⚠️  WARNING: No payment history found - this could be the issue!")
+            else:
+                self.log_result("1.2 GET /api/payments/history", False, f"Status: {response.status_code}", response.text)
+        except Exception as e:
+            self.log_result("1.2 GET /api/payments/history", False, "Exception occurred", str(e))
+        
+        # TEST 2 - VERIFY DATABASE DIRECTLY
+        print("\nTEST 2 - VÉRIFIER LA BASE DE DONNÉES:")
+        
+        # 2.1 - Count total payments in payment_declarations
+        try:
+            # Use a different endpoint to check database content
+            response = self.session.get(f"{API_BASE}/admin/dashboard-stats", headers=headers)
+            if response.status_code == 200:
+                stats = response.json()
+                # Look for payment-related stats
+                if 'payments' in stats:
+                    self.log_result("2.1 Database Payment Count", True, f"Found payment stats in dashboard: {stats['payments']}")
+                else:
+                    self.log_result("2.1 Database Payment Count", False, "No payment stats found in dashboard")
+            else:
+                self.log_result("2.1 Database Payment Count", False, f"Could not access dashboard stats: {response.status_code}")
+        except Exception as e:
+            self.log_result("2.1 Database Payment Count", False, "Exception occurred", str(e))
+        
+        # TEST 3 - TEST WITH NEW PAYMENT
+        print("\nTEST 3 - TESTER AVEC UN NOUVEAU PAIEMENT:")
+        
+        # 3.1 - Create a client first if we don't have one
+        test_client_email = "payment.test.client@example.com"
+        client_token = None
+        
+        # Try to create a client for payment testing
+        try:
+            client_data = {
+                "email": test_client_email,
+                "full_name": "Client Test Paiement",
+                "phone": "+33123456789",
+                "country": "France",
+                "visa_type": "Permis de travail",
+                "message": "Client créé pour test paiement manager"
+            }
+            response = self.session.post(f"{API_BASE}/clients", json=client_data, headers=headers)
+            if response.status_code in [200, 201]:
+                client_info = response.json()
+                self.log_result("3.1 Create Test Client", True, f"Test client created: {client_info.get('login_email', test_client_email)}")
+                
+                # Try to login as the client
+                client_login_data = {
+                    "email": test_client_email,
+                    "password": "Aloria2024!"
+                }
+                login_response = self.session.post(f"{API_BASE}/auth/login", json=client_login_data)
+                if login_response.status_code == 200:
+                    client_token = login_response.json()['access_token']
+                    self.log_result("3.2 Client Login", True, "Successfully logged in as test client")
+                else:
+                    self.log_result("3.2 Client Login", False, f"Could not login as client: {login_response.status_code}")
+            else:
+                self.log_result("3.1 Create Test Client", False, f"Status: {response.status_code}", response.text)
+        except Exception as e:
+            self.log_result("3.1 Create Test Client", False, "Exception occurred", str(e))
+        
+        # 3.2 - Declare a new payment as client
+        if client_token:
+            try:
+                client_headers = {"Authorization": f"Bearer {client_token}"}
+                payment_data = {
+                    "amount": 7500,
+                    "currency": "CFA",
+                    "description": "Test paiement manager dashboard",
+                    "payment_method": "Cash"
+                }
+                response = self.session.post(f"{API_BASE}/payments/declare", json=payment_data, headers=client_headers)
+                if response.status_code in [200, 201]:
+                    payment_info = response.json()
+                    self.test_payment_id = payment_info.get('id')
+                    self.log_result("3.3 Client Declare Payment", True, f"Payment declared with ID: {self.test_payment_id}, Status: {payment_info.get('status')}")
+                else:
+                    self.log_result("3.3 Client Declare Payment", False, f"Status: {response.status_code}", response.text)
+            except Exception as e:
+                self.log_result("3.3 Client Declare Payment", False, "Exception occurred", str(e))
+        
+        # 3.3 - Check if new payment appears in manager pending
+        if self.test_payment_id:
+            try:
+                response = self.session.get(f"{API_BASE}/payments/pending", headers=headers)
+                if response.status_code == 200:
+                    pending_payments = response.json()
+                    found_payment = any(p.get('id') == self.test_payment_id for p in pending_payments)
+                    if found_payment:
+                        self.log_result("3.4 New Payment in Manager Pending", True, "New payment appears in manager pending list")
+                    else:
+                        self.log_result("3.4 New Payment in Manager Pending", False, f"New payment NOT found in pending list (found {len(pending_payments)} payments)")
+                        # Print details of what we found
+                        if pending_payments:
+                            print(f"   Found payments: {[p.get('id', 'no-id') for p in pending_payments]}")
+                else:
+                    self.log_result("3.4 New Payment in Manager Pending", False, f"Could not check pending: {response.status_code}")
+            except Exception as e:
+                self.log_result("3.4 New Payment in Manager Pending", False, "Exception occurred", str(e))
+        
+        # TEST 4 - VERIFY RESPONSE MODEL
+        print("\nTEST 4 - VÉRIFIER LE MODÈLE DE RÉPONSE:")
+        
+        # 4.1 - Check if PaymentDeclarationResponse can serialize properly
+        try:
+            response = self.session.get(f"{API_BASE}/payments/pending", headers=headers)
+            if response.status_code == 200:
+                pending_payments = response.json()
+                if pending_payments:
+                    # Check the structure of the first payment
+                    first_payment = pending_payments[0]
+                    required_fields = ['id', 'client_id', 'amount', 'currency', 'status', 'declared_at']
+                    missing_fields = [field for field in required_fields if field not in first_payment]
+                    
+                    if not missing_fields:
+                        self.log_result("4.1 Payment Response Model", True, f"Payment model has all required fields: {list(first_payment.keys())}")
+                    else:
+                        self.log_result("4.1 Payment Response Model", False, f"Missing required fields: {missing_fields}")
+                        print(f"   Available fields: {list(first_payment.keys())}")
+                else:
+                    self.log_result("4.1 Payment Response Model", False, "No payments available to check model structure")
+            else:
+                self.log_result("4.1 Payment Response Model", False, f"Could not get payments to check model: {response.status_code}")
+        except Exception as e:
+            self.log_result("4.1 Payment Response Model", False, "Exception occurred", str(e))
+        
+        # DIAGNOSTIC SUMMARY
+        print("\n=== DIAGNOSTIC SUMMARY ===")
+        print("If Manager dashboard shows empty payments:")
+        print("1. Check if GET /api/payments/pending returns 200 with data")
+        print("2. Check if GET /api/payments/history returns 200 with data") 
+        print("3. Verify client can declare payments successfully")
+        print("4. Check if new payments appear in manager endpoints")
+        print("5. Verify PaymentDeclarationResponse model serialization")
+
     def test_critical_bugs_client_details_and_payment_history(self):
         """
         CRITICAL BUGS TESTING - USER REPORTED ISSUES
