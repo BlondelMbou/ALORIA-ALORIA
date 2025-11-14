@@ -1320,6 +1320,94 @@ export default function ManagerDashboard() {
         </Dialog>
       )}
 
+      {/* Dialog Credentials Nouveau Client */}
+      {showCredentialsDialog && newClientCredentials && (
+        <Dialog open={showCredentialsDialog} onOpenChange={setShowCredentialsDialog}>
+          <DialogContent className="bg-[#1E293B] border-slate-700 max-w-md">
+            <DialogHeader>
+              <DialogTitle className="text-white flex items-center gap-2">
+                <CheckCircle className="w-6 h-6 text-green-500" />
+                Client Créé avec Succès!
+              </DialogTitle>
+            </DialogHeader>
+            
+            <div className="space-y-4 mt-4">
+              <div className="bg-green-500/10 border border-green-500/30 p-4 rounded-lg">
+                <p className="text-green-400 text-sm font-semibold mb-2">
+                  ✅ Le client a été créé avec succès
+                </p>
+                <p className="text-slate-400 text-xs">
+                  Veuillez noter ces identifiants et les transmettre au client de manière sécurisée
+                </p>
+              </div>
+
+              <div className="bg-slate-800 p-4 rounded-lg space-y-3">
+                <div>
+                  <p className="text-slate-400 text-xs mb-1">Nom complet</p>
+                  <p className="text-white font-semibold">{newClientCredentials.full_name}</p>
+                </div>
+
+                <div>
+                  <p className="text-slate-400 text-xs mb-1">📧 Email de connexion</p>
+                  <div className="flex items-center gap-2">
+                    <code className="text-white bg-slate-900 px-3 py-2 rounded flex-1 font-mono text-sm">
+                      {newClientCredentials.email}
+                    </code>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="border-slate-600"
+                      onClick={() => {
+                        navigator.clipboard.writeText(newClientCredentials.email);
+                        toast.success('Email copié!');
+                      }}
+                    >
+                      Copier
+                    </Button>
+                  </div>
+                </div>
+
+                <div>
+                  <p className="text-slate-400 text-xs mb-1">🔑 Mot de passe temporaire</p>
+                  <div className="flex items-center gap-2">
+                    <code className="text-orange-400 bg-slate-900 px-3 py-2 rounded flex-1 font-mono text-sm font-bold">
+                      {newClientCredentials.password}
+                    </code>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="border-slate-600"
+                      onClick={() => {
+                        navigator.clipboard.writeText(newClientCredentials.password);
+                        toast.success('Mot de passe copié!');
+                      }}
+                    >
+                      Copier
+                    </Button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-orange-500/10 border border-orange-500/30 p-3 rounded-lg">
+                <p className="text-orange-400 text-xs">
+                  ⚠️ <strong>Important:</strong> Ces identifiants ne seront plus affichés. Assurez-vous de les sauvegarder maintenant.
+                </p>
+              </div>
+
+              <Button 
+                className="w-full bg-blue-500 hover:bg-blue-600"
+                onClick={() => {
+                  setShowCredentialsDialog(false);
+                  setNewClientCredentials(null);
+                }}
+              >
+                J'ai noté les identifiants
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+
       {/* Dialog Détails Client */}
       {selectedClient && (
         <Dialog open={!!selectedClient} onOpenChange={() => setSelectedClient(null)}>
