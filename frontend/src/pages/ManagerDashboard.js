@@ -1447,6 +1447,67 @@ export default function ManagerDashboard() {
         credentials={newClientCredentials}
       />
 
+      {/* Dialog Créer un Employé */}
+      <Dialog open={showCreateEmployee} onOpenChange={setShowCreateEmployee}>
+        <DialogContent className="bg-[#1E293B] border-slate-700 max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="text-white">Créer un Nouvel Employé</DialogTitle>
+            <DialogDescription className="text-slate-400">
+              Ajoutez un nouveau conseiller à votre équipe
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleCreateEmployee} className="space-y-4">
+            <div>
+              <Label className="text-slate-300">Nom Complet *</Label>
+              <Input
+                value={newEmployee.full_name}
+                onChange={(e) => setNewEmployee({ ...newEmployee, full_name: e.target.value })}
+                required
+                placeholder="Ex: Marie Kouassi"
+                className="bg-slate-800 border-slate-600 text-white"
+              />
+            </div>
+            
+            <div>
+              <Label className="text-slate-300">Email *</Label>
+              <Input
+                type="email"
+                value={newEmployee.email}
+                onChange={(e) => setNewEmployee({ ...newEmployee, email: e.target.value })}
+                required
+                placeholder="email@example.com"
+                className="bg-slate-800 border-slate-600 text-white"
+              />
+            </div>
+            
+            <div>
+              <Label className="text-slate-300">Téléphone *</Label>
+              <Input
+                value={newEmployee.phone}
+                onChange={(e) => setNewEmployee({ ...newEmployee, phone: e.target.value })}
+                required
+                placeholder="+237 XXX XXX XXX"
+                className="bg-slate-800 border-slate-600 text-white"
+              />
+            </div>
+            
+            <div className="bg-green-500/10 border border-green-500/30 p-3 rounded-lg">
+              <p className="text-green-400 text-sm">
+                ℹ️ Un compte employé sera créé avec un mot de passe temporaire qui sera affiché après la création.
+              </p>
+            </div>
+            
+            <Button 
+              type="submit" 
+              className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white"
+            >
+              <UserPlus className="w-4 h-4 mr-2" />
+              Créer l'Employé
+            </Button>
+          </form>
+        </DialogContent>
+      </Dialog>
+
       {/* Dialog Détails Client */}
       {selectedClient && (
         <Dialog open={!!selectedClient} onOpenChange={() => setSelectedClient(null)}>
