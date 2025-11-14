@@ -39,6 +39,8 @@ export default function EmployeeDashboard() {
     phone: '',
     country: 'Canada',
     visa_type: '',
+    first_payment_amount: 0,
+    payment_method: 'Espèces',
     message: ''
   });
   
