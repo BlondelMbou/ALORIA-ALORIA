@@ -52,6 +52,22 @@ export default function ClientDashboard() {
     fetchPayments(); // Charger l'historique des paiements au démarrage
   }, []);
 
+  // Écouter les notifications de paiement pour rafraîchir automatiquement
+  useEffect(() => {
+    if (socket) {
+      socket.on('notification', (notification) => {
+        if (notification.type === 'payment_confirmed' || notification.type === 'payment_rejected') {
+          // Rafraîchir les paiements automatiquement
+          fetchPayments();
+        }
+      });
+      
+      return () => {
+        socket.off('notification');
+      };
+    }
+  }, [socket]);
+
   const fetchData = async () => {
     setLoading(true);
     try {
