@@ -2258,9 +2258,11 @@ async def declare_payment(payment_data: PaymentDeclaration, current_user: dict =
 # OLD PAYMENT CONFIRMATION ENDPOINT REMOVED - DUPLICATE OF ENHANCED VERSION BELOW
 
 # Fonction pour générer une facture PDF simple
-async def generate_invoice_pdf(payment_id: str, invoice_number: str):
-    """Génère une facture PDF complète pour le paiement confirmé"""
+async def generate_invoice_png(payment_id: str, invoice_number: str):
+    """Génère une facture PNG moderne et compacte pour le paiement confirmé"""
     try:
+        from invoice_generator_png import generate_invoice_png as create_png
+        
         payment = await db.payment_declarations.find_one({"id": payment_id})
         if not payment:
             return
@@ -2288,56 +2290,11 @@ async def generate_invoice_pdf(payment_id: str, invoice_number: str):
         
         await db.invoices.insert_one(invoice_record)
         
-        # Générer le fichier PDF physique
-        pdf_path = f"/app/backend/invoices/{invoice_number}.pdf"
+        # Générer le fichier PNG physique
+        png_path = f"/app/backend/invoices/{invoice_number}.png"
         
-        # Créer le PDF avec reportlab
-        c = canvas.Canvas(pdf_path, pagesize=letter)
-        width, height = letter
-        
-        # En-tête avec logo et informations entreprise
-        c.setFont("Helvetica-Bold", 24)
-        c.setFillColorRGB(0.96, 0.49, 0.13)  # Orange ALORIA
-        c.drawString(50, height - 50, "ALORIA AGENCY")
-        
-        c.setFillColorRGB(0, 0, 0)  # Noir
-        c.setFont("Helvetica", 10)
-        c.drawString(50, height - 70, "Bureau de Douala, Cameroun")
-        c.drawString(50, height - 85, "Tél: +237 6XX XX XX XX | Email: contact@aloria-agency.com")
-        
-        # Ligne de séparation
-        c.setStrokeColorRGB(0.96, 0.49, 0.13)
-        c.setLineWidth(2)
-        c.line(50, height - 100, width - 50, height - 100)
-        
-        # Titre facture
-        c.setFillColorRGB(0, 0, 0)
-        c.setFont("Helvetica-Bold", 18)
-        c.drawString(50, height - 140, f"FACTURE N° {invoice_number}")
-        
-        c.setFont("Helvetica", 11)
-        c.drawString(50, height - 165, f"Date d'émission: {invoice_data['date']}")
-        
-        # Informations client (encadré)
-        c.setStrokeColorRGB(0.8, 0.8, 0.8)
-        c.setLineWidth(1)
-        c.rect(50, height - 250, width - 100, 60)
-        
-        c.setFont("Helvetica-Bold", 12)
-        c.drawString(60, height - 210, "CLIENT:")
-        c.setFont("Helvetica", 11)
-        c.drawString(60, height - 230, invoice_data['client_name'])
-        
-        # Détails des services (encadré)
-        c.rect(50, height - 380, width - 100, 100)
-        c.setFont("Helvetica-Bold", 12)
-        c.drawString(60, height - 310, "DESCRIPTION DES SERVICES:")
-        c.setFont("Helvetica", 11)
-        c.drawString(60, height - 335, invoice_data['description'])
-        c.drawString(60, height - 355, f"Méthode de paiement: {invoice_data['payment_method']}")
-        
-        # Montant (encadré avec fond orange clair)
-        c.setFillColorRGB(0.96, 0.49, 0.13, alpha=0.1)
+        # Créer l'image PNG moderne
+        create_png(invoice_data, png_path)
         c.rect(50, height - 460, width - 100, 50, fill=1)
         
         c.setFillColorRGB(0, 0, 0)
