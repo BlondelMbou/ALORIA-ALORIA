@@ -423,6 +423,42 @@
         -agent: "testing"
         -comment: "🎯 CHAT PERMISSIONS TESTING COMPLETE - 100% SUCCESS! Comprehensive testing of ALORIA AGENCY chat permissions and communication system completed with PERFECT RESULTS according to review request specifications. ✅ CLIENT PERMISSIONS: Client can access assigned employee in contacts (GET /api/users/available-contacts) and send messages to assigned employee + managers only (POST /api/chat/send). ✅ EMPLOYEE PERMISSIONS: Employee can see assigned clients + managers in contacts and send messages to assigned clients + managers only. ✅ MANAGER PERMISSIONS: Manager can communicate with everyone (all employees and clients). ✅ RESTRICTIONS WORKING: All forbidden communications correctly blocked with 403 errors: Client→non-assigned employee (403), Employee→non-assigned client (403), Client→another client (403). ✅ ASSIGNMENT SYSTEM: Client reassignment working correctly via PATCH /api/clients/{id}/reassign?new_employee_id={id}. ✅ CONTACT DISCOVERY: Available contacts API properly filters based on role and assignments. ALL 8 CRITICAL TESTS FROM REVIEW REQUEST PASSED 100%! Chat permissions system fully operational and secure."
 
+  - task: "Withdrawal Manager - Category Validation Error"
+    implemented: true
+    working: false
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        -working: false
+        -agent: "testing"
+        -comment: "🚨 ERREUR CRITIQUE IDENTIFIÉE: POST /api/withdrawals retourne 422 Validation Error. Le champ 'category' doit être un enum strict ('SALAIRES', 'BUREAUX', 'JURIDIQUE', 'DOSSIERS', 'MARKETING', 'TECH', 'TRANSPORT', 'FORMATION') mais la demande de test utilisait 'Frais de bureau' qui n'est pas dans l'enum. SOLUTION: Utiliser 'BUREAUX' au lieu de 'Frais de bureau'. Test avec enum correct réussit (withdrawal créé: 20729a05-f343-412a-b7e1-7e753d0bbe1f). Pas un bug backend mais une erreur de validation attendue."
+
+  - task: "PNG Invoice Generation System"
+    implemented: true
+    working: false
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        -working: false
+        -agent: "testing"
+        -comment: "❌ SYSTÈME FACTURES PNG PARTIELLEMENT FONCTIONNEL: Client créé avec succès (ID: 073272b6-9114-4783-92bc-8b9bda8e9d5f) mais login client échoue avec mot de passe par défaut 'Aloria2024!'. Impossible de tester la génération de factures PNG car le client ne peut pas se connecter pour déclarer un paiement. PROBLÈME: Authentification client défaillante malgré création réussie du compte."
+
+  - task: "SuperAdmin Dashboard Financial Stats"
+    implemented: true
+    working: false
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        -working: false
+        -agent: "testing"
+        -comment: "❌ DASHBOARD SUPERADMIN INCOMPLET: GET /api/admin/dashboard-stats manque les champs critiques 'total_withdrawals' et 'current_balance'. Structure actuelle: {'users', 'business', 'consultations', 'activity'}. Seul 'business.total_payments' présent (59 paiements). Après création d'un retrait test, les stats ne reflètent pas les withdrawals (toujours 0). REQUIS: Ajouter total_withdrawals et current_balance (entrées - sorties) dans la réponse API."
+
   - task: "Payment Status Display Bug (User Reported)"
     implemented: true
     working: true
