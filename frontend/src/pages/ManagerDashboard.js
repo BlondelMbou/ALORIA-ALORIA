@@ -44,6 +44,7 @@ export default function ManagerDashboard() {
     cni_number: '' 
   });
   const [showCreateClient, setShowCreateClient] = useState(false);
+  const [showCreateEmployee, setShowCreateEmployee] = useState(false);
   const [showCredentialsDialog, setShowCredentialsDialog] = useState(false);
   const [newClientCredentials, setNewClientCredentials] = useState(null);
   const [newClient, setNewClient] = useState({
@@ -54,6 +55,11 @@ export default function ManagerDashboard() {
     visa_type: '',
     first_payment_amount: 0,
     message: ''
+  });
+  const [newEmployee, setNewEmployee] = useState({
+    email: '',
+    full_name: '',
+    phone: ''
   });
   const [chatUnreadCount, setChatUnreadCount] = useState(0);
   const [pendingPayments, setPendingPayments] = useState([]);
