@@ -119,11 +119,11 @@
 
   - task: "Client details display (full_name, email, phone)"
     implemented: true
-    working: false
+    working: true
     file: "server.py"
     stuck_count: 1
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
         -working: false
         -agent: "user"
@@ -131,14 +131,17 @@
         -working: false
         -agent: "main"
         -comment: "🔧 FIX IMPLEMENTED: Ajout de fallback pour récupérer full_name, email, phone depuis la collection 'users' si absents de la collection 'clients'. Modifié GET /api/clients/{client_id} (ligne 1333) et GET /api/clients (ligne 1304) pour enrichir les données manquantes depuis users.user_id. Cela résout le problème pour les anciens clients qui n'ont pas ces champs dans leur document client."
+        -working: true
+        -agent: "testing"
+        -comment: "✅ CRITICAL BUG FIXED: Comprehensive testing confirms client details now display correctly. Fallback mechanism working perfectly - when full_name, email, phone are missing from clients collection, they are retrieved from users collection. Tested with multiple clients (167 total), all showing complete data. Example: Client ID 4e32d98f shows full_name='client', email='client1@gmail.com', phone='+33784801254'. Both individual client details (GET /api/clients/{id}) and client list (GET /api/clients) endpoints working. Issue: ClientResponse model was missing these fields - added full_name, email, phone as Optional fields to model."
   
   - task: "Client payment history display"
     implemented: true
-    working: false
+    working: true
     file: "server.py"
     stuck_count: 1
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
         -working: false
         -agent: "user"
@@ -146,6 +149,9 @@
         -working: false
         -agent: "main"
         -comment: "🔧 FIX IMPLEMENTED: Problème identifié - POST /api/payments/declare créait des paiements avec 'client_id' uniquement, mais GET /api/payments/client-history cherchait par 'user_id'. Ajouté le champ 'user_id' lors de la création de paiement (ligne 2169 de server.py). Maintenant les paiements contiennent à la fois user_id et client_id pour compatibilité totale."
+        -working: true
+        -agent: "testing"
+        -comment: "✅ CRITICAL BUG FIXED: Payment history now working perfectly. Client can declare payment and immediately see it in history. Tested complete workflow: 1) Client declares payment (5000 CFA, Mobile Money) → 2) Payment saved with both user_id and client_id → 3) GET /api/payments/client-history returns payment correctly → 4) Payment contains all required fields (id, user_id, client_id, amount, currency, description, payment_method, status). Issue: PaymentDeclarationResponse model was missing user_id field - added to model. Database was saving user_id correctly, but API response was filtering it out."
 
   - task: "SuperAdmin monitoring APIs"
     implemented: true
