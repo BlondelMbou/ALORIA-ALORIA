@@ -460,58 +460,64 @@ export default function ClientDashboard() {
             </TabsList>
           </div>
 
-          {/* Progress Tab */}
-          <TabsContent value="progress">
-            <div className="grid lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-2">
-                <Card className="bg-gradient-to-br from-[#1E293B] to-[#334155] border-slate-700">
-                  <CardHeader>
-                    <CardTitle className="text-white text-xl">Étape Actuelle</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="bg-gradient-to-br from-orange-500/10 to-orange-600/10 border border-orange-500/20 rounded-lg p-6">
-                      <div className="flex items-start space-x-4 mb-4">
-                        <div className="w-12 h-12 bg-orange-500 text-white rounded-full flex items-center justify-center font-bold text-lg">
-                          {caseData.current_step_index + 1}
+          {/* Progress Tab - Mobile Optimized */}
+          <TabsContent value="progress" className="space-y-4 sm:space-y-5 md:space-y-6">
+            {/* Current Step Card - Full Width on Mobile */}
+            <Card className="bg-gradient-to-br from-[#1E293B] to-[#334155] border-slate-700 shadow-lg">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-white text-lg sm:text-xl flex items-center gap-2">
+                  <span className="text-2xl">🎯</span>
+                  Étape Actuelle
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="bg-gradient-to-br from-orange-500/10 to-orange-600/10 border border-orange-500/30 rounded-xl p-4 sm:p-5 md:p-6">
+                  <div className="flex flex-col sm:flex-row sm:items-start gap-4">
+                    <div className="w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-br from-orange-500 to-orange-600 text-white rounded-2xl flex items-center justify-center font-bold text-2xl shadow-lg flex-shrink-0">
+                      {caseData.current_step_index + 1}
+                    </div>
+                    <div className="flex-1 space-y-3">
+                      <h3 className="font-bold text-xl sm:text-2xl text-white leading-tight">{currentStep.title}</h3>
+                      <p className="text-slate-300 text-sm sm:text-base leading-relaxed">{currentStep.description}</p>
+                      {currentStep.duration && (
+                        <div className="flex items-center text-sm text-slate-400 bg-slate-800/30 rounded-lg px-3 py-2 w-fit">
+                          <Clock className="w-4 h-4 mr-2 text-orange-400" />
+                          <span className="font-medium">Durée estimée: {currentStep.duration}</span>
                         </div>
-                        <div className="flex-1">
-                          <h3 className="font-bold text-xl text-white mb-2">{currentStep.title}</h3>
-                          <p className="text-slate-300 mb-4">{currentStep.description}</p>
-                          {currentStep.duration && (
-                            <div className="flex items-center text-sm text-slate-400">
-                              <Clock className="w-4 h-4 mr-2" />
-                              Durée estimée: {currentStep.duration}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-              
-              <Card className="bg-gradient-to-br from-[#1E293B] to-[#334155] border-slate-700">
-                <CardHeader>
-                  <CardTitle className="text-white">Statistiques</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex justify-between">
-                      <span className="text-slate-400">Étapes terminées:</span>
-                      <span className="text-green-500 font-semibold">{caseData.current_step_index}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-slate-400">Étapes restantes:</span>
-                      <span className="text-orange-500 font-semibold">{caseData.workflow_steps.length - caseData.current_step_index}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-slate-400">Temps écoulé:</span>
-                      <span className="text-slate-300">{formatDistanceToNow(new Date(caseData.created_at), { addSuffix: true, locale: fr })}</span>
+                      )}
                     </div>
                   </div>
-                </CardContent>
-              </Card>
-            </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            {/* Statistics Card - Full Width on Mobile */}
+            <Card className="bg-gradient-to-br from-[#1E293B] to-[#334155] border-slate-700 shadow-lg">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-white text-lg sm:text-xl flex items-center gap-2">
+                  <span className="text-2xl">📈</span>
+                  Statistiques
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-4 text-center">
+                    <div className="text-3xl sm:text-4xl font-bold text-green-400 mb-1">{caseData.current_step_index}</div>
+                    <p className="text-slate-400 text-sm">Étapes terminées</p>
+                  </div>
+                  <div className="bg-orange-500/10 border border-orange-500/30 rounded-xl p-4 text-center">
+                    <div className="text-3xl sm:text-4xl font-bold text-orange-400 mb-1">{caseData.workflow_steps.length - caseData.current_step_index}</div>
+                    <p className="text-slate-400 text-sm">Étapes restantes</p>
+                  </div>
+                  <div className="bg-blue-500/10 border border-blue-500/30 rounded-xl p-4 text-center sm:col-span-1">
+                    <div className="text-lg sm:text-xl font-bold text-blue-400 mb-1">
+                      {formatDistanceToNow(new Date(caseData.created_at), { addSuffix: false, locale: fr })}
+                    </div>
+                    <p className="text-slate-400 text-sm">Temps écoulé</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           {/* Documents Tab */}
