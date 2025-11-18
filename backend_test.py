@@ -3516,6 +3516,451 @@ class APITester:
         print("9. Validation des codes de confirmation")
         print("="*50)
 
+    def test_urgent_employee_clients_na_diagnostic(self):
+        """DIAGNOSTIC URGENT - ENDPOINT /api/clients POUR EMPLOYÉ RETOURNE N/A"""
+        print("=== DIAGNOSTIC URGENT - ENDPOINT /api/clients POUR EMPLOYÉ RETOURNE N/A ===")
+        
+        # Variables pour stocker les données du test
+        employee_token = None
+        manager_token = None
+        employee_id = None
+        manager_id = None
+        
+        # ============================================================================
+        # TEST 1 - EMPLOYÉ LOGIN ET GET CLIENTS
+        # ============================================================================
+        print("\n🔸 TEST 1 - EMPLOYÉ LOGIN ET GET CLIENTS")
+        
+        # 1.1 - Login avec employé : employee@aloria.com / employee123 (ou créer un nouveau)
+        try:
+            print("🔍 TESTING Employee Login: employee@aloria.com / employee123")
+            employee_login_response = self.session.post(f"{API_BASE}/auth/login", json={
+                "email": "employee@aloria.com",
+                "password": "employee123"
+            })
+            
+            if employee_login_response.status_code == 200:
+                employee_data = employee_login_response.json()
+                employee_token = employee_data['access_token']
+                employee_id = employee_data['user']['id']
+                self.log_result("1.1 Employee Login", True, f"Employee logged in: {employee_data['user']['full_name']}")
+                print(f"   - Employee ID: {employee_id}")
+                print(f"   - Employee Token: {employee_token[:20]}...")
+            else:
+                self.log_result("1.1 Employee Login", False, f"Status: {employee_login_response.status_code}", employee_login_response.text)
+                print("🚨 CANNOT CONTINUE WITHOUT EMPLOYEE LOGIN")
+                return
+                
+        except Exception as e:
+            self.log_result("1.1 Employee Login", False, "Exception occurred", str(e))
+            return
+        
+        # 1.2 - GET /api/clients avec token employé
+        try:
+            headers = {"Authorization": f"Bearer {employee_token}"}
+            print("🔍 TESTING GET /api/clients with Employee token")
+            
+            clients_response = self.session.get(f"{API_BASE}/clients", headers=headers)
+            
+            print(f"📊 RESPONSE STATUS: {clients_response.status_code}")
+            print(f"📊 RESPONSE HEADERS: {dict(clients_response.headers)}")
+            
+            if clients_response.status_code == 200:
+                clients_data = clients_response.json()
+                self.log_result("1.2 Employee GET Clients", True, f"✅ Status 200 - {len(clients_data)} clients retournés")
+                
+                # 1.3 - ANALYSER la réponse complète
+                print(f"\n📋 ANALYSE COMPLÈTE DE LA RÉPONSE:")
+                print(f"   - Nombre de clients retournés: {len(clients_data)}")
+                
+                if len(clients_data) > 0:
+                    print(f"\n🔍 ANALYSE DÉTAILLÉE DE CHAQUE CLIENT:")
+                    
+                    for i, client in enumerate(clients_data[:3]):  # Analyser les 3 premiers clients
+                        print(f"\n   CLIENT {i+1}:")
+                        
+                        # Vérifier chaque champ critique
+                        fields_analysis = {}
+                        
+                        # id : présent ?
+                        client_id = client.get('id')
+                        if client_id:
+                            fields_analysis['id'] = f"✅ présent: {client_id}"
+                        else:
+                            fields_analysis['id'] = "❌ absent ou null"
+                        
+                        # full_name : valeur ? (N/A, null, vide, ou nom réel ?)
+                        full_name = client.get('full_name')
+                        if full_name == "N/A":
+                            fields_analysis['full_name'] = "🚨 N/A (PROBLÈME IDENTIFIÉ)"
+                        elif full_name is None:
+                            fields_analysis['full_name'] = "❌ null"
+                        elif full_name == "":
+                            fields_analysis['full_name'] = "❌ vide"
+                        elif isinstance(full_name, str) and len(full_name) > 0:
+                            fields_analysis['full_name'] = f"✅ nom réel: '{full_name}'"
+                        else:
+                            fields_analysis['full_name'] = f"❌ type inattendu: {type(full_name)} = {full_name}"
+                        
+                        # email : valeur ?
+                        email = client.get('email')
+                        if email == "N/A":
+                            fields_analysis['email'] = "🚨 N/A (PROBLÈME IDENTIFIÉ)"
+                        elif email is None:
+                            fields_analysis['email'] = "❌ null"
+                        elif email == "":
+                            fields_analysis['email'] = "❌ vide"
+                        elif isinstance(email, str) and "@" in email:
+                            fields_analysis['email'] = f"✅ email valide: '{email}'"
+                        else:
+                            fields_analysis['email'] = f"❌ email invalide: '{email}'"
+                        
+                        # phone : valeur ?
+                        phone = client.get('phone')
+                        if phone == "N/A":
+                            fields_analysis['phone'] = "🚨 N/A (PROBLÈME IDENTIFIÉ)"
+                        elif phone is None:
+                            fields_analysis['phone'] = "❌ null"
+                        elif phone == "":
+                            fields_analysis['phone'] = "❌ vide"
+                        elif isinstance(phone, str) and len(phone) > 0:
+                            fields_analysis['phone'] = f"✅ téléphone: '{phone}'"
+                        else:
+                            fields_analysis['phone'] = f"❌ type inattendu: {type(phone)} = {phone}"
+                        
+                        # user_id : présent ? (C'EST CRITIQUE)
+                        user_id = client.get('user_id')
+                        if user_id:
+                            fields_analysis['user_id'] = f"✅ présent: {user_id} (CRITIQUE)"
+                        else:
+                            fields_analysis['user_id'] = "🚨 ABSENT (C'EST LE PROBLÈME CRITIQUE)"
+                        
+                        # country : valeur ?
+                        country = client.get('country')
+                        if country == "N/A":
+                            fields_analysis['country'] = "🚨 N/A (PROBLÈME IDENTIFIÉ)"
+                        elif country:
+                            fields_analysis['country'] = f"✅ pays: '{country}'"
+                        else:
+                            fields_analysis['country'] = "❌ absent ou null"
+                        
+                        # visa_type : valeur ?
+                        visa_type = client.get('visa_type')
+                        if visa_type == "N/A":
+                            fields_analysis['visa_type'] = "🚨 N/A (PROBLÈME IDENTIFIÉ)"
+                        elif visa_type:
+                            fields_analysis['visa_type'] = f"✅ visa: '{visa_type}'"
+                        else:
+                            fields_analysis['visa_type'] = "❌ absent ou null"
+                        
+                        # current_status : valeur ?
+                        current_status = client.get('current_status')
+                        if current_status == "N/A":
+                            fields_analysis['current_status'] = "🚨 N/A (PROBLÈME IDENTIFIÉ)"
+                        elif current_status:
+                            fields_analysis['current_status'] = f"✅ statut: '{current_status}'"
+                        else:
+                            fields_analysis['current_status'] = "❌ absent ou null"
+                        
+                        # progress_percentage : valeur ?
+                        progress_percentage = client.get('progress_percentage')
+                        if progress_percentage is not None:
+                            fields_analysis['progress_percentage'] = f"✅ progrès: {progress_percentage}%"
+                        else:
+                            fields_analysis['progress_percentage'] = "❌ absent ou null"
+                        
+                        # Afficher l'analyse
+                        for field, analysis in fields_analysis.items():
+                            print(f"     - {field}: {analysis}")
+                        
+                        # Stocker le premier client pour les tests suivants
+                        if i == 0:
+                            self.first_employee_client = client
+                    
+                    # Déterminer le résultat global
+                    na_issues = []
+                    critical_issues = []
+                    
+                    for client in clients_data:
+                        if client.get('full_name') == "N/A":
+                            na_issues.append('full_name')
+                        if client.get('email') == "N/A":
+                            na_issues.append('email')
+                        if client.get('phone') == "N/A":
+                            na_issues.append('phone')
+                        if not client.get('user_id'):
+                            critical_issues.append('user_id manquant')
+                    
+                    if na_issues or critical_issues:
+                        all_issues = na_issues + critical_issues
+                        self.log_result("1.3 Employee Client Data Analysis", False, 
+                                      f"🚨 PROBLÈMES DÉTECTÉS: {', '.join(set(all_issues))}")
+                    else:
+                        self.log_result("1.3 Employee Client Data Analysis", True, 
+                                      "✅ Toutes les données clients sont correctes")
+                
+                else:
+                    self.log_result("1.3 Employee Client Data Analysis", False, 
+                                  "❌ Aucun client assigné à cet employé")
+                    return
+                    
+            else:
+                self.log_result("1.2 Employee GET Clients", False, f"Status: {clients_response.status_code}", clients_response.text)
+                return
+                
+        except Exception as e:
+            self.log_result("1.2 Employee GET Clients", False, "Exception occurred", str(e))
+            return
+        
+        # ============================================================================
+        # TEST 2 - VÉRIFIER UN CLIENT SPÉCIFIQUE
+        # ============================================================================
+        print("\n🔸 TEST 2 - VÉRIFIER UN CLIENT SPÉCIFIQUE")
+        
+        if hasattr(self, 'first_employee_client') and self.first_employee_client:
+            client = self.first_employee_client
+            client_id = client.get('id')
+            user_id = client.get('user_id')
+            
+            print(f"🔍 ANALYSE DU CLIENT: {client_id}")
+            print(f"   - client_id: {client_id}")
+            print(f"   - user_id: {user_id}")
+            
+            # 2.1 - Si user_id est présent : vérifier dans la collection users si cet user existe
+            if user_id:
+                try:
+                    # Essayer d'accéder aux données utilisateur via l'API admin
+                    headers = {"Authorization": f"Bearer {employee_token}"}
+                    
+                    # Tenter GET /api/admin/users (peut ne pas fonctionner avec token employé)
+                    users_response = self.session.get(f"{API_BASE}/admin/users", headers=headers)
+                    
+                    if users_response.status_code == 200:
+                        users_data = users_response.json()
+                        target_user = next((u for u in users_data if u.get('id') == user_id), None)
+                        
+                        if target_user:
+                            print(f"📋 USER TROUVÉ DANS LA COLLECTION USERS:")
+                            print(f"   - id: {target_user.get('id')}")
+                            print(f"   - full_name: {target_user.get('full_name')}")
+                            print(f"   - email: {target_user.get('email')}")
+                            print(f"   - phone: {target_user.get('phone')}")
+                            
+                            self.log_result("2.1 User Exists in Collection", True, 
+                                          f"✅ User existe: {target_user.get('full_name')} ({target_user.get('email')})")
+                            
+                            # Comparer les données
+                            comparison_issues = []
+                            if target_user.get('full_name') != client.get('full_name'):
+                                comparison_issues.append(f"full_name: user='{target_user.get('full_name')}' vs client='{client.get('full_name')}'")
+                            if target_user.get('email') != client.get('email'):
+                                comparison_issues.append(f"email: user='{target_user.get('email')}' vs client='{client.get('email')}'")
+                            if target_user.get('phone') != client.get('phone'):
+                                comparison_issues.append(f"phone: user='{target_user.get('phone')}' vs client='{client.get('phone')}'")
+                            
+                            if comparison_issues:
+                                self.log_result("2.2 Data Synchronization", False, 
+                                              f"🚨 PROBLÈME DE SYNCHRONISATION: {'; '.join(comparison_issues)}")
+                            else:
+                                self.log_result("2.2 Data Synchronization", True, 
+                                              "✅ Données user et client synchronisées")
+                        else:
+                            self.log_result("2.1 User Exists in Collection", False, 
+                                          f"❌ User avec ID {user_id} non trouvé dans la collection users")
+                    
+                    elif users_response.status_code == 403:
+                        self.log_result("2.1 User Collection Access", False, 
+                                      "❌ Employé n'a pas accès à /api/admin/users (normal)")
+                        
+                        # Utiliser une approche alternative - essayer de se connecter avec les credentials du client
+                        print("🔍 APPROCHE ALTERNATIVE: Vérifier si le user_id correspond à un utilisateur valide")
+                        
+                        # On ne peut pas facilement vérifier sans accès admin, mais on peut noter que user_id existe
+                        if user_id and len(user_id) > 10:  # UUID format
+                            self.log_result("2.1 User ID Format", True, 
+                                          f"✅ user_id a un format UUID valide: {user_id}")
+                        else:
+                            self.log_result("2.1 User ID Format", False, 
+                                          f"❌ user_id a un format invalide: {user_id}")
+                    
+                    else:
+                        self.log_result("2.1 User Collection Access", False, 
+                                      f"Status: {users_response.status_code}", users_response.text)
+                        
+                except Exception as e:
+                    self.log_result("2.1 User Verification", False, "Exception occurred", str(e))
+            
+            # 2.2 - Si user_id est absent : C'EST LE PROBLÈME
+            else:
+                self.log_result("2.1 User ID Present", False, 
+                              "🚨 C'EST LE PROBLÈME: Les clients n'ont pas de user_id")
+                print("🚨 DIAGNOSTIC: user_id manquant dans les données client - c'est la cause des N/A")
+        
+        # ============================================================================
+        # TEST 3 - COMPARER AVEC MANAGER
+        # ============================================================================
+        print("\n🔸 TEST 3 - COMPARER AVEC MANAGER")
+        
+        # 3.1 - Login Manager (manager@test.com / password123)
+        try:
+            print("🔍 TESTING Manager Login: manager@test.com / password123")
+            manager_login_response = self.session.post(f"{API_BASE}/auth/login", json={
+                "email": "manager@test.com",
+                "password": "password123"
+            })
+            
+            if manager_login_response.status_code == 200:
+                manager_data = manager_login_response.json()
+                manager_token = manager_data['access_token']
+                manager_id = manager_data['user']['id']
+                self.log_result("3.1 Manager Login", True, f"Manager logged in: {manager_data['user']['full_name']}")
+            else:
+                self.log_result("3.1 Manager Login", False, f"Status: {manager_login_response.status_code}", manager_login_response.text)
+                return
+                
+        except Exception as e:
+            self.log_result("3.1 Manager Login", False, "Exception occurred", str(e))
+            return
+        
+        # 3.2 - GET /api/clients avec token manager
+        try:
+            headers = {"Authorization": f"Bearer {manager_token}"}
+            print("🔍 TESTING GET /api/clients with Manager token")
+            
+            manager_clients_response = self.session.get(f"{API_BASE}/clients", headers=headers)
+            
+            if manager_clients_response.status_code == 200:
+                manager_clients_data = manager_clients_response.json()
+                self.log_result("3.2 Manager GET Clients", True, f"✅ Status 200 - {len(manager_clients_data)} clients retournés")
+                
+                # 3.3 - COMPARER : Est-ce que les mêmes clients ont des données pour le Manager mais pas pour l'Employé ?
+                print(f"\n📋 COMPARAISON MANAGER vs EMPLOYÉ:")
+                print(f"   - Manager voit: {len(manager_clients_data)} clients")
+                print(f"   - Employé voit: {len(clients_data)} clients")
+                
+                # Chercher des clients communs (par email ou autre identifiant)
+                manager_emails = {c.get('email') for c in manager_clients_data if c.get('email')}
+                employee_emails = {c.get('email') for c in clients_data if c.get('email')}
+                
+                common_emails = manager_emails.intersection(employee_emails)
+                
+                if common_emails:
+                    print(f"   - Clients communs trouvés: {len(common_emails)}")
+                    
+                    # Analyser un client commun
+                    common_email = list(common_emails)[0]
+                    manager_client = next(c for c in manager_clients_data if c.get('email') == common_email)
+                    employee_client = next(c for c in clients_data if c.get('email') == common_email)
+                    
+                    print(f"\n🔍 ANALYSE CLIENT COMMUN: {common_email}")
+                    print(f"   MANAGER voit:")
+                    print(f"     - full_name: {manager_client.get('full_name')}")
+                    print(f"     - email: {manager_client.get('email')}")
+                    print(f"     - phone: {manager_client.get('phone')}")
+                    print(f"     - user_id: {manager_client.get('user_id')}")
+                    
+                    print(f"   EMPLOYÉ voit:")
+                    print(f"     - full_name: {employee_client.get('full_name')}")
+                    print(f"     - email: {employee_client.get('email')}")
+                    print(f"     - phone: {employee_client.get('phone')}")
+                    print(f"     - user_id: {employee_client.get('user_id')}")
+                    
+                    # Déterminer si c'est un problème de permissions ou de données
+                    manager_has_data = all([
+                        manager_client.get('full_name') not in [None, '', 'N/A'],
+                        manager_client.get('email') not in [None, '', 'N/A'],
+                        manager_client.get('user_id') not in [None, '']
+                    ])
+                    
+                    employee_has_data = all([
+                        employee_client.get('full_name') not in [None, '', 'N/A'],
+                        employee_client.get('email') not in [None, '', 'N/A'],
+                        employee_client.get('user_id') not in [None, '']
+                    ])
+                    
+                    if manager_has_data and not employee_has_data:
+                        self.log_result("3.3 Manager vs Employee Data", False, 
+                                      "🚨 PROBLÈME: Manager a les données, Employé a des N/A - Problème de permissions ou de requête")
+                    elif manager_has_data and employee_has_data:
+                        self.log_result("3.3 Manager vs Employee Data", True, 
+                                      "✅ Manager et Employé ont tous les deux les données correctes")
+                    else:
+                        self.log_result("3.3 Manager vs Employee Data", False, 
+                                      "🚨 PROBLÈME: Ni Manager ni Employé n'ont les données complètes - Problème de base de données")
+                
+                else:
+                    self.log_result("3.3 Manager vs Employee Data", False, 
+                                  "❌ Aucun client commun trouvé entre Manager et Employé")
+                    
+            else:
+                self.log_result("3.2 Manager GET Clients", False, f"Status: {manager_clients_response.status_code}", manager_clients_response.text)
+                
+        except Exception as e:
+            self.log_result("3.2 Manager GET Clients", False, "Exception occurred", str(e))
+        
+        # ============================================================================
+        # TEST 4 - VÉRIFIER LA BASE DE DONNÉES DIRECTEMENT
+        # ============================================================================
+        print("\n🔸 TEST 4 - VÉRIFIER LA BASE DE DONNÉES DIRECTEMENT")
+        
+        # Note: Nous ne pouvons pas accéder directement à MongoDB depuis ce test,
+        # mais nous pouvons utiliser les APIs admin pour simuler une vérification DB
+        
+        if manager_token and employee_id:
+            try:
+                headers = {"Authorization": f"Bearer {manager_token}"}
+                
+                # Utiliser l'API admin pour obtenir des informations sur les clients assignés à cet employé
+                print(f"🔍 SIMULATION DB QUERY: Clients assignés à l'employé {employee_id}")
+                
+                # GET tous les clients et filtrer ceux assignés à cet employé
+                all_clients_response = self.session.get(f"{API_BASE}/clients", headers=headers)
+                
+                if all_clients_response.status_code == 200:
+                    all_clients = all_clients_response.json()
+                    assigned_clients = [c for c in all_clients if c.get('assigned_employee_id') == employee_id]
+                    
+                    print(f"📋 CLIENTS ASSIGNÉS À L'EMPLOYÉ {employee_id}:")
+                    print(f"   - Nombre total: {len(assigned_clients)}")
+                    
+                    if assigned_clients:
+                        for i, client in enumerate(assigned_clients[:3]):  # Analyser les 3 premiers
+                            print(f"\n   CLIENT {i+1} (ID: {client.get('id')}):")
+                            
+                            # Vérifier si ces documents clients ont les champs requis
+                            has_full_name = 'full_name' in client and client['full_name'] not in [None, '', 'N/A']
+                            has_email = 'email' in client and client['email'] not in [None, '', 'N/A']
+                            has_user_id = 'user_id' in client and client['user_id'] not in [None, '']
+                            
+                            print(f"     - full_name dans document: {'✅' if has_full_name else '❌'} {client.get('full_name')}")
+                            print(f"     - email dans document: {'✅' if has_email else '❌'} {client.get('email')}")
+                            print(f"     - user_id dans document: {'✅' if has_user_id else '❌'} {client.get('user_id')}")
+                        
+                        # Déterminer le diagnostic
+                        clients_with_user_id = [c for c in assigned_clients if c.get('user_id')]
+                        clients_with_full_name = [c for c in assigned_clients if c.get('full_name') not in [None, '', 'N/A']]
+                        
+                        if len(clients_with_user_id) == 0:
+                            self.log_result("4.1 Database Structure Check", False, 
+                                          "🚨 PROBLÈME A: Les clients n'ont pas de user_id du tout")
+                        elif len(clients_with_full_name) == 0:
+                            self.log_result("4.1 Database Structure Check", False, 
+                                          "🚨 PROBLÈME B: Les clients ont un user_id mais pas de full_name - Le code de fallback ne s'exécute pas")
+                        else:
+                            self.log_result("4.1 Database Structure Check", True, 
+                                          "✅ Les données sont présentes dans la base - Le problème est ailleurs")
+                    
+                    else:
+                        self.log_result("4.1 Database Structure Check", False, 
+                                      f"❌ Aucun client assigné à l'employé {employee_id}")
+                
+                else:
+                    self.log_result("4.1 Database Structure Check", False, 
+                                  f"Status: {all_clients_response.status_code}", all_clients_response.text)
+                    
+            except Exception as e:
+                self.log_result("4.1 Database Structure Check", False, "Exception occurred", str(e))
+
     def test_superadmin_apis(self):
         """Test SuperAdmin specific APIs"""
         print("=== Testing SuperAdmin APIs ===")
