@@ -19,7 +19,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 MONGO_URL = os.environ.get('MONGO_URL', 'mongodb://localhost:27017')
-DB_NAME = "aloria"
+DB_NAME = os.environ.get('DB_NAME', 'aloria_agency')
 
 
 async def fix_clients_data():
