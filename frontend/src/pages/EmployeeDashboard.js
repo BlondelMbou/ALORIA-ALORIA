@@ -403,15 +403,18 @@ export default function EmployeeDashboard() {
           </Card>
         </div>
 
-        {/* Tabs */}
+        {/* Tabs - Mobile Optimized */}
         <Tabs defaultValue="cases" className="w-full">
-          <TabsList className="grid w-full grid-cols-5 mb-6 bg-[#1E293B] border border-slate-700">
-            <TabsTrigger value="cases" data-testid="tab-my-cases" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white text-slate-300">Mes Dossiers</TabsTrigger>
-            <TabsTrigger value="clients" data-testid="tab-my-clients" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white text-slate-300">Mes Clients</TabsTrigger>
-            <TabsTrigger value="prospects" data-testid="tab-prospects" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white text-slate-300">Prospects</TabsTrigger>
-            <TabsTrigger value="visitors" data-testid="tab-visitors" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white text-slate-300">Visiteurs</TabsTrigger>
-            <TabsTrigger value="create" data-testid="tab-create-client" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white text-slate-300">Créer un Client</TabsTrigger>
-          </TabsList>
+          {/* Mobile: Scrollable, Desktop: Grid */}
+          <div className="-mx-4 sm:mx-0 mb-5 sm:mb-6">
+            <TabsList className="flex w-full overflow-x-auto md:grid md:grid-cols-5 bg-[#1E293B] border border-slate-700 p-1.5 sm:p-2 gap-1 sm:gap-2 scrollbar-hide">
+              <TabsTrigger value="cases" data-testid="tab-my-cases" className="flex-shrink-0 min-w-[110px] md:min-w-0 data-[state=active]:bg-orange-500 data-[state=active]:text-white text-slate-300 px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm font-medium whitespace-nowrap rounded-lg transition-all touch-manipulation">📁 Mes Dossiers</TabsTrigger>
+              <TabsTrigger value="clients" data-testid="tab-my-clients" className="flex-shrink-0 min-w-[110px] md:min-w-0 data-[state=active]:bg-orange-500 data-[state=active]:text-white text-slate-300 px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm font-medium whitespace-nowrap rounded-lg transition-all touch-manipulation">👥 Mes Clients</TabsTrigger>
+              <TabsTrigger value="prospects" data-testid="tab-prospects" className="flex-shrink-0 min-w-[110px] md:min-w-0 data-[state=active]:bg-orange-500 data-[state=active]:text-white text-slate-300 px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm font-medium whitespace-nowrap rounded-lg transition-all touch-manipulation">🎯 Prospects</TabsTrigger>
+              <TabsTrigger value="visitors" data-testid="tab-visitors" className="flex-shrink-0 min-w-[110px] md:min-w-0 data-[state=active]:bg-orange-500 data-[state=active]:text-white text-slate-300 px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm font-medium whitespace-nowrap rounded-lg transition-all touch-manipulation">🚶 Visiteurs</TabsTrigger>
+              <TabsTrigger value="create" data-testid="tab-create-client" className="flex-shrink-0 min-w-[110px] md:min-w-0 data-[state=active]:bg-orange-500 data-[state=active]:text-white text-slate-300 px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm font-medium whitespace-nowrap rounded-lg transition-all touch-manipulation">➕ Créer Client</TabsTrigger>
+            </TabsList>
+          </div>
 
           {/* My Cases */}
           <TabsContent value="cases">
