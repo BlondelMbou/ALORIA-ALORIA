@@ -316,44 +316,64 @@ export default function ClientDashboard() {
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-5 md:py-6 lg:py-8">
         {/* Profile Overview - Mobile Responsive */}
-        <Card className="bg-gradient-to-br from-[#1E293B] to-[#334155] border-slate-700 mb-4 sm:mb-6 lg:mb-8">
-          <CardContent className="p-4 sm:p-6 lg:p-8">
+        <Card className="bg-gradient-to-br from-[#1E293B] to-[#334155] border-slate-700 mb-4 sm:mb-5 md:mb-6 lg:mb-8 shadow-xl">
+          <CardContent className="p-4 sm:p-5 md:p-6 lg:p-8">
             
             {/* Mobile Layout - Stack vertically */}
-            <div className="block lg:hidden space-y-4">
-              {/* User Info Row */}
-              <div className="flex items-center space-x-3 sm:space-x-4">
-                <Avatar className="w-12 h-12 sm:w-16 sm:h-16">
-                  <AvatarFallback className="bg-orange-500 text-white text-lg sm:text-xl font-bold">
+            <div className="block lg:hidden space-y-5">
+              {/* User Info Row - Mobile Optimized */}
+              <div className="flex items-start gap-3 sm:gap-4">
+                <Avatar className="w-14 h-14 sm:w-16 sm:h-16 flex-shrink-0">
+                  <AvatarFallback className="bg-orange-500 text-white text-xl sm:text-2xl font-bold">
                     {user.full_name.charAt(0)}
                   </AvatarFallback>
                 </Avatar>
-                <div className="flex-1">
-                  <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-white mb-1">
-                    Bonjour, {user.full_name.split(' ')[0]}
+                <div className="flex-1 min-w-0">
+                  <h1 className="text-xl sm:text-2xl font-bold text-white mb-1.5 leading-tight">
+                    Bonjour, {user.full_name.split(' ')[0]} 👋
                   </h1>
-                  <p className="text-slate-300 text-sm sm:text-base">{caseData.country} - {caseData.visa_type}</p>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl sm:text-3xl font-bold text-orange-500">
-                    {Math.round(progressPercentage)}%
-                  </div>
-                  <p className="text-xs sm:text-sm text-slate-400">Progression</p>
+                  <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
+                    {caseData.country} - {caseData.visa_type}
+                  </p>
                 </div>
               </div>
 
-              {/* Status and Counselor Row */}
-              <div className="flex flex-col xs:flex-row xs:items-center xs:justify-between gap-2 xs:gap-4">
-                <Badge className={`${getStatusColor(caseData.status)} text-xs sm:text-sm`} data-testid="case-status-badge">
-                  {caseData.status}
-                </Badge>
+              {/* Progress Card - Mobile First */}
+              <div className="bg-gradient-to-r from-orange-500/10 to-orange-600/10 border border-orange-500/30 rounded-xl p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-sm font-medium text-slate-300">Votre Progression</span>
+                  <div className="text-3xl font-bold text-orange-500">
+                    {Math.round(progressPercentage)}%
+                  </div>
+                </div>
+                <div className="w-full bg-slate-700/50 rounded-full h-3 overflow-hidden">
+                  <div 
+                    className="bg-gradient-to-r from-orange-500 to-orange-600 h-full transition-all duration-500 ease-out"
+                    style={{ width: `${progressPercentage}%` }}
+                  />
+                </div>
+                <p className="text-xs text-slate-400 mt-2 text-center">
+                  Étape {caseData.current_step_index + 1} sur {caseData.workflow_steps.length}
+                </p>
+              </div>
+
+              {/* Status and Counselor Row - Mobile Optimized */}
+              <div className="flex flex-col gap-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-slate-400">Statut:</span>
+                  <Badge className={`${getStatusColor(caseData.status)} text-sm px-3 py-1`} data-testid="case-status-badge">
+                    {caseData.status}
+                  </Badge>
+                </div>
                 {counselor && (
-                  <div className="flex items-center text-slate-300 text-xs sm:text-sm">
-                    <User className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
-                    <span className="hidden xs:inline">Conseiller: </span>
-                    {counselor.name}
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-slate-400">Conseiller:</span>
+                    <div className="flex items-center text-slate-200 text-sm font-medium">
+                      <User className="w-4 h-4 mr-1.5 text-orange-400" />
+                      {counselor.name}
+                    </div>
                   </div>
                 )}
               </div>
