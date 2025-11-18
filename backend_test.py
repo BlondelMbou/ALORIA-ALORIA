@@ -6006,42 +6006,65 @@ class APITester:
         print("=" * 80)
 
 def main():
-    """Main test execution - URGENT CLIENT DATA & PASSWORD CHANGE ISSUES"""
-    print("🚀 ALORIA AGENCY Backend API Testing Suite - URGENT ISSUES")
+    """Main test execution - DIAGNOSTIC URGENT AUTHENTIFICATION ET DONNÉES CLIENTS"""
+    print("🚀 ALORIA AGENCY Backend API Testing Suite - DIAGNOSTIC URGENT")
     print("=" * 80)
-    print("TEST URGENT - DONNÉES CLIENTS N/A + CHANGEMENT MOT DE PASSE")
+    print("PROBLÈME RAPPORTÉ: Les données clients affichent N/A dans le frontend")
+    print("INVESTIGATION: Problème d'authentification suspecté")
     print("=" * 80)
     
     tester = APITester()
     
-    # Step 1: Authenticate all roles
-    tester.authenticate_all_roles()
+    # Step 1: Basic Authentication Test
+    print("\n🔸 PHASE 1: AUTHENTIFICATION DE BASE")
+    tester.test_1_basic_authentication()
     
-    # Step 2: Run URGENT tests
-    print("\n🚨 RUNNING URGENT DIAGNOSTIC TESTS")
-    tester.test_urgent_1_client_data_na_issue()
-    tester.test_urgent_2_password_change_issue()
+    # Step 2: Client Data Retrieval Test
+    print("\n🔸 PHASE 2: RÉCUPÉRATION DONNÉES CLIENTS")
+    tester.test_2_client_data_retrieval_with_token()
     
-    # Final Results
+    # Step 3: Client Data Structure Analysis
+    print("\n🔸 PHASE 3: ANALYSE STRUCTURE DONNÉES")
+    tester.test_3_client_data_structure_analysis()
+    
+    # Step 4: User Verification
+    print("\n🔸 PHASE 4: VÉRIFICATION UTILISATEUR SPÉCIFIQUE")
+    tester.test_4_verify_specific_user()
+    
+    # Step 5: BCRYPT/PASSLIB Verification
+    print("\n🔸 PHASE 5: VÉRIFICATION BCRYPT/PASSLIB")
+    tester.test_5_bcrypt_passlib_verification()
+    
+    # Final summary
     print("\n" + "=" * 80)
-    print("🎯 URGENT TEST RESULTS")
+    print("🎯 DIAGNOSTIC FINAL - AUTHENTIFICATION ET DONNÉES CLIENTS")
     print("=" * 80)
-    print(f"✅ PASSED: {tester.results['passed']}")
-    print(f"❌ FAILED: {tester.results['failed']}")
+    print(f"✅ TESTS RÉUSSIS: {tester.results['passed']}")
+    print(f"❌ TESTS ÉCHOUÉS: {tester.results['failed']}")
     
-    if tester.results['passed'] + tester.results['failed'] > 0:
-        success_rate = (tester.results['passed'] / (tester.results['passed'] + tester.results['failed']) * 100)
-        print(f"📊 SUCCESS RATE: {success_rate:.1f}%")
+    total_tests = tester.results['passed'] + tester.results['failed']
+    if total_tests > 0:
+        success_rate = (tester.results['passed'] / total_tests) * 100
+        print(f"📊 TAUX DE RÉUSSITE: {success_rate:.1f}%")
     
     if tester.results['errors']:
-        print(f"\n🚨 CRITICAL ERRORS IDENTIFIED:")
-        for error in tester.results['errors']:
-            print(f"   - {error['test']}: {error['message']}")
+        print(f"\n🚨 PROBLÈMES IDENTIFIÉS:")
+        for i, error in enumerate(tester.results['errors'], 1):
+            print(f"   {i}. {error['test']}")
+            print(f"      {error['message']}")
             if error['error']:
-                print(f"     Error Details: {error['error']}")
+                print(f"      Détail: {error['error']}")
     
-    print("\n🎯 DIAGNOSTIC COMPLET TERMINÉ")
-    print("OBJECTIF: Identifier la cause exacte des 2 problèmes urgents")
+    # Diagnostic conclusion
+    print(f"\n📋 CONCLUSION DIAGNOSTIC:")
+    if tester.results['failed'] == 0:
+        print("✅ AUCUN PROBLÈME DÉTECTÉ - Le système d'authentification et de données clients fonctionne correctement")
+        print("   Le problème rapporté pourrait être côté frontend ou dans des conditions spécifiques")
+    else:
+        print("❌ PROBLÈMES DÉTECTÉS - Voir les détails ci-dessus")
+        print("   Actions correctives nécessaires côté backend")
+    
+    print("\n" + "=" * 80)
 
 if __name__ == "__main__":
     main()
