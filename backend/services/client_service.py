@@ -18,11 +18,42 @@ logger = logging.getLogger(__name__)
 # Workflows par pays et type de visa (importé depuis server.py)
 WORKFLOWS = {}
 
+# Mapping des noms de visa anglais → français
+VISA_TYPE_MAPPING = {
+    # Canada
+    "Work Permit": "Permis de travail",
+    "Study Permit": "Permis d'études",
+    "Permanent Residence (Express Entry)": "Résidence permanente (Entrée express)",
+    # France
+    "Work Permit (Talent Passport)": "Permis de travail (Passeport Talent)",
+    "Student Visa": "Visa étudiant",
+    "Family Reunification": "Regroupement familial"
+}
+
 
 def set_workflows(workflows: Dict):
     """Initialise les workflows depuis server.py"""
     global WORKFLOWS
     WORKFLOWS = workflows
+
+
+def normalize_visa_type(visa_type: str) -> str:
+    """
+    Normalise le type de visa en convertissant les noms anglais en français.
+    
+    Args:
+        visa_type: Type de visa (peut être en anglais ou français)
+    
+    Returns:
+        str: Type de visa en français (clé pour WORKFLOWS)
+    """
+    # Si déjà en français, retourner tel quel
+    if visa_type in ["Permis de travail", "Permis d'études", "Résidence permanente (Entrée express)",
+                     "Permis de travail (Passeport Talent)", "Visa étudiant", "Regroupement familial"]:
+        return visa_type
+    
+    # Sinon, chercher la traduction
+    return VISA_TYPE_MAPPING.get(visa_type, visa_type)
 
 
 async def create_client_profile(
