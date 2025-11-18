@@ -1544,6 +1544,336 @@ class APITester:
             except Exception as e:
                 self.log_result("4.2 Test Withdrawal Creation", False, "Exception occurred", str(e))
 
+    def test_cases_endpoint_client_name_mapping(self):
+        """TEST FINAL - CORRECTION ENDPOINT /api/cases EMPLOYEE - Client Name Mapping"""
+        print("=== TEST FINAL - CORRECTION ENDPOINT /api/cases EMPLOYEE ===")
+        print("Problème corrigé : L'endpoint /api/cases retournait 'Unknown' pour client_name")
+        print("Correction appliquée : Lignes 1403-1409 et 1410-1414 dans server.py")
+        
+        # ============================================================================
+        # TEST 1 - EMPLOYÉ GET CASES
+        # ============================================================================
+        print("\n🔸 TEST 1 - EMPLOYÉ GET CASES")
+        
+        # First, try to login as employee
+        employee_token = None
+        employee_credentials = [
+            {'email': 'employee@aloria.com', 'password': 'emp123'},
+            {'email': 'employee@test.com', 'password': 'password123'},
+            {'email': 'employee@aloria.com', 'password': 'password123'}
+        ]
+        
+        for creds in employee_credentials:
+            try:
+                response = self.session.post(f"{API_BASE}/auth/login", json=creds)
+                if response.status_code == 200:
+                    data = response.json()
+                    employee_token = data['access_token']
+                    employee_user = data['user']
+                    self.log_result("1.1 Employee Login", True, f"Employee logged in: {creds['email']}")
+                    print(f"   Employee: {employee_user.get('full_name')} ({employee_user.get('role')})")
+                    break
+            except Exception as e:
+                continue
+        
+        if not employee_token:
+            # Create a new employee if none exists
+            if 'manager' in self.tokens:
+                try:
+                    headers = {"Authorization": f"Bearer {self.tokens['manager']}"}
+                    employee_data = {
+                        "email": f"test.employee.{int(time.time())}@aloria.com",
+                        "full_name": "Test Employee Cases",
+                        "phone": "+33123456789",
+                        "role": "EMPLOYEE",
+                        "send_email": False
+                    }
+                    response = self.session.post(f"{API_BASE}/users/create", json=employee_data, headers=headers)
+                    if response.status_code in [200, 201]:
+                        emp_response = response.json()
+                        temp_password = emp_response.get('temporary_password')
+                        
+                        # Login as the new employee
+                        login_response = self.session.post(f"{API_BASE}/auth/login", json={
+                            "email": employee_data['email'],
+                            "password": temp_password
+                        })
+                        if login_response.status_code == 200:
+                            employee_token = login_response.json()['access_token']
+                            self.log_result("1.1 Create Employee", True, f"New employee created and logged in")
+                        else:
+                            self.log_result("1.1 Create Employee", False, f"Login failed: {login_response.status_code}")
+                            return
+                    else:
+                        self.log_result("1.1 Create Employee", False, f"Creation failed: {response.status_code}")
+                        return
+                except Exception as e:
+                    self.log_result("1.1 Create Employee", False, f"Exception: {str(e)}")
+                    return
+        
+        # Test GET /api/cases with employee token
+        if employee_token:
+            try:
+                headers = {"Authorization": f"Bearer {employee_token}"}
+                print("🔍 Testing GET /api/cases with employee token")
+                response = self.session.get(f"{API_BASE}/cases", headers=headers)
+                
+                print(f"📊 RESPONSE STATUS: {response.status_code}")
+                
+                if response.status_code == 200:
+                    cases_data = response.json()
+                    self.log_result("1.2 Employee Cases API", True, f"Status 200 OK - {len(cases_data)} cases returned")
+                    
+                    # VÉRIFIER client_name pour chaque case
+                    unknown_count = 0
+                    valid_names = []
+                    case_analysis = []
+                    
+                    for i, case in enumerate(cases_data):
+                        client_name = case.get('client_name', 'Missing')
+                        case_analysis.append({
+                            'case_id': case.get('id', 'Unknown'),
+                            'client_name': client_name,
+                            'client_id': case.get('client_id', 'Missing'),
+                            'case_number': case.get('case_number', case.get('id', 'Missing'))
+                        })
+                        
+                        if client_name == "Unknown":
+                            unknown_count += 1
+                        elif client_name and client_name != "Missing" and len(client_name) > 0:
+                            valid_names.append(client_name)
+                    
+                    print(f"📋 CASE ANALYSIS:")
+                    print(f"   - Total cases: {len(cases_data)}")
+                    print(f"   - Cases with 'Unknown' client_name: {unknown_count}")
+                    print(f"   - Cases with valid client_name: {len(valid_names)}")
+                    
+                    if len(valid_names) > 0:
+                        print(f"   - Examples of valid names: {valid_names[:3]}")
+                    
+                    # Show detailed analysis for first few cases
+                    print(f"📋 DETAILED CASE STRUCTURE (first 3 cases):")
+                    for case in case_analysis[:3]:
+                        print(f"   Case {case['case_id'][:8]}...")
+                        print(f"     - client_name: '{case['client_name']}'")
+                        print(f"     - client_id: {case['client_id']}")
+                        print(f"     - case_number: {case['case_number']}")
+                    
+                    # VÉRIFIER que client_name ne doit PAS être "Unknown"
+                    if unknown_count == 0:
+                        self.log_result("1.3 Client Name Mapping", True, 
+                                      f"✅ CORRECTION VALIDÉE - Aucun client_name 'Unknown' trouvé")
+                    else:
+                        self.log_result("1.3 Client Name Mapping", False, 
+                                      f"❌ PROBLÈME PERSISTANT - {unknown_count} cases avec client_name 'Unknown'")
+                        
+                        # Show problematic cases
+                        unknown_cases = [c for c in case_analysis if c['client_name'] == 'Unknown']
+                        for case in unknown_cases[:3]:
+                            print(f"   PROBLEMATIC CASE: {case}")
+                    
+                    # Store cases data for further tests
+                    self.employee_cases_data = cases_data
+                    
+                else:
+                    self.log_result("1.2 Employee Cases API", False, f"Status: {response.status_code}", response.text)
+                    
+            except Exception as e:
+                self.log_result("1.2 Employee Cases API", False, f"Exception: {str(e)}")
+        
+        # ============================================================================
+        # TEST 2 - MANAGER GET CASES
+        # ============================================================================
+        print("\n🔸 TEST 2 - MANAGER GET CASES")
+        
+        if 'manager' in self.tokens:
+            try:
+                headers = {"Authorization": f"Bearer {self.tokens['manager']}"}
+                print("🔍 Testing GET /api/cases with manager token")
+                response = self.session.get(f"{API_BASE}/cases", headers=headers)
+                
+                if response.status_code == 200:
+                    manager_cases_data = response.json()
+                    self.log_result("2.1 Manager Cases API", True, 
+                                  f"Status 200 OK - {len(manager_cases_data)} cases returned (ALL cases)")
+                    
+                    # VÉRIFIER que tous les client_name sont valides
+                    unknown_count = 0
+                    valid_names = []
+                    
+                    for case in manager_cases_data:
+                        client_name = case.get('client_name', 'Missing')
+                        if client_name == "Unknown":
+                            unknown_count += 1
+                        elif client_name and client_name != "Missing" and len(client_name) > 0:
+                            valid_names.append(client_name)
+                    
+                    print(f"📋 MANAGER CASES ANALYSIS:")
+                    print(f"   - Total cases (all): {len(manager_cases_data)}")
+                    print(f"   - Cases with 'Unknown' client_name: {unknown_count}")
+                    print(f"   - Cases with valid client_name: {len(valid_names)}")
+                    
+                    if len(valid_names) > 0:
+                        unique_names = list(set(valid_names))
+                        print(f"   - Unique client names found: {len(unique_names)}")
+                        print(f"   - Examples: {unique_names[:5]}")
+                    
+                    if unknown_count == 0:
+                        self.log_result("2.2 Manager Client Names", True, 
+                                      "✅ Tous les client_name valides (pas de 'Unknown')")
+                    else:
+                        self.log_result("2.2 Manager Client Names", False, 
+                                      f"❌ {unknown_count} cases avec client_name 'Unknown'")
+                    
+                    # Store manager cases data
+                    self.manager_cases_data = manager_cases_data
+                    
+                else:
+                    self.log_result("2.1 Manager Cases API", False, f"Status: {response.status_code}", response.text)
+                    
+            except Exception as e:
+                self.log_result("2.1 Manager Cases API", False, f"Exception: {str(e)}")
+        
+        # ============================================================================
+        # TEST 3 - STRUCTURE DES CASES
+        # ============================================================================
+        print("\n🔸 TEST 3 - STRUCTURE DES CASES")
+        
+        if hasattr(self, 'manager_cases_data') and self.manager_cases_data:
+            try:
+                # Analyser la structure d'UN case
+                sample_case = self.manager_cases_data[0]
+                
+                print(f"📋 ANALYSE STRUCTURE D'UN CASE:")
+                print(f"   Case ID: {sample_case.get('id', 'Missing')}")
+                
+                required_fields = {
+                    'id': 'UUID',
+                    'client_id': 'présent',
+                    'user_id': 'présent (peut être différent de client_id)',
+                    'client_name': 'nom complet du client',
+                    'case_number': 'numéro de dossier',
+                    'status': 'statut actuel',
+                    'country': 'pays de destination',
+                    'visa_type': 'type de visa'
+                }
+                
+                structure_analysis = {}
+                for field, description in required_fields.items():
+                    value = sample_case.get(field)
+                    if value is None:
+                        structure_analysis[field] = f"❌ Missing - {description}"
+                    elif value == "":
+                        structure_analysis[field] = f"❌ Empty - {description}"
+                    elif field == 'id' and len(str(value)) > 10:
+                        structure_analysis[field] = f"✅ UUID: {str(value)[:8]}... - {description}"
+                    elif field == 'client_name' and value != "Unknown":
+                        structure_analysis[field] = f"✅ Valid: '{value}' - {description}"
+                    elif field == 'client_name' and value == "Unknown":
+                        structure_analysis[field] = f"❌ Unknown - {description}"
+                    else:
+                        structure_analysis[field] = f"✅ Present: '{value}' - {description}"
+                
+                print(f"📋 STRUCTURE ANALYSIS:")
+                for field, analysis in structure_analysis.items():
+                    print(f"   - {field}: {analysis}")
+                
+                # Count valid fields
+                valid_fields = sum(1 for analysis in structure_analysis.values() if "✅" in analysis)
+                total_fields = len(structure_analysis)
+                
+                if valid_fields == total_fields:
+                    self.log_result("3.1 Case Structure Analysis", True, 
+                                  f"✅ Structure complète - {valid_fields}/{total_fields} champs valides")
+                else:
+                    self.log_result("3.1 Case Structure Analysis", False, 
+                                  f"❌ Structure incomplète - {valid_fields}/{total_fields} champs valides")
+                
+            except Exception as e:
+                self.log_result("3.1 Case Structure Analysis", False, f"Exception: {str(e)}")
+        
+        # ============================================================================
+        # TEST 4 - COMPARER CLIENT ET CASE
+        # ============================================================================
+        print("\n🔸 TEST 4 - COMPARER CLIENT ET CASE")
+        
+        if hasattr(self, 'manager_cases_data') and self.manager_cases_data and 'manager' in self.tokens:
+            try:
+                # Prendre un case avec son client_id ou user_id
+                sample_case = self.manager_cases_data[0]
+                case_client_id = sample_case.get('client_id')
+                case_user_id = sample_case.get('user_id')
+                case_client_name = sample_case.get('client_name')
+                
+                print(f"📋 COMPARING CASE AND CLIENT DATA:")
+                print(f"   Case client_id: {case_client_id}")
+                print(f"   Case user_id: {case_user_id}")
+                print(f"   Case client_name: '{case_client_name}'")
+                
+                # GET /api/clients pour trouver le client correspondant
+                headers = {"Authorization": f"Bearer {self.tokens['manager']}"}
+                clients_response = self.session.get(f"{API_BASE}/clients", headers=headers)
+                
+                if clients_response.status_code == 200:
+                    clients_data = clients_response.json()
+                    
+                    # Find matching client
+                    matching_client = None
+                    for client in clients_data:
+                        if (client.get('id') == case_client_id or 
+                            client.get('user_id') == case_client_id or
+                            client.get('id') == case_user_id or
+                            client.get('user_id') == case_user_id):
+                            matching_client = client
+                            break
+                    
+                    if matching_client:
+                        client_full_name = matching_client.get('full_name', 'Missing')
+                        client_email = matching_client.get('email', 'Missing')
+                        client_id = matching_client.get('id', 'Missing')
+                        client_user_id = matching_client.get('user_id', 'Missing')
+                        
+                        print(f"📋 MATCHING CLIENT FOUND:")
+                        print(f"   Client id: {client_id}")
+                        print(f"   Client user_id: {client_user_id}")
+                        print(f"   Client full_name: '{client_full_name}'")
+                        print(f"   Client email: '{client_email}'")
+                        
+                        # VÉRIFIER que le client_name dans le case correspond au nom du client
+                        comparison_results = []
+                        
+                        if case_client_name == client_full_name:
+                            comparison_results.append("✅ client_name matches client.full_name")
+                        else:
+                            comparison_results.append(f"❌ client_name mismatch: case='{case_client_name}' vs client='{client_full_name}'")
+                        
+                        if case_client_id == client_id or case_client_id == client_user_id:
+                            comparison_results.append("✅ client_id mapping correct")
+                        else:
+                            comparison_results.append(f"❌ client_id mapping issue: case_client_id='{case_client_id}' vs client_id='{client_id}' vs client_user_id='{client_user_id}'")
+                        
+                        print(f"📋 COMPARISON RESULTS:")
+                        for result in comparison_results:
+                            print(f"   {result}")
+                        
+                        # Determine overall result
+                        all_match = all("✅" in result for result in comparison_results)
+                        if all_match:
+                            self.log_result("4.1 Client-Case Data Comparison", True, 
+                                          "✅ client_name dans case correspond correctement au nom du client")
+                        else:
+                            self.log_result("4.1 Client-Case Data Comparison", False, 
+                                          "❌ Incohérence entre client_name du case et données client")
+                    else:
+                        self.log_result("4.1 Find Matching Client", False, 
+                                      f"❌ Aucun client trouvé correspondant au case (client_id: {case_client_id}, user_id: {case_user_id})")
+                else:
+                    self.log_result("4.1 Get Clients for Comparison", False, 
+                                  f"Status: {clients_response.status_code}")
+                    
+            except Exception as e:
+                self.log_result("4.1 Client-Case Data Comparison", False, f"Exception: {str(e)}")
+
     def test_priority_2_manager_employee_actions(self):
         """PRIORITY 2: Test Manager/Employee actions"""
         print("=== PRIORITY 2: MANAGER/EMPLOYEE ACTIONS ===")
