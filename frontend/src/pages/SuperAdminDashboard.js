@@ -93,13 +93,15 @@ const SuperAdminDashboard = () => {
       console.log('📊 First 3 activities:', activitiesRes.data.slice(0, 3));
       setActivities(activitiesRes.data);
       
-      // Charger les visiteurs
+      // Charger les visiteurs (messages de contact du site web)
       try {
-        const visitorsResponse = await api.get('/visitors');
+        const visitorsResponse = await api.get('/contact-messages');
+        console.log('📊 Visiteurs (Contact Messages) loaded:', visitorsResponse.data.length);
         setVisitors(visitorsResponse.data);
         setFilteredVisitors(visitorsResponse.data);
       } catch (error) {
         console.error('Error loading visitors:', error);
+        toast.error('Erreur lors du chargement des visiteurs');
       }
     } catch (error) {
       toast.error('Erreur lors du chargement des données');
