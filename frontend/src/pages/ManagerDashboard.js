@@ -1831,24 +1831,24 @@ export default function ManagerDashboard() {
               </div>
 
               {/* Informations du dossier */}
-              <div className="bg-slate-800 p-4 rounded-lg space-y-3">
-                <h4 className="text-white font-semibold mb-3">🗂️ Dossier d'Immigration</h4>
-                <div className="grid grid-cols-2 gap-4">
+              <div className="bg-slate-800 p-3 sm:p-4 rounded-lg space-y-3">
+                <h4 className="text-white font-semibold mb-3 text-sm sm:text-base">🗂️ Dossier d'Immigration</h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div>
-                    <p className="text-slate-400 text-sm">Pays de destination</p>
-                    <p className="text-white font-medium">{selectedClient.country}</p>
+                    <p className="text-slate-400 text-xs sm:text-sm">Pays de destination</p>
+                    <p className="text-white font-medium text-sm sm:text-base">{selectedClient.country}</p>
                   </div>
                   <div>
-                    <p className="text-slate-400 text-sm">Type de visa</p>
-                    <p className="text-white">{selectedClient.visa_type}</p>
+                    <p className="text-slate-400 text-xs sm:text-sm">Type de visa</p>
+                    <p className="text-white text-sm sm:text-base">{selectedClient.visa_type}</p>
                   </div>
                   <div>
-                    <p className="text-slate-400 text-sm">Employé assigné</p>
-                    <p className="text-white">{selectedClient.assigned_employee_name || 'Non assigné'}</p>
+                    <p className="text-slate-400 text-xs sm:text-sm">Employé assigné</p>
+                    <p className="text-white text-sm sm:text-base break-words">{selectedClient.assigned_employee_name || 'Non assigné'}</p>
                   </div>
                   <div>
-                    <p className="text-slate-400 text-sm">Date de création</p>
-                    <p className="text-white">
+                    <p className="text-slate-400 text-xs sm:text-sm">Date de création</p>
+                    <p className="text-white text-sm sm:text-base">
                       {selectedClient.created_at ? new Date(selectedClient.created_at).toLocaleDateString('fr-FR') : 'N/A'}
                     </p>
                   </div>
