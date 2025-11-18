@@ -1013,6 +1013,26 @@ export default function EmployeeDashboard() {
         }}
         credentials={newClientCredentials}
       />
+
+      {/* Profile Settings Overlay */}
+      {showProfileSettings && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-start justify-end p-6">
+          <div className="bg-[#0F172A] rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-slate-700">
+            <div className="sticky top-0 bg-[#1E293B] border-b border-slate-700 p-4 flex justify-between items-center">
+              <h2 className="text-xl font-bold text-white">⚙️ Paramètres du Profil</h2>
+              <button
+                onClick={() => setShowProfileSettings(false)}
+                className="text-slate-400 hover:text-white transition-colors text-2xl"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="p-6">
+              <ProfileSettings user={user} onUpdate={fetchData} />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
