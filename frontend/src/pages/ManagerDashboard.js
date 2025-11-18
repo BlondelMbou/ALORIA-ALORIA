@@ -1906,10 +1906,10 @@ export default function ManagerDashboard() {
                 </div>
               </div>
 
-              <div className="flex justify-end">
+              <div className="flex justify-end pt-3 sm:pt-4 border-t border-slate-700">
                 <Button 
                   onClick={() => setSelectedClient(null)}
-                  className="bg-slate-600 hover:bg-slate-500"
+                  className="bg-slate-600 hover:bg-slate-500 w-full sm:w-auto"
                 >
                   Fermer
                 </Button>
