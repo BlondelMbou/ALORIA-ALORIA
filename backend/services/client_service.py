@@ -221,7 +221,7 @@ async def get_workflow_for_client(db, country: str, visa_type: str) -> List[Dict
     Args:
         db: Instance de la base de données
         country: Pays de destination
-        visa_type: Type de visa
+        visa_type: Type de visa (doit être en français)
     
     Returns:
         List[Dict]: Liste des étapes du workflow
@@ -232,12 +232,17 @@ async def get_workflow_for_client(db, country: str, visa_type: str) -> List[Dict
     if workflows_data:
         workflow_steps = workflows_data.get("workflows", {}).get(visa_type, [])
         if workflow_steps:
-            logger.info(f"Workflow personnalisé trouvé pour {country} - {visa_type}")
+            logger.info(f"✅ Workflow personnalisé trouvé pour {country} - {visa_type} ({len(workflow_steps)} étapes)")
             return workflow_steps
     
     # Utiliser workflow par défaut
     workflow_steps = WORKFLOWS.get(country, {}).get(visa_type, [])
-    logger.info(f"Workflow par défaut utilisé pour {country} - {visa_type}")
+    
+    if workflow_steps:
+        logger.info(f"✅ Workflow par défaut trouvé pour {country} - {visa_type} ({len(workflow_steps)} étapes)")
+    else:
+        logger.warning(f"⚠️ AUCUN workflow trouvé pour {country} - {visa_type}. Workflows disponibles: {list(WORKFLOWS.get(country, {}).keys())}")
+    
     return workflow_steps
 
 
