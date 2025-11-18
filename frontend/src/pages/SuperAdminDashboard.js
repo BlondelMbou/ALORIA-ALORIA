@@ -383,6 +383,13 @@ const SuperAdminDashboard = () => {
               <span className="text-xs bg-red-500/20 text-red-400 px-2 py-1 rounded">SUPERADMIN</span>
             </div>
             <button
+              onClick={() => setShowProfileSettings(!showProfileSettings)}
+              className="flex items-center space-x-2 px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors"
+            >
+              <span>👤</span>
+              <span>Mon Profil</span>
+            </button>
+            <button
               onClick={logout}
               className="flex items-center space-x-2 px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors"
             >
