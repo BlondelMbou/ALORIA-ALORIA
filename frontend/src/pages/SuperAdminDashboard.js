@@ -575,17 +575,19 @@ const SuperAdminDashboard = () => {
                 <thead>
                   <tr className="border-b border-slate-700">
                     <th className="text-left py-3 px-4 text-slate-300 font-medium">Date</th>
+                    <th className="text-left py-3 px-4 text-slate-300 font-medium">Nom</th>
                     <th className="text-left py-3 px-4 text-slate-300 font-medium">Email</th>
                     <th className="text-left py-3 px-4 text-slate-300 font-medium">Téléphone</th>
                     <th className="text-left py-3 px-4 text-slate-300 font-medium">Pays</th>
                     <th className="text-left py-3 px-4 text-slate-300 font-medium">Type de Visa</th>
+                    <th className="text-left py-3 px-4 text-slate-300 font-medium">Statut</th>
                     <th className="text-left py-3 px-4 text-slate-300 font-medium">Message</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredVisitors.length === 0 ? (
                     <tr>
-                      <td colSpan="6" className="text-center py-8 text-slate-400">
+                      <td colSpan="8" className="text-center py-8 text-slate-400">
                         Aucun visiteur trouvé
                       </td>
                     </tr>
@@ -595,10 +597,26 @@ const SuperAdminDashboard = () => {
                         <td className="py-3 px-4 text-slate-300">
                           {visitor.created_at ? new Date(visitor.created_at).toLocaleDateString('fr-FR') : 'N/A'}
                         </td>
+                        <td className="py-3 px-4 text-slate-300 font-medium">{visitor.name || 'N/A'}</td>
                         <td className="py-3 px-4 text-slate-300">{visitor.email || 'N/A'}</td>
                         <td className="py-3 px-4 text-slate-300">{visitor.phone || 'N/A'}</td>
                         <td className="py-3 px-4 text-slate-300">{visitor.country || 'N/A'}</td>
                         <td className="py-3 px-4 text-slate-300">{visitor.visa_type || 'N/A'}</td>
+                        <td className="py-3 px-4">
+                          <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
+                            visitor.status === 'converti_client' ? 'bg-green-500/20 text-green-400' :
+                            visitor.status === 'paiement_50k' ? 'bg-blue-500/20 text-blue-400' :
+                            visitor.status === 'en_consultation' ? 'bg-purple-500/20 text-purple-400' :
+                            visitor.status === 'assigne_employe' ? 'bg-orange-500/20 text-orange-400' :
+                            'bg-slate-500/20 text-slate-400'
+                          }`}>
+                            {visitor.status === 'converti_client' ? 'Converti' :
+                             visitor.status === 'paiement_50k' ? 'Payé' :
+                             visitor.status === 'en_consultation' ? 'En consultation' :
+                             visitor.status === 'assigne_employe' ? 'Assigné' :
+                             visitor.status || 'Nouveau'}
+                          </span>
+                        </td>
                         <td className="py-3 px-4 text-slate-300">
                           <div className="max-w-xs truncate" title={visitor.message}>
                             {visitor.message || 'Aucun message'}
