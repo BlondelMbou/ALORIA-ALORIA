@@ -437,29 +437,29 @@ export default function LandingPage() {
         )}
 
       {/* Hero Section - Mobile-First Responsive */}
-      <section className="pt-20 sm:pt-24 md:pt-28 pb-16 sm:pb-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden min-h-[600px] sm:min-h-screen flex items-center">
+      <section className="pt-20 sm:pt-24 md:pt-28 lg:pt-32 pb-12 sm:pb-16 md:pb-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden min-h-[650px] sm:min-h-[700px] md:min-h-screen flex items-center">
         {/* Animated background elements - Optimized for mobile */}
-        <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute -top-20 sm:-top-40 -right-20 sm:-right-40 w-40 sm:w-80 h-40 sm:h-80 bg-orange-500/10 rounded-full blur-3xl animate-pulse"></div>
           <div className="absolute -bottom-20 sm:-bottom-40 -left-20 sm:-left-40 w-48 sm:w-96 h-48 sm:h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
         </div>
 
         <div className="max-w-7xl mx-auto relative w-full">
-          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+          <div className="grid lg:grid-cols-2 gap-10 sm:gap-12 lg:gap-16 items-center">
             {/* Left Column - Mobile optimized */}
-            <div className="space-y-6 sm:space-y-8 text-center lg:text-left animate-fade-in">
-              <Badge className="bg-orange-500/10 text-orange-400 border-orange-500/30 px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm inline-flex items-center">
-                <Zap className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-                <span className="hidden sm:inline">Services d'Immigration de Confiance Depuis 2012</span>
+            <div className="space-y-6 sm:space-y-7 md:space-y-8 text-center lg:text-left animate-fade-in">
+              <Badge className="bg-orange-500/10 text-orange-400 border-orange-500/30 px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm inline-flex items-center justify-center lg:justify-start max-w-full">
+                <Zap className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 flex-shrink-0" />
+                <span className="hidden sm:inline truncate">Services d'Immigration de Confiance Depuis 2012</span>
                 <span className="sm:hidden">Immigration Experts 2012</span>
               </Badge>
               
-              <h1 className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-tight">
-                Votre Rêve
-                <span className="block bg-gradient-to-r from-orange-500 via-orange-400 to-yellow-400 bg-clip-text text-transparent mt-1 sm:mt-2">
+              <h1 className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-[1.1] sm:leading-tight">
+                <span className="block">Votre Rêve</span>
+                <span className="block bg-gradient-to-r from-orange-500 via-orange-400 to-yellow-400 bg-clip-text text-transparent mt-2 sm:mt-3">
                   d'Immigration
                 </span>
-                <span className="block text-slate-200">Devient Réalité</span>
+                <span className="block text-slate-200 mt-2 sm:mt-3">Devient Réalité</span>
               </h1>
               
               <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-slate-300 leading-relaxed max-w-2xl mx-auto lg:mx-0">
