@@ -37,6 +37,10 @@ const SuperAdminDashboard = () => {
     setFilteredActivities(data);
   }, []);
 
+  const handleFilteredVisitorsChange = React.useCallback((data) => {
+    setFilteredVisitors(data);
+  }, []);
+
   // Calcul dynamique des stats à partir des données locales pour mise à jour en temps réel
   const calculatedStats = React.useMemo(() => {
     const managers = users.filter(u => u.role === 'MANAGER').length;
