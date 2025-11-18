@@ -6336,34 +6336,18 @@ class APITester:
         print("=" * 80)
 
 def main():
-    """Main test execution - DIAGNOSTIC URGENT AUTHENTIFICATION ET DONNÉES CLIENTS"""
-    print("🚀 ALORIA AGENCY Backend API Testing Suite - DIAGNOSTIC URGENT")
+    """Main test execution - TEST FINAL CORRECTION ENDPOINT /api/cases EMPLOYEE"""
+    print("🚀 TEST FINAL - CORRECTION ENDPOINT /api/cases EMPLOYEE")
     print("=" * 80)
-    print("PROBLÈME RAPPORTÉ: Les données clients affichent N/A dans le frontend")
-    print("INVESTIGATION: Problème d'authentification suspecté")
+    print("PROBLÈME CORRIGÉ: L'endpoint /api/cases retournait 'Unknown' pour client_name")
+    print("CORRECTION APPLIQUÉE: Lignes 1403-1409 et 1410-1414 dans server.py")
+    print("OBJECTIF: Vérifier que tous les client_name sont maintenant valides")
     print("=" * 80)
     
     tester = APITester()
     
-    # Step 1: Basic Authentication Test
-    print("\n🔸 PHASE 1: AUTHENTIFICATION DE BASE")
-    tester.test_1_basic_authentication()
-    
-    # Step 2: Client Data Retrieval Test
-    print("\n🔸 PHASE 2: RÉCUPÉRATION DONNÉES CLIENTS")
-    tester.test_2_client_data_retrieval_with_token()
-    
-    # Step 3: Client Data Structure Analysis
-    print("\n🔸 PHASE 3: ANALYSE STRUCTURE DONNÉES")
-    tester.test_3_client_data_structure_analysis()
-    
-    # Step 4: User Verification
-    print("\n🔸 PHASE 4: VÉRIFICATION UTILISATEUR SPÉCIFIQUE")
-    tester.test_4_verify_specific_user()
-    
-    # Step 5: BCRYPT/PASSLIB Verification
-    print("\n🔸 PHASE 5: VÉRIFICATION BCRYPT/PASSLIB")
-    tester.test_5_bcrypt_passlib_verification()
+    # Run the specific test for the review request
+    tester.test_cases_endpoint_client_name_mapping()
     
     # Final summary
     print("\n" + "=" * 80)
