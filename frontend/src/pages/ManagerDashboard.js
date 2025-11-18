@@ -1851,11 +1851,11 @@ export default function ManagerDashboard() {
               {/* Identifiants de connexion */}
               <div className="bg-blue-500/10 border border-blue-500/30 p-4 rounded-lg">
                 <h4 className="text-blue-400 font-semibold mb-3">🔑 Identifiants de Connexion</h4>
-                <div className="space-y-2">
+                <div className="space-y-3">
                   <div>
-                    <p className="text-slate-400 text-sm">Email de connexion</p>
+                    <p className="text-slate-400 text-sm mb-1">Email de connexion</p>
                     <div className="flex items-center gap-2">
-                      <code className="text-white bg-slate-900 px-3 py-1 rounded font-mono text-sm flex-1">
+                      <code className="text-white bg-slate-900 px-3 py-2 rounded font-mono text-sm flex-1">
                         {selectedClient.email}
                       </code>
                       <Button
@@ -1871,8 +1871,30 @@ export default function ManagerDashboard() {
                       </Button>
                     </div>
                   </div>
-                  <div className="text-slate-400 text-xs mt-2">
-                    ℹ️ Le mot de passe temporaire a été envoyé par email lors de la création du compte
+                  <div>
+                    <p className="text-slate-400 text-sm mb-1">Mot de passe par défaut</p>
+                    <div className="flex items-center gap-2">
+                      <code className="text-white bg-slate-900 px-3 py-2 rounded font-mono text-sm flex-1">
+                        Aloria2024!
+                      </code>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="border-slate-600"
+                        onClick={() => {
+                          navigator.clipboard.writeText('Aloria2024!');
+                          toast.success('Mot de passe copié!');
+                        }}
+                      >
+                        Copier
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="bg-amber-500/10 border border-amber-500/30 rounded p-2 mt-2">
+                    <p className="text-amber-200 text-xs flex items-start gap-2">
+                      <span className="text-sm">⚠️</span>
+                      <span>Le client devra changer ce mot de passe lors de sa première connexion.</span>
+                    </p>
                   </div>
                 </div>
               </div>
