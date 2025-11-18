@@ -658,6 +658,21 @@
         -agent: "testing"
         -comment: "✅ TESTED SUCCESSFULLY: Color theme perfectly harmonized across all pages with consistent blue night theme (107 blue/slate elements detected) and orange accents (77 orange elements detected). Landing page, login page, manager dashboard, and employee dashboard all maintain consistent #0F172A/#1E293B/#334155 blue night backgrounds with #orange-500/#orange-600 accent colors. ALORIA AGENCY branding (5 instances) consistently styled. Professional and cohesive design language throughout."
 
+  - task: "SuperAdmin Visitors List Display"
+    implemented: true
+    working: "NA"
+    file: "SuperAdminDashboard.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        -working: false
+        -agent: "user"
+        -comment: "❌ USER REPORTED: L'onglet 'Visiteurs' du tableau de bord SuperAdmin est vide. Le SuperAdmin devrait voir la liste complète de tous les visiteurs du site web (contact form submissions)."
+        -working: "NA"
+        -agent: "main"
+        -comment: "🔧 FIX IMPLEMENTED: Identifié confusion entre deux types de visiteurs - visiteurs physiques de l'agence (VisitorResponse) vs visiteurs du site web (ContactMessageResponse). Modifié SuperAdminDashboard.js pour appeler l'endpoint '/contact-messages' au lieu de '/visitors' (ligne 98). Mis à jour le tableau pour afficher les bonnes colonnes: Nom, Email, Téléphone, Pays, Type de Visa, Statut, Message. Ajouté affichage du statut avec badges colorés (converti, payé, en consultation, assigné, nouveau). Base de données contient 54 messages de contact. Nécessite test pour confirmer l'affichage correct."
+
 ## metadata:
   created_by: "main_agent"
   version: "2.0"
