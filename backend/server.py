@@ -1401,10 +1401,18 @@ async def get_cases(current_user: dict = Depends(get_current_user)):
     for client in clients:
         user = await db.users.find_one({"id": client["user_id"]})
         if user:
+            # Map both client_id and user_id to handle different case structures
             client_map[client["id"]] = user["full_name"]
+            client_map[client["user_id"]] = user["full_name"]
     
     for case in cases:
-        case["client_name"] = client_map.get(case["client_id"], "Unknown")
+        # Try multiple strategies to get client name
+        client_name = (
+            client_map.get(case.get("client_id")) or 
+            client_map.get(case.get("user_id")) or
+            "Unknown"
+        )
+        case["client_name"] = client_name
         # Ensure all required fields have default values
         if "notes" not in case:
             case["notes"] = ""
