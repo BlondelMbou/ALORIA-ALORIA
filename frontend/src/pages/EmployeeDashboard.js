@@ -346,6 +346,14 @@ export default function EmployeeDashboard() {
                 <p className="text-sm font-medium text-white">{user.full_name}</p>
                 <p className="text-xs text-slate-400">{user.role}</p>
               </div>
+              <Button 
+                variant="outline" 
+                onClick={() => setShowProfileSettings(!showProfileSettings)}
+                className="border-slate-600 text-slate-300 hover:bg-slate-800 hover:text-white"
+              >
+                <Users className="w-4 h-4 mr-2" />
+                Mon Profil
+              </Button>
               <Button variant="outline" onClick={logout} data-testid="logout-btn" className="border-slate-600 text-slate-300 hover:bg-slate-800 hover:text-white">
                 <LogOut className="w-4 h-4 mr-2" />
                 Déconnexion
