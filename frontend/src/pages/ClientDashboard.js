@@ -661,10 +661,11 @@ export default function ClientDashboard() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <form onSubmit={handlePaymentDeclaration} className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
+                  <form onSubmit={handlePaymentDeclaration} className="space-y-4 sm:space-y-5">
+                    {/* Mobile: Full width, Desktop: Side by side */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
-                        <Label htmlFor="amount" className="text-slate-300">Montant</Label>
+                        <Label htmlFor="amount" className="text-slate-300 font-medium mb-2 block">Montant</Label>
                         <Input
                           id="amount"
                           type="number"
@@ -673,16 +674,16 @@ export default function ClientDashboard() {
                           value={paymentForm.amount}
                           onChange={(e) => setPaymentForm({...paymentForm, amount: e.target.value})}
                           required
-                          className="bg-slate-600 border-slate-500 text-white"
+                          className="bg-slate-600 border-slate-500 text-white h-12 text-base"
                         />
                       </div>
                       <div>
-                        <Label htmlFor="currency" className="text-slate-300">Devise</Label>
+                        <Label htmlFor="currency" className="text-slate-300 font-medium mb-2 block">Devise</Label>
                         <select
                           id="currency"
                           value={paymentForm.currency}
                           onChange={(e) => setPaymentForm({...paymentForm, currency: e.target.value})}
-                          className="w-full px-3 py-2 bg-slate-600 border border-slate-500 text-white rounded-md"
+                          className="w-full px-3 py-3 bg-slate-600 border border-slate-500 text-white rounded-md h-12 text-base"
                         >
                           <option value="CFA">CFA (FCFA)</option>
                           <option value="EUR">EUR (€)</option>
