@@ -280,37 +280,36 @@ export default function ClientDashboard() {
     <div className="min-h-screen bg-gradient-to-br from-[#0F172A] via-[#1E293B] to-[#0F172A]">
       {/* Header - Mobile-First Responsive */}
       <header className="bg-[#1E293B] border-b border-slate-700/50 shadow-lg sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-14 sm:h-16">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
+          <div className="flex justify-between items-center h-16 sm:h-18 md:h-20">
             {/* Logo Section - Mobile optimized */}
-            <div className="flex items-center gap-3">
-              <AloriaLogo className="h-10" />
-              <div>
-                <h1 className="text-lg sm:text-xl font-bold text-white">Espace Client</h1>
-                <p className="text-xs sm:text-sm text-slate-400">{user?.full_name}</p>
+            <div className="flex items-center gap-2 sm:gap-3">
+              <AloriaLogo className="h-8 sm:h-10" />
+              <div className="hidden sm:block">
+                <h1 className="text-base sm:text-lg md:text-xl font-bold text-white leading-tight">Espace Client</h1>
+                <p className="text-xs sm:text-sm text-slate-400 truncate max-w-[120px] sm:max-w-none">{user?.full_name}</p>
               </div>
             </div>
 
             {/* Right side - Mobile responsive */}
-            <div className="flex items-center space-x-2 sm:space-x-4">
+            <div className="flex items-center gap-2 sm:gap-3">
               <NotificationBell currentUser={user} />
               
               {/* User info - Hidden on mobile, shown on tablet+ */}
-              <div className="hidden md:block text-right">
+              <div className="hidden lg:block text-right">
                 <p className="text-sm font-medium text-white">{user.full_name}</p>
                 <p className="text-xs text-slate-400">{user.role}</p>
               </div>
 
-              {/* Logout button - Responsive */}
+              {/* Logout button - Mobile optimized */}
               <Button 
                 variant="outline" 
                 onClick={logout} 
                 data-testid="logout-btn" 
-                className="border-slate-600 text-slate-300 hover:bg-slate-800 hover:text-white text-xs sm:text-sm px-2 sm:px-4 py-1.5 sm:py-2 touch-manipulation"
+                className="border-slate-600 text-slate-300 hover:bg-slate-800 hover:text-white text-xs sm:text-sm px-2 sm:px-3 md:px-4 py-2 sm:py-2.5 touch-manipulation min-h-[44px]"
               >
-                <LogOut className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-                <span className="hidden xs:inline">Déconnexion</span>
-                <span className="xs:hidden">Exit</span>
+                <LogOut className="w-4 h-4 sm:mr-1 md:mr-2" />
+                <span className="hidden sm:inline">Déconnexion</span>
               </Button>
             </div>
           </div>
