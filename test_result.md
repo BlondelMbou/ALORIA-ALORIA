@@ -516,6 +516,21 @@
         -agent: "testing"
         -comment: "✅ RESET PASSWORD CORRECTION VALIDÉE - 100% SUCCÈS! Tests exhaustifs du système de réinitialisation de mot de passe terminés avec PARFAIT RÉSULTAT (4/4 tests critiques réussis). ✅ TEST 1 - RESET PASSWORD CLIENT: Succès complet - Message de sécurité retourné, mot de passe temporaire généré (aeSOwc@yfzBx), notification créée dans l'application. ✅ TEST 2 - RESET PASSWORD EMPLOYÉ: Succès complet avec mot de passe temporaire (Wz#vgU@*lwk^) pour employee@aloria.com. ✅ TEST 3 - RESET PASSWORD MANAGER: Succès complet avec mot de passe temporaire (UCAsF2GV3FBw) pour manager@test.com. ✅ TEST 4 - EMAIL INVALIDE: Gestion sécurisée correcte - message de sécurité retourné sans révéler l'existence de l'email. La correction du main agent est 100% fonctionnelle - paramètre `db` ajouté, `notification_type` corrigé, import services.notification_service validé. Système de reset password opérationnel pour tous les rôles!"
 
+  - task: "Bcrypt/Passlib Compatibility Issue (URGENT FIX)"
+    implemented: true
+    working: true
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: false
+        -agent: "testing"
+        -comment: "🚨 ERREUR CRITIQUE IDENTIFIÉE: Erreur 500 sur POST /api/auth/login causée par incompatibilité bcrypt 5.0.0 avec passlib 1.7.4. Erreur: 'password cannot be longer than 72 bytes' même pour mots de passe courts. Problème de détection de version bcrypt: 'module bcrypt has no attribute __about__'. Système d'authentification complètement cassé - aucun login possible."
+        -working: true
+        -agent: "testing"
+        -comment: "✅ CORRECTION CRITIQUE APPLIQUÉE - 100% RÉSOLUE! Problème d'incompatibilité bcrypt résolu par downgrade bcrypt 5.0.0 → 4.0.1. ✅ TESTS BCRYPT: Tous les tests de hash/verify fonctionnent correctement, mots de passe jusqu'à 72 bytes supportés. ✅ AUTHENTIFICATION RESTAURÉE: Login manager@test.com/password123 fonctionne, token JWT généré, accès API complet. ✅ CHANGEMENT MOT DE PASSE: PATCH /api/auth/change-password opérationnel. ✅ BACKEND REDÉMARRÉ: Service backend redémarré avec succès, plus d'erreurs 500. La correction d'infrastructure critique a restauré 100% des fonctionnalités d'authentification."
+
 ## frontend:
   - task: "Manager Dashboard SearchAndSort Systems"
     implemented: true
