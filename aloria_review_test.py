@@ -24,7 +24,7 @@ import sys
 import time
 
 # Configuration
-BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://agence-debug.preview.emergentagent.com')
+BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://aloria-dev.preview.emergentagent.com')
 API_BASE = f"{BACKEND_URL}/api"
 
 # Credentials de test selon la demande de révision
