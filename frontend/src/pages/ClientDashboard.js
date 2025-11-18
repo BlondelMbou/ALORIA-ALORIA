@@ -646,9 +646,9 @@ export default function ClientDashboard() {
             </Card>
           </TabsContent>
 
-          {/* Payments Tab */}
+          {/* Payments Tab - Mobile Optimized */}
           <TabsContent value="payments">
-            <div className="grid lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5 md:gap-6">
               {/* Payment Declaration Form */}
               <Card className="bg-gradient-to-br from-[#1E293B] to-[#334155] border-slate-700">
                 <CardHeader>
