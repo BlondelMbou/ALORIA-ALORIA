@@ -422,25 +422,43 @@ export default function ClientDashboard() {
           </CardContent>
         </Card>
 
-        {/* Main Content Tabs */}
+        {/* Main Content Tabs - Mobile Optimized */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-5 mb-6 bg-[#1E293B] border border-slate-700">
-            <TabsTrigger value="progress" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white text-slate-300">
-              Progression
-            </TabsTrigger>
-            <TabsTrigger value="documents" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white text-slate-300">
-              Documents
-            </TabsTrigger>
-            <TabsTrigger value="timeline" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white text-slate-300">
-              Étapes À Venir
-            </TabsTrigger>
-            <TabsTrigger value="payments" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white text-slate-300">
-              Paiements
-            </TabsTrigger>
-            <TabsTrigger value="profile" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white text-slate-300">
-              Mon Profil
-            </TabsTrigger>
-          </TabsList>
+          {/* Mobile: Scrollable Tabs */}
+          <div className="mb-5 sm:mb-6 -mx-3 sm:mx-0">
+            <TabsList className="flex w-full overflow-x-auto md:grid md:grid-cols-5 bg-[#1E293B] border border-slate-700 p-1 scrollbar-hide gap-1 md:gap-0">
+              <TabsTrigger 
+                value="progress" 
+                className="flex-shrink-0 min-w-[110px] sm:min-w-[120px] md:min-w-0 data-[state=active]:bg-orange-500 data-[state=active]:text-white text-slate-300 px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm font-medium whitespace-nowrap rounded-lg md:rounded-none transition-all touch-manipulation"
+              >
+                📊 Progression
+              </TabsTrigger>
+              <TabsTrigger 
+                value="documents" 
+                className="flex-shrink-0 min-w-[110px] sm:min-w-[120px] md:min-w-0 data-[state=active]:bg-orange-500 data-[state=active]:text-white text-slate-300 px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm font-medium whitespace-nowrap rounded-lg md:rounded-none transition-all touch-manipulation"
+              >
+                📄 Documents
+              </TabsTrigger>
+              <TabsTrigger 
+                value="timeline" 
+                className="flex-shrink-0 min-w-[110px] sm:min-w-[120px] md:min-w-0 data-[state=active]:bg-orange-500 data-[state=active]:text-white text-slate-300 px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm font-medium whitespace-nowrap rounded-lg md:rounded-none transition-all touch-manipulation"
+              >
+                🗓️ À Venir
+              </TabsTrigger>
+              <TabsTrigger 
+                value="payments" 
+                className="flex-shrink-0 min-w-[110px] sm:min-w-[120px] md:min-w-0 data-[state=active]:bg-orange-500 data-[state=active]:text-white text-slate-300 px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm font-medium whitespace-nowrap rounded-lg md:rounded-none transition-all touch-manipulation"
+              >
+                💳 Paiements
+              </TabsTrigger>
+              <TabsTrigger 
+                value="profile" 
+                className="flex-shrink-0 min-w-[110px] sm:min-w-[120px] md:min-w-0 data-[state=active]:bg-orange-500 data-[state=active]:text-white text-slate-300 px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm font-medium whitespace-nowrap rounded-lg md:rounded-none transition-all touch-manipulation"
+              >
+                👤 Profil
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
           {/* Progress Tab */}
           <TabsContent value="progress">
