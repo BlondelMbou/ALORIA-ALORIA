@@ -388,34 +388,34 @@ export default function ClientDashboard() {
                   </AvatarFallback>
                 </Avatar>
                 <div>
-                  <h1 className="text-3xl font-bold text-white mb-2">Bonjour, {user.full_name}</h1>
-                  <p className="text-slate-300 text-lg mb-1">{caseData.country} - {caseData.visa_type}</p>
+                  <h1 className="text-3xl font-bold text-white mb-2">Bonjour, {user.full_name} 👋</h1>
+                  <p className="text-slate-300 text-lg mb-2">{caseData.country} - {caseData.visa_type}</p>
                   <div className="flex items-center space-x-4">
-                    <Badge className={getStatusColor(caseData.status)} data-testid="case-status-badge">
+                    <Badge className={`${getStatusColor(caseData.status)} px-3 py-1`} data-testid="case-status-badge">
                       {caseData.status}
                     </Badge>
                     {counselor && (
                       <div className="flex items-center text-slate-300">
-                        <User className="w-4 h-4 mr-1" />
-                        Conseiller: {counselor.name}
+                        <User className="w-4 h-4 mr-2 text-orange-400" />
+                        <span className="font-medium">Conseiller: {counselor.name}</span>
                       </div>
                     )}
                   </div>
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-4xl font-bold text-orange-500 mb-1">
+                <div className="text-5xl font-bold text-orange-500 mb-2">
                   {Math.round(progressPercentage)}%
                 </div>
-                <p className="text-slate-400">Progression</p>
+                <p className="text-slate-400 text-lg">Progression</p>
               </div>
             </div>
             
-            {/* Progress Bar */}
-            <div className="mt-6">
-              <div className="flex justify-between text-sm text-slate-400 mb-2">
+            {/* Progress Bar - Desktop Only */}
+            <div className="hidden lg:block mt-8">
+              <div className="flex justify-between text-sm text-slate-400 mb-3">
                 <span>Étape {caseData.current_step_index + 1} sur {caseData.workflow_steps.length}</span>
-                <span className="text-orange-500">{Math.round(progressPercentage)}% terminé</span>
+                <span className="text-orange-500 font-medium">{Math.round(progressPercentage)}% terminé</span>
               </div>
               <Progress value={progressPercentage} className="h-3" />
             </div>
