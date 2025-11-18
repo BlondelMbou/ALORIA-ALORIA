@@ -75,15 +75,22 @@ const CredentialsPopup = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-[#1E293B] border-slate-700 text-white max-w-2xl">
-        <DialogHeader>
-          <DialogTitle className="text-2xl font-bold flex items-center gap-3">
-            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center">
-              <CheckCircle className="w-6 h-6 text-white" />
+      <DialogContent className="bg-[#1E293B] border-slate-700 text-white max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader className="relative">
+          <button
+            onClick={() => onOpenChange(false)}
+            className="absolute right-0 top-0 text-slate-400 hover:text-white transition-colors text-2xl font-bold leading-none"
+            aria-label="Fermer"
+          >
+            ✕
+          </button>
+          <DialogTitle className="text-xl sm:text-2xl font-bold flex items-center gap-3 pr-8">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center flex-shrink-0">
+              <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
             </div>
             <span>Compte Créé avec Succès !</span>
           </DialogTitle>
-          <DialogDescription className="text-slate-400 text-base mt-2">
+          <DialogDescription className="text-slate-400 text-sm sm:text-base mt-2">
             Les informations de connexion ont été générées. Veuillez les noter ou les copier.
           </DialogDescription>
         </DialogHeader>
