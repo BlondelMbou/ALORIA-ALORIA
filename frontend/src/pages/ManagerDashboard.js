@@ -744,17 +744,20 @@ export default function ManagerDashboard() {
           </Card>
         </div>
 
-        {/* Tabs */}
-        <Tabs defaultValue="clients" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 md:grid-cols-7 gap-2 bg-[#1E293B] border border-slate-700 p-2">
-            <TabsTrigger value="clients" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-orange-600 data-[state=active]:text-white text-slate-300">Clients</TabsTrigger>
-            <TabsTrigger value="employees" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-orange-600 data-[state=active]:text-white text-slate-300">Équipe</TabsTrigger>
-            <TabsTrigger value="cases" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-orange-600 data-[state=active]:text-white text-slate-300">Dossiers</TabsTrigger>
-            <TabsTrigger value="visitors" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-orange-600 data-[state=active]:text-white text-slate-300">Visiteurs</TabsTrigger>
-            <TabsTrigger value="prospects" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-orange-600 data-[state=active]:text-white text-slate-300">Prospects</TabsTrigger>
-            <TabsTrigger value="payments" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-orange-600 data-[state=active]:text-white text-slate-300">Paiements</TabsTrigger>
-            <TabsTrigger value="withdrawals" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-orange-600 data-[state=active]:text-white text-slate-300">Retraits</TabsTrigger>
-          </TabsList>
+        {/* Tabs - Mobile Optimized */}
+        <Tabs defaultValue="clients" className="space-y-5 sm:space-y-6">
+          {/* Mobile: Scrollable Tabs, Desktop: Grid */}
+          <div className="-mx-4 sm:mx-0">
+            <TabsList className="flex w-full overflow-x-auto md:grid md:grid-cols-7 bg-[#1E293B] border border-slate-700 p-1.5 sm:p-2 gap-1 sm:gap-2 scrollbar-hide">
+              <TabsTrigger value="clients" className="flex-shrink-0 min-w-[100px] md:min-w-0 data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-orange-600 data-[state=active]:text-white text-slate-300 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium whitespace-nowrap rounded-lg transition-all touch-manipulation">👥 Clients</TabsTrigger>
+              <TabsTrigger value="employees" className="flex-shrink-0 min-w-[100px] md:min-w-0 data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-orange-600 data-[state=active]:text-white text-slate-300 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium whitespace-nowrap rounded-lg transition-all touch-manipulation">👔 Équipe</TabsTrigger>
+              <TabsTrigger value="cases" className="flex-shrink-0 min-w-[100px] md:min-w-0 data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-orange-600 data-[state=active]:text-white text-slate-300 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium whitespace-nowrap rounded-lg transition-all touch-manipulation">📁 Dossiers</TabsTrigger>
+              <TabsTrigger value="visitors" className="flex-shrink-0 min-w-[100px] md:min-w-0 data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-orange-600 data-[state=active]:text-white text-slate-300 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium whitespace-nowrap rounded-lg transition-all touch-manipulation">🚶 Visiteurs</TabsTrigger>
+              <TabsTrigger value="prospects" className="flex-shrink-0 min-w-[100px] md:min-w-0 data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-orange-600 data-[state=active]:text-white text-slate-300 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium whitespace-nowrap rounded-lg transition-all touch-manipulation">🎯 Prospects</TabsTrigger>
+              <TabsTrigger value="payments" className="flex-shrink-0 min-w-[100px] md:min-w-0 data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-orange-600 data-[state=active]:text-white text-slate-300 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium whitespace-nowrap rounded-lg transition-all touch-manipulation">💰 Paiements</TabsTrigger>
+              <TabsTrigger value="withdrawals" className="flex-shrink-0 min-w-[100px] md:min-w-0 data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-orange-600 data-[state=active]:text-white text-slate-300 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium whitespace-nowrap rounded-lg transition-all touch-manipulation">🏦 Retraits</TabsTrigger>
+            </TabsList>
+          </div>
 
           {/* Clients Tab */}
           <TabsContent value="clients">
