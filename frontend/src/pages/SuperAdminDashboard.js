@@ -560,9 +560,10 @@ const SuperAdminDashboard = () => {
             
             <SearchAndSort
               data={visitors}
-              searchFields={['email', 'phone', 'country', 'visa_type', 'message']}
+              searchFields={['name', 'email', 'phone', 'country', 'visa_type', 'message']}
               sortOptions={[
                 { value: 'created_at', label: 'Date de visite' },
+                { value: 'name', label: 'Nom' },
                 { value: 'email', label: 'Email' },
                 { value: 'country', label: 'Pays' }
               ]}
