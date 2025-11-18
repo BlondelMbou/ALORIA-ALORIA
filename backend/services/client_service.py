@@ -138,8 +138,10 @@ async def create_client_profile(
     await db.clients.insert_one(client_dict)
     logger.info(f"Profil client créé: {client_id} ({full_name})")
     
-    # 2. Récupérer le workflow approprié
-    workflow_steps = await get_workflow_for_client(db, country, visa_type)
+    # 2. Normaliser le type de visa (anglais → français) et récupérer le workflow
+    normalized_visa_type = normalize_visa_type(visa_type)
+    workflow_steps = await get_workflow_for_client(db, country, normalized_visa_type)
+    logger.info(f"Workflow récupéré pour {country} - {normalized_visa_type}: {len(workflow_steps)} étapes")
     
     # 3. Créer le dossier (case) avec workflow
     case_id = str(uuid.uuid4())
