@@ -13,7 +13,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 # Ajouter le répertoire parent au path pour importer les modules
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from dotenv import load_load_dotenv
+from dotenv import load_dotenv
 
 # Charger les variables d'environnement
 load_dotenv()
