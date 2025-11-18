@@ -93,6 +93,44 @@ img {
     }
 }
 
+/* Tabs scrollables - Masquer scrollbar */
+.scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+}
+
+/* Touch optimization pour les boutons */
+@media (hover: none) and (pointer: coarse) {
+    button, a, [role="button"] {
+        min-height: 44px;
+        min-width: 44px;
+    }
+}
+
+/* Amélioration des cards sur mobile */
+@media (max-width: 640px) {
+    .card-mobile-optimized {
+        border-radius: 12px;
+        padding: 1rem;
+    }
+    
+    /* Optimisation des dialogs/modals sur mobile */
+    [role="dialog"] {
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+    
+    /* Meilleure gestion des grids sur mobile */
+    .responsive-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+}
+
 /* Réduire les animations sur mobile bas de gamme */
 @media (prefers-reduced-motion: reduce) {
     *,
