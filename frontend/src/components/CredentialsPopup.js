@@ -143,17 +143,17 @@ const CredentialsPopup = ({
           </div>
 
           {/* Mot de passe temporaire */}
-          <div className="bg-slate-800/50 rounded-lg p-4 border border-slate-700">
-            <div className="flex items-center gap-3 mb-3">
-              <Lock className="w-5 h-5 text-orange-400" />
-              <h3 className="font-semibold">Mot de passe temporaire</h3>
+          <div className="bg-slate-800/50 rounded-lg p-3 sm:p-4 border border-slate-700">
+            <div className="flex items-center gap-2 sm:gap-3 mb-3">
+              <Lock className="w-4 h-4 sm:w-5 sm:h-5 text-orange-400 flex-shrink-0" />
+              <h3 className="font-semibold text-base sm:text-lg">Mot de passe temporaire</h3>
             </div>
-            <div className="flex items-center gap-2">
-              <div className="flex-1 bg-slate-900 rounded px-4 py-3 font-mono text-sm border border-slate-700 flex items-center justify-between">
-                <span>{showPassword ? displayPassword : '••••••••••••'}</span>
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+              <div className="flex-1 bg-slate-900 rounded px-3 sm:px-4 py-2 sm:py-3 font-mono text-xs sm:text-sm border border-slate-700 flex items-center justify-between">
+                <span className="break-all flex-1">{showPassword ? displayPassword : '••••••••••••'}</span>
                 <button
                   onClick={() => setShowPassword(!showPassword)}
-                  className="text-slate-400 hover:text-white transition-colors"
+                  className="text-slate-400 hover:text-white transition-colors ml-2 flex-shrink-0"
                 >
                   {showPassword ? (
                     <EyeOff className="w-4 h-4" />
@@ -166,12 +166,12 @@ const CredentialsPopup = ({
                 size="sm"
                 variant="outline"
                 onClick={() => copyToClipboard(displayPassword, 'password')}
-                className="bg-slate-700 border-slate-600 hover:bg-slate-600"
+                className="bg-slate-700 border-slate-600 hover:bg-slate-600 w-full sm:w-auto"
               >
                 {copiedPassword ? (
-                  <CheckCircle className="w-4 h-4 text-green-400" />
+                  <><CheckCircle className="w-4 h-4 text-green-400 mr-1" /> Copié</>
                 ) : (
-                  <Copy className="w-4 h-4" />
+                  <><Copy className="w-4 h-4 mr-1" /> Copier</>
                 )}
               </Button>
             </div>
