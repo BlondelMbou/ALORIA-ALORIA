@@ -462,37 +462,37 @@ export default function LandingPage() {
                 <span className="block text-slate-200 mt-2 sm:mt-3">Devient Réalité</span>
               </h1>
               
-              <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-slate-300 leading-relaxed max-w-2xl mx-auto lg:mx-0">
+              <p className="text-sm sm:text-base md:text-lg lg:text-xl text-slate-300 leading-relaxed max-w-2xl mx-auto lg:mx-0 px-2 sm:px-0">
                 Expertise premium pour vos demandes de visa vers le <span className="text-orange-400 font-semibold">Canada</span> et 
                 la <span className="text-blue-400 font-semibold">France</span>. 
-                <span className="hidden sm:inline"> Nos experts certifiés transforment la complexité de l'immigration en un processus simple, transparent et efficace.</span>
+                <span className="hidden md:inline"> Nos experts certifiés transforment la complexité de l'immigration en un processus simple, transparent et efficace.</span>
               </p>
 
               {/* Features Grid - Responsive */}
-              <div className="grid grid-cols-1 xs:grid-cols-2 gap-3 sm:gap-4 max-w-lg mx-auto lg:max-w-none lg:mx-0">
-                <div className="flex items-center space-x-2 sm:space-x-3 p-2.5 sm:p-3 bg-green-500/10 rounded-lg border border-green-500/20">
-                  <CheckCircle className="w-4 h-4 sm:w-6 sm:h-6 text-green-400 flex-shrink-0" />
+              <div className="grid grid-cols-1 xs:grid-cols-2 gap-3 sm:gap-4 max-w-md sm:max-w-lg mx-auto lg:max-w-none lg:mx-0">
+                <div className="flex items-center gap-2 sm:gap-3 p-3 sm:p-3.5 bg-green-500/10 rounded-xl border border-green-500/20 hover:border-green-500/40 transition-all">
+                  <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-green-400 flex-shrink-0" />
                   <span className="text-slate-200 font-medium text-sm sm:text-base">Suivi Temps Réel</span>
                 </div>
-                <div className="flex items-center space-x-2 sm:space-x-3 p-2.5 sm:p-3 bg-blue-500/10 rounded-lg border border-blue-500/20">
-                  <Shield className="w-4 h-4 sm:w-6 sm:h-6 text-blue-400 flex-shrink-0" />
+                <div className="flex items-center gap-2 sm:gap-3 p-3 sm:p-3.5 bg-blue-500/10 rounded-xl border border-blue-500/20 hover:border-blue-500/40 transition-all">
+                  <Shield className="w-5 h-5 sm:w-6 sm:h-6 text-blue-400 flex-shrink-0" />
                   <span className="text-slate-200 font-medium text-sm sm:text-base">Experts Certifiés</span>
                 </div>
-                <div className="flex items-center space-x-2 sm:space-x-3 p-2.5 sm:p-3 bg-purple-500/10 rounded-lg border border-purple-500/20">
-                  <Award className="w-4 h-4 sm:w-6 sm:h-6 text-purple-400 flex-shrink-0" />
+                <div className="flex items-center gap-2 sm:gap-3 p-3 sm:p-3.5 bg-purple-500/10 rounded-xl border border-purple-500/20 hover:border-purple-500/40 transition-all">
+                  <Award className="w-5 h-5 sm:w-6 sm:h-6 text-purple-400 flex-shrink-0" />
                   <span className="text-slate-200 font-medium text-sm sm:text-base">98% Succès</span>
                 </div>
-                <div className="flex items-center space-x-2 sm:space-x-3 p-2.5 sm:p-3 bg-orange-500/10 rounded-lg border border-orange-500/20">
-                  <Headphones className="w-4 h-4 sm:w-6 sm:h-6 text-orange-400 flex-shrink-0" />
+                <div className="flex items-center gap-2 sm:gap-3 p-3 sm:p-3.5 bg-orange-500/10 rounded-xl border border-orange-500/20 hover:border-orange-500/40 transition-all">
+                  <Headphones className="w-5 h-5 sm:w-6 sm:h-6 text-orange-400 flex-shrink-0" />
                   <span className="text-slate-200 font-medium text-sm sm:text-base">Support 24/7</span>
                 </div>
               </div>
 
               {/* CTA Buttons - Mobile optimized */}
-              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full">
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full pt-2">
                 <Button 
                   size="lg" 
-                  className="w-full sm:w-auto bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white px-6 sm:px-8 py-4 sm:py-6 text-base sm:text-lg shadow-2xl shadow-orange-500/50 hover:shadow-orange-500/70 transition-all duration-300 hover:scale-105 touch-manipulation"
+                  className="w-full sm:w-auto bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white px-6 sm:px-8 py-5 sm:py-6 text-base sm:text-lg font-semibold shadow-2xl shadow-orange-500/50 hover:shadow-orange-500/70 transition-all duration-300 hover:scale-105 touch-manipulation min-h-[56px]"
                   onClick={() => {
                     const crsCalculator = document.getElementById('calculateur-crs');
                     if (crsCalculator) {
