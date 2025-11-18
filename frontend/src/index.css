@@ -170,6 +170,37 @@ img {
     }
 }
 
+/* Animations optimisées pour mobile */
+@media (max-width: 768px) {
+    /* Réduire la complexité des animations sur mobile */
+    .animate-pulse {
+        animation-duration: 3s;
+    }
+    
+    .animate-bounce {
+        animation-duration: 2s;
+    }
+    
+    /* Transitions rapides sur mobile */
+    * {
+        transition-duration: 0.2s !important;
+    }
+}
+
+/* Optimisation de rendu pour mobile */
+.card, .button, [class*="Card"], [class*="Button"] {
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+}
+
+/* Améliorer le rendu des gradients sur mobile */
+[class*="gradient"] {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
 /* Réduire les animations sur mobile bas de gamme */
 @media (prefers-reduced-motion: reduce) {
     *,
