@@ -694,12 +694,12 @@ export default function ClientDashboard() {
                     </div>
                     
                     <div>
-                      <Label htmlFor="payment_method" className="text-slate-300">Méthode de Paiement</Label>
+                      <Label htmlFor="payment_method" className="text-slate-300 font-medium mb-2 block">Méthode de Paiement</Label>
                       <select
                         id="payment_method"
                         value={paymentForm.payment_method}
                         onChange={(e) => setPaymentForm({...paymentForm, payment_method: e.target.value})}
-                        className="w-full px-3 py-2 bg-slate-600 border border-slate-500 text-white rounded-md"
+                        className="w-full px-3 py-3 bg-slate-600 border border-slate-500 text-white rounded-md h-12 text-base"
                       >
                         <option value="Virement bancaire">Virement bancaire</option>
                         <option value="Carte bancaire">Carte bancaire</option>
@@ -710,22 +710,22 @@ export default function ClientDashboard() {
                     </div>
 
                     <div>
-                      <Label htmlFor="description" className="text-slate-300">Description (optionnelle)</Label>
+                      <Label htmlFor="description" className="text-slate-300 font-medium mb-2 block">Description (optionnelle)</Label>
                       <textarea
                         id="description"
                         placeholder="Décrivez le paiement (ex: Frais de dossier, Honoraires consultation...)"
                         value={paymentForm.description}
                         onChange={(e) => setPaymentForm({...paymentForm, description: e.target.value})}
                         rows={3}
-                        className="w-full px-3 py-2 bg-slate-600 border border-slate-500 text-white rounded-md resize-none"
+                        className="w-full px-3 py-2.5 bg-slate-600 border border-slate-500 text-white rounded-md resize-none text-base"
                       />
                     </div>
 
                     <Button 
                       type="submit"
-                      className="w-full bg-orange-600 hover:bg-orange-700 text-white"
+                      className="w-full bg-orange-600 hover:bg-orange-700 text-white py-3 h-12 text-base font-semibold touch-manipulation"
                     >
-                      <CreditCard className="h-4 w-4 mr-2" />
+                      <CreditCard className="h-5 w-5 mr-2" />
                       Déclarer le Paiement
                     </Button>
                   </form>
