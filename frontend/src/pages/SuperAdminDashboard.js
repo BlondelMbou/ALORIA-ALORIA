@@ -557,7 +557,7 @@ const SuperAdminDashboard = () => {
                 { value: 'email', label: 'Email' },
                 { value: 'country', label: 'Pays' }
               ]}
-              onFilteredDataChange={setFilteredVisitors}
+              onFilteredDataChange={handleFilteredVisitorsChange}
             />
 
             <div className="mt-6 overflow-x-auto">
