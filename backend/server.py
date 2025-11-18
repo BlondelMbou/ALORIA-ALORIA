@@ -1801,7 +1801,8 @@ async def create_visitor(visitor_data: VisitorCreate, current_user: dict = Depen
 
 @api_router.get("/visitors", response_model=List[VisitorResponse])
 async def get_visitors(current_user: dict = Depends(get_current_user)):
-    if current_user["role"] not in ["MANAGER", "EMPLOYEE"]:
+    # SUPERADMIN can view all visitors, MANAGER and EMPLOYEE can view their own
+    if current_user["role"] not in ["MANAGER", "EMPLOYEE", "SUPERADMIN"]:
         raise HTTPException(status_code=403, detail="Access denied")
     
     visitors = await db.visitors.find({}, {"_id": 0}).sort("created_at", -1).to_list(1000)
