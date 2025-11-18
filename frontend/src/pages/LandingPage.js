@@ -534,33 +534,33 @@ export default function LandingPage() {
                 </CardContent>
               </Card>
               
-              <Card className="bg-gradient-to-br from-[#1E293B] to-[#334155] border-slate-700/50 hover:border-green-500/50 transition-all duration-300">
-                <CardContent className="p-3 sm:p-4 md:p-6 text-center">
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 bg-gradient-to-r from-green-500 to-green-600 rounded-xl md:rounded-2xl flex items-center justify-center mx-auto mb-2 sm:mb-3 md:mb-4">
-                    <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 text-white" />
+              <Card className="bg-gradient-to-br from-[#1E293B] to-[#334155] border-slate-700/50 hover:border-green-500/50 transition-all duration-300 shadow-lg">
+                <CardContent className="p-4 sm:p-5 md:p-6 text-center">
+                  <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-gradient-to-r from-green-500 to-green-600 rounded-xl md:rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4 shadow-lg">
+                    <TrendingUp className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-white" />
                   </div>
                   <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-1 sm:mb-2">{animatedNumbers.success}%</h3>
-                  <p className="text-slate-400 text-xs sm:text-sm md:text-base">Taux de Réussite</p>
+                  <p className="text-slate-400 text-xs sm:text-sm md:text-base font-medium">Taux de Réussite</p>
                 </CardContent>
               </Card>
               
-              <Card className="bg-gradient-to-br from-[#1E293B] to-[#334155] border-slate-700/50 hover:border-blue-500/50 transition-all duration-300">
-                <CardContent className="p-3 sm:p-4 md:p-6 text-center">
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl md:rounded-2xl flex items-center justify-center mx-auto mb-2 sm:mb-3 md:mb-4">
-                    <Globe className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 text-white" />
+              <Card className="bg-gradient-to-br from-[#1E293B] to-[#334155] border-slate-700/50 hover:border-blue-500/50 transition-all duration-300 shadow-lg">
+                <CardContent className="p-4 sm:p-5 md:p-6 text-center">
+                  <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl md:rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4 shadow-lg">
+                    <Globe className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-white" />
                   </div>
                   <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-1 sm:mb-2">{animatedNumbers.countries}+</h3>
-                  <p className="text-slate-400 text-xs sm:text-sm md:text-base">Pays Partenaires</p>
+                  <p className="text-slate-400 text-xs sm:text-sm md:text-base font-medium">Pays Partenaires</p>
                 </CardContent>
               </Card>
               
-              <Card className="bg-gradient-to-br from-[#1E293B] to-[#334155] border-slate-700/50 hover:border-purple-500/50 transition-all duration-300">
-                <CardContent className="p-3 sm:p-4 md:p-6 text-center">
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl md:rounded-2xl flex items-center justify-center mx-auto mb-2 sm:mb-3 md:mb-4">
-                    <Calendar className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 text-white" />
+              <Card className="bg-gradient-to-br from-[#1E293B] to-[#334155] border-slate-700/50 hover:border-purple-500/50 transition-all duration-300 shadow-lg">
+                <CardContent className="p-4 sm:p-5 md:p-6 text-center">
+                  <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl md:rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4 shadow-lg">
+                    <Calendar className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-white" />
                   </div>
                   <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-1 sm:mb-2">{animatedNumbers.experience}+</h3>
-                  <p className="text-slate-400 text-xs sm:text-sm md:text-base">Années d'Expérience</p>
+                  <p className="text-slate-400 text-xs sm:text-sm md:text-base font-medium">Années d'Expérience</p>
                 </CardContent>
               </Card>
             </div>
