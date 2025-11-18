@@ -121,163 +121,502 @@ class APITester:
             except Exception as e:
                 self.log_result(f"{role.upper()} Login", False, "Exception occurred", str(e))
 
-    def test_urgent_1_client_data_na_issue(self):
-        """TEST URGENT 1: DIAGNOSTIC DONNÉES CLIENTS N/A"""
-        print("=== TEST URGENT 1: DIAGNOSTIC DONNÉES CLIENTS N/A ===")
+    def test_1_basic_authentication(self):
+        """TEST 1 - AUTHENTIFICATION DE BASE"""
+        print("=== TEST 1 - AUTHENTIFICATION DE BASE ===")
         
-        # Try to create a manager first if we have SuperAdmin access
-        if 'manager' not in self.tokens and 'superadmin' in self.tokens:
-            print("🔍 CREATING MANAGER FOR TESTING")
-            try:
-                headers = {"Authorization": f"Bearer {self.tokens['superadmin']}"}
-                manager_data = {
-                    "email": "manager@test.com",
-                    "full_name": "Test Manager",
-                    "phone": "+33123456789",
-                    "role": "MANAGER",
-                    "send_email": False
-                }
-                response = self.session.post(f"{API_BASE}/users/create", json=manager_data, headers=headers)
-                if response.status_code in [200, 201]:
-                    manager_response = response.json()
-                    temp_password = manager_response.get('temporary_password', 'password123')
-                    
-                    # Try to login with the new manager
-                    login_response = self.session.post(f"{API_BASE}/auth/login", json={
-                        "email": "manager@test.com",
-                        "password": temp_password
-                    })
-                    if login_response.status_code == 200:
-                        login_data = login_response.json()
-                        self.tokens['manager'] = login_data['access_token']
-                        self.users['manager'] = login_data['user']
-                        self.log_result("1.0 Create Manager", True, f"Manager created and logged in with password: {temp_password}")
-                    else:
-                        # Try with default password
-                        login_response = self.session.post(f"{API_BASE}/auth/login", json={
-                            "email": "manager@test.com",
-                            "password": "password123"
-                        })
-                        if login_response.status_code == 200:
-                            login_data = login_response.json()
-                            self.tokens['manager'] = login_data['access_token']
-                            self.users['manager'] = login_data['user']
-                            self.log_result("1.0 Create Manager", True, "Manager logged in with default password")
-                        else:
-                            self.log_result("1.0 Create Manager", False, f"Login failed: {login_response.status_code}")
-                else:
-                    self.log_result("1.0 Create Manager", False, f"Manager creation failed: {response.status_code}")
-            except Exception as e:
-                self.log_result("1.0 Create Manager", False, f"Exception: {str(e)}")
-        
-        # Use SuperAdmin if Manager still not available
-        test_token = None
-        test_role = None
-        if 'manager' in self.tokens:
-            test_token = self.tokens['manager']
-            test_role = "MANAGER"
-        elif 'superadmin' in self.tokens:
-            test_token = self.tokens['superadmin']
-            test_role = "SUPERADMIN"
-        else:
-            self.log_result("TEST 1 - No Admin Access", False, "Neither Manager nor SuperAdmin credentials available")
-            return
-            
-        headers = {"Authorization": f"Bearer {test_token}"}
-        
-        # ÉTAPE 1: Login Admin - DÉJÀ FAIT
-        self.log_result("1.1 Admin Login", True, f"{test_role} logged in successfully")
-        
-        # ÉTAPE 2: GET /api/clients
+        # POST /api/auth/login avec manager@test.com / password123
         try:
-            print("🔍 TESTING GET /api/clients")
-            response = self.session.get(f"{API_BASE}/clients", headers=headers)
+            print("🔍 TESTING POST /api/auth/login with manager@test.com / password123")
+            login_data = {
+                "email": "manager@test.com",
+                "password": "password123"
+            }
             
+            response = self.session.post(f"{API_BASE}/auth/login", json=login_data)
+            
+            print(f"📊 RESPONSE STATUS: {response.status_code}")
+            print(f"📊 RESPONSE HEADERS: {dict(response.headers)}")
+            
+            # VÉRIFIER Status code 200
             if response.status_code == 200:
-                clients = response.json()
-                print(f"📊 NOMBRE DE CLIENTS RETOURNÉS: {len(clients)}")
+                self.log_result("1.1 Login Status Code", True, "✅ Status code 200 - Login successful")
                 
-                # ÉTAPE 3: ANALYSER la réponse
-                na_clients = []
-                valid_clients = []
-                
-                for i, client in enumerate(clients[:5]):  # Analyser les 5 premiers clients
-                    client_analysis = {
-                        'client_id': client.get('id', 'N/A'),
-                        'user_id': client.get('user_id', 'N/A'),
-                        'full_name': client.get('full_name', 'N/A'),
-                        'email': client.get('email', 'N/A'),
-                        'phone': client.get('phone', 'N/A')
-                    }
+                try:
+                    response_data = response.json()
+                    print(f"📊 RESPONSE DATA KEYS: {list(response_data.keys())}")
                     
-                    print(f"🔍 CLIENT {i+1}: ID={client_analysis['client_id']}")
-                    print(f"   - user_id: {client_analysis['user_id']}")
-                    print(f"   - full_name: {client_analysis['full_name']}")
-                    print(f"   - email: {client_analysis['email']}")
-                    print(f"   - phone: {client_analysis['phone']}")
-                    
-                    # Vérifier si les données sont N/A, vides ou null
-                    has_na_data = (
-                        client_analysis['full_name'] in [None, '', 'N/A', 'null'] or
-                        client_analysis['email'] in [None, '', 'N/A', 'null'] or
-                        client_analysis['phone'] in [None, '', 'N/A', 'null']
-                    )
-                    
-                    if has_na_data:
-                        na_clients.append(client_analysis)
+                    # VÉRIFIER access_token présent
+                    access_token = response_data.get('access_token')
+                    if access_token:
+                        self.log_result("1.2 Access Token Present", True, "✅ access_token présent dans la réponse")
+                        
+                        # VÉRIFIER Token n'est pas null ou vide
+                        if access_token and access_token.strip() and access_token != "null":
+                            self.log_result("1.3 Token Valid", True, f"✅ Token valide (longueur: {len(access_token)})")
+                            
+                            # EXTRAIRE le token pour les tests suivants
+                            self.tokens['manager'] = access_token
+                            self.users['manager'] = response_data.get('user', {})
+                            
+                            print(f"🔑 TOKEN EXTRACTED: {access_token[:20]}...")
+                            print(f"👤 USER INFO: {self.users['manager'].get('full_name')} ({self.users['manager'].get('role')})")
+                            
+                        else:
+                            self.log_result("1.3 Token Valid", False, f"❌ Token null ou vide: '{access_token}'")
                     else:
-                        valid_clients.append(client_analysis)
-                
-                # ÉTAPE 4: Pour UN client avec données N/A, vérifier user_id
-                if na_clients:
-                    problem_client = na_clients[0]
-                    print(f"\n🚨 PROBLÈME DÉTECTÉ - Client avec données N/A: {problem_client['client_id']}")
+                        self.log_result("1.2 Access Token Present", False, "❌ access_token manquant dans la réponse")
+                        print(f"📋 RESPONSE DATA: {response_data}")
+                        
+                except Exception as e:
+                    self.log_result("1.2 Parse Response", False, f"❌ Cannot parse JSON response: {str(e)}")
+                    print(f"📋 RAW RESPONSE: {response.text}")
                     
-                    if problem_client['user_id'] not in [None, '', 'N/A']:
-                        # Vérifier si l'utilisateur existe
-                        try:
-                            user_response = self.session.get(f"{API_BASE}/admin/users", headers=headers)
-                            if user_response.status_code == 200:
-                                users = user_response.json()
-                                user_found = next((u for u in users if u.get('id') == problem_client['user_id']), None)
-                                
-                                if user_found:
-                                    print(f"✅ USER TROUVÉ: {user_found.get('id')}")
-                                    print(f"   - full_name: {user_found.get('full_name')}")
-                                    print(f"   - email: {user_found.get('email')}")
-                                    print(f"   - phone: {user_found.get('phone')}")
-                                    
-                                    self.log_result("1.2 Client Data Analysis", False, 
-                                                  f"❌ DIAGNOSTIC RACINE: User existe avec données complètes mais client affiche N/A. "
-                                                  f"Le code de fallback ne fonctionne pas correctement. "
-                                                  f"Client ID: {problem_client['client_id']}, User ID: {problem_client['user_id']}")
-                                else:
-                                    self.log_result("1.2 Client Data Analysis", False, 
-                                                  f"❌ DIAGNOSTIC RACINE: user_id présent ({problem_client['user_id']}) mais user inexistant - User supprimé")
-                            else:
-                                self.log_result("1.2 Client Data Analysis", False, 
-                                              f"Cannot access users list - Status: {user_response.status_code}")
-                        except Exception as e:
-                            self.log_result("1.2 Client Data Analysis", False, f"Exception checking user: {str(e)}")
-                    else:
-                        self.log_result("1.2 Client Data Analysis", False, 
-                                      f"❌ DIAGNOSTIC RACINE: Les clients n'ont pas de user_id lié")
-                else:
-                    self.log_result("1.2 Client Data Analysis", True, 
-                                  f"✅ AUCUN PROBLÈME DÉTECTÉ: Tous les clients analysés ont des données complètes. "
-                                  f"Clients valides: {len(valid_clients)}")
+            elif response.status_code == 401:
+                self.log_result("1.1 Login Status Code", False, "❌ Status code 401 - Unauthorized (credentials incorrects)")
+                try:
+                    error_data = response.json()
+                    print(f"📋 ERROR DETAILS: {error_data}")
+                except:
+                    print(f"📋 RAW ERROR: {response.text}")
+                    
+            elif response.status_code == 404:
+                self.log_result("1.1 Login Status Code", False, "❌ Status code 404 - Endpoint not found")
                 
-                # ÉTAPE 5: RÉSUMÉ DIAGNOSTIC
-                print(f"\n📋 RÉSUMÉ DIAGNOSTIC:")
-                print(f"   - Total clients: {len(clients)}")
-                print(f"   - Clients avec données N/A: {len(na_clients)}")
-                print(f"   - Clients avec données valides: {len(valid_clients)}")
+            elif response.status_code == 500:
+                self.log_result("1.1 Login Status Code", False, "❌ Status code 500 - Server error")
+                print(f"📋 SERVER ERROR: {response.text}")
                 
             else:
-                self.log_result("1.2 GET /api/clients", False, f"Status: {response.status_code}", response.text)
+                self.log_result("1.1 Login Status Code", False, f"❌ Unexpected status code: {response.status_code}")
+                print(f"📋 RESPONSE: {response.text}")
                 
         except Exception as e:
-            self.log_result("1.2 GET /api/clients", False, "Exception occurred", str(e))
+            self.log_result("1.1 Login Request", False, f"❌ Exception during login: {str(e)}")
+
+    def test_2_client_data_retrieval_with_token(self):
+        """TEST 2 - RÉCUPÉRATION CLIENTS AVEC TOKEN"""
+        print("=== TEST 2 - RÉCUPÉRATION CLIENTS AVEC TOKEN ===")
+        
+        # Vérifier qu'on a un token
+        if 'manager' not in self.tokens:
+            self.log_result("2.0 Token Available", False, "❌ Aucun token manager disponible - Test 1 a échoué")
+            return
+            
+        token = self.tokens['manager']
+        headers = {"Authorization": f"Bearer {token}"}
+        
+        print(f"🔑 USING TOKEN: {token[:20]}...")
+        
+        # GET /api/clients avec header Authorization: Bearer {token}
+        try:
+            print("🔍 TESTING GET /api/clients with Authorization header")
+            response = self.session.get(f"{API_BASE}/clients", headers=headers)
+            
+            print(f"📊 RESPONSE STATUS: {response.status_code}")
+            print(f"📊 RESPONSE HEADERS: {dict(response.headers)}")
+            
+            # VÉRIFIER Status code
+            if response.status_code == 200:
+                self.log_result("2.1 Clients API Status", True, "✅ Status code 200 - API accessible")
+                
+                try:
+                    clients_data = response.json()
+                    
+                    # VÉRIFIER Type de réponse (array, object, error ?)
+                    if isinstance(clients_data, list):
+                        self.log_result("2.2 Response Type", True, f"✅ Response type: array avec {len(clients_data)} éléments")
+                        
+                        # Si array : nombre d'éléments
+                        if len(clients_data) > 0:
+                            self.log_result("2.3 Data Available", True, f"✅ {len(clients_data)} clients trouvés")
+                            
+                            # Store for next test
+                            self.clients_data = clients_data
+                            
+                        else:
+                            self.log_result("2.3 Data Available", False, "❌ Array vide - aucun client trouvé")
+                            
+                    elif isinstance(clients_data, dict):
+                        if 'error' in clients_data or 'detail' in clients_data:
+                            self.log_result("2.2 Response Type", False, f"❌ Response type: error object - {clients_data}")
+                        else:
+                            self.log_result("2.2 Response Type", False, f"❌ Response type: object (attendu array) - {clients_data}")
+                    else:
+                        self.log_result("2.2 Response Type", False, f"❌ Response type: {type(clients_data)} - {clients_data}")
+                        
+                except Exception as e:
+                    self.log_result("2.2 Parse Response", False, f"❌ Cannot parse JSON: {str(e)}")
+                    print(f"📋 RAW RESPONSE: {response.text}")
+                    
+            elif response.status_code == 401:
+                self.log_result("2.1 Clients API Status", False, "❌ Status code 401 - Token invalide ou expiré")
+                try:
+                    error_data = response.json()
+                    print(f"📋 AUTH ERROR: {error_data}")
+                except:
+                    print(f"📋 RAW AUTH ERROR: {response.text}")
+                    
+            elif response.status_code == 403:
+                self.log_result("2.1 Clients API Status", False, "❌ Status code 403 - Permissions insuffisantes")
+                try:
+                    error_data = response.json()
+                    print(f"📋 PERMISSION ERROR: {error_data}")
+                except:
+                    print(f"📋 RAW PERMISSION ERROR: {response.text}")
+                    
+            elif response.status_code == 500:
+                self.log_result("2.1 Clients API Status", False, "❌ Status code 500 - Erreur serveur")
+                print(f"📋 SERVER ERROR: {response.text}")
+                
+            else:
+                self.log_result("2.1 Clients API Status", False, f"❌ Status code: {response.status_code}")
+                print(f"📋 RESPONSE: {response.text}")
+                
+        except Exception as e:
+            self.log_result("2.1 Clients API Request", False, f"❌ Exception: {str(e)}")
+
+    def test_3_client_data_structure_analysis(self):
+        """TEST 3 - STRUCTURE DES DONNÉES CLIENTS"""
+        print("=== TEST 3 - STRUCTURE DES DONNÉES CLIENTS ===")
+        
+        # Vérifier qu'on a des données clients
+        if not hasattr(self, 'clients_data') or not self.clients_data:
+            self.log_result("3.0 Client Data Available", False, "❌ Aucune donnée client disponible - Test 2 a échoué")
+            return
+            
+        clients = self.clients_data
+        print(f"📊 ANALYSING {len(clients)} clients")
+        
+        # ANALYSER le premier client
+        if len(clients) > 0:
+            first_client = clients[0]
+            print(f"🔍 ANALYSING FIRST CLIENT:")
+            print(f"📋 CLIENT KEYS: {list(first_client.keys())}")
+            
+            # Analyser chaque champ demandé
+            analysis_results = {}
+            
+            # full_name : valeur ? (string, null, undefined ?)
+            full_name = first_client.get('full_name')
+            if full_name is None:
+                analysis_results['full_name'] = "❌ null/undefined"
+            elif full_name == "":
+                analysis_results['full_name'] = "❌ empty string"
+            elif full_name == "N/A":
+                analysis_results['full_name'] = "❌ N/A"
+            elif isinstance(full_name, str) and len(full_name) > 0:
+                analysis_results['full_name'] = f"✅ string: '{full_name}'"
+            else:
+                analysis_results['full_name'] = f"❌ unexpected type: {type(full_name)} = {full_name}"
+                
+            # email : valeur ?
+            email = first_client.get('email')
+            if email is None:
+                analysis_results['email'] = "❌ null/undefined"
+            elif email == "":
+                analysis_results['email'] = "❌ empty string"
+            elif email == "N/A":
+                analysis_results['email'] = "❌ N/A"
+            elif isinstance(email, str) and "@" in email:
+                analysis_results['email'] = f"✅ valid email: '{email}'"
+            elif isinstance(email, str):
+                analysis_results['email'] = f"❌ invalid email: '{email}'"
+            else:
+                analysis_results['email'] = f"❌ unexpected type: {type(email)} = {email}"
+                
+            # phone : valeur ?
+            phone = first_client.get('phone')
+            if phone is None:
+                analysis_results['phone'] = "❌ null/undefined"
+            elif phone == "":
+                analysis_results['phone'] = "❌ empty string"
+            elif phone == "N/A":
+                analysis_results['phone'] = "❌ N/A"
+            elif isinstance(phone, str) and len(phone) > 0:
+                analysis_results['phone'] = f"✅ string: '{phone}'"
+            else:
+                analysis_results['phone'] = f"❌ unexpected type: {type(phone)} = {phone}"
+                
+            # client_name : valeur ? (might not exist)
+            client_name = first_client.get('client_name')
+            if 'client_name' not in first_client:
+                analysis_results['client_name'] = "⚠️ field not present"
+            elif client_name is None:
+                analysis_results['client_name'] = "❌ null/undefined"
+            elif client_name == "":
+                analysis_results['client_name'] = "❌ empty string"
+            elif client_name == "N/A":
+                analysis_results['client_name'] = "❌ N/A"
+            elif isinstance(client_name, str) and len(client_name) > 0:
+                analysis_results['client_name'] = f"✅ string: '{client_name}'"
+            else:
+                analysis_results['client_name'] = f"❌ unexpected type: {type(client_name)} = {client_name}"
+                
+            # user_id : présent ?
+            user_id = first_client.get('user_id')
+            if user_id is None:
+                analysis_results['user_id'] = "❌ null/undefined"
+            elif user_id == "":
+                analysis_results['user_id'] = "❌ empty string"
+            elif isinstance(user_id, str) and len(user_id) > 0:
+                analysis_results['user_id'] = f"✅ string: '{user_id}'"
+                # Store for next test
+                self.test_user_id = user_id
+            else:
+                analysis_results['user_id'] = f"❌ unexpected type: {type(user_id)} = {user_id}"
+            
+            # Log results
+            print(f"\n📋 ANALYSIS RESULTS:")
+            for field, result in analysis_results.items():
+                print(f"   - {field}: {result}")
+                
+            # Determine overall result
+            critical_fields = ['full_name', 'email', 'phone', 'user_id']
+            critical_issues = [field for field in critical_fields if field in analysis_results and "❌" in analysis_results[field]]
+            
+            if critical_issues:
+                self.log_result("3.1 Client Data Structure", False, 
+                              f"❌ PROBLÈMES CRITIQUES détectés dans les champs: {', '.join(critical_issues)}")
+                print(f"🚨 DIAGNOSTIC: Les données clients contiennent des valeurs N/A, null ou vides")
+            else:
+                self.log_result("3.1 Client Data Structure", True, 
+                              "✅ Structure des données clients correcte - tous les champs critiques présents")
+                              
+        else:
+            self.log_result("3.1 Client Data Structure", False, "❌ Aucun client à analyser")
+
+    def test_4_verify_specific_user(self):
+        """TEST 4 - VÉRIFIER UN USER SPÉCIFIQUE"""
+        print("=== TEST 4 - VÉRIFIER UN USER SPÉCIFIQUE ===")
+        
+        # Vérifier qu'on a un user_id à tester
+        if not hasattr(self, 'test_user_id') or not self.test_user_id:
+            self.log_result("4.0 User ID Available", False, "❌ Aucun user_id disponible - Test 3 a échoué")
+            return
+            
+        user_id = self.test_user_id
+        print(f"🔍 TESTING USER ID: {user_id}")
+        
+        # Vérifier qu'on a un token
+        if 'manager' not in self.tokens:
+            self.log_result("4.0 Token Available", False, "❌ Aucun token manager disponible")
+            return
+            
+        headers = {"Authorization": f"Bearer {self.tokens['manager']}"}
+        
+        # GET /api/admin/users (si accessible)
+        try:
+            print("🔍 TESTING GET /api/admin/users")
+            response = self.session.get(f"{API_BASE}/admin/users", headers=headers)
+            
+            if response.status_code == 200:
+                users_data = response.json()
+                print(f"📊 FOUND {len(users_data)} users in system")
+                
+                # Chercher l'utilisateur spécifique
+                target_user = next((u for u in users_data if u.get('id') == user_id), None)
+                
+                if target_user:
+                    self.log_result("4.1 User Found", True, f"✅ User trouvé: {target_user.get('full_name')} ({target_user.get('email')})")
+                    
+                    # COMPARER les données du user vs les données du client
+                    print(f"📋 USER DATA:")
+                    print(f"   - id: {target_user.get('id')}")
+                    print(f"   - full_name: {target_user.get('full_name')}")
+                    print(f"   - email: {target_user.get('email')}")
+                    print(f"   - phone: {target_user.get('phone')}")
+                    print(f"   - role: {target_user.get('role')}")
+                    
+                    # Compare with client data from test 3
+                    if hasattr(self, 'clients_data') and self.clients_data:
+                        first_client = self.clients_data[0]
+                        
+                        print(f"📋 CLIENT DATA:")
+                        print(f"   - user_id: {first_client.get('user_id')}")
+                        print(f"   - full_name: {first_client.get('full_name')}")
+                        print(f"   - email: {first_client.get('email')}")
+                        print(f"   - phone: {first_client.get('phone')}")
+                        
+                        # Compare fields
+                        comparison_results = []
+                        
+                        if target_user.get('full_name') == first_client.get('full_name'):
+                            comparison_results.append("✅ full_name matches")
+                        else:
+                            comparison_results.append(f"❌ full_name mismatch: user='{target_user.get('full_name')}' vs client='{first_client.get('full_name')}'")
+                            
+                        if target_user.get('email') == first_client.get('email'):
+                            comparison_results.append("✅ email matches")
+                        else:
+                            comparison_results.append(f"❌ email mismatch: user='{target_user.get('email')}' vs client='{first_client.get('email')}'")
+                            
+                        if target_user.get('phone') == first_client.get('phone'):
+                            comparison_results.append("✅ phone matches")
+                        else:
+                            comparison_results.append(f"❌ phone mismatch: user='{target_user.get('phone')}' vs client='{first_client.get('phone')}'")
+                        
+                        print(f"\n📋 COMPARISON RESULTS:")
+                        for result in comparison_results:
+                            print(f"   {result}")
+                            
+                        # Determine if there's a data sync issue
+                        mismatches = [r for r in comparison_results if "❌" in r]
+                        if mismatches:
+                            self.log_result("4.2 Data Comparison", False, 
+                                          f"❌ PROBLÈME DE SYNCHRONISATION: {len(mismatches)} champs ne correspondent pas entre user et client")
+                            print(f"🚨 DIAGNOSTIC: Le système de fallback ne fonctionne pas - les données user existent mais ne sont pas copiées dans client")
+                        else:
+                            self.log_result("4.2 Data Comparison", True, 
+                                          "✅ Données user et client synchronisées correctement")
+                    
+                else:
+                    self.log_result("4.1 User Found", False, f"❌ User avec ID {user_id} non trouvé dans la liste des utilisateurs")
+                    print(f"🚨 DIAGNOSTIC: user_id présent dans client mais user inexistant - données orphelines")
+                    
+            elif response.status_code == 403:
+                self.log_result("4.1 Admin Users Access", False, "❌ Status 403 - Pas d'accès à /api/admin/users avec token manager")
+                
+                # Try alternative approach - get current user info
+                try:
+                    print("🔍 TRYING ALTERNATIVE: GET /api/auth/me")
+                    me_response = self.session.get(f"{API_BASE}/auth/me", headers=headers)
+                    if me_response.status_code == 200:
+                        me_data = me_response.json()
+                        print(f"📋 CURRENT USER: {me_data}")
+                        self.log_result("4.1 Alternative User Check", True, f"✅ Current user accessible: {me_data.get('full_name')}")
+                    else:
+                        self.log_result("4.1 Alternative User Check", False, f"❌ Cannot access current user: {me_response.status_code}")
+                except Exception as e:
+                    self.log_result("4.1 Alternative User Check", False, f"❌ Exception: {str(e)}")
+                    
+            else:
+                self.log_result("4.1 Admin Users Access", False, f"❌ Status {response.status_code}: {response.text}")
+                
+        except Exception as e:
+            self.log_result("4.1 Admin Users Request", False, f"❌ Exception: {str(e)}")
+
+    def test_5_bcrypt_passlib_verification(self):
+        """TEST 5 - BCRYPT/PASSLIB"""
+        print("=== TEST 5 - BCRYPT/PASSLIB ===")
+        
+        # 1. Vérifier qu'il n'y a pas d'erreur bcrypt dans les logs
+        print("🔍 STEP 1: Checking for bcrypt errors in backend logs")
+        try:
+            import subprocess
+            import os
+            
+            # Check if supervisor logs exist
+            log_paths = [
+                "/var/log/supervisor/backend.err.log",
+                "/var/log/supervisor/backend.out.log"
+            ]
+            
+            bcrypt_errors_found = []
+            
+            for log_path in log_paths:
+                if os.path.exists(log_path):
+                    try:
+                        result = subprocess.run(['tail', '-n', '100', log_path], 
+                                              capture_output=True, text=True, timeout=10)
+                        if result.returncode == 0:
+                            log_content = result.stdout
+                            if 'bcrypt' in log_content.lower() or 'passlib' in log_content.lower():
+                                bcrypt_lines = [line.strip() for line in log_content.split('\n') 
+                                              if 'bcrypt' in line.lower() or 'passlib' in line.lower()]
+                                if bcrypt_lines:
+                                    bcrypt_errors_found.extend(bcrypt_lines)
+                    except Exception as e:
+                        print(f"   Cannot read {log_path}: {str(e)}")
+                        
+            if bcrypt_errors_found:
+                self.log_result("5.1 Bcrypt Logs Check", False, 
+                              f"❌ Erreurs bcrypt/passlib trouvées dans les logs: {len(bcrypt_errors_found)} lignes")
+                for error in bcrypt_errors_found[:3]:  # Show first 3 errors
+                    print(f"   ERROR: {error}")
+            else:
+                self.log_result("5.1 Bcrypt Logs Check", True, 
+                              "✅ Aucune erreur bcrypt/passlib trouvée dans les logs récents")
+                              
+        except Exception as e:
+            self.log_result("5.1 Bcrypt Logs Check", False, f"❌ Cannot check logs: {str(e)}")
+        
+        # 2. Tester un changement de mot de passe simple
+        print("🔍 STEP 2: Testing simple password change")
+        
+        # Vérifier qu'on a un token
+        if 'manager' not in self.tokens:
+            self.log_result("5.2 Password Change Test", False, "❌ Aucun token manager disponible")
+            return
+            
+        try:
+            headers = {"Authorization": f"Bearer {self.tokens['manager']}"}
+            
+            # Test password change with current manager
+            password_change_data = {
+                "old_password": "password123",
+                "new_password": "NewTestPassword123!"
+            }
+            
+            print(f"🔍 TESTING PATCH /api/auth/change-password")
+            response = self.session.patch(f"{API_BASE}/auth/change-password", 
+                                        json=password_change_data, headers=headers)
+            
+            if response.status_code == 200:
+                response_data = response.json()
+                self.log_result("5.2 Password Change Test", True, 
+                              f"✅ Password change successful: {response_data.get('message', 'Success')}")
+                
+                # 3. Vérifier que le hash fonctionne - test login with new password
+                print("🔍 STEP 3: Verifying password hash works")
+                time.sleep(1)  # Wait for password update
+                
+                new_login_response = self.session.post(f"{API_BASE}/auth/login", json={
+                    "email": "manager@test.com",
+                    "password": "NewTestPassword123!"
+                })
+                
+                if new_login_response.status_code == 200:
+                    self.log_result("5.3 Password Hash Verification", True, 
+                                  "✅ Login successful with new password - Hash working correctly")
+                    
+                    # Update token for future tests
+                    new_token_data = new_login_response.json()
+                    self.tokens['manager'] = new_token_data['access_token']
+                    
+                else:
+                    self.log_result("5.3 Password Hash Verification", False, 
+                                  f"❌ Cannot login with new password - Status: {new_login_response.status_code}")
+                    
+                    # Try with old password to see if change was applied
+                    old_login_response = self.session.post(f"{API_BASE}/auth/login", json={
+                        "email": "manager@test.com",
+                        "password": "password123"
+                    })
+                    
+                    if old_login_response.status_code == 200:
+                        self.log_result("5.3 Password Hash Verification", False, 
+                                      "❌ CRITICAL: Old password still works - Password change not applied")
+                    else:
+                        self.log_result("5.3 Password Hash Verification", False, 
+                                      "❌ CRITICAL: Neither old nor new password works - Hash corruption")
+                        
+            elif response.status_code == 400:
+                try:
+                    error_data = response.json()
+                    error_message = error_data.get('detail', 'Unknown error')
+                    self.log_result("5.2 Password Change Test", False, 
+                                  f"❌ Password change failed: {error_message}")
+                except:
+                    self.log_result("5.2 Password Change Test", False, 
+                                  f"❌ Password change failed: {response.text}")
+                                  
+            else:
+                self.log_result("5.2 Password Change Test", False, 
+                              f"❌ Unexpected status: {response.status_code}, Response: {response.text}")
+                              
+        except Exception as e:
+            self.log_result("5.2 Password Change Test", False, f"❌ Exception: {str(e)}")
 
     def test_urgent_2_password_change_issue(self):
         """TEST URGENT 2: CHANGEMENT MOT DE PASSE NE FONCTIONNE PAS"""
