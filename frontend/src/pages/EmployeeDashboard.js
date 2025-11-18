@@ -49,6 +49,9 @@ export default function EmployeeDashboard() {
   const [showCredentialsDialog, setShowCredentialsDialog] = useState(false);
   const [newClientCredentials, setNewClientCredentials] = useState(null);
   
+  // Profile settings state
+  const [showProfileSettings, setShowProfileSettings] = useState(false);
+  
   // Visitor registration state
   const [showVisitorForm, setShowVisitorForm] = useState(false);
   const [newVisitor, setNewVisitor] = useState({
