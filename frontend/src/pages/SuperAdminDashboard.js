@@ -7,6 +7,7 @@ import BalanceMonitor from '../components/BalanceMonitor';
 import ActivityHistory from '../components/ActivityHistory';
 import ProspectManagement from '../components/ProspectManagement';
 import SearchAndSort from '../components/SearchAndSort';
+import ProfileSettings from '../components/ProfileSettings';
 import AloriaLogo from '../components/AloriaLogo';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../components/ui/dialog';
 import api from '../utils/api';
