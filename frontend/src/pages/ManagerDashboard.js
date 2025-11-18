@@ -1789,15 +1789,22 @@ export default function ManagerDashboard() {
       {/* Dialog Détails Client */}
       {selectedClient && (
         <Dialog open={!!selectedClient} onOpenChange={() => setSelectedClient(null)}>
-          <DialogContent className="bg-[#1E293B] border-slate-700 max-w-3xl">
-            <DialogHeader>
-              <DialogTitle className="text-white flex items-center gap-2">
-                <User className="w-6 h-6 text-blue-500" />
+          <DialogContent className="bg-[#1E293B] border-slate-700 max-w-3xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader className="relative">
+              <button
+                onClick={() => setSelectedClient(null)}
+                className="absolute right-0 top-0 text-slate-400 hover:text-white transition-colors text-2xl font-bold leading-none"
+                aria-label="Fermer"
+              >
+                ✕
+              </button>
+              <DialogTitle className="text-white flex items-center gap-2 pr-8">
+                <User className="w-5 h-5 sm:w-6 sm:h-6 text-blue-500" />
                 Détails du Client
               </DialogTitle>
             </DialogHeader>
             
-            <div className="space-y-6 mt-4">
+            <div className="space-y-4 sm:space-y-6 mt-3 sm:mt-4">
               {/* Informations de base */}
               <div className="bg-slate-800 p-4 rounded-lg space-y-3">
                 <h4 className="text-white font-semibold mb-3">📋 Informations Personnelles</h4>
