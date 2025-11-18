@@ -453,7 +453,7 @@ export default function ClientDashboard() {
               </TabsTrigger>
               <TabsTrigger 
                 value="profile" 
-                className="flex-shrink-0 min-w-[110px] sm:min-w-[120px] md:min-w-0 data-[state=active]:bg-orange-500 data-[state=active]:text-white text-slate-300 px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm font-medium whitespace-nowrap rounded-lg md:rounded-none transition-all touch-manipulation"
+                className="flex-shrink-0 min-w-[110px] sm:min-w-[120px] md:min-w-0 data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-orange-600 data-[state=active]:text-white data-[state=active]:shadow-lg text-slate-300 hover:text-white hover:bg-slate-700/50 px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm font-medium whitespace-nowrap rounded-lg transition-all touch-manipulation"
               >
                 👤 Profil
               </TabsTrigger>
