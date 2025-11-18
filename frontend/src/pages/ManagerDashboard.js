@@ -1806,24 +1806,24 @@ export default function ManagerDashboard() {
             
             <div className="space-y-4 sm:space-y-6 mt-3 sm:mt-4">
               {/* Informations de base */}
-              <div className="bg-slate-800 p-4 rounded-lg space-y-3">
-                <h4 className="text-white font-semibold mb-3">📋 Informations Personnelles</h4>
-                <div className="grid grid-cols-2 gap-4">
+              <div className="bg-slate-800 p-3 sm:p-4 rounded-lg space-y-3">
+                <h4 className="text-white font-semibold mb-3 text-sm sm:text-base">📋 Informations Personnelles</h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div>
-                    <p className="text-slate-400 text-sm">Nom complet</p>
-                    <p className="text-white font-medium">{selectedClient.full_name}</p>
+                    <p className="text-slate-400 text-xs sm:text-sm">Nom complet</p>
+                    <p className="text-white font-medium text-sm sm:text-base break-words">{selectedClient.full_name}</p>
                   </div>
                   <div>
-                    <p className="text-slate-400 text-sm">Email</p>
-                    <p className="text-white">{selectedClient.email}</p>
+                    <p className="text-slate-400 text-xs sm:text-sm">Email</p>
+                    <p className="text-white text-sm sm:text-base break-all">{selectedClient.email}</p>
                   </div>
                   <div>
-                    <p className="text-slate-400 text-sm">Téléphone</p>
-                    <p className="text-white">{selectedClient.phone || 'Non renseigné'}</p>
+                    <p className="text-slate-400 text-xs sm:text-sm">Téléphone</p>
+                    <p className="text-white text-sm sm:text-base">{selectedClient.phone || 'Non renseigné'}</p>
                   </div>
                   <div>
-                    <p className="text-slate-400 text-sm">Statut</p>
-                    <Badge className={selectedClient.status === 'active' ? 'bg-green-500/20 text-green-400' : 'bg-slate-500/20 text-slate-400'}>
+                    <p className="text-slate-400 text-xs sm:text-sm">Statut</p>
+                    <Badge className={`${selectedClient.status === 'active' ? 'bg-green-500/20 text-green-400' : 'bg-slate-500/20 text-slate-400'} w-fit`}>
                       {selectedClient.status === 'active' ? 'Actif' : selectedClient.status}
                     </Badge>
                   </div>
