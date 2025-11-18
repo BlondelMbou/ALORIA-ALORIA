@@ -179,20 +179,20 @@ const CredentialsPopup = ({
 
           {/* Informations supplémentaires pour CLIENT */}
           {role === 'CLIENT' && additional_info && (
-            <div className="bg-gradient-to-r from-orange-500/10 to-blue-500/10 rounded-lg p-4 border border-orange-500/30">
-              <h3 className="font-semibold mb-3 flex items-center gap-2">
-                <CheckCircle className="w-5 h-5 text-orange-400" />
+            <div className="bg-gradient-to-r from-orange-500/10 to-blue-500/10 rounded-lg p-3 sm:p-4 border border-orange-500/30">
+              <h3 className="font-semibold mb-3 flex items-center gap-2 text-sm sm:text-base">
+                <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-orange-400 flex-shrink-0" />
                 Dashboard Client Créé
               </h3>
-              <div className="space-y-2 text-sm">
+              <div className="space-y-2 text-xs sm:text-sm">
                 {additional_info.case_id && (
-                  <div className="flex justify-between">
+                  <div className="flex flex-col sm:flex-row sm:justify-between gap-1">
                     <span className="text-slate-400">Numéro de dossier:</span>
-                    <span className="font-mono text-orange-400">{additional_info.case_id}</span>
+                    <span className="font-mono text-orange-400 break-all">{additional_info.case_id}</span>
                   </div>
                 )}
                 {additional_info.country && additional_info.visa_type && (
-                  <div className="flex justify-between">
+                  <div className="flex flex-col sm:flex-row sm:justify-between gap-1">
                     <span className="text-slate-400">Destination:</span>
                     <span className="font-medium">{additional_info.country} - {additional_info.visa_type}</span>
                   </div>
@@ -202,14 +202,14 @@ const CredentialsPopup = ({
           )}
 
           {/* Avertissement */}
-          <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-4">
-            <div className="flex gap-3">
-              <div className="text-amber-400 mt-1">⚠️</div>
+          <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-3 sm:p-4">
+            <div className="flex gap-2 sm:gap-3">
+              <div className="text-amber-400 text-lg sm:text-xl flex-shrink-0">⚠️</div>
               <div className="flex-1">
-                <p className="text-sm text-amber-200 font-medium mb-1">
+                <p className="text-xs sm:text-sm text-amber-200 font-medium mb-1">
                   Important - Changement de mot de passe requis
                 </p>
-                <p className="text-sm text-slate-400">
+                <p className="text-xs sm:text-sm text-slate-400">
                   L'utilisateur devra changer ce mot de passe temporaire lors de sa première connexion.
                 </p>
               </div>
@@ -217,11 +217,11 @@ const CredentialsPopup = ({
           </div>
         </div>
 
-        <div className="flex justify-end gap-3 pt-4 border-t border-slate-700">
+        <div className="flex justify-end gap-2 sm:gap-3 pt-3 sm:pt-4 border-t border-slate-700">
           <Button
             variant="outline"
             onClick={() => onOpenChange(false)}
-            className="bg-slate-700 border-slate-600 hover:bg-slate-600"
+            className="bg-slate-700 border-slate-600 hover:bg-slate-600 w-full sm:w-auto"
           >
             Fermer
           </Button>
