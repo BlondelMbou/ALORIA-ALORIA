@@ -95,21 +95,21 @@ const CredentialsPopup = ({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-6 py-4">
+        <div className="space-y-4 sm:space-y-6 py-3 sm:py-4">
           {/* Informations utilisateur */}
-          <div className="bg-slate-800/50 rounded-lg p-4 border border-slate-700">
-            <div className="flex items-center gap-3 mb-3">
-              <User className="w-5 h-5 text-orange-400" />
-              <h3 className="font-semibold text-lg">Informations de l'utilisateur</h3>
+          <div className="bg-slate-800/50 rounded-lg p-3 sm:p-4 border border-slate-700">
+            <div className="flex items-center gap-2 sm:gap-3 mb-3">
+              <User className="w-4 h-4 sm:w-5 sm:h-5 text-orange-400 flex-shrink-0" />
+              <h3 className="font-semibold text-base sm:text-lg">Informations de l'utilisateur</h3>
             </div>
             <div className="space-y-2">
-              <div className="flex justify-between items-center">
-                <span className="text-slate-400">Nom complet:</span>
-                <span className="font-medium">{full_name}</span>
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1">
+                <span className="text-slate-400 text-sm">Nom complet:</span>
+                <span className="font-medium text-sm sm:text-base">{full_name}</span>
               </div>
-              <div className="flex justify-between items-center">
-                <span className="text-slate-400">Rôle:</span>
-                <Badge className={`${getRoleBadgeColor(role)} border`}>
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1">
+                <span className="text-slate-400 text-sm">Rôle:</span>
+                <Badge className={`${getRoleBadgeColor(role)} border w-fit`}>
                   <Briefcase className="w-3 h-3 mr-1" />
                   {getRoleLabel(role)}
                 </Badge>
