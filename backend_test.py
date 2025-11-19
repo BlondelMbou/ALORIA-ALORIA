@@ -13,19 +13,18 @@ WORKFLOW À TESTER:
 import requests
 import json
 import os
+import time
 from datetime import datetime
 import sys
-import time
 
-# Get backend URL from environment
+# Configuration
 BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://aloria-dev.preview.emergentagent.com')
 API_BASE = f"{BACKEND_URL}/api"
 
-# Test credentials from review request
-TEST_CREDENTIALS = {
-    'manager': {'email': 'test.manager.1763495772@aloria.com', 'password': 'B!qNP!6JHqNU'},
-    'superadmin': {'email': 'superadmin@aloria.com', 'password': 'SuperAdmin123!'},
-    'consultant': {'email': 'consultant@aloria.com', 'password': 'consultant123'}
+# Credentials from review request
+CREDENTIALS = {
+    'manager': {'email': 'manager@test.com', 'password': 'password123'},
+    'employee': {'email': 'employee@aloria.com', 'password': 'emp123'}
 }
 
 class APITester:
