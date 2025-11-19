@@ -55,23 +55,27 @@ class WorkflowTester:
             })
         print()
 
-    def authenticate_all_roles(self):
-        """Authenticate all test users with review credentials"""
-        print("=== PRIORITY 0: Authentication Setup ===")
+    def authenticate_users(self):
+        """Authenticate all required users"""
+        print("=== AUTHENTICATION SETUP ===")
         
-        for role, credentials in TEST_CREDENTIALS.items():
+        for role, credentials in CREDENTIALS.items():
             try:
-                # Try login first
                 response = self.session.post(f"{API_BASE}/auth/login", json=credentials)
                 if response.status_code == 200:
                     data = response.json()
                     self.tokens[role] = data['access_token']
                     self.users[role] = data['user']
-                    self.log_result(f"{role.upper()} Login", True, f"Logged in as {credentials['email']}")
+                    self.log_result(f"{role.upper()} Login", True, 
+                                  f"Logged in as {credentials['email']} - Role: {data['user']['role']}")
                 else:
-                    self.log_result(f"{role.upper()} Login", False, f"Status: {response.status_code}", response.text)
+                    self.log_result(f"{role.upper()} Login", False, 
+                                  f"Status: {response.status_code}", response.text)
+                    return False
             except Exception as e:
                 self.log_result(f"{role.upper()} Login", False, "Exception occurred", str(e))
+                return False
+        return True
 
     def test_1_basic_authentication(self):
         """TEST 1 - AUTHENTIFICATION DE BASE"""
