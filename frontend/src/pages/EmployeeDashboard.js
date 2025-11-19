@@ -698,11 +698,11 @@ export default function EmployeeDashboard() {
                         <CardContent className="p-4">
                           <div className="flex items-center gap-2 mb-3">
                             <div className="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center text-white font-bold">
-                              {(clientCase?.client_name || 'N')[0].toUpperCase()}
+                              {(client?.full_name || 'N')[0].toUpperCase()}
                             </div>
                             <div className="flex-1">
-                              <h3 className="font-bold text-lg text-white leading-tight">{clientCase?.client_name || 'N/A'}</h3>
-                              <p className="text-xs text-slate-400">{clientCase?.client_email || 'Email N/A'}</p>
+                              <h3 className="font-bold text-lg text-white leading-tight">{client?.full_name || 'N/A'}</h3>
+                              <p className="text-xs text-slate-400">{client?.email || 'Email N/A'}</p>
                             </div>
                           </div>
                           <div className="space-y-2">
