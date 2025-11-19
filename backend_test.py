@@ -27,23 +27,13 @@ CREDENTIALS = {
     'employee': {'email': 'employee@aloria.com', 'password': 'emp123'}
 }
 
-class APITester:
+class WorkflowTester:
     def __init__(self):
         self.session = requests.Session()
-        # Store tokens for all roles
         self.tokens = {}
         self.users = {}
-        # Test data storage
-        self.test_prospect_id = None
-        self.test_client_id = None
-        self.test_visitor_id = None
-        self.test_payment_id = None
-        self.test_withdrawal_id = None
-        self.results = {
-            'passed': 0,
-            'failed': 0,
-            'errors': []
-        }
+        self.test_data = {}
+        self.results = {'passed': 0, 'failed': 0, 'errors': []}
 
     def log_result(self, test_name, success, message="", error_details=""):
         """Log test result"""
