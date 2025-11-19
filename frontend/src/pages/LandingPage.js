@@ -448,8 +448,8 @@ export default function LandingPage() {
               
               <h1 className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-[1.1] sm:leading-tight">
                 <span className="block">Votre Rêve</span>
-                <span className="block bg-gradient-to-r from-orange-500 via-orange-400 to-yellow-400 bg-clip-text text-transparent mt-2 sm:mt-3">
-                  d'Immigration
+                <span className="block mt-2 sm:mt-3 px-4 py-2 sm:px-6 sm:py-3 bg-gradient-to-r from-orange-500 via-orange-400 to-orange-600 rounded-lg shadow-2xl inline-block">
+                  <span className="text-white font-extrabold">d'Immigration</span>
                 </span>
                 <span className="block text-slate-200 mt-2 sm:mt-3">Devient Réalité</span>
               </h1>
