@@ -77,78 +77,90 @@ class WorkflowTester:
                 return False
         return True
 
-    def test_1_basic_authentication(self):
-        """TEST 1 - AUTHENTIFICATION DE BASE"""
-        print("=== TEST 1 - AUTHENTIFICATION DE BASE ===")
+    def phase_1_employee_client_creation(self):
+        """PHASE 1 - Création de Client par Employee"""
+        print("\n" + "="*60)
+        print("PHASE 1 - CRÉATION DE CLIENT PAR EMPLOYEE")
+        print("="*60)
         
-        # POST /api/auth/login avec manager@test.com / password123
+        if 'employee' not in self.tokens:
+            self.log_result("Phase 1 Setup", False, "Employee token not available")
+            return False
+            
+        headers = {"Authorization": f"Bearer {self.tokens['employee']}"}
+        
+        # 1. Créer un prospect via POST /api/contact-messages
+        print("\n🔸 ÉTAPE 1.1 - Créer un prospect")
         try:
-            print("🔍 TESTING POST /api/auth/login with manager@test.com / password123")
-            login_data = {
-                "email": "manager@test.com",
-                "password": "password123"
+            prospect_data = {
+                "name": "Test Client Employee",
+                "email": "client.employee.test@example.com",
+                "phone": "+33612345678",
+                "country": "Canada",
+                "visa_type": "Permis de travail",
+                "urgency_level": "Normal",
+                "message": "Test de création par employé",
+                "lead_source": "Site web",
+                "how_did_you_know": "Recherche Google"
             }
             
-            response = self.session.post(f"{API_BASE}/auth/login", json=login_data)
+            response = self.session.post(f"{API_BASE}/contact-messages", json=prospect_data, headers=headers)
             
-            print(f"📊 RESPONSE STATUS: {response.status_code}")
-            print(f"📊 RESPONSE HEADERS: {dict(response.headers)}")
-            
-            # VÉRIFIER Status code 200
-            if response.status_code == 200:
-                self.log_result("1.1 Login Status Code", True, "✅ Status code 200 - Login successful")
-                
-                try:
-                    response_data = response.json()
-                    print(f"📊 RESPONSE DATA KEYS: {list(response_data.keys())}")
-                    
-                    # VÉRIFIER access_token présent
-                    access_token = response_data.get('access_token')
-                    if access_token:
-                        self.log_result("1.2 Access Token Present", True, "✅ access_token présent dans la réponse")
-                        
-                        # VÉRIFIER Token n'est pas null ou vide
-                        if access_token and access_token.strip() and access_token != "null":
-                            self.log_result("1.3 Token Valid", True, f"✅ Token valide (longueur: {len(access_token)})")
-                            
-                            # EXTRAIRE le token pour les tests suivants
-                            self.tokens['manager'] = access_token
-                            self.users['manager'] = response_data.get('user', {})
-                            
-                            print(f"🔑 TOKEN EXTRACTED: {access_token[:20]}...")
-                            print(f"👤 USER INFO: {self.users['manager'].get('full_name')} ({self.users['manager'].get('role')})")
-                            
-                        else:
-                            self.log_result("1.3 Token Valid", False, f"❌ Token null ou vide: '{access_token}'")
-                    else:
-                        self.log_result("1.2 Access Token Present", False, "❌ access_token manquant dans la réponse")
-                        print(f"📋 RESPONSE DATA: {response_data}")
-                        
-                except Exception as e:
-                    self.log_result("1.2 Parse Response", False, f"❌ Cannot parse JSON response: {str(e)}")
-                    print(f"📋 RAW RESPONSE: {response.text}")
-                    
-            elif response.status_code == 401:
-                self.log_result("1.1 Login Status Code", False, "❌ Status code 401 - Unauthorized (credentials incorrects)")
-                try:
-                    error_data = response.json()
-                    print(f"📋 ERROR DETAILS: {error_data}")
-                except:
-                    print(f"📋 RAW ERROR: {response.text}")
-                    
-            elif response.status_code == 404:
-                self.log_result("1.1 Login Status Code", False, "❌ Status code 404 - Endpoint not found")
-                
-            elif response.status_code == 500:
-                self.log_result("1.1 Login Status Code", False, "❌ Status code 500 - Server error")
-                print(f"📋 SERVER ERROR: {response.text}")
-                
+            if response.status_code in [200, 201]:
+                prospect = response.json()
+                self.test_data['prospect_id'] = prospect['id']
+                self.log_result("1.1 Create Prospect", True, 
+                              f"Prospect créé: {prospect['id']} - {prospect['name']}")
             else:
-                self.log_result("1.1 Login Status Code", False, f"❌ Unexpected status code: {response.status_code}")
-                print(f"📋 RESPONSE: {response.text}")
+                self.log_result("1.1 Create Prospect", False, 
+                              f"Status: {response.status_code}", response.text)
+                return False
                 
         except Exception as e:
-            self.log_result("1.1 Login Request", False, f"❌ Exception during login: {str(e)}")
+            self.log_result("1.1 Create Prospect", False, "Exception occurred", str(e))
+            return False
+        
+        # 2. Convertir prospect en client via POST /api/contact-messages/{message_id}/convert-to-client
+        print("\n🔸 ÉTAPE 1.2 - Convertir prospect en client")
+        try:
+            conversion_data = {
+                "first_payment_amount": 50000,
+                "payment_method": "Virement bancaire",
+                "country": "Canada",
+                "visa_type": "Permis de travail"
+            }
+            
+            prospect_id = self.test_data['prospect_id']
+            response = self.session.post(f"{API_BASE}/contact-messages/{prospect_id}/convert-to-client", 
+                                       json=conversion_data, headers=headers)
+            
+            if response.status_code in [200, 201]:
+                conversion_result = response.json()
+                self.test_data['client_id'] = conversion_result.get('client_id')
+                self.test_data['user_id'] = conversion_result.get('user_id')
+                self.test_data['case_id'] = conversion_result.get('case_id')
+                self.test_data['payment_id'] = conversion_result.get('payment_id')
+                
+                self.log_result("1.2 Convert to Client", True, 
+                              f"Client créé: {self.test_data['client_id']}")
+            else:
+                self.log_result("1.2 Convert to Client", False, 
+                              f"Status: {response.status_code}", response.text)
+                return False
+                
+        except Exception as e:
+            self.log_result("1.2 Convert to Client", False, "Exception occurred", str(e))
+            return False
+        
+        # 3. Vérifications post-création
+        print("\n🔸 ÉTAPE 1.3 - Vérifications post-création")
+        self.verify_client_creation()
+        
+        # 4. Vérifier le Dashboard Client
+        print("\n🔸 ÉTAPE 1.4 - Vérifier le Dashboard Client")
+        self.verify_client_dashboard()
+        
+        return True
 
     def test_2_client_data_retrieval_with_token(self):
         """TEST 2 - RÉCUPÉRATION CLIENTS AVEC TOKEN"""
