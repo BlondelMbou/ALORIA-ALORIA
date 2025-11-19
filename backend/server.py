@@ -1488,8 +1488,8 @@ async def update_case(case_id: str, update_data: CaseUpdate, current_user: dict 
             client["user_id"],
             "Mise à jour de votre dossier",
             f"Votre dossier a été mis à jour par {current_user['full_name']}. Statut: {update_data.status or case['status']}",
-            "case_update",
-            case_id
+            notification_type="case_update",
+            related_id=case_id
         )
         
         # Notify assigned employee if different from current user
@@ -1499,8 +1499,8 @@ async def update_case(case_id: str, update_data: CaseUpdate, current_user: dict 
                 client["assigned_employee_id"],
                 "Dossier client mis à jour",
                 f"Le dossier de {client_name} a été mis à jour par {current_user['full_name']}",
-                "case_update",
-                case_id
+                notification_type="case_update",
+                related_id=case_id
             )
         
         # Send WebSocket updates
