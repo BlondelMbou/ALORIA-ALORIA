@@ -1,50 +1,13 @@
 #!/usr/bin/env python3
 """
-ALORIA AGENCY Backend API Testing Suite - DIAGNOSTIC URGENT AUTHENTIFICATION ET DONNÉES CLIENTS
+ALORIA AGENCY - Test Complet du Workflow Client
+Création, Dashboard, Affectation et Notifications
 
-DIAGNOSTIC URGENT - PROBLÈME AUTHENTIFICATION ET DONNÉES CLIENTS
-
-**Problème rapporté :** Les données clients affichent N/A dans le frontend. Après investigation, il semble y avoir un problème d'authentification.
-
-**TESTS À EFFECTUER :**
-
-**TEST 1 - AUTHENTIFICATION DE BASE**
-1. POST /api/auth/login avec manager@test.com / password123
-2. **VÉRIFIER** :
-   - Status code 200
-   - access_token présent dans la réponse
-   - Token n'est pas null ou vide
-3. **EXTRAIRE** le token pour les tests suivants
-
-**TEST 2 - RÉCUPÉRATION CLIENTS AVEC TOKEN**
-1. Utiliser le token obtenu
-2. GET /api/clients avec header `Authorization: Bearer {token}`
-3. **VÉRIFIER** :
-   - Status code (200, 401, 403, 500 ?)
-   - Type de réponse (array, object, error ?)
-   - Si array : nombre d'éléments
-   - Si error : message exact
-
-**TEST 3 - STRUCTURE DES DONNÉES CLIENTS**
-Si GET /api/clients retourne des données :
-1. **ANALYSER** le premier client :
-   - `full_name` : valeur ? (string, null, undefined ?)
-   - `email` : valeur ?
-   - `phone` : valeur ?
-   - `client_name` : valeur ?
-   - `user_id` : présent ?
-
-**TEST 4 - VÉRIFIER UN USER SPÉCIFIQUE**
-1. Prendre un user_id d'un client
-2. GET /api/users (si accessible) ou vérifier dans la DB
-3. **COMPARER** : Les données du user vs les données du client
-
-**TEST 5 - BCRYPT/PASSLIB**
-1. Vérifier qu'il n'y a pas d'erreur bcrypt dans les logs
-2. Tester un changement de mot de passe simple
-3. Vérifier que le hash fonctionne
-
-**OBJECTIF** : Identifier pourquoi le frontend ne reçoit pas les bonnes données - est-ce un problème d'auth, de structure de données, ou autre ?
+WORKFLOW À TESTER:
+- PHASE 1: Création de Client par Employee
+- PHASE 2: Mise à jour du Dossier par Manager avec Notifications  
+- PHASE 3: Création de Client par Manager avec Affectation
+- PHASE 4: Validation Complète du Workflow
 """
 
 import requests
