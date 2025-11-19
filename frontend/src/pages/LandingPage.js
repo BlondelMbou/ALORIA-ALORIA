@@ -891,8 +891,11 @@ export default function LandingPage() {
             <div className="inline-flex items-center justify-center p-3 bg-orange-500/10 rounded-2xl mb-6">
               <Calculator className="h-8 w-8 text-orange-500" />
             </div>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4 sm:mb-6">
-              Vérifiez votre <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-orange-600">Potentiel d'Admissibilité</span>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4 sm:mb-6 px-4">
+              Vérifiez votre <br className="sm:hidden" />
+              <span className="inline-block mt-2 sm:mt-0 px-4 py-2 sm:px-6 sm:py-3 bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg shadow-xl">
+                <span className="text-white font-extrabold">Potentiel d'Admissibilité</span>
+              </span>
             </h2>
             <p className="text-base sm:text-lg text-slate-400 max-w-3xl mx-auto leading-relaxed px-4">
               Estimation indicative basée sur le système <strong>Entrée Express du Canada</strong>. 
