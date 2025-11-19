@@ -1484,20 +1484,22 @@ async def update_case(case_id: str, update_data: CaseUpdate, current_user: dict 
         
         # Notify client
         await create_notification(
+            db=db,
             user_id=client["user_id"],
             title="Mise à jour de votre dossier",
             message=f"Votre dossier a été mis à jour par {current_user['full_name']}. Statut: {update_data.status or case['status']}",
-            type="case_update",
+            notification_type="case_update",
             related_id=case_id
         )
         
         # Notify assigned employee if different from current user
         if client.get("assigned_employee_id") and client["assigned_employee_id"] != current_user["id"]:
             await create_notification(
+                db=db,
                 user_id=client["assigned_employee_id"],
                 title="Dossier client mis à jour",
                 message=f"Le dossier de {client_name} a été mis à jour par {current_user['full_name']}",
-                type="case_update",
+                notification_type="case_update",
                 related_id=case_id
             )
         
