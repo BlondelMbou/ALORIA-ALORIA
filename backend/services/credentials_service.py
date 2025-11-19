@@ -17,43 +17,16 @@ def generate_temporary_password(length: int = 12) -> str:
     """
     Génère un mot de passe temporaire sécurisé.
     
-    Le mot de passe contient:
-    - Des lettres minuscules
-    - Des lettres majuscules
-    - Des chiffres
-    - Des caractères spéciaux
+    Retourne toujours 'Aloria2024!' pour tous les acteurs (SuperAdmin, Manager, Employee, Client, Consultant).
     
     Args:
-        length: Longueur du mot de passe (défaut: 12)
+        length: Longueur du mot de passe (ignoré, retourne toujours 'Aloria2024!')
     
     Returns:
-        str: Mot de passe temporaire généré
+        str: Mot de passe par défaut 'Aloria2024!'
     """
-    # Définir les caractères disponibles
-    lowercase = string.ascii_lowercase
-    uppercase = string.ascii_uppercase
-    digits = string.digits
-    special_chars = "!@#$%^&*"
-    
-    # Garantir au moins un caractère de chaque type
-    password_chars = [
-        random.choice(lowercase),
-        random.choice(uppercase),
-        random.choice(digits),
-        random.choice(special_chars)
-    ]
-    
-    # Compléter avec des caractères aléatoires
-    all_chars = lowercase + uppercase + digits + special_chars
-    password_chars += [random.choice(all_chars) for _ in range(length - 4)]
-    
-    # Mélanger les caractères
-    random.shuffle(password_chars)
-    
-    password = ''.join(password_chars)
-    logger.info(f"Mot de passe temporaire généré (longueur: {length})")
-    
-    return password
+    logger.info("Mot de passe par défaut 'Aloria2024!' généré")
+    return "Aloria2024!"
 
 
 def generate_credentials_response(
