@@ -89,68 +89,76 @@ class WorkflowTester:
             
         headers = {"Authorization": f"Bearer {self.tokens['employee']}"}
         
-        # 1. Créer un prospect via POST /api/contact-messages
-        print("\n🔸 ÉTAPE 1.1 - Créer un prospect")
+        # 1. Créer un client directement via POST /api/clients
+        print("\n🔸 ÉTAPE 1.1 - Créer un client directement")
         try:
-            prospect_data = {
-                "name": "Test Client Employee",
+            client_data = {
                 "email": "client.employee.test@example.com",
+                "full_name": "Test Client Employee",
                 "phone": "+33612345678",
                 "country": "Canada",
                 "visa_type": "Permis de travail",
-                "urgency_level": "Normal",
-                "message": "Test de création par employé",
-                "lead_source": "Site web",
-                "how_did_you_know": "Recherche Google"
+                "message": "Test de création par employé"
             }
             
-            response = self.session.post(f"{API_BASE}/contact-messages", json=prospect_data, headers=headers)
+            response = self.session.post(f"{API_BASE}/clients", json=client_data, headers=headers)
             
             if response.status_code in [200, 201]:
-                prospect = response.json()
-                self.test_data['prospect_id'] = prospect['id']
-                self.log_result("1.1 Create Prospect", True, 
-                              f"Prospect créé: {prospect['id']} - {prospect['name']}")
+                client = response.json()
+                self.test_data['client_id'] = client['id']
+                self.test_data['user_id'] = client['user_id']
+                
+                self.log_result("1.1 Create Client", True, 
+                              f"Client créé: {client['id']} - {client.get('full_name', 'N/A')}")
             else:
-                self.log_result("1.1 Create Prospect", False, 
+                self.log_result("1.1 Create Client", False, 
                               f"Status: {response.status_code}", response.text)
                 return False
                 
         except Exception as e:
-            self.log_result("1.1 Create Prospect", False, "Exception occurred", str(e))
+            self.log_result("1.1 Create Client", False, "Exception occurred", str(e))
             return False
         
-        # 2. Convertir prospect en client via POST /api/contact-messages/{message_id}/convert-to-client
-        print("\n🔸 ÉTAPE 1.2 - Convertir prospect en client")
+        # 2. Créer un paiement initial pour le client
+        print("\n🔸 ÉTAPE 1.2 - Créer un paiement initial")
         try:
-            conversion_data = {
-                "first_payment_amount": 50000,
-                "payment_method": "Virement bancaire",
-                "country": "Canada",
-                "visa_type": "Permis de travail"
+            # Login as the created client to declare payment
+            client_credentials = {
+                "email": "client.employee.test@example.com",
+                "password": "Aloria2024!"  # Default password
             }
             
-            prospect_id = self.test_data['prospect_id']
-            response = self.session.post(f"{API_BASE}/contact-messages/{prospect_id}/convert-to-client", 
-                                       json=conversion_data, headers=headers)
+            login_response = self.session.post(f"{API_BASE}/auth/login", json=client_credentials)
             
-            if response.status_code in [200, 201]:
-                conversion_result = response.json()
-                self.test_data['client_id'] = conversion_result.get('client_id')
-                self.test_data['user_id'] = conversion_result.get('user_id')
-                self.test_data['case_id'] = conversion_result.get('case_id')
-                self.test_data['payment_id'] = conversion_result.get('payment_id')
+            if login_response.status_code == 200:
+                client_token = login_response.json()['access_token']
+                client_headers = {"Authorization": f"Bearer {client_token}"}
                 
-                self.log_result("1.2 Convert to Client", True, 
-                              f"Client créé: {self.test_data['client_id']}")
+                payment_data = {
+                    "amount": 50000,
+                    "currency": "CFA",
+                    "description": "Premier versement - Test workflow",
+                    "payment_method": "Virement bancaire"
+                }
+                
+                payment_response = self.session.post(f"{API_BASE}/payments/declare", 
+                                                   json=payment_data, headers=client_headers)
+                
+                if payment_response.status_code in [200, 201]:
+                    payment = payment_response.json()
+                    self.test_data['payment_id'] = payment['id']
+                    
+                    self.log_result("1.2 Create Payment", True, 
+                                  f"Paiement créé: {payment['id']} - {payment['amount']} {payment['currency']}")
+                else:
+                    self.log_result("1.2 Create Payment", False, 
+                                  f"Status: {payment_response.status_code}", payment_response.text)
             else:
-                self.log_result("1.2 Convert to Client", False, 
-                              f"Status: {response.status_code}", response.text)
-                return False
+                self.log_result("1.2 Client Login for Payment", False, 
+                              f"Status: {login_response.status_code}", login_response.text)
                 
         except Exception as e:
-            self.log_result("1.2 Convert to Client", False, "Exception occurred", str(e))
-            return False
+            self.log_result("1.2 Create Payment", False, "Exception occurred", str(e))
         
         # 3. Vérifications post-création
         print("\n🔸 ÉTAPE 1.3 - Vérifications post-création")
