@@ -3232,16 +3232,16 @@ async def get_consultation_payments(current_user: dict = Depends(get_current_use
 
 @api_router.get("/payments/{payment_id}/invoice")
 async def download_invoice(payment_id: str, current_user: dict = Depends(get_current_user)):
-    """Télécharger la facture PNG pour un paiement confirmé"""
-    import os
-    from fastapi.responses import FileResponse
+    """Télécharger la facture PDF professionnelle pour un paiement confirmé"""
+    from fastapi.responses import Response
+    from professional_invoice_generator import generate_professional_invoice_pdf
     
     # Récupérer le paiement depuis payment_declarations
     payment = await db.payment_declarations.find_one({"id": payment_id}, {"_id": 0})
     if not payment:
         raise HTTPException(status_code=404, detail="Paiement non trouvé")
     
-    # Vérifier que le paiement est confirmé et a une facture
+    # Vérifier que le paiement est confirmé
     payment_status = payment.get("status", "").lower()
     if payment_status != "confirmed":
         raise HTTPException(status_code=400, detail="Le paiement n'est pas confirmé")
@@ -3263,18 +3263,47 @@ async def download_invoice(payment_id: str, current_user: dict = Depends(get_cur
     elif current_user["role"] not in ["MANAGER", "SUPERADMIN"]:
         raise HTTPException(status_code=403, detail="Accès non autorisé")
     
-    # Chemin du fichier PNG
-    png_path = f"/app/backend/invoices/{invoice_number}.png"
+    # Récupérer les informations du client
+    client = await db.clients.find_one({"id": client_id}) or await db.clients.find_one({"user_id": client_id})
+    user = await db.users.find_one({"id": client_id}) if client_id else None
     
-    # Vérifier que le fichier existe
-    if not os.path.exists(png_path):
-        raise HTTPException(status_code=404, detail="Fichier de facture non trouvé")
+    client_name = "Client"
+    client_email = None
+    client_phone = None
     
-    # Retourner le fichier PNG
-    return FileResponse(
-        path=png_path,
-        media_type="image/png",
-        filename=f"Facture_{invoice_number}.png"
+    if client:
+        client_name = client.get("full_name") or user.get("full_name", "Client") if user else "Client"
+        client_email = client.get("email") or user.get("email") if user else None
+        client_phone = client.get("phone") or user.get("phone") if user else None
+    elif user:
+        client_name = user.get("full_name", "Client")
+        client_email = user.get("email")
+        client_phone = user.get("phone")
+    
+    # Préparer les données de la facture
+    invoice_data = {
+        'invoice_number': invoice_number,
+        'client_name': client_name,
+        'client_email': client_email,
+        'client_phone': client_phone,
+        'amount': payment.get('amount', 0),
+        'currency': payment.get('currency', 'CFA'),
+        'payment_method': payment.get('payment_method', 'N/A'),
+        'description': payment.get('description', 'Services d\'immigration et conseil'),
+        'created_at': payment.get('created_at', datetime.now(timezone.utc).isoformat()),
+        'status': 'Confirmé' if payment_status == 'confirmed' else 'En attente'
+    }
+    
+    # Générer le PDF professionnel
+    pdf_bytes = generate_professional_invoice_pdf(invoice_data)
+    
+    # Retourner le PDF
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": f"attachment; filename=Facture_{invoice_number}.pdf"
+        }
     )
 
 # Contact Messages & CRM
