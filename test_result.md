@@ -676,6 +676,36 @@
         -agent: "testing"
         -comment: "✅ SUPERADMIN VISITORS LIST DISPLAY - 100% FUNCTIONAL! Comprehensive testing completed with PERFECT RESULTS (7/7 tests passed). ✅ SUPERADMIN AUTHENTICATION: Login superadmin@aloria.com/SuperAdmin123! successful with correct role verification. ✅ CONTACT MESSAGES ENDPOINT: GET /api/contact-messages accessible and returns exactly 54 contact messages as expected. ✅ DATA STRUCTURE: All required fields present (id, name, email, phone, country, visa_type, status, message, created_at) with valid data quality. ✅ SUPERADMIN ACCESS: SuperAdmin sees ALL message statuses without filtering (paiement_50k, en_consultation, nouveau, CONTACTED, RESPONDED, converti_client, assigne_employe, NEW). ✅ ENDPOINT COMPARISON: /api/visitors returns 67 physical visitors (different data structure) confirming the fix correctly distinguishes between website visitors (contact messages) and physical agency visitors. The main agent's fix is 100% operational - SuperAdmin can now see the complete list of website visitors with proper data display."
 
+  - task: "Manager Case Update Error - Notification Bug"
+    implemented: true
+    working: "NA"
+    file: "server.py"
+    stuck_count: 0
+    priority: "critical"
+    needs_retesting: true
+    status_history:
+        -working: false
+        -agent: "user"
+        -comment: "❌ USER REPORTED: Quand je me connecte en tant que manager et j'essaie de mettre à jour un dossier client, ça me retourne une erreur 'Erreur lors de la mise à jour'. Impossible de mettre à jour les dossiers. Screenshot: maj.png montre l'erreur sur le modal 'Mise à jour du Dossier' pour le client 'frida'."
+        -working: "NA"
+        -agent: "main"
+        -comment: "🔧 FIX IMPLEMENTED: Identifié le problème dans l'endpoint PATCH /api/cases/{case_id} (ligne 1486 et 1496 de server.py). Les appels à create_notification manquaient le paramètre 'db' en premier argument et utilisaient 'type' au lieu de 'notification_type'. Corrections appliquées: Ajout du paramètre db=db, changement de 'type' en 'notification_type' dans les deux appels create_notification pour notifier le client et l'employé assigné. Backend redémarré avec succès."
+
+  - task: "Employee Dashboard Client Data N/A Display"
+    implemented: true
+    working: "NA"
+    file: "EmployeeDashboard.js"
+    stuck_count: 1
+    priority: "critical"
+    needs_retesting: true
+    status_history:
+        -working: false
+        -agent: "user"
+        -comment: "❌ USER REPORTED: Sur l'Employee Dashboard, toutes les cartes de clients (9 cartes) affichent 'N/A' pour le nom du client et 'Email N/A' pour l'adresse email au lieu des vraies données. Screenshot: na.png montre 9 cartes avec ce problème. C'est un sujet sensible à l'application."
+        -working: "NA"
+        -agent: "main"
+        -comment: "🔧 FIX IMPLEMENTED: Identifié le problème dans EmployeeDashboard.js ligne 704-705. Le code utilisait clientCase?.client_name et clientCase?.client_email (provenant de l'objet case) au lieu d'utiliser client?.full_name et client?.email (provenant de l'objet client directement). Les données existent bien dans la BDD (vérifié: 10 clients assignés à l'employé 'employer' avec toutes les données full_name, email, phone présentes). Correction: Changé ligne 701 de (clientCase?.client_name || 'N') en (client?.full_name || 'N'), ligne 704 de {clientCase?.client_name || 'N/A'} en {client?.full_name || 'N/A'}, ligne 705 de {clientCase?.client_email || 'Email N/A'} en {client?.email || 'Email N/A'}. Frontend utilise hot reload, pas besoin de redémarrage."
+
 ## metadata:
   created_by: "main_agent"
   version: "2.0"
