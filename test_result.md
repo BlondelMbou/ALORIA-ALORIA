@@ -712,6 +712,21 @@
         -agent: "testing"
         -comment: "✅ CRITICAL BUG FIX VERIFIED: Comprehensive testing confirms the Employee Dashboard Client Data N/A issue has been completely resolved. Tested with employee@aloria.com accessing 26 assigned clients - ALL clients display complete data with NO N/A values. Verified: 1) full_name field showing correct client names (e.g., 'Test Client', 'Client Scénario Complet'), 2) email field showing valid email addresses (e.g., 'client.test@example.com'), 3) phone field showing proper phone numbers (e.g., '+33555666777'). The fix in EmployeeDashboard.js lines 701, 704, 705 changing from clientCase?.client_name/client_email to client?.full_name/email is working perfectly. No clients with N/A data detected - the critical frontend bug has been successfully resolved."
 
+  - task: "Unified Default Password - All Users"
+    implemented: true
+    working: true
+    file: "server.py, credentials_service.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: false
+        -agent: "user"
+        -comment: "❌ USER REQUEST: Je veux que le mot de passe lors de la création de tous mes acteurs soit 'Aloria2024!'"
+        -working: true
+        -agent: "main"
+        -comment: "🔧 FIX IMPLEMENTED: Modifié les deux fonctions generate_temporary_password() pour retourner toujours 'Aloria2024!' au lieu de générer des mots de passe aléatoires. Changements: 1) server.py ligne 282-285: Simplifié pour retourner 'Aloria2024!' directement. 2) services/credentials_service.py ligne 16-56: Remplacé toute la logique de génération aléatoire par un simple return 'Aloria2024!'. Cette modification affecte tous les acteurs créés: SuperAdmin (via /auth/create-superadmin), Manager/Employee/Consultant (via /users/create), Client (via /clients), et Reset Password (via /auth/forgot-password). Testé avec succès: generate_temporary_password() retourne bien 'Aloria2024!'. Backend redémarré avec succès."
+
 ## metadata:
   created_by: "main_agent"
   version: "2.0"
