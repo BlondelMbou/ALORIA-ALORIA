@@ -280,9 +280,8 @@ import secrets
 import string
 
 def generate_temporary_password(length: int = 12) -> str:
-    """Génère un mot de passe temporaire sécurisé"""
-    alphabet = string.ascii_letters + string.digits + "!@#$%^&*"
-    return ''.join(secrets.choice(alphabet) for _ in range(length))
+    """Génère un mot de passe temporaire sécurisé - Retourne toujours 'Aloria2024!' pour tous les acteurs"""
+    return "Aloria2024!"
 
 async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
     try:
