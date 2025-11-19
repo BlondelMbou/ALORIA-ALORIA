@@ -299,33 +299,25 @@ export default function LandingPage() {
               </Button>
             </nav>
 
-            {/* Mobile Menu Button */}
-            <div className="flex items-center space-x-2 lg:hidden">
+            {/* Mobile Menu Button - Corrigé pour meilleur alignement */}
+            <div className="flex items-center gap-3 lg:hidden">
               <Button 
                 onClick={() => navigate('/login')}
                 size="sm"
-                className="bg-orange-500 hover:bg-orange-600 text-white px-3 py-2 text-xs touch-manipulation"
+                className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 text-sm font-medium touch-manipulation shadow-lg"
               >
-                <ArrowRight className="w-3 h-3 mr-1" />
-                <span className="hidden xs:inline">Connexion</span>
-                <span className="xs:hidden">Login</span>
+                Connexion
               </Button>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setShowMobileMenu(!showMobileMenu)}
                 className="p-2 text-slate-300 hover:text-orange-500 hover:bg-slate-800 touch-manipulation"
+                aria-label="Menu"
               >
-                {showMobileMenu ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+                {showMobileMenu ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
               </Button>
             </div>
-
-            <button 
-              className="lg:hidden text-slate-300"
-              onClick={() => setShowMobileMenu(!showMobileMenu)}
-            >
-              {showMobileMenu ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </button>
           </div>
         </div>
       </header>
