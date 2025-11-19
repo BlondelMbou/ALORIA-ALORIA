@@ -753,6 +753,7 @@
 
 ## test_plan:
   current_focus:
+    - "Manager Case Update Bug Fix - 404 Error Resolution - RÉSOLU ✅"
     - "Authentication & Client Data N/A Issue - RÉSOLU ✅"
     - "Bcrypt/Passlib Compatibility Issue - RÉSOLU ✅"
     - "PNG Invoice Generation System - Case Sensitivity Bug Identified ❌"
@@ -760,8 +761,8 @@
     - "PNG Invoice case sensitivity bug (line 3237 server.py)"
     - "Alternative invoice endpoint GET /api/invoices/{invoice_number} broken"
   test_all: false
-  test_priority: "urgent_authentication_resolved"
-  last_test_session: "DIAGNOSTIC URGENT AUTHENTIFICATION ET DONNÉES CLIENTS - 83.3% SUCCÈS! Problème critique d'authentification identifié et résolu. ✅ PROBLÈME RACINE: Incompatibilité bcrypt 5.0.0/passlib 1.7.4 causait erreurs 500. ✅ CORRECTION: Downgrade bcrypt→4.0.1, redémarrage backend. ✅ AUTHENTIFICATION: Login manager@test.com/password123 opérationnel, token JWT valide. ✅ DONNÉES CLIENTS: 201 clients analysés, aucune donnée N/A, structure complète. ✅ BCRYPT: Hash/verify fonctionnel, changement mot de passe opérationnel. Le système d'authentification et données clients fonctionne maintenant à 100%."
+  test_priority: "critical_manager_case_update_resolved"
+  last_test_session: "MANAGER CASE UPDATE BUG FIX TESTING - 100% SUCCÈS! Test critique du bug Manager Case Update terminé avec PARFAIT RÉSULTAT (8/8 tests réussis). ✅ PROBLÈME IDENTIFIÉ: GET /api/cases utilisait user_id au lieu de client_id pour chercher les cases. ✅ CORRECTION VALIDÉE: Ligne 1396 server.py corrigée, GET /api/cases retourne maintenant les vrais cases. ✅ PATCH FONCTIONNEL: PATCH /api/cases/{case_id} retourne 200 OK (pas 404), mise à jour des dossiers opérationnelle. ✅ CORRECTION ADDITIONNELLE: Fixed create_notification() function calls. Le Manager peut maintenant mettre à jour les dossiers sans erreur - bug critique résolu à 100%."
 
 ## agent_communication:
     -agent: "testing"
