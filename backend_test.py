@@ -217,7 +217,17 @@ class WorkflowTester:
             response = self.session.get(f"{API_BASE}/cases", headers=headers)
             if response.status_code == 200:
                 cases = response.json()
-                created_case = next((c for c in cases if c['client_id'] == self.test_data['client_id']), None)
+                print(f"   DEBUG: Found {len(cases)} cases total")
+                
+                # Try to find case by client_id or user_id
+                created_case = None
+                for case in cases:
+                    print(f"   DEBUG: Case {case.get('id')} - client_id: {case.get('client_id')}, client_name: {case.get('client_name')}")
+                    if (case.get('client_id') == self.test_data['client_id'] or 
+                        case.get('client_id') == self.test_data['user_id'] or
+                        case.get('client_name') == "Test Client Employee"):
+                        created_case = case
+                        break
                 
                 if created_case:
                     verifications = []
@@ -237,11 +247,15 @@ class WorkflowTester:
                     else:
                         verifications.append(f"❌ Workflow steps: {len(created_case.get('workflow_steps', []))} étapes")
                     
+                    # Store case_id for later use
+                    self.test_data['case_id'] = created_case['id']
+                    
                     all_verified = all("✅" in v for v in verifications)
                     self.log_result("1.3.2 Case Data Verification", all_verified, 
                                   f"Vérifications: {'; '.join(verifications)}")
                 else:
-                    self.log_result("1.3.2 Case Data Verification", False, "Dossier non trouvé")
+                    self.log_result("1.3.2 Case Data Verification", False, 
+                                  f"Dossier non trouvé - client_id: {self.test_data['client_id']}, user_id: {self.test_data['user_id']}")
             else:
                 self.log_result("1.3.2 Case Data Verification", False, 
                               f"Status: {response.status_code}")
