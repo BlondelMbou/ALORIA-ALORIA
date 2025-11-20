@@ -273,7 +273,7 @@ class PasswordChangeTester:
         
         return True
 
-    def verify_client_dashboard(self):
+    def test_manager_password_change(self):
         """Vérifier l'accès au dashboard client"""
         try:
             # Login avec le client créé
