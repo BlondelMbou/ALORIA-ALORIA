@@ -204,7 +204,7 @@ class InvoiceDownloadTester:
                 
                 if (status == 'CONFIRMED' or payment.get('status') == 'confirmed') and invoice_number and client_id:
                     # Get client info
-                    client = await self.get_client_info(client_id)
+                    client = self.get_client_info(client_id)
                     if client:
                         return payment, client
             
