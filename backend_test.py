@@ -507,7 +507,7 @@ class PasswordChangeTester:
         
         return True
 
-    def phase_3_manager_client_creation(self):
+    def run_password_change_tests(self):
         """PHASE 3 - Création de Client par Manager avec Affectation"""
         print("\n" + "="*60)
         print("PHASE 3 - CRÉATION DE CLIENT PAR MANAGER")
