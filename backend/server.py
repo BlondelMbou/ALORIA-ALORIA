@@ -3262,19 +3262,25 @@ async def download_invoice(payment_id: str, current_user: dict = Depends(get_cur
     
     if current_user["role"] == "CLIENT":
         # CLIENT: Vérifier que le paiement lui appartient
-        # Le paiement peut avoir client_id = client.id OU user_id = current_user["id"]
         client_record = await db.clients.find_one({"user_id": current_user["id"]})
         if not client_record:
             raise HTTPException(status_code=403, detail="Profil client non trouvé")
         
-        # Vérifier que le paiement appartient à ce client
-        payment_belongs_to_client = (
-            client_id == client_record.get("id") or  # paiement avec client.id
-            client_id == current_user["id"] or       # paiement avec user_id
-            payment.get("user_id") == current_user["id"]  # user_id dans le paiement
+        # Vérification stricte : le paiement DOIT avoir au moins l'un de ces champs correspondant
+        # ET le client correspondant doit être le client actuel
+        payment_user_id = payment.get("user_id")
+        payment_client_id = payment.get("client_id")
+        
+        # Cas 1: payment.user_id = current_user["id"] (user_id du client)
+        # Cas 2: payment.client_id = client_record["id"] (ID du profil client)  
+        # Cas 3: payment.client_id = current_user["id"] (si client_id stocke user_id)
+        is_owner = (
+            (payment_user_id and payment_user_id == current_user["id"]) or
+            (payment_client_id and payment_client_id == client_record.get("id")) or
+            (payment_client_id and payment_client_id == current_user["id"])
         )
         
-        if not payment_belongs_to_client:
+        if not is_owner:
             raise HTTPException(status_code=403, detail="Accès non autorisé à cette facture")
     elif current_user["role"] == "EMPLOYEE":
         client_record = await db.clients.find_one({"user_id": client_id}) or await db.clients.find_one({"id": client_id})
