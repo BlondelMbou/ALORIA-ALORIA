@@ -508,94 +508,59 @@ class PasswordChangeTester:
         return True
 
     def run_password_change_tests(self):
-        """PHASE 3 - Création de Client par Manager avec Affectation"""
-        print("\n" + "="*60)
-        print("PHASE 3 - CRÉATION DE CLIENT PAR MANAGER")
-        print("="*60)
+        """Exécuter tous les tests de changement de mot de passe"""
+        print("ALORIA AGENCY - Test Changement de Mot de Passe - Tous les Rôles")
+        print("Test complet du système de changement de mot de passe pour tous les rôles")
+        print("="*80)
         
-        if 'manager' not in self.tokens:
-            self.log_result("Phase 3 Setup", False, "Manager token not available")
-            return False
-            
-        headers = {"Authorization": f"Bearer {self.tokens['manager']}"}
-        
-        # 1. Créer un client directement
-        print("\n🔸 ÉTAPE 3.1 - Créer un client directement")
-        try:
-            client_data = {
-                "email": "client.manager.test@example.com",
-                "full_name": "Test Client Manager",
-                "phone": "+33698765432",
-                "country": "France",
-                "visa_type": "Visa étudiant",
-                "message": "Test de création par manager"
-            }
-            
-            response = self.session.post(f"{API_BASE}/clients", json=client_data, headers=headers)
-            
-            if response.status_code in [200, 201]:
-                client = response.json()
-                self.test_data['manager_client_id'] = client['id']
-                
-                self.log_result("3.1 Create Manager Client", True, 
-                              f"Client créé: {client['id']} - {client.get('full_name', 'N/A')}")
-            else:
-                self.log_result("3.1 Create Manager Client", False, 
-                              f"Status: {response.status_code}", response.text)
-                return False
-                
-        except Exception as e:
-            self.log_result("3.1 Create Manager Client", False, "Exception occurred", str(e))
+        # Authentication
+        if not self.authenticate_users():
+            print("❌ ÉCHEC: Impossible d'authentifier les utilisateurs")
             return False
         
-        # 2. Créer un paiement pour ce client
-        print("\n🔸 ÉTAPE 3.2 - Créer un paiement")
-        try:
-            # Login as the created client to declare payment
-            client_credentials = {
-                "email": "client.manager.test@example.com",
-                "password": "Aloria2024!"  # Default password
-            }
-            
-            login_response = self.session.post(f"{API_BASE}/auth/login", json=client_credentials)
-            
-            if login_response.status_code == 200:
-                client_token = login_response.json()['access_token']
-                client_headers = {"Authorization": f"Bearer {client_token}"}
-                
-                payment_data = {
-                    "amount": 75000,
-                    "currency": "CFA",
-                    "description": "Premier versement - Test manager",
-                    "payment_method": "Espèces"
-                }
-                
-                payment_response = self.session.post(f"{API_BASE}/payments/declare", 
-                                                   json=payment_data, headers=client_headers)
-                
-                if payment_response.status_code in [200, 201]:
-                    payment = payment_response.json()
-                    self.log_result("3.2 Create Manager Payment", True, 
-                                  f"Paiement créé: {payment['id']} - {payment['amount']} {payment['currency']}")
-                else:
-                    self.log_result("3.2 Create Manager Payment", False, 
-                                  f"Status: {payment_response.status_code}", payment_response.text)
-            else:
-                self.log_result("3.2 Manager Client Login", False, 
-                              f"Status: {login_response.status_code}", login_response.text)
-                
-        except Exception as e:
-            self.log_result("3.2 Create Manager Payment", False, "Exception occurred", str(e))
+        # Find active client
+        if not self.find_active_client():
+            print("❌ ÉCHEC: Impossible de trouver un client actif")
+            return False
         
-        # 3. Vérifier l'affectation automatique au manager
-        print("\n🔸 ÉTAPE 3.3 - Vérifier l'affectation")
-        self.verify_manager_assignment()
+        # Test 1: CLIENT Change Son Mot de Passe
+        if not self.test_client_password_change():
+            print("❌ ÉCHEC: Test 1 - CLIENT Change Son Mot de Passe")
         
-        # 4. Réaffecter le client à l'employé
-        print("\n🔸 ÉTAPE 3.4 - Réaffecter à l'employé")
-        self.test_client_reassignment()
+        # Test 2: EMPLOYEE Change Son Mot de Passe
+        if not self.test_employee_password_change():
+            print("❌ ÉCHEC: Test 2 - EMPLOYEE Change Son Mot de Passe")
         
-        return True
+        # Test 3: MANAGER Change Son Mot de Passe
+        if not self.test_manager_password_change():
+            print("❌ ÉCHEC: Test 3 - MANAGER Change Son Mot de Passe")
+        
+        # Test 4: SUPERADMIN Change Son Mot de Passe
+        if not self.test_superadmin_password_change():
+            print("❌ ÉCHEC: Test 4 - SUPERADMIN Change Son Mot de Passe")
+        
+        # Test 5: Erreurs de Validation
+        if not self.test_password_validation_errors():
+            print("❌ ÉCHEC: Test 5 - Erreurs de Validation")
+        
+        # Résultats finaux
+        print("\n" + "="*80)
+        print("RÉSULTATS FINAUX")
+        print("="*80)
+        
+        total_tests = self.results['passed'] + self.results['failed']
+        success_rate = (self.results['passed'] / total_tests * 100) if total_tests > 0 else 0
+        
+        print(f"✅ Tests réussis: {self.results['passed']}")
+        print(f"❌ Tests échoués: {self.results['failed']}")
+        print(f"📊 Taux de réussite: {success_rate:.1f}%")
+        
+        if self.results['errors']:
+            print(f"\n🚨 ERREURS DÉTECTÉES:")
+            for error in self.results['errors']:
+                print(f"   - {error['test']}: {error['message']}")
+        
+        return success_rate >= 80  # Considérer comme succès si >= 80%
 
     def verify_manager_assignment(self):
         """Vérifier que le client est assigné au manager"""
