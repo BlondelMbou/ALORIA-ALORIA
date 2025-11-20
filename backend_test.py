@@ -411,7 +411,7 @@ class PasswordChangeTester:
         
         return True
 
-    def verify_notifications_after_update(self):
+    def test_password_validation_errors(self):
         """Vérifier que les notifications sont créées après mise à jour"""
         
         # Vérifier notifications pour l'employé
