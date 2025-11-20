@@ -412,69 +412,100 @@ class PasswordChangeTester:
         return True
 
     def test_password_validation_errors(self):
-        """Vérifier que les notifications sont créées après mise à jour"""
+        """TEST 5 - Erreurs de Validation"""
+        print("\n" + "="*60)
+        print("TEST 5 - ERREURS DE VALIDATION")
+        print("="*60)
         
-        # Vérifier notifications pour l'employé
-        try:
-            headers = {"Authorization": f"Bearer {self.tokens['employee']}"}
-            response = self.session.get(f"{API_BASE}/notifications", headers=headers)
-            
-            if response.status_code == 200:
-                notifications = response.json()
-                case_notifications = [n for n in notifications if n.get('type') == 'case_update']
-                
-                if len(case_notifications) > 0:
-                    latest_notification = case_notifications[0]
-                    if "Test Client Employee" in latest_notification.get('message', ''):
-                        self.log_result("2.3.1 Employee Notification", True, 
-                                      f"Notification reçue: {latest_notification['title']}")
-                    else:
-                        self.log_result("2.3.1 Employee Notification", False, 
-                                      f"Notification incorrecte: {latest_notification.get('message')}")
-                else:
-                    self.log_result("2.3.1 Employee Notification", False, 
-                                  "Aucune notification de mise à jour trouvée")
-            else:
-                self.log_result("2.3.1 Employee Notification", False, 
-                              f"Status: {response.status_code}")
-                
-        except Exception as e:
-            self.log_result("2.3.1 Employee Notification", False, "Exception occurred", str(e))
+        if 'manager' not in self.tokens:
+            self.log_result("Test 5 Setup", False, "Manager token not available")
+            return False
         
-        # Vérifier notifications pour le client
+        headers = {"Authorization": f"Bearer {self.tokens['manager']}"}
+        
+        # Test 5.1: Mot de passe actuel incorrect
+        print("\n🔸 ÉTAPE 5.1 - Mot de passe actuel incorrect")
         try:
-            client_credentials = {
-                "email": "client.employee.test@example.com",
-                "password": "Aloria2024!"
+            wrong_password_data = {
+                "current_password": "wrong_password_123",
+                "new_password": "NewValidPass123!"
             }
             
-            login_response = self.session.post(f"{API_BASE}/auth/login", json=client_credentials)
+            response = self.session.post(f"{API_BASE}/users/change-password", 
+                                       json=wrong_password_data, headers=headers)
             
-            if login_response.status_code == 200:
-                client_token = login_response.json()['access_token']
-                headers = {"Authorization": f"Bearer {client_token}"}
-                
-                response = self.session.get(f"{API_BASE}/notifications", headers=headers)
-                
-                if response.status_code == 200:
-                    notifications = response.json()
-                    case_notifications = [n for n in notifications if n.get('type') == 'case_update']
-                    
-                    if len(case_notifications) > 0:
-                        self.log_result("2.3.2 Client Notification", True, 
-                                      f"Client a reçu {len(case_notifications)} notification(s)")
-                    else:
-                        self.log_result("2.3.2 Client Notification", False, 
-                                      "Client n'a reçu aucune notification")
+            if response.status_code == 400:
+                response_data = response.json()
+                if "incorrect" in response_data.get('detail', '').lower():
+                    self.log_result("5.1 Wrong Current Password", True, 
+                                  f"Erreur attendue: {response_data.get('detail')}")
                 else:
-                    self.log_result("2.3.2 Client Notification", False, 
-                                  f"Status: {response.status_code}")
+                    self.log_result("5.1 Wrong Current Password", False, 
+                                  f"Message d'erreur inattendu: {response_data.get('detail')}")
             else:
-                self.log_result("2.3.2 Client Notification", False, 
-                              "Impossible de se connecter en tant que client")
+                self.log_result("5.1 Wrong Current Password", False, 
+                              f"Status inattendu: {response.status_code} (attendu: 400)")
                 
         except Exception as e:
-            self.log_result("2.3.2 Client Notification", False, "Exception occurred", str(e))
+            self.log_result("5.1 Wrong Current Password", False, "Exception occurred", str(e))
+        
+        # Test 5.2: Nouveau mot de passe trop court
+        print("\n🔸 ÉTAPE 5.2 - Nouveau mot de passe trop court")
+        try:
+            short_password_data = {
+                "current_password": "password123",
+                "new_password": "12345"  # < 6 caractères
+            }
+            
+            response = self.session.post(f"{API_BASE}/users/change-password", 
+                                       json=short_password_data, headers=headers)
+            
+            if response.status_code == 400:
+                response_data = response.json()
+                if "6 caractères" in response_data.get('detail', ''):
+                    self.log_result("5.2 Short Password", True, 
+                                  f"Erreur attendue: {response_data.get('detail')}")
+                else:
+                    self.log_result("5.2 Short Password", False, 
+                                  f"Message d'erreur inattendu: {response_data.get('detail')}")
+            else:
+                self.log_result("5.2 Short Password", False, 
+                              f"Status inattendu: {response.status_code} (attendu: 400)")
+                
+        except Exception as e:
+            self.log_result("5.2 Short Password", False, "Exception occurred", str(e))
+        
+        # Test 5.3: Champs manquants
+        print("\n🔸 ÉTAPE 5.3 - Champs manquants")
+        try:
+            missing_fields_data = {
+                "current_password": "password123"
+                # new_password manquant
+            }
+            
+            response = self.session.post(f"{API_BASE}/users/change-password", 
+                                       json=missing_fields_data, headers=headers)
+            
+            if response.status_code == 400 or response.status_code == 422:
+                response_data = response.json()
+                error_message = response_data.get('detail', '')
+                if isinstance(error_message, list):
+                    error_message = str(error_message)
+                
+                if "requis" in error_message.lower() or "required" in error_message.lower():
+                    self.log_result("5.3 Missing Fields", True, 
+                                  f"Erreur attendue: {error_message}")
+                else:
+                    self.log_result("5.3 Missing Fields", False, 
+                                  f"Message d'erreur inattendu: {error_message}")
+            else:
+                self.log_result("5.3 Missing Fields", False, 
+                              f"Status inattendu: {response.status_code} (attendu: 400 ou 422)")
+                
+        except Exception as e:
+            self.log_result("5.3 Missing Fields", False, "Exception occurred", str(e))
+        
+        return True
 
     def phase_3_manager_client_creation(self):
         """PHASE 3 - Création de Client par Manager avec Affectation"""
