@@ -116,7 +116,7 @@ class PasswordChangeTester:
             self.log_result("Find Active Client", False, "Exception occurred", str(e))
             return False
 
-    def phase_1_employee_client_creation(self):
+    def test_client_password_change(self):
         """PHASE 1 - Création de Client par Employee"""
         print("\n" + "="*60)
         print("PHASE 1 - CRÉATION DE CLIENT PAR EMPLOYEE")
