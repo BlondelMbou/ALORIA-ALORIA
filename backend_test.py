@@ -204,7 +204,7 @@ class PasswordChangeTester:
         
         return True
 
-    def verify_client_creation(self):
+    def test_employee_password_change(self):
         """Vérifier que le client est créé correctement"""
         headers = {"Authorization": f"Bearer {self.tokens['employee']}"}
         
