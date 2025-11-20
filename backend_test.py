@@ -342,7 +342,7 @@ class PasswordChangeTester:
         
         return True
 
-    def phase_2_manager_case_update(self):
+    def test_superadmin_password_change(self):
         """PHASE 2 - Mise à jour du Dossier par Manager avec Notifications"""
         print("\n" + "="*60)
         print("PHASE 2 - MISE À JOUR DU DOSSIER PAR MANAGER")
