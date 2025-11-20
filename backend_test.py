@@ -79,6 +79,43 @@ class PasswordChangeTester:
                 return False
         return True
 
+    def find_active_client(self):
+        """Find an active client in the database"""
+        print("\n=== FINDING ACTIVE CLIENT ===")
+        
+        try:
+            # Use manager token to get all clients
+            headers = {"Authorization": f"Bearer {self.tokens['manager']}"}
+            response = self.session.get(f"{API_BASE}/clients", headers=headers)
+            
+            if response.status_code == 200:
+                clients = response.json()
+                if clients:
+                    # Find a client with complete data
+                    for client in clients:
+                        if client.get('email') and client.get('user_id'):
+                            self.test_data['client_email'] = client['email']
+                            self.test_data['client_user_id'] = client['user_id']
+                            self.test_data['client_full_name'] = client.get('full_name', 'Client Test')
+                            
+                            self.log_result("Find Active Client", True, 
+                                          f"Found client: {client['email']} (ID: {client['user_id']})")
+                            return True
+                    
+                    self.log_result("Find Active Client", False, "No client with complete data found")
+                    return False
+                else:
+                    self.log_result("Find Active Client", False, "No clients found in database")
+                    return False
+            else:
+                self.log_result("Find Active Client", False, 
+                              f"Status: {response.status_code}", response.text)
+                return False
+                
+        except Exception as e:
+            self.log_result("Find Active Client", False, "Exception occurred", str(e))
+            return False
+
     def phase_1_employee_client_creation(self):
         """PHASE 1 - Création de Client par Employee"""
         print("\n" + "="*60)
