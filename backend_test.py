@@ -29,7 +29,7 @@ CREDENTIALS = {
     'superadmin': {'email': 'superadmin@aloria.com', 'password': 'SuperAdmin123!'}
 }
 
-class WorkflowTester:
+class PasswordChangeTester:
     def __init__(self):
         self.session = requests.Session()
         self.tokens = {}
