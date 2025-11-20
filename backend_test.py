@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 """
-ALORIA AGENCY - Test Complet du Workflow Client
-Création, Dashboard, Affectation et Notifications
+ALORIA AGENCY - Test Changement de Mot de Passe - Tous les Rôles
+Test complet du système de changement de mot de passe pour tous les rôles
 
-WORKFLOW À TESTER:
-- PHASE 1: Création de Client par Employee
-- PHASE 2: Mise à jour du Dossier par Manager avec Notifications  
-- PHASE 3: Création de Client par Manager avec Affectation
-- PHASE 4: Validation Complète du Workflow
+TESTS À EFFECTUER:
+- TEST 1: CLIENT Change Son Mot de Passe
+- TEST 2: EMPLOYEE Change Son Mot de Passe  
+- TEST 3: MANAGER Change Son Mot de Passe
+- TEST 4: SUPERADMIN Change Son Mot de Passe
+- TEST 5: Erreurs de Validation (mot de passe incorrect, trop court, champs manquants)
 """
 
 import requests
