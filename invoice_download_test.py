@@ -88,7 +88,7 @@ class InvoiceDownloadTester:
         """Find a confirmed payment with invoice number"""
         try:
             # Try different payment endpoints
-            endpoints = ["/payments", "/payments/history"]
+            endpoints = ["/payments/manager-history", "/payments/history"]
             
             for endpoint in endpoints:
                 response = self.session.get(f"{API_BASE}{endpoint}", headers=headers)
