@@ -733,6 +733,24 @@
         -agent: "main"
         -comment: "🔧 FIX IMPLEMENTED: Modifié les deux fonctions generate_temporary_password() pour retourner toujours 'Aloria2024!' au lieu de générer des mots de passe aléatoires. Changements: 1) server.py ligne 282-285: Simplifié pour retourner 'Aloria2024!' directement. 2) services/credentials_service.py ligne 16-56: Remplacé toute la logique de génération aléatoire par un simple return 'Aloria2024!'. Cette modification affecte tous les acteurs créés: SuperAdmin (via /auth/create-superadmin), Manager/Employee/Consultant (via /users/create), Client (via /clients), et Reset Password (via /auth/forgot-password). Testé avec succès: generate_temporary_password() retourne bien 'Aloria2024!'. Backend redémarré avec succès."
 
+  - task: "Invoice Download Permission Fix - CLIENT vs MANAGER"
+    implemented: true
+    working: false
+    file: "server.py"
+    stuck_count: 0
+    priority: "critical"
+    needs_retesting: false
+    status_history:
+        -working: false
+        -agent: "user"
+        -comment: "❌ USER REPORTED: Le Manager peut télécharger les factures mais le Client se prend une erreur 403 (Accès non autorisé) quand il essaie de télécharger sa propre facture."
+        -working: false
+        -agent: "main"
+        -comment: "🔧 CORRECTION APPLIQUÉE: Lignes 3263-3265 de server.py - Vérification de permission incorrecte pour CLIENT. Le code vérifiait client_id != current_user['id'] mais client_id du paiement = client.id (ID du profil client) et current_user['id'] = user_id du client. Donc client.id != user_id → CLIENT toujours refusé. CORRECTION: Récupérer le profil client avec user_id = current_user['id'], vérifier que le paiement appartient au client en comparant payment.client_id == client_record.id OU payment.client_id == current_user['id'] OU payment.user_id == current_user['id']."
+        -working: false
+        -agent: "testing"
+        -comment: "🚨 TESTS COMPLETS EFFECTUÉS - RÉSULTATS MIXTES (68.8% succès, 11/16 tests passés): ✅ TEST 1 - Manager télécharge facture: PASS (baseline fonctionnel) ✅ TEST 2 - Client télécharge SA propre facture: PASS (bug fix validé - Status 200 OK au lieu de 403 Forbidden) ✅ TEST 4 - Employee télécharge facture client assigné: PASS ❌ TEST 3 - FAILLE DE SÉCURITÉ CRITIQUE: Client peut télécharger factures d'autres clients (Status 200 au lieu de 403 Forbidden) ❌ TEST 5 - Problèmes d'authentification clients pour tests paiements initiaux. CONCLUSION: Le bug principal est corrigé (clients peuvent télécharger leurs propres factures) MAIS une faille de sécurité critique permet aux clients de télécharger les factures d'autres clients. ACTIONS REQUISES: Renforcer les vérifications de sécurité dans l'endpoint /api/payments/{payment_id}/invoice pour empêcher l'accès cross-client."
+
   - task: "Manager Case Update Bug Fix - 404 Error Resolution"
     implemented: true
     working: true
