@@ -343,61 +343,73 @@ class PasswordChangeTester:
         return True
 
     def test_superadmin_password_change(self):
-        """PHASE 2 - Mise à jour du Dossier par Manager avec Notifications"""
+        """TEST 4 - SUPERADMIN Change Son Mot de Passe"""
         print("\n" + "="*60)
-        print("PHASE 2 - MISE À JOUR DU DOSSIER PAR MANAGER")
+        print("TEST 4 - SUPERADMIN CHANGE SON MOT DE PASSE")
         print("="*60)
         
-        if 'manager' not in self.tokens:
-            self.log_result("Phase 2 Setup", False, "Manager token not available")
+        if 'superadmin' not in self.tokens:
+            self.log_result("Test 4 Setup", False, "SuperAdmin token not available")
             return False
-            
-        headers = {"Authorization": f"Bearer {self.tokens['manager']}"}
         
-        # 1. Récupérer le dossier créé par l'employé
-        print("\n🔸 ÉTAPE 2.1 - Récupérer le dossier")
         try:
-            response = self.session.get(f"{API_BASE}/cases", headers=headers)
+            # 1. Changer le mot de passe SUPERADMIN
+            print("\n🔸 ÉTAPE 4.1 - Changer le mot de passe SUPERADMIN")
+            headers = {"Authorization": f"Bearer {self.tokens['superadmin']}"}
             
-            if response.status_code == 200:
-                cases = response.json()
-                target_case = next((c for c in cases if c.get('client_name') == "Test Client Employee"), None)
+            password_change_data = {
+                "current_password": "SuperAdmin123!",
+                "new_password": "SuperNewPass123!"
+            }
+            
+            change_response = self.session.post(f"{API_BASE}/users/change-password", 
+                                              json=password_change_data, headers=headers)
+            
+            if change_response.status_code == 200:
+                response_data = change_response.json()
                 
-                if target_case:
-                    self.test_data['case_id'] = target_case['id']
-                    self.log_result("2.1 Get Case", True, 
-                                  f"Dossier trouvé: {target_case['id']} - Client: {target_case['client_name']}")
+                if "succès" in response_data.get('message', '').lower():
+                    self.log_result("4.1 SuperAdmin Password Change", True, 
+                                  f"Message: {response_data.get('message')}")
+                    
+                    # 2. Vérifier que le nouveau mot de passe fonctionne
+                    print("\n🔸 ÉTAPE 4.2 - Vérifier nouveau mot de passe SUPERADMIN")
+                    new_credentials = {
+                        "email": "superadmin@aloria.com",
+                        "password": "SuperNewPass123!"
+                    }
+                    
+                    verify_response = self.session.post(f"{API_BASE}/auth/login", json=new_credentials)
+                    
+                    if verify_response.status_code == 200:
+                        self.log_result("4.2 SuperAdmin New Password Verification", True, 
+                                      "Re-login avec nouveau mot de passe réussi")
+                        
+                        # Restore original password for other tests
+                        restore_headers = {"Authorization": f"Bearer {verify_response.json()['access_token']}"}
+                        restore_data = {
+                            "current_password": "SuperNewPass123!",
+                            "new_password": "SuperAdmin123!"
+                        }
+                        self.session.post(f"{API_BASE}/users/change-password", 
+                                        json=restore_data, headers=restore_headers)
+                        
+                    else:
+                        self.log_result("4.2 SuperAdmin New Password Verification", False, 
+                                      f"Re-login échoué - Status: {verify_response.status_code}")
                 else:
-                    self.log_result("2.1 Get Case", False, "Dossier non trouvé")
-                    return False
+                    self.log_result("4.1 SuperAdmin Password Change", False, 
+                                  f"Message inattendu: {response_data.get('message')}")
             else:
-                self.log_result("2.1 Get Case", False, 
-                              f"Status: {response.status_code}", response.text)
+                self.log_result("4.1 SuperAdmin Password Change", False, 
+                              f"Status: {change_response.status_code}", change_response.text)
                 return False
                 
         except Exception as e:
-            self.log_result("2.1 Get Case", False, "Exception occurred", str(e))
+            self.log_result("Test 4 SuperAdmin Password Change", False, "Exception occurred", str(e))
             return False
         
-        # 2. Mettre à jour le dossier
-        print("\n🔸 ÉTAPE 2.2 - Mettre à jour le dossier")
-        try:
-            update_data = {
-                "current_step_index": 3,
-                "status": "En cours",
-                "notes": "Mise à jour par Manager - Test workflow"
-            }
-            
-            case_id = self.test_data['case_id']
-            response = self.session.patch(f"{API_BASE}/cases/{case_id}", 
-                                        json=update_data, headers=headers)
-            
-            if response.status_code == 200:
-                updated_case = response.json()
-                self.log_result("2.2 Update Case", True, 
-                              f"Dossier mis à jour - Étape: {updated_case.get('current_step_index')}, Status: {updated_case.get('status')}")
-            else:
-                self.log_result("2.2 Update Case", False, 
+        return True 
                               f"Status: {response.status_code}", response.text)
                 return False
                 
