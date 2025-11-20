@@ -332,7 +332,7 @@ class InvoiceDownloadTester:
         client_headers = {"Authorization": f"Bearer {self.tokens['client']}"}
         
         try:
-            response = self.session.get(f"{API_BASE}/payments", headers=client_headers)
+            response = self.session.get(f"{API_BASE}/payments/client-history", headers=client_headers)
             if response.status_code == 200:
                 client_payments = response.json()
                 client_payment = next((p for p in client_payments if p.get('id') == payment_id), None)
