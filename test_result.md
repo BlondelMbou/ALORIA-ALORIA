@@ -777,6 +777,7 @@
 
 ## test_plan:
   current_focus:
+    - "Client Dashboard 'Aucun Dossier Actif' Bug Fix - RÉSOLU ✅"
     - "Manager Case Update Bug Fix - 404 Error Resolution - RÉSOLU ✅"
     - "Authentication & Client Data N/A Issue - RÉSOLU ✅"
     - "Bcrypt/Passlib Compatibility Issue - RÉSOLU ✅"
@@ -785,8 +786,8 @@
     - "PNG Invoice case sensitivity bug (line 3237 server.py)"
     - "Alternative invoice endpoint GET /api/invoices/{invoice_number} broken"
   test_all: false
-  test_priority: "critical_manager_case_update_resolved"
-  last_test_session: "MANAGER CASE UPDATE BUG FIX TESTING - 100% SUCCÈS! Test critique du bug Manager Case Update terminé avec PARFAIT RÉSULTAT (8/8 tests réussis). ✅ PROBLÈME IDENTIFIÉ: GET /api/cases utilisait user_id au lieu de client_id pour chercher les cases. ✅ CORRECTION VALIDÉE: Ligne 1396 server.py corrigée, GET /api/cases retourne maintenant les vrais cases. ✅ PATCH FONCTIONNEL: PATCH /api/cases/{case_id} retourne 200 OK (pas 404), mise à jour des dossiers opérationnelle. ✅ CORRECTION ADDITIONNELLE: Fixed create_notification() function calls. Le Manager peut maintenant mettre à jour les dossiers sans erreur - bug critique résolu à 100%."
+  test_priority: "critical_client_dashboard_aucun_dossier_actif_resolved"
+  last_test_session: "CLIENT DASHBOARD 'AUCUN DOSSIER ACTIF' CORRECTION TESTING - 100% SUCCÈS! Test critique de la correction 'Aucun Dossier Actif' terminé avec PARFAIT RÉSULTAT (13/13 tests réussis). ✅ PROBLÈME IDENTIFIÉ ET CORRIGÉ: Incohérence dans la recherche des cases - CLIENT cherche avec client_id = user_id, MANAGER/EMPLOYEE avec client_id IN [user_ids]. ✅ TOUS LES TESTS VALIDÉS: Client existant voit son dossier, nouveaux clients créés par Employee/Manager voient immédiatement leur dossier, Manager voit tous les dossiers (84 cases), Employee voit ses dossiers assignés (11 cases). ✅ RÉSULTAT FINAL: Plus d'erreur 'Aucun Dossier Actif', Dashboard client 100% fonctionnel avec workflow complet."
 
 ## agent_communication:
     -agent: "testing"
