@@ -3261,10 +3261,23 @@ async def download_invoice(payment_id: str, current_user: dict = Depends(get_cur
     client_id = payment.get("client_id") or payment.get("user_id")
     
     if current_user["role"] == "CLIENT":
-        if client_id != current_user["id"]:
-            raise HTTPException(status_code=403, detail="Accès non autorisé")
+        # CLIENT: Vérifier que le paiement lui appartient
+        # Le paiement peut avoir client_id = client.id OU user_id = current_user["id"]
+        client_record = await db.clients.find_one({"user_id": current_user["id"]})
+        if not client_record:
+            raise HTTPException(status_code=403, detail="Profil client non trouvé")
+        
+        # Vérifier que le paiement appartient à ce client
+        payment_belongs_to_client = (
+            client_id == client_record.get("id") or  # paiement avec client.id
+            client_id == current_user["id"] or       # paiement avec user_id
+            payment.get("user_id") == current_user["id"]  # user_id dans le paiement
+        )
+        
+        if not payment_belongs_to_client:
+            raise HTTPException(status_code=403, detail="Accès non autorisé à cette facture")
     elif current_user["role"] == "EMPLOYEE":
-        client_record = await db.clients.find_one({"user_id": client_id})
+        client_record = await db.clients.find_one({"user_id": client_id}) or await db.clients.find_one({"id": client_id})
         if not client_record or client_record.get("assigned_employee_id") != current_user["id"]:
             raise HTTPException(status_code=403, detail="Accès non autorisé")
     elif current_user["role"] not in ["MANAGER", "SUPERADMIN"]:
