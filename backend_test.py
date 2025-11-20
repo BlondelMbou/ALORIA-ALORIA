@@ -274,65 +274,73 @@ class PasswordChangeTester:
         return True
 
     def test_manager_password_change(self):
-        """Vérifier l'accès au dashboard client"""
+        """TEST 3 - MANAGER Change Son Mot de Passe"""
+        print("\n" + "="*60)
+        print("TEST 3 - MANAGER CHANGE SON MOT DE PASSE")
+        print("="*60)
+        
+        if 'manager' not in self.tokens:
+            self.log_result("Test 3 Setup", False, "Manager token not available")
+            return False
+        
         try:
-            # Login avec le client créé
-            client_credentials = {
-                "email": "client.employee.test@example.com",
-                "password": "Aloria2024!"  # Mot de passe par défaut
+            # 1. Changer le mot de passe MANAGER
+            print("\n🔸 ÉTAPE 3.1 - Changer le mot de passe MANAGER")
+            headers = {"Authorization": f"Bearer {self.tokens['manager']}"}
+            
+            password_change_data = {
+                "current_password": "password123",
+                "new_password": "MgrNewPass123!"
             }
             
-            response = self.session.post(f"{API_BASE}/auth/login", json=client_credentials)
+            change_response = self.session.post(f"{API_BASE}/users/change-password", 
+                                              json=password_change_data, headers=headers)
             
-            if response.status_code == 200:
-                client_data = response.json()
-                client_token = client_data['access_token']
+            if change_response.status_code == 200:
+                response_data = change_response.json()
                 
-                self.log_result("1.4.1 Client Login", True, 
-                              f"Client connecté: {client_data['user']['full_name']}")
-                
-                # Vérifier l'accès aux dossiers
-                headers = {"Authorization": f"Bearer {client_token}"}
-                cases_response = self.session.get(f"{API_BASE}/cases", headers=headers)
-                
-                if cases_response.status_code == 200:
-                    cases = cases_response.json()
-                    if len(cases) > 0:
-                        self.log_result("1.4.2 Client Cases Access", True, 
-                                      f"Client peut voir {len(cases)} dossier(s)")
+                if "succès" in response_data.get('message', '').lower():
+                    self.log_result("3.1 Manager Password Change", True, 
+                                  f"Message: {response_data.get('message')}")
+                    
+                    # 2. Vérifier que le nouveau mot de passe fonctionne
+                    print("\n🔸 ÉTAPE 3.2 - Vérifier nouveau mot de passe MANAGER")
+                    new_credentials = {
+                        "email": "manager@test.com",
+                        "password": "MgrNewPass123!"
+                    }
+                    
+                    verify_response = self.session.post(f"{API_BASE}/auth/login", json=new_credentials)
+                    
+                    if verify_response.status_code == 200:
+                        self.log_result("3.2 Manager New Password Verification", True, 
+                                      "Re-login avec nouveau mot de passe réussi")
+                        
+                        # Restore original password for other tests
+                        restore_headers = {"Authorization": f"Bearer {verify_response.json()['access_token']}"}
+                        restore_data = {
+                            "current_password": "MgrNewPass123!",
+                            "new_password": "password123"
+                        }
+                        self.session.post(f"{API_BASE}/users/change-password", 
+                                        json=restore_data, headers=restore_headers)
+                        
                     else:
-                        self.log_result("1.4.2 Client Cases Access", False, 
-                                      "Aucun dossier accessible au client")
+                        self.log_result("3.2 Manager New Password Verification", False, 
+                                      f"Re-login échoué - Status: {verify_response.status_code}")
                 else:
-                    self.log_result("1.4.2 Client Cases Access", False, 
-                                  f"Status: {cases_response.status_code}")
-                
-                # Vérifier l'accès aux paiements
-                payments_response = self.session.get(f"{API_BASE}/payments/client-history", headers=headers)
-                
-                if payments_response.status_code == 200:
-                    payments = payments_response.json()
-                    if len(payments) > 0:
-                        payment = payments[0]
-                        if payment.get('amount') == 50000:
-                            self.log_result("1.4.3 Client Payments Access", True, 
-                                          f"Client peut voir son paiement de {payment['amount']} CFA")
-                        else:
-                            self.log_result("1.4.3 Client Payments Access", False, 
-                                          f"Montant incorrect: {payment.get('amount')}")
-                    else:
-                        self.log_result("1.4.3 Client Payments Access", False, 
-                                      "Aucun paiement visible au client")
-                else:
-                    self.log_result("1.4.3 Client Payments Access", False, 
-                                  f"Status: {payments_response.status_code}")
-                
+                    self.log_result("3.1 Manager Password Change", False, 
+                                  f"Message inattendu: {response_data.get('message')}")
             else:
-                self.log_result("1.4.1 Client Login", False, 
-                              f"Status: {response.status_code}", response.text)
+                self.log_result("3.1 Manager Password Change", False, 
+                              f"Status: {change_response.status_code}", change_response.text)
+                return False
                 
         except Exception as e:
-            self.log_result("1.4.1 Client Login", False, "Exception occurred", str(e))
+            self.log_result("Test 3 Manager Password Change", False, "Exception occurred", str(e))
+            return False
+        
+        return True
 
     def phase_2_manager_case_update(self):
         """PHASE 2 - Mise à jour du Dossier par Manager avec Notifications"""
