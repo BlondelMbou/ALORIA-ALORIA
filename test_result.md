@@ -751,6 +751,24 @@
         -agent: "testing"
         -comment: "🎉 CRITICAL BUG FIX VALIDATED - 100% SUCCESS! Comprehensive testing of Manager Case Update bug fix completed with PERFECT RESULTS (8/8 tests passed). ✅ TEST 1 - GET /api/cases: Manager authentication successful, 134 cases trouvés avec IDs valides (pas une liste vide). ✅ TEST 2 - PATCH /api/cases/{case_id}: Status 200 OK retourné (PAS 404 Not Found), current_step_index et status mis à jour correctement. ✅ TEST 3 - Vérification: current_step_index = 2 confirmé, status = 'En cours' confirmé. ✅ RÉSULTAT: GET /api/cases retourne les vrais cases avec leurs vrais IDs, PATCH /api/cases/{case_id} retourne 200 OK (pas 404), le Manager peut maintenant mettre à jour les dossiers sans erreur. CORRECTION ADDITIONNELLE: Fixed create_notification() function calls to use correct local function signature (type instead of notification_type, no db parameter)."
 
+  - task: "Client Dashboard 'Aucun Dossier Actif' Bug Fix"
+    implemented: true
+    working: true
+    file: "server.py"
+    stuck_count: 0
+    priority: "critical"
+    needs_retesting: false
+    status_history:
+        -working: false
+        -agent: "user"
+        -comment: "❌ USER REPORTED: Lorsqu'un Manager ou Employee crée un client, le client voit l'erreur 'Aucun Dossier Actif' sur son dashboard au lieu de voir son dossier."
+        -working: false
+        -agent: "main"
+        -comment: "🔧 PROBLÈME IDENTIFIÉ ET CORRIGÉ: Ligne 1396-1397 de server.py - Incohérence dans la recherche des cases. Les cases sont créés avec client_id = user_id mais GET /api/cases cherchait avec client_id IN [client.id, ...] pour tous les rôles. Pour les CLIENTS, client.id ≠ user_id, donc aucun case trouvé. CORRECTION APPLIQUÉE: CLIENT cherche directement avec client_id = current_user['id'] (son user_id), MANAGER/EMPLOYEE cherche avec client_id IN [user_id, user_id, ...] des clients assignés."
+        -working: true
+        -agent: "testing"
+        -comment: "🎉 CORRECTION 'AUCUN DOSSIER ACTIF' VALIDÉE - 100% SUCCÈS! Test complet de la correction terminé avec PARFAIT RÉSULTAT (13/13 tests réussis). ✅ TEST 1 - CLIENT EXISTANT: client.employee.test@example.com voit 2 cases avec toutes les données requises (case_id, client_id = user_id, status, workflow_steps, current_step_index). ✅ TEST 2 - NOUVEAU CLIENT EMPLOYEE: Nouveau client créé par employee@aloria.com voit immédiatement son dossier après création (1 case). ✅ TEST 3 - NOUVEAU CLIENT MANAGER: Nouveau client créé par manager@test.com voit immédiatement son dossier (1 case). ✅ TEST 4 - MANAGER PERMISSIONS: Manager voit tous les dossiers (84 cases, 53 clients différents, 2 pays). ✅ TEST 5 - EMPLOYEE PERMISSIONS: Employee voit uniquement ses dossiers assignés (29 clients assignés, 11 cases visibles, tous correspondent aux clients assignés). ✅ RÉSULTAT FINAL: Les clients voient leurs dossiers (plus d'erreur 'Aucun Dossier Actif'), Dashboard client fonctionnel avec workflow complet, Manager voit tous les dossiers, Employee voit uniquement ses dossiers assignés, Nouveaux clients créés ont immédiatement accès à leur dossier."
+
 ## metadata:
   created_by: "main_agent"
   version: "2.0"
