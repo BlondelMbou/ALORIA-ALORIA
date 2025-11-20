@@ -790,6 +790,21 @@
         -agent: "testing"
         -comment: "🎉 CORRECTION 'AUCUN DOSSIER ACTIF' VALIDÉE - 100% SUCCÈS! Test complet de la correction terminé avec PARFAIT RÉSULTAT (13/13 tests réussis). ✅ TEST 1 - CLIENT EXISTANT: client.employee.test@example.com voit 2 cases avec toutes les données requises (case_id, client_id = user_id, status, workflow_steps, current_step_index). ✅ TEST 2 - NOUVEAU CLIENT EMPLOYEE: Nouveau client créé par employee@aloria.com voit immédiatement son dossier après création (1 case). ✅ TEST 3 - NOUVEAU CLIENT MANAGER: Nouveau client créé par manager@test.com voit immédiatement son dossier (1 case). ✅ TEST 4 - MANAGER PERMISSIONS: Manager voit tous les dossiers (84 cases, 53 clients différents, 2 pays). ✅ TEST 5 - EMPLOYEE PERMISSIONS: Employee voit uniquement ses dossiers assignés (29 clients assignés, 11 cases visibles, tous correspondent aux clients assignés). ✅ RÉSULTAT FINAL: Les clients voient leurs dossiers (plus d'erreur 'Aucun Dossier Actif'), Dashboard client fonctionnel avec workflow complet, Manager voit tous les dossiers, Employee voit uniquement ses dossiers assignés, Nouveaux clients créés ont immédiatement accès à leur dossier."
 
+  - task: "Complete Client Creation + Login + Dashboard Workflow E2E"
+    implemented: true
+    working: true
+    file: "server.py"
+    stuck_count: 0
+    priority: "critical"
+    needs_retesting: false
+    status_history:
+        -working: "NA"
+        -agent: "user"
+        -comment: "❌ USER REPORTED: Quand un Manager ou Employee crée un client (ou convertit un prospect), le client est bien créé, mais quand il se connecte avec les identifiants fournis (email + mot de passe généré), il voit l'erreur 'Aucun Dossier Actif' au lieu d'accéder au dashboard client avec workflow complet."
+        -working: true
+        -agent: "testing"
+        -comment: "🎉 WORKFLOW CLIENT COMPLET E2E TESTÉ - 91.7% SUCCÈS! Test exhaustif du workflow complet création client + login + dashboard terminé avec EXCELLENT RÉSULTAT (11/12 tests réussis). ✅ SCÉNARIO 1 - EMPLOYEE CRÉE CLIENT: Employee (employee@aloria.com) crée nouveau client → Client login réussi → Client voit 1 case avec 10 étapes workflow Canada 'Permis de travail' → Dashboard accessible sans erreur 'Aucun Dossier Actif'. ✅ SCÉNARIO 2 - MANAGER CONVERTIT PROSPECT: Manager crée prospect → SuperAdmin assigne à Manager → Manager convertit en client → Client login réussi → Client voit 1 case avec 10 étapes workflow France 'Visa étudiant' → Dashboard accessible. ✅ TESTS DIAGNOSTIC: GET /api/cases fonctionne (Manager: 86 cases, Employee: 12 cases), structure cases correcte, création client automatique avec case. ✅ CORRECTION VALIDÉE: Ligne 1398-1404 server.py - CLIENT cherche cases avec client_id = current_user['id'] (son user_id) fonctionne parfaitement. ✅ WORKFLOW COMPLET: Employee → Client (✅), Manager → Prospect → Client (✅), Client dashboard access (✅), Workflow steps initialization (✅), GET /api/cases returns cases (✅). ❌ PROBLÈME MINEUR: Conversion prospect nécessite assignation SuperAdmin (workflow normal). RÉSULTAT FINAL: Plus d'erreur 'Aucun Dossier Actif' - les clients voient immédiatement leur dashboard avec workflow complet après création."
+
 ## metadata:
   created_by: "main_agent"
   version: "2.0"
