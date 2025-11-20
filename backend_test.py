@@ -409,18 +409,6 @@ class PasswordChangeTester:
             self.log_result("Test 4 SuperAdmin Password Change", False, "Exception occurred", str(e))
             return False
         
-        return True 
-                              f"Status: {response.status_code}", response.text)
-                return False
-                
-        except Exception as e:
-            self.log_result("2.2 Update Case", False, "Exception occurred", str(e))
-            return False
-        
-        # 3. Vérifier les notifications
-        print("\n🔸 ÉTAPE 2.3 - Vérifier les notifications")
-        self.verify_notifications_after_update()
-        
         return True
 
     def verify_notifications_after_update(self):
