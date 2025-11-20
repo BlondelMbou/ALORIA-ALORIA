@@ -117,95 +117,90 @@ class PasswordChangeTester:
             return False
 
     def test_client_password_change(self):
-        """PHASE 1 - Création de Client par Employee"""
+        """TEST 1 - CLIENT Change Son Mot de Passe"""
         print("\n" + "="*60)
-        print("PHASE 1 - CRÉATION DE CLIENT PAR EMPLOYEE")
+        print("TEST 1 - CLIENT CHANGE SON MOT DE PASSE")
         print("="*60)
         
-        if 'employee' not in self.tokens:
-            self.log_result("Phase 1 Setup", False, "Employee token not available")
-            return False
-            
-        headers = {"Authorization": f"Bearer {self.tokens['employee']}"}
-        
-        # 1. Créer un client directement via POST /api/clients
-        print("\n🔸 ÉTAPE 1.1 - Créer un client directement")
-        try:
-            client_data = {
-                "email": "client.employee.test@example.com",
-                "full_name": "Test Client Employee",
-                "phone": "+33612345678",
-                "country": "Canada",
-                "visa_type": "Permis de travail",
-                "message": "Test de création par employé"
-            }
-            
-            response = self.session.post(f"{API_BASE}/clients", json=client_data, headers=headers)
-            
-            if response.status_code in [200, 201]:
-                client = response.json()
-                self.test_data['client_id'] = client['id']
-                self.test_data['user_id'] = client['user_id']
-                
-                self.log_result("1.1 Create Client", True, 
-                              f"Client créé: {client['id']} - {client.get('full_name', 'N/A')}")
-            else:
-                self.log_result("1.1 Create Client", False, 
-                              f"Status: {response.status_code}", response.text)
-                return False
-                
-        except Exception as e:
-            self.log_result("1.1 Create Client", False, "Exception occurred", str(e))
+        if not self.test_data.get('client_email'):
+            self.log_result("Test 1 Setup", False, "Client email not available")
             return False
         
-        # 2. Créer un paiement initial pour le client
-        print("\n🔸 ÉTAPE 1.2 - Créer un paiement initial")
         try:
-            # Login as the created client to declare payment
+            # 1. Login CLIENT avec mot de passe par défaut
+            print("\n🔸 ÉTAPE 1.1 - Login CLIENT avec mot de passe par défaut")
             client_credentials = {
-                "email": "client.employee.test@example.com",
-                "password": "Aloria2024!"  # Default password
+                "email": self.test_data['client_email'],
+                "password": "Aloria2024!"  # Mot de passe par défaut
             }
             
             login_response = self.session.post(f"{API_BASE}/auth/login", json=client_credentials)
             
             if login_response.status_code == 200:
-                client_token = login_response.json()['access_token']
-                client_headers = {"Authorization": f"Bearer {client_token}"}
+                client_data = login_response.json()
+                client_token = client_data['access_token']
                 
-                payment_data = {
-                    "amount": 50000,
-                    "currency": "CFA",
-                    "description": "Premier versement - Test workflow",
-                    "payment_method": "Virement bancaire"
+                self.log_result("1.1 Client Login", True, 
+                              f"Client connecté: {client_data['user']['full_name']}")
+                
+                # 2. Changer le mot de passe
+                print("\n🔸 ÉTAPE 1.2 - Changer le mot de passe CLIENT")
+                headers = {"Authorization": f"Bearer {client_token}"}
+                
+                password_change_data = {
+                    "current_password": "Aloria2024!",
+                    "new_password": "NewClientPass123!"
                 }
                 
-                payment_response = self.session.post(f"{API_BASE}/payments/declare", 
-                                                   json=payment_data, headers=client_headers)
+                change_response = self.session.post(f"{API_BASE}/users/change-password", 
+                                                  json=password_change_data, headers=headers)
                 
-                if payment_response.status_code in [200, 201]:
-                    payment = payment_response.json()
-                    self.test_data['payment_id'] = payment['id']
+                if change_response.status_code == 200:
+                    response_data = change_response.json()
                     
-                    self.log_result("1.2 Create Payment", True, 
-                                  f"Paiement créé: {payment['id']} - {payment['amount']} {payment['currency']}")
+                    if "succès" in response_data.get('message', '').lower():
+                        self.log_result("1.2 Client Password Change", True, 
+                                      f"Message: {response_data.get('message')}")
+                        
+                        # 3. Vérifier que le nouveau mot de passe fonctionne
+                        print("\n🔸 ÉTAPE 1.3 - Vérifier nouveau mot de passe CLIENT")
+                        new_credentials = {
+                            "email": self.test_data['client_email'],
+                            "password": "NewClientPass123!"
+                        }
+                        
+                        verify_response = self.session.post(f"{API_BASE}/auth/login", json=new_credentials)
+                        
+                        if verify_response.status_code == 200:
+                            self.log_result("1.3 Client New Password Verification", True, 
+                                          "Re-login avec nouveau mot de passe réussi")
+                            
+                            # Restore original password for other tests
+                            restore_headers = {"Authorization": f"Bearer {verify_response.json()['access_token']}"}
+                            restore_data = {
+                                "current_password": "NewClientPass123!",
+                                "new_password": "Aloria2024!"
+                            }
+                            self.session.post(f"{API_BASE}/users/change-password", 
+                                            json=restore_data, headers=restore_headers)
+                            
+                        else:
+                            self.log_result("1.3 Client New Password Verification", False, 
+                                          f"Re-login échoué - Status: {verify_response.status_code}")
+                    else:
+                        self.log_result("1.2 Client Password Change", False, 
+                                      f"Message inattendu: {response_data.get('message')}")
                 else:
-                    self.log_result("1.2 Create Payment", False, 
-                                  f"Status: {payment_response.status_code}", payment_response.text)
+                    self.log_result("1.2 Client Password Change", False, 
+                                  f"Status: {change_response.status_code}", change_response.text)
             else:
-                self.log_result("1.2 Client Login for Payment", False, 
+                self.log_result("1.1 Client Login", False, 
                               f"Status: {login_response.status_code}", login_response.text)
+                return False
                 
         except Exception as e:
-            self.log_result("1.2 Create Payment", False, "Exception occurred", str(e))
-        
-        # 3. Vérifications post-création
-        print("\n🔸 ÉTAPE 1.3 - Vérifications post-création")
-        self.verify_client_creation()
-        
-        # 4. Vérifier le Dashboard Client
-        print("\n🔸 ÉTAPE 1.4 - Vérifier le Dashboard Client")
-        self.verify_client_dashboard()
+            self.log_result("Test 1 Client Password Change", False, "Exception occurred", str(e))
+            return False
         
         return True
 
