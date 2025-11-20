@@ -205,97 +205,73 @@ class PasswordChangeTester:
         return True
 
     def test_employee_password_change(self):
-        """Vérifier que le client est créé correctement"""
-        headers = {"Authorization": f"Bearer {self.tokens['employee']}"}
+        """TEST 2 - EMPLOYEE Change Son Mot de Passe"""
+        print("\n" + "="*60)
+        print("TEST 2 - EMPLOYEE CHANGE SON MOT DE PASSE")
+        print("="*60)
         
-        # Vérifier le client dans la collection clients
+        if 'employee' not in self.tokens:
+            self.log_result("Test 2 Setup", False, "Employee token not available")
+            return False
+        
         try:
-            response = self.session.get(f"{API_BASE}/clients", headers=headers)
-            if response.status_code == 200:
-                clients = response.json()
-                created_client = next((c for c in clients if c['id'] == self.test_data['client_id']), None)
+            # 1. Changer le mot de passe EMPLOYEE
+            print("\n🔸 ÉTAPE 2.1 - Changer le mot de passe EMPLOYEE")
+            headers = {"Authorization": f"Bearer {self.tokens['employee']}"}
+            
+            password_change_data = {
+                "current_password": "emp123",
+                "new_password": "EmpNewPass123!"
+            }
+            
+            change_response = self.session.post(f"{API_BASE}/users/change-password", 
+                                              json=password_change_data, headers=headers)
+            
+            if change_response.status_code == 200:
+                response_data = change_response.json()
                 
-                if created_client:
-                    verifications = []
+                if "succès" in response_data.get('message', '').lower():
+                    self.log_result("2.1 Employee Password Change", True, 
+                                  f"Message: {response_data.get('message')}")
                     
-                    # Vérifier les données du client
-                    if created_client.get('full_name') == "Test Client Employee":
-                        verifications.append("✅ Nom client correct")
+                    # 2. Vérifier que le nouveau mot de passe fonctionne
+                    print("\n🔸 ÉTAPE 2.2 - Vérifier nouveau mot de passe EMPLOYEE")
+                    new_credentials = {
+                        "email": "employee@aloria.com",
+                        "password": "EmpNewPass123!"
+                    }
+                    
+                    verify_response = self.session.post(f"{API_BASE}/auth/login", json=new_credentials)
+                    
+                    if verify_response.status_code == 200:
+                        self.log_result("2.2 Employee New Password Verification", True, 
+                                      "Re-login avec nouveau mot de passe réussi")
+                        
+                        # Restore original password for other tests
+                        restore_headers = {"Authorization": f"Bearer {verify_response.json()['access_token']}"}
+                        restore_data = {
+                            "current_password": "EmpNewPass123!",
+                            "new_password": "emp123"
+                        }
+                        self.session.post(f"{API_BASE}/users/change-password", 
+                                        json=restore_data, headers=restore_headers)
+                        
                     else:
-                        verifications.append(f"❌ Nom client: {created_client.get('full_name')}")
-                    
-                    if created_client.get('email') == "client.employee.test@example.com":
-                        verifications.append("✅ Email client correct")
-                    else:
-                        verifications.append(f"❌ Email client: {created_client.get('email')}")
-                    
-                    if created_client.get('assigned_employee_id') == self.users['employee']['id']:
-                        verifications.append("✅ Employé assigné automatiquement")
-                    else:
-                        verifications.append(f"❌ Assignation employé: {created_client.get('assigned_employee_id')}")
-                    
-                    all_verified = all("✅" in v for v in verifications)
-                    self.log_result("1.3.1 Client Data Verification", all_verified, 
-                                  f"Vérifications: {'; '.join(verifications)}")
+                        self.log_result("2.2 Employee New Password Verification", False, 
+                                      f"Re-login échoué - Status: {verify_response.status_code}")
                 else:
-                    self.log_result("1.3.1 Client Data Verification", False, "Client non trouvé")
+                    self.log_result("2.1 Employee Password Change", False, 
+                                  f"Message inattendu: {response_data.get('message')}")
             else:
-                self.log_result("1.3.1 Client Data Verification", False, 
-                              f"Status: {response.status_code}")
+                self.log_result("2.1 Employee Password Change", False, 
+                              f"Status: {change_response.status_code}", change_response.text)
+                return False
                 
         except Exception as e:
-            self.log_result("1.3.1 Client Data Verification", False, "Exception occurred", str(e))
+            self.log_result("Test 2 Employee Password Change", False, "Exception occurred", str(e))
+            return False
         
-        # Vérifier le dossier (case)
-        try:
-            response = self.session.get(f"{API_BASE}/cases", headers=headers)
-            if response.status_code == 200:
-                cases = response.json()
-                print(f"   DEBUG: Found {len(cases)} cases total")
-                
-                # Try to find case by client_id or user_id
-                created_case = None
-                for case in cases:
-                    print(f"   DEBUG: Case {case.get('id')} - client_id: {case.get('client_id')}, client_name: {case.get('client_name')}")
-                    if (case.get('client_id') == self.test_data['client_id'] or 
-                        case.get('client_id') == self.test_data['user_id'] or
-                        case.get('client_name') == "Test Client Employee"):
-                        created_case = case
-                        break
-                
-                if created_case:
-                    verifications = []
-                    
-                    if created_case.get('country') == "Canada":
-                        verifications.append("✅ Pays correct")
-                    else:
-                        verifications.append(f"❌ Pays: {created_case.get('country')}")
-                    
-                    if created_case.get('visa_type') == "Permis de travail":
-                        verifications.append("✅ Type de visa correct")
-                    else:
-                        verifications.append(f"❌ Type de visa: {created_case.get('visa_type')}")
-                    
-                    if len(created_case.get('workflow_steps', [])) > 10:
-                        verifications.append(f"✅ Workflow steps: {len(created_case['workflow_steps'])} étapes")
-                    else:
-                        verifications.append(f"❌ Workflow steps: {len(created_case.get('workflow_steps', []))} étapes")
-                    
-                    # Store case_id for later use
-                    self.test_data['case_id'] = created_case['id']
-                    
-                    all_verified = all("✅" in v for v in verifications)
-                    self.log_result("1.3.2 Case Data Verification", all_verified, 
-                                  f"Vérifications: {'; '.join(verifications)}")
-                else:
-                    self.log_result("1.3.2 Case Data Verification", False, 
-                                  f"Dossier non trouvé - client_id: {self.test_data['client_id']}, user_id: {self.test_data['user_id']}")
-            else:
-                self.log_result("1.3.2 Case Data Verification", False, 
-                              f"Status: {response.status_code}")
-                
-        except Exception as e:
-            self.log_result("1.3.2 Case Data Verification", False, "Exception occurred", str(e))
+        return True
 
     def verify_client_dashboard(self):
         """Vérifier l'accès au dashboard client"""
