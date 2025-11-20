@@ -25,7 +25,8 @@ API_BASE = f"{BACKEND_URL}/api"
 # Credentials from review request
 CREDENTIALS = {
     'manager': {'email': 'manager@test.com', 'password': 'password123'},
-    'employee': {'email': 'employee@aloria.com', 'password': 'emp123'}
+    'employee': {'email': 'employee@aloria.com', 'password': 'emp123'},
+    'superadmin': {'email': 'superadmin@aloria.com', 'password': 'SuperAdmin123!'}
 }
 
 class WorkflowTester:
